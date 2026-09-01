@@ -189,7 +189,7 @@ def track(b, events, px, mid, W, up, lane_h, offset, square, filled=None, size=8
 
     Drawing each item complete before starting the next puts a later point's
     leader line straight through an earlier point's text, so the two passes
-    are not an optimisation.
+    are not an optimization.
     """
     filled = filled or (lambda label: True)
     placed = [(x, mid + (-offset - lane * lane_h if up else offset + lane * lane_h), lab, flip)
@@ -220,7 +220,7 @@ def fig_model_lineage():
     b = []
     panels = [
         ("Winfree", "phase only",
-         "dθi/dt = ωi + Z(θi) Σj P(θj)",
+         "dθi/dt = ωi + Z(θi) (K/N) Σj P(θj)",
          "influence P and sensitivity Z are separate functions",
          "WONN"),
         ("Kuramoto", "phase only",
@@ -248,7 +248,7 @@ def fig_model_lineage():
          "an oscillatory recurrence; damping bounds the gradients",
          "coRNN · UnICORNN · RON · Neural Wave Machines"),
         ("Linear oscillatory state space", "no coupling term",
-         "y″ = −Ay − Gy′ + Bu,   A, G diagonal",
+         "y″ = −Ay − Gy′ + Bu,  A, G diagonal, G = 0 in LinOSS",
          "linear, so the whole sequence solves by parallel scan",
          "LinOSS · D-LinOSS"),
     ]
@@ -370,7 +370,7 @@ def fig_input_injection():
     eq_y = 84
     b.append(box(58, eq_y - 28, 544, 44, FILL_A, HAIR, 4, 1))
     terms = [(84, "dθi/dt   =", "start"), (188, "ωi", "middle"), (218, "+", "middle"),
-             (248, "K", "middle"), (330, "Σj sin(θj − θi)", "middle"),
+             (248, "(K/N)", "middle"), (330, "Σj sin(θj − θi)", "middle"),
              (432, "+", "middle"), (486, "u(t)", "middle")]
     for x, s, anc in terms:
         b.append(text(x, eq_y, s, 13.5, anchor=anc))
@@ -427,7 +427,7 @@ def fig_training_horizon():
         (1, "Kuramoto Orientation Diffusion", "per-step score objectives", True, -80),
         (17, "Un-0", "10–25 integration steps", True, -48, 24),
         (18, "WONN", "18 steps (6 layers × 3)", True, -20),
-        (18000, "LinOSS · D-LinOSS", "linear, implicitly discretised", False, -48),
+        (18000, "LinOSS · D-LinOSS", "linear, implicitly discretized", False, -48),
     ]
     for v, name, note, nonlinear, dy, *extra in points:
         x = px(v)
@@ -638,7 +638,7 @@ def fig_oscillator_anatomy():
     b.append(text(ccx + 13, ccy - 16, "r", 9, anchor="start"))
     b.append(polyline(arc(ccx, ccy, 12, 0, ta), FAINT, 1))
     b.append(text(ccx + 17, ccy - 2, "θ", 9, anchor="start"))
-    b.append(text(x + pw / 2, note_y, "trajectories relax onto a limit cycle", 8, fill=MID))
+    b.append(text(x + pw / 2, note_y, "Stuart–Landau relaxes onto a limit cycle", 8, fill=MID))
 
     # (c) a population, each unit keeping its own phase
     x = x0 + 2 * (pw + gx)

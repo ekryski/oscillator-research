@@ -1,0 +1,818 @@
+/* paper.css — reading styles for the HTML build of a manuscript.
+ *
+ * Pandoc's --standalone HTML is correct and completely unstyled: full-bleed
+ * paragraphs, 1990s blue links, a table that shatters the layout on a phone.
+ * This gives that output the shape of a paper — one measured column of text,
+ * off-white ground, greyscale everything, figures and tables that behave.
+ *
+ * Written against the real generated markup (pandoc 3.11, --standalone --toc
+ * --citeproc --embed-resources), so the selectors name what pandoc actually
+ * emits:
+ *
+ *   header#title-block-header  h1.title / p.author / p.date / div.abstract
+ *   nav#TOC                    nested ul; the section numbers are literal
+ *                              text in each entry
+ *   h1–h3                      shifted up one level by the build, so a
+ *                              manuscript's `##` is h1 here; .unnumbered
+ *   figure > img + figcaption  caption already prefixed "Figure N." by
+ *                              filters/number-floats.lua
+ *   table > caption            plus colgroup/col with inline % widths
+ *   span.citation > a          role="doc-biblioref", links into #refs
+ *   div#refs.csl-bib-body      div.csl-entry children, hanging indent
+ *   <p>References</p>          a bare paragraph, not a heading
+ *
+ * A few rules below match nothing in the current manuscript and are there so
+ * the sheet holds up when it does appear: h4–h6, blockquote, code/pre, hr,
+ * span.smallcaps, block math, the section-number spans that --number-sections
+ * would add, and the csl-left-margin/right-inline shapes a numeric CSL emits.
+ *
+ * No JavaScript, no web fonts, no external requests: the HTML build is a
+ * single self-contained file and must keep working offline. Everything below
+ * is system fonts and CSS.
+ *
+ * Loaded after tables.css, which sets the cell padding and row rules shared
+ * with the EPUB. The few overrides here are written one selector deeper so
+ * they win regardless of the order the two files end up in.
+ */
+
+/* ---------------------------------------------------------------- tokens */
+
+:root {
+  /* Light: warm off-white ground, near-black ink. Neither is pure — pure
+     white glares under a lamp and pure black on white is over-contrasted
+     for a document read for an hour at a time. */
+  --bg:        #f7f6f3;
+  --plate:     #fdfdfb; /* figure and table-head grounds, a shade above bg */
+  --ink:       #1b1b19;
+  --ink-soft:  #43423f; /* secondary prose: abstract, table cells */
+  --ink-mute:  #6f6d68; /* captions, section numbers, metadata */
+  --rule:      rgba(28, 28, 25, 0.14);
+  --rule-firm: rgba(28, 28, 25, 0.30);
+  --link:      #2f5670; /* the one hue in the document */
+  --link-hover:#1d3c52;
+  --accent-bg: rgba(47, 86, 112, 0.10);
+
+  /* Measure. Stated in rem, and the root font-size carries the responsive
+     clamp, so the column scales with the type and the character count stays
+     put. `ch` is tempting and wrong here: it is the width of "0", which in a
+     serif runs about 40% above the average letter, and a 68ch column measured
+     out at 97 characters. At this face 32rem is a hair under 75. */
+  --measure:   32rem;
+  /* Figures and tables step outside the text column but stay centred on it. */
+  --measure-wide: min(100%, 42rem);
+  --gutter:    clamp(1rem, 4vw, 3rem);
+
+  --serif: ui-serif, Georgia, Cambria, "Palatino Linotype", "Book Antiqua",
+           Palatino, "Times New Roman", Times, serif;
+  --sans:  ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+           Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono:  ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+           "Liberation Mono", monospace;
+
+  color-scheme: light dark;
+}
+
+/* ------------------------------------------------------------------ base */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  /* an anchored citation jump lands below the viewport edge, not against it */
+  scroll-padding-top: 2rem;
+  /* 17px on a phone up to 19px on a wide screen. It lives on the root rather
+     than on body so that every rem in this file — the measure above all —
+     scales with it. */
+  font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  margin: 0;
+  padding: clamp(2rem, 6vw, 5rem) var(--gutter) 6rem;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.7;
+  font-kerning: normal;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  overflow-wrap: break-word;
+}
+
+/* One centred column. Pandoc emits every block as a direct child of <body>
+   with no wrapper, so the column is built here rather than in the markup. */
+body > * {
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+/* Figures and tables are allowed the wider measure. */
+body > figure,
+body > table {
+  max-width: var(--measure-wide);
+}
+
+::selection {
+  background: var(--accent-bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------------------------- title block */
+
+header#title-block-header {
+  margin-bottom: 3.5rem;
+}
+
+h1.title {
+  margin-block: 0 1.25rem;
+  /* a survey title runs long; the floor is set low enough that it does not
+     eat a whole phone screen */
+  font-size: clamp(1.55rem, 1.2rem + 1.9vw, 2.4rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+  /* the title is the one heading that is not part of the numbered run, so it
+     carries no rule above it */
+  border: 0;
+}
+
+p.author,
+p.date {
+  margin-block: 0.15rem;
+  font-family: var(--sans);
+  font-size: 0.82em;
+  line-height: 1.5;
+  color: var(--ink-mute);
+  letter-spacing: 0.01em;
+}
+
+p.author {
+  color: var(--ink-soft);
+  font-size: 0.9em;
+}
+
+p.date {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------- abstract */
+
+div.abstract {
+  margin-block: 2.5rem 0;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-soft);
+  font-size: 0.94em;
+  line-height: 1.65;
+}
+
+div.abstract-title {
+  margin-bottom: 0.6rem;
+  font-family: var(--sans);
+  font-size: 0.72em;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+div.abstract p {
+  margin: 0 0 0.9em;
+}
+
+div.abstract p:last-child {
+  margin-bottom: 0;
+}
+
+/* ----------------------------------------------------------------- TOC */
+
+nav#TOC {
+  margin: 0 auto 4rem;
+  padding: 1.5rem 1.75rem;
+  background: var(--plate);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  font-family: var(--sans);
+  font-size: 0.85em;
+  line-height: 1.5;
+}
+
+/* pandoc's --toc emits the list with no label of its own */
+nav#TOC::before {
+  content: "Contents";
+  display: block;
+  margin-bottom: 0.9rem;
+  font-size: 0.82em;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+nav#TOC ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav#TOC ul ul {
+  padding-left: 1.35rem;
+}
+
+/* The section number is literal text at the head of each entry, so the entry
+   is hung on it: a wrapped title lines up with the title above it rather than
+   running back under the number. */
+nav#TOC li {
+  margin: 0.3rem 0;
+  padding-left: 1.7em;
+  text-indent: -1.7em;
+}
+
+nav#TOC > ul > li {
+  margin-top: 0.65rem;
+}
+
+nav#TOC > ul > li > a {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+nav#TOC a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+nav#TOC a:hover,
+nav#TOC a:focus-visible {
+  color: var(--link);
+  border-bottom-color: var(--rule-firm);
+}
+
+/* Only emitted when the build passes --number-sections; when it does not, the
+   numbers are literal text in the entry and the hanging indent above carries
+   them. Styling only, so the two builds agree. */
+span.toc-section-number {
+  color: var(--ink-mute);
+  font-variant-numeric: lining-nums tabular-nums;
+  font-weight: 400;
+}
+
+/* -------------------------------------------------------------- headings */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--serif);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.006em;
+  text-wrap: balance;
+  /* a heading should never be the last thing on a screen or a page */
+  break-after: avoid;
+  break-inside: avoid;
+}
+
+/* the manuscript's top level; publish.sh shifts headings so `##` becomes h1 */
+body > h1 {
+  margin-block: 4rem 1.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+  font-size: 1.6em;
+}
+
+h2 {
+  margin-block: 2.75rem 0.9rem;
+  font-size: 1.24em;
+}
+
+h3 {
+  margin-block: 2.25rem 0.7rem;
+  font-size: 1.06em;
+}
+
+h4, h5, h6 {
+  margin-block: 1.75rem 0.5rem;
+  font-size: 1em;
+  color: var(--ink-soft);
+}
+
+/* --number-sections puts the number in its own span inside the heading;
+   without that flag the number is literal text and inherits the heading. */
+span.header-section-number {
+  color: var(--ink-mute);
+  font-weight: 400;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* --------------------------------------------------------------- prose */
+
+p {
+  margin-block: 0 1.15em;
+}
+
+em { font-style: italic; }
+
+strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* pandoc's small-caps span; kept here so it survives a font without real
+   small caps */
+span.smallcaps {
+  font-variant-caps: small-caps;
+  letter-spacing: 0.03em;
+}
+
+ul, ol {
+  margin-block: 0 1.3em;
+  padding-left: 1.6em;
+}
+
+li {
+  margin: 0.35em 0;
+  padding-left: 0.15em;
+}
+
+li::marker {
+  color: var(--ink-mute);
+}
+
+li > p {
+  margin-bottom: 0.6em;
+}
+
+hr {
+  height: 0;
+  margin: 3rem auto;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+blockquote {
+  margin-block: 1.6em;
+  padding: 0.1em 0 0.1em 1.35em;
+  border-left: 2px solid var(--rule-firm);
+  color: var(--ink-soft);
+  font-size: 0.96em;
+}
+
+code, pre, kbd, samp {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  font-variant-numeric: normal;
+}
+
+code {
+  padding: 0.12em 0.32em;
+  background: var(--accent-bg);
+  border-radius: 2px;
+}
+
+pre {
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+  background: var(--plate);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  line-height: 1.55;
+}
+
+pre code {
+  padding: 0;
+  background: none;
+}
+
+/* --------------------------------------------------------------- links */
+
+a {
+  color: var(--link);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+  text-decoration-color: color-mix(in srgb, var(--link) 35%, transparent);
+}
+
+a:hover,
+a:focus-visible {
+  color: var(--link-hover);
+  text-decoration-color: currentColor;
+}
+
+/* Citations are dense — three or four to a sentence in places — so they get
+   colour and no rule, or the paragraph turns into a fence. */
+span.citation a,
+a[role="doc-biblioref"] {
+  text-decoration: none;
+  color: var(--ink-soft);
+  border-bottom: 1px dotted var(--rule-firm);
+}
+
+span.citation a:hover,
+a[role="doc-biblioref"]:hover,
+span.citation a:focus-visible,
+a[role="doc-biblioref"]:focus-visible {
+  color: var(--link);
+  border-bottom-color: var(--link);
+}
+
+/* -------------------------------------------------------------- figures */
+
+figure {
+  margin: 2.75rem auto;
+  break-inside: avoid;
+}
+
+figure img,
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+/* The figures are opaque white PNGs of black line art. The plate gives them
+   an edge and a margin so they sit on the off-white ground deliberately
+   rather than looking like a stray rectangle of white. */
+figure img {
+  padding: 0.75rem;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+
+/* The caption runs the full width of the plate above it rather than the
+   narrower prose measure, and is justified so its block ends flush with both
+   of the plate's edges. This is the one place on screen where justification
+   is used: the rest of the page reserves it for print, where the measure is
+   fixed. A caption is short and sits under a hard edge it has to line up
+   with, and `hyphens: auto` keeps the fluid measure from opening rivers. */
+figcaption {
+  max-width: 100%;
+  margin: 0.9rem 0 0;
+  font-family: var(--sans);
+  font-size: 0.72em;
+  line-height: 1.5;
+  color: var(--ink-mute);
+  text-align: justify;
+  hyphens: auto;
+  text-wrap: pretty;
+}
+
+/* ---------------------------------------------------------------- tables */
+
+/* A table is made its own horizontal scroll container. Pandoc gives tables no
+   wrapper element, and `display: block` on the table itself makes the browser
+   wrap the caption's siblings — colgroup, thead, tbody — in a single
+   anonymous table box, so column alignment is preserved while the block
+   scrolls. Without this a six-column table of paragraphs either overflows the
+   page or crushes each column to one word wide on a phone. */
+table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 2.5rem auto;
+  border-collapse: collapse;
+  font-family: var(--sans);
+  font-size: 0.78em;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  /* the body runs oldstyle figures; a table of reported results wants lining
+     ones that line up column-wise */
+  font-variant-numeric: lining-nums tabular-nums;
+  /* the scrollable region is a focusable, announced region for keyboards */
+  overscroll-behavior-x: contain;
+}
+
+/* The caption is prose, so it stays at the visible width and pins to the left
+   edge instead of scrolling away with the columns. */
+table > caption {
+  display: block;
+  position: sticky;
+  left: 0;
+  margin-bottom: 0.85rem;
+  font-family: var(--sans);
+  font-size: 1.05em;
+  line-height: 1.55;
+  color: var(--ink-mute);
+  text-align: left;
+  text-wrap: pretty;
+}
+
+/* Cells get a floor width so a narrow screen scrolls the table rather than
+   squeezing six columns of prose into 40px each. Six columns clear 36rem,
+   wider than any phone and narrower than the wide measure on a desktop, so
+   the scrollbar appears exactly when it is needed and not before. */
+table th,
+table td {
+  min-width: 6rem;
+  padding: 0.55em 0.75em;
+  vertical-align: top;
+  text-align: left;
+}
+
+table thead th {
+  color: var(--ink);
+  font-weight: 600;
+  /* softer than tables.css's currentColor rule, which reads as a heavy bar
+     against this palette */
+  border-bottom: 1px solid var(--rule-firm);
+}
+
+table tbody tr + tr td {
+  border-top: 1px solid var(--rule);
+}
+
+table tbody tr:hover td {
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
+}
+
+table p {
+  margin: 0 0 0.5em;
+}
+
+table p:last-child {
+  margin-bottom: 0;
+}
+
+/* --------------------------------------------------------------- MathML */
+
+/* pandoc's default HTML math writer is MathML; the browser renders it. */
+math {
+  font-size: 1.02em;
+}
+
+math[display="block"] {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 1.5em auto;
+  text-align: center;
+}
+
+/* --------------------------------------------------------- bibliography */
+
+/* citeproc emits <p>References</p> — a bare paragraph, not a heading —
+   immediately before #refs. Where :has() is supported it is given the weight
+   of a section heading; where it is not, it degrades to a plain paragraph. */
+p:has(+ div#refs) {
+  margin-block: 4rem 1.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+  font-size: 1.6em;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.006em;
+}
+
+/* citeproc puts class="hanging-indent" on the #refs container itself, and
+   pandoc's built-in stylesheet answers it with `margin-left: 1.5em;
+   text-indent: -1.5em` on the whole block — which beats `margin-inline: auto`
+   on specificity and shunts the entire bibliography off the centre line. The
+   indent belongs on the entries, not on their container, so it is reset here
+   and re-applied below. */
+div#refs,
+div.csl-bib-body {
+  margin-inline: auto;
+  margin-left: auto;
+  text-indent: 0;
+  font-size: 0.87em;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* hanging indent: first line flush, continuations indented, so the author
+   names stay scannable down the left edge. Carries an id so it outranks
+   pandoc's `.hanging-indent div.csl-entry`, which sets both of these. */
+div#refs div.csl-entry,
+div.csl-bib-body div.csl-entry {
+  margin-left: 1.9em;
+  margin-bottom: 0.85em;
+  text-indent: -1.9em;
+}
+
+/* bare DOI URLs are long and unbreakable; let them wrap rather than push the
+   whole column sideways */
+div.csl-entry a {
+  overflow-wrap: anywhere;
+  text-decoration-thickness: 1px;
+}
+
+/* the entry a citation was just followed into */
+div.csl-entry:target {
+  background: var(--accent-bg);
+  border-radius: 2px;
+  box-shadow: 0 0 0 0.4em var(--accent-bg);
+}
+
+/* citeproc's other bibliography shapes, emitted by numeric styles (CSL=ieee)
+   rather than the author-year default */
+div.csl-left-margin {
+  min-width: 2em;
+  float: left;
+}
+
+div.csl-right-inline {
+  margin-left: 2em;
+  padding-left: 1em;
+}
+
+div.csl-indent {
+  margin-left: 2em;
+}
+
+/* ------------------------------------------------------------ narrow screens */
+
+@media (max-width: 34rem) {
+  nav#TOC {
+    padding: 1.15rem 1.15rem;
+  }
+
+  nav#TOC ul ul {
+    padding-left: 0.9rem;
+  }
+
+  span.toc-section-number {
+    min-width: 2.2em;
+  }
+
+  figure img {
+    padding: 0.4rem;
+  }
+
+  div#refs div.csl-entry,
+  div.csl-bib-body div.csl-entry {
+    margin-left: 1.4em;
+    text-indent: -1.4em;
+  }
+}
+
+/* ---------------------------------------------------------------- dark */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #17181a;
+    --plate:     #1e2023;
+    --ink:       #e7e5e0;
+    --ink-soft:  #c3c0ba;
+    --ink-mute:  #918e88;
+    --rule:      rgba(231, 229, 224, 0.14);
+    --rule-firm: rgba(231, 229, 224, 0.32);
+    --link:      #97b6ce;
+    --link-hover:#b9d2e5;
+    --accent-bg: rgba(151, 182, 206, 0.16);
+  }
+
+  /* The figures are white-ground PNGs and cannot be recoloured, so they are
+     dimmed just enough to stop them burning a hole in a dark page, and given
+     a plate that reads as paper laid on the page. */
+  figure img {
+    background: #f2f1ee;
+    filter: brightness(0.9) contrast(1.02);
+  }
+
+  table tbody tr:hover td {
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+  }
+}
+
+/* ---------------------------------------------------------------- print */
+
+@media print {
+  :root {
+    --bg:        #fff;
+    --plate:     #fff;
+    --ink:       #000;
+    --ink-soft:  #1a1a1a;
+    --ink-mute:  #444;
+    --rule:      rgba(0, 0, 0, 0.25);
+    --rule-firm: rgba(0, 0, 0, 0.5);
+    --link:      #000;
+    --link-hover:#000;
+    --accent-bg: transparent;
+    --measure:      100%;
+    --measure-wide: 100%;
+  }
+
+  /* Generous side margins: the print measure is the page, and A4 at 18mm
+     runs to something like 110 characters a line, which is unreadable. */
+  @page {
+    margin: 20mm 25mm;
+  }
+
+  /* the viewport clamp is meaningless on paper; pin rem so the margins and
+     rules below come out at a fixed size */
+  html {
+    font-size: 12pt;
+  }
+
+  body {
+    padding: 0;
+    background: #fff;
+    font-size: 11pt;
+    line-height: 1.45;
+    orphans: 3;
+    widows: 3;
+    /* a printed page is a fixed measure, so justification is safe here in a
+       way it is not on screen */
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  body > * {
+    max-width: none;
+  }
+
+  a {
+    color: #000;
+    text-decoration: none;
+  }
+
+  span.citation a,
+  a[role="doc-biblioref"] {
+    border-bottom: 0;
+  }
+
+  h1.title {
+    font-size: 20pt;
+  }
+
+  body > h1 {
+    margin-top: 1.6rem;
+    font-size: 14pt;
+  }
+
+  h2 { font-size: 12pt; }
+  h3 { font-size: 11pt; }
+
+  h1, h2, h3, h4, h5, h6,
+  table > caption,
+  div.abstract,
+  p.author,
+  p.date,
+  nav#TOC {
+    text-align: left;
+    hyphens: manual;
+  }
+
+  nav#TOC {
+    padding: 0;
+    border: 0;
+    background: none;
+    /* the body starts on a fresh page, as it does in the PDF builds */
+    break-after: page;
+  }
+
+  /* the scroll container is meaningless on paper: restore a real table */
+  table {
+    display: table;
+    width: 100%;
+    font-size: 8.5pt;
+    break-inside: auto;
+  }
+
+  table > caption {
+    position: static;
+    display: table-caption;
+    caption-side: top;
+  }
+
+  table th,
+  table td {
+    min-width: 0;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr, figure, div.csl-entry {
+    break-inside: avoid;
+  }
+
+  figure img {
+    padding: 0;
+    border: 0;
+    max-height: 8.5in;
+  }
+
+  div.csl-entry:target {
+    background: none;
+    box-shadow: none;
+  }
+}

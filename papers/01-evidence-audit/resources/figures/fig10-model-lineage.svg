@@ -5,7 +5,7 @@
 <text x="32" y="42" text-anchor="start" font-size="11" fill="#24231F" font-weight="bold" font-style="normal">Winfree</text>
 <text x="314" y="41" text-anchor="end" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">phase only</text>
 <line x1="32" y1="51" x2="314" y2="51" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
-<text x="173.0" y="75" text-anchor="middle" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">dθi/dt = ωi + Z(θi) Σj P(θj)</text>
+<text x="173.0" y="75" text-anchor="middle" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">dθi/dt = ωi + Z(θi) (K/N) Σj P(θj)</text>
 <text x="173.0" y="95" text-anchor="middle" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="normal">influence P and sensitivity Z are separate functions</text>
 <text x="173.0" y="113" text-anchor="middle" font-size="8.4" fill="#24231F" font-weight="bold" font-style="normal">WONN</text>
 <rect x="342" y="20" width="310" height="104" rx="4" fill="#F2F1EE" stroke="#24231F" stroke-width="1.2"/>
@@ -54,7 +54,7 @@
 <text x="356" y="393" text-anchor="start" font-size="11" fill="#24231F" font-weight="bold" font-style="normal">Linear oscillatory state space</text>
 <text x="638" y="392" text-anchor="end" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">no coupling term</text>
 <line x1="356" y1="402" x2="638" y2="402" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
-<text x="497.0" y="426" text-anchor="middle" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">y″ = −Ay − Gy′ + Bu,   A, G diagonal</text>
+<text x="497.0" y="426" text-anchor="middle" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">y″ = −Ay − Gy′ + Bu,  A, G diagonal, G = 0 in LinOSS</text>
 <text x="497.0" y="446" text-anchor="middle" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="normal">linear, so the whole sequence solves by parallel scan</text>
 <text x="497.0" y="464" text-anchor="middle" font-size="8.4" fill="#24231F" font-weight="bold" font-style="normal">LinOSS · D-LinOSS</text>
 <line x1="18" y1="486" x2="642" y2="486" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>

@@ -10,6 +10,9 @@
   "Ada-FE",
   "Zhang et al. 2025"
  ],
+ "adler1946": [
+  "Adler 1946"
+ ],
  "ahmadi2026": [
   "Ahmadi 2026"
  ],
@@ -315,6 +318,9 @@
   "Oscillator Ising machines",
   "Wang & Roychowdhury 2019"
  ],
+ "pantaleone2002": [
+  "Pantaleone 2002"
+ ],
  "pikovsky2001": [
   "Pikovsky et al. 2001",
   "Pikovsky, Rosenblum & Kurths (2001)"
@@ -439,7 +445,7 @@
   "Yu et al. 2025"
  ],
  "zhang2023": [
-  "Zhang et al. 2023"
+  "Zhang, Lucas & Battiston (2023)"
  ],
  "zhang2026": [
   "Stuart\u2013Landau",

@@ -279,6 +279,7 @@
   pages         = {1--5},
   doi           = {10.1109/ICASSP49357.2023.10095188},
   url           = {https://doi.org/10.1109/ICASSP49357.2023.10095188},
+  note          = {Preprint: arXiv:2210.14476},
 }
 
 @article{hizanidis2016,
@@ -734,6 +735,7 @@
   journal       = {Neural Networks},
   volume        = {115},
   doi           = {10.1016/j.neunet.2019.03.005},
+  note          = {Preprint: arXiv:1808.04962},
 }
 
 @article{torrejon2017,
@@ -825,13 +827,14 @@
 }
 
 @article{zhang2023,
-  author        = {Zhang, Xin-Jie and Moore, Jack Murdoch and Yan, Gang and Li, Xiang},
-  title         = {Universal structural patterns in sparse recurrent neural networks},
+  author        = {Zhang, Yuanzhao and Lucas, Maxime and Battiston, Federico},
+  title         = {Higher-order interactions shape collective dynamics differently in hypergraphs
+                   and simplicial complexes},
   year          = {2023},
-  journal       = {Communications Physics},
-  volume        = {6},
-  number        = {1},
-  doi           = {10.1038/s42005-023-01364-0},
+  journal       = {Nature Communications},
+  volume        = {14},
+  doi           = {10.1038/s41467-023-37190-9},
+  % cited in the manuscript as: Zhang, Lucas & Battiston (2023)
 }
 
 @inproceedings{zhang2026,
@@ -852,7 +855,12 @@
   publisher    = {{ACM}},
   year         = {2026},
   url          = {https://dl.acm.org/doi/10.1145/3774904.3792675},
-  doi          = {10.1145/3774904.3792675},
+  % The DOI is 10.1145/3774904.3792675, and is deliberately not a field here.
+  % ACM has not registered it with the resolver yet, so doi.org returns 404
+  % while the publisher page below resolves. bibtex_compat.one_identifier
+  % prefers a DOI over a URL, so recording it would print the address that
+  % fails and drop the one that works. Restore the field once doi.org answers;
+  % the URL carries the same DOI in its path meanwhile.
   note          = {Preprint: arXiv:2511.08094},
 }
 
@@ -1011,7 +1019,7 @@
 
 @article{sakaguchi1986,
   author        = {Sakaguchi, Hidetsugu and Kuramoto, Yoshiki},
-  title         = {A Soluble Active Rotater Model Showing Phase Transitions via Mutual Entrainment},
+  title         = {A Soluble Active Rotator Model Showing Phase Transitions via Mutual Entrainment},
   year          = {1986},
   journal       = {Progress of Theoretical Physics},
   volume        = {76},
@@ -1412,4 +1420,31 @@
   eprint        = {2405.20750},
   archiveprefix = {arXiv},
   primaryclass  = {cs.CV},
+}
+
+
+@article{pantaleone2002,
+  author        = {Pantaleone, James},
+  title         = {Synchronization of metronomes},
+  year          = {2002},
+  journal       = {American Journal of Physics},
+  volume        = {70},
+  number        = {10},
+  pages         = {992--1000},
+  doi           = {10.1119/1.1501118},
+  % cited in the manuscript as: Pantaleone 2002
+}
+
+
+@article{adler1946,
+  author        = {Adler, R.},
+  title         = {A Study of Locking Phenomena in Oscillators},
+  year          = {1946},
+  journal       = {Proceedings of the {IRE}},
+  volume        = {34},
+  number        = {6},
+  pages         = {351--357},
+  doi           = {10.1109/JRPROC.1946.229930},
+  % CrossRef carries no given name for this 1946 record; initial only.
+  % cited in the manuscript as: Adler 1946
 }

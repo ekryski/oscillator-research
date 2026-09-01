@@ -6,43 +6,24 @@
 
 ## What this is about
 
-A coupled-oscillator network is a population of rhythmic units that pull each
-other toward phase agreement. Wire them onto a lattice, drive them with sound,
-and the field's collective state becomes a representation of that sound: the
-physics does the transducing. The idea is old — synchronization theory, the
-Hopf model of the cochlea, reservoir computing, Mead's case for running physics
-directly — and it is currently enjoying a revival in machine learning, with
-oscillator-based systems posting competitive results in long-sequence modeling,
-vision, and image generation, and with physical oscillator hardware classifying
-spoken digits at a fraction of the energy a trained network needs.
+A coupled-oscillator network is a population of rhythmic units that pull each other toward phase agreement. Wire them onto a geometric structure with a coupling function and drive them with sound, and the field's collective state becomes a representation of that sound. The physics does the transducing, and what you read out is the network's own response to the input.
 
-Speech is a natural target, because speech is oscillation at every scale:
-prosody near 1 Hz, syllable rhythm at 4-8 Hz, phone transitions at 10-40 Hz,
-pitch and formants from 100 Hz to several kHz. An oscillator field is a
-frequency-selective medium with intrinsic timescales, locking behavior, and
-spatial wave modes — exactly the representational resources that structure
-would seem to want.
+The idea is old. It runs from Huygens noticing in 1665 that two pendulum clocks on one beam fall into step, through the Hopf model of the cochlea, reservoir computing, and Mead's case for letting physics do the computing directly. What is new is that three fields have arrived at the same dynamics from different directions. Physics now describes synchronization regimes that exhibit computational properties rather than mere order. Neuroscience has identified the neuron as a complex chemical and physical system with functional oscillatory properties. Machine learning has recently produced oscillator architectures that are effective at classification, image generation and path navigation, with evidence suggesting that oscillatory neural networks can be trained, learn, remember and reason.
 
-Whether that promise survives contact with controlled measurement is the open
-question, and it is the question this research addresses. The work here is
-deliberately small-scale and control-heavy: single-variable comparisons,
-pre-registered decision criteria written before each run, no-dynamics floors
-under every accuracy, parameter-matched conventional baselines, and randomized
-twins for every designed structure. Negative results are reported with the same
-weight as positive ones.
+That convergence is the motivation here. The working hypothesis is that a substrate whose native operations are resonance and entrainment more closely resembles the biological neurons that evolution refined to sense and learn from signals in the physical world, and that a trainable model built from those dynamics would make questions about learning, forgetting and rhythm disruption addressable in simulation.
 
-Every paper ships with the code and the raw per-run data that produced its
-numbers, so any claim here can be peer reviewed and validated or refuted.
+Speech is the natural place to press on it, because speech is oscillation at every scale: prosody near 1 Hz, syllable rhythm at 4-8 Hz, phone transitions at 10-40 Hz, pitch and formants from 100 Hz to several kHz. An oscillator field is a frequency-selective medium with intrinsic timescales, locking behaviour and spatial wave modes, which is the representational vocabulary that structure would seem to want.
+
+Whether any of that survives contact with controlled measurement is the open question, and it is the question this research addresses. The work is deliberately small-scale and control-heavy: single-variable comparisons, pre-registered decision criteria written before each run, no-dynamics floors under every accuracy, parameter-matched conventional baselines, and randomized twins for every designed structure. Negative results are reported with the same weight as positive ones.
+
+Every experimental paper ships with the code and the raw per-run data that produced its numbers, so any claim here can be peer reviewed and validated or refuted.
 
 ## Papers
 
 | # | Paper | What it does |
 |---|---|---|
-| 01 | [From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning](papers/01-evidence-audit/from-synchronization-physics-to-trained-dynamics.md) | A prior-art survey of the oscillator-computing revival, auditing 88 published sources — including load-bearing results that exist only as technical blog posts — and organizing them into nine hypotheses the literature motivates but does not settle. For each, it states what supports it, what bounds it, and the controlled experiment that would decide it. |
-| 02 | [Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields](papers/02-untrained-reservoirs/) | Freezes every physics parameter of a 1,024-oscillator field and measures spoken-digit recognition across 1,940 pre-registered experiment runs — six coupling laws, six lattice geometries, three frequency structures, three drive pathways — against conventional baselines at exact parameter parity. Untrained fields beat every trained baseline at that budget yet clear their own no-dynamics floor by only ~3 points, and no design axis moves the result; on a task that provably requires memory, the same frozen fields read temporal order at 0.97-1.00. |
-
-Paper 01 is a survey without any code or data. Paper 02 also includes the code used in the experiment (src + tests), launch and scoring scripts, per-run raw results across the entire experiment matrix, and audio and
-figure assets used in or that support the reader in understanding the paper — see its [README](papers/02-untrained-reservoirs/README.md) for how to reproduce the experiments.
+| 01 | [From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning](papers/01-evidence-audit/from-synchronization-physics-to-trained-dynamics.md) | A critical survey of oscillator networks in machine learning, tracing the idea from Huygens in 1665 to the current revival and drawing on 130 sources across physics, mathematics, neuroscience and neuromorphic computing. It sorts thirteen published systems by what is actually learned, and finds that of the fifty-five control comparisons that would isolate the physics, seven have been run. |
+| 02 | [Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields](papers/02-untrained-reservoirs/) | Freezes every physics parameter of a 1,024-oscillator field and measures spoken-digit recognition across 1,940 pre-registered runs. The frozen field beats all five trained conventional networks at the same ~2k parameter budget (GRU, TCN, CNN, tiny transformer, S4D-style SSM) yet clears its own no-dynamics linear floor by only about three points, and neither lattice geometry nor coupling law moves that margin by as much as a point; on a task built so that order-free readouts provably cannot answer it, the same frozen fields read temporal order at 0.97 to 1.00. |
 
 ## Layout
 
@@ -51,8 +32,8 @@ papers/
 ├── 01-evidence-audit/
 │   ├── README.md
 │   ├── from-synchronization-physics-to-trained-dynamics.md   the manuscript
-│   ├── ….pdf .html .epub .docx .tex                          built beside it
-│   ├── …-tmlr.pdf  …-arxiv.tar.gz                      submission builds
+│   ├── ….html .epub .docx                                    built beside it
+│   ├── …-tmlr.pdf  …-tmlr.tex  …-arxiv.tar.gz                submission builds
 │   ├── metadata/    front matter, and how to cite this paper
 │   └── references/  the works it cites
 └── 02-untrained-reservoirs/
@@ -64,35 +45,24 @@ papers/
 publishing/          the scripts that turn a manuscript into those formats
 ```
 
-Each paper is self-contained: the manuscript, the formats built from it, the
-bibliography it cites, and its own citation metadata all live in one folder.
+Each paper is self-contained: the manuscript, the formats built from it, the bibliography it cites, and its own citation metadata all live in one folder.
 
 ## Publishing
 
-The manuscripts are plain Markdown; `publishing/` turns them into every other
-format without touching the source, writing each one beside the Markdown it came
-from — PDF, EPUB, HTML, DOCX, LaTeX, a TMLR submission build against the
-journal's own style file, and a ready-to-upload arXiv bundle:
+The manuscripts are plain Markdown. `publishing/` turns them into every other format without touching the source, writing each one beside the Markdown it came from. Ultimately producing a styled HTML page, EPUB, DOCX, a TMLR submission build against the journal's own style file, and a ready-to-upload arXiv bundle:
 
 ```bash
 bash publishing/publish.sh
 ```
 
-Citations are resolved against a real bibliography whose author lists, titles,
-venues and years come from the DOI registries and DBLP rather than from prose,
-with tooling to check that every link still resolves and that no entry is too
-incomplete to publish.
+Citations are resolved against a real bibliography whose author lists, titles, venues and years come from the DOI registries and DBLP rather than from prose. Every build runs a set of checks over the sources and fails loudly rather than shipping something wrong: whether any entry is too incomplete to publish, whether a citation label is claimed by two different works, whether every system and
+author is cited where it is first named, whether every "Section 2.3.3" and "Appendix D" pointer resolves, whether the section numbers in the headings are still current, and whether any invisible character has found its way into the source. Section numbers are written into the Markdown itself, so a cross-reference read on GitHub points at a heading you can see.
 
-To cite a paper, see the citation section in its README —
-[01](papers/01-evidence-audit/README.md#citing-this-paper),
-[02](papers/02-untrained-reservoirs/README.md#citing-this-paper) — or
-[CITATION.cff](CITATION.cff) for the repository as a whole. Details in
-[publishing/README.md](publishing/README.md).
+To cite one of these papers, see the citation section in its README ([Paper 01](papers/01-evidence-audit/README.md#citing-this-paper), [Paper 02](papers/02-untrained-reservoirs/README.md#citing-this-paper)) — or [CITATION.cff](CITATION.cff) for the repository as a whole. More details in [publishing/README.md](publishing/README.md).
 
 ## Data
 
-Speech corpora are not committed. Paper 02 uses
-[AudioMNIST](https://github.com/soerenab/AudioMNIST); download it and build the
+Speech corpora are not committed. Paper 02 uses [AudioMNIST](https://github.com/soerenab/AudioMNIST); download it and build the
 local bank as described in that paper's README.
 
 ## License

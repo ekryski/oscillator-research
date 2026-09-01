@@ -1,7 +1,12 @@
-# Front matter for the built formats. Edit here, not in the manuscript: the
-# manuscript stays plain readable Markdown, and everything a venue wants in a
-# title block lives in this file.
-title: "From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning"
+# Front matter for the built formats: the parts of a title block that are not
+# also part of the paper as it reads. The manuscript stays plain readable
+# Markdown, and anything a venue wants that is not written there lives here.
+#
+# The title and the abstract are the exceptions, and are written in the
+# manuscript itself: the title as its `# ` heading, the abstract under
+# `## Abstract`, so a reader who opens the Markdown sees both. publish.sh lifts
+# each one out and hands it to pandoc as metadata, and removes it from the body
+# copy so it renders once rather than twice.
 author:
   - name: Eric Kryski
     affiliation: Independent researcher
@@ -14,9 +19,6 @@ keywords:
   - synchronization
   - neural architectures
   - literature survey
-# The abstract lives in the manuscript, under `## Abstract`, so it is edited
-# beside the prose. publish.sh lifts it out and hands it to pandoc as the
-# title-block abstract, and removes it from the body so it renders once.
 lang: en-GB
 documentclass: article
 classoption:

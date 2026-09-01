@@ -35,6 +35,12 @@ $endfor$
 \renewcommand{\arraystretch}{1.35}
 \setlength{\extrarowheight}{3pt}
 $after-header-includes.latex()$
+% Captions are set a step down from the body, matching the HTML build, where a
+% caption is the one block deliberately smaller than the prose around it. The
+% caption package is loaded by pandoc's partial above, and only when the paper
+% has a table, so this is guarded rather than unconditional: a paper of figures
+% and no tables would otherwise fail on an undefined \captionsetup.
+\ifdefined\captionsetup\captionsetup{font=small}\fi
 $hypersetup.latex()$
 $if(tmlr-submission)$
 $-- Double-blind covers the file, not just the page: hyperref writes the author
@@ -60,21 +66,25 @@ $-- has replaced the title block with "Anonymous authors".
 \renewcommand{\fps@figure}{!htbp}
 \renewcommand{\fps@table}{!htbp}
 \makeatother
-% A float may still drift past the heading of the subsection that introduces it,
-% which reads as though it belongs to the next one: the physics timeline was
-% landing under "Within neuroscience". Flushing pending floats at every
-% subsection boundary keeps each figure inside the subsection that cites it.
-% placeins would do this, but it is not in a BasicTeX installation, and the
-% mechanism is short: if any float is still waiting when a subsection begins,
-% flush it first. \@deferlist holds exactly those floats, so the page break
-% only fires when one is actually pending.
+% A float may drift past the heading that introduces it and read as though it
+% belongs to the next one: the physics timeline was landing under "Within
+% neuroscience". Flushing pending floats at a heading fixes that. placeins would
+% do it, but it is not in a BasicTeX installation, and the mechanism is short:
+% if any float is still waiting when a section begins, flush it first.
+% \@deferlist holds exactly those floats, so the break only fires when one is
+% actually pending.
+%
+% At \section only, deliberately. Attaching it to every subsection and
+% subsubsection clears the page so often that a figure with any text after it
+% gets a page to itself: figures 3 and 4 were taking a page each, at 242 and 155
+% words of surrounding text. Section-level keeps each figure inside the numbered
+% section that cites it, which is what a cross-reference names, and leaves LaTeX
+% free to pack the pages in between.
 \makeatletter
 \newcommand{\tmlr@floatbarrier}{\par\vspace{\z@}%
   \ifx\@deferlist\@empty\else\clearpage\fi}
-\let\tmlr@subsection\subsection
-\renewcommand{\subsection}{\tmlr@floatbarrier\tmlr@subsection}
-\let\tmlr@subsubsection\subsubsection
-\renewcommand{\subsubsection}{\tmlr@floatbarrier\tmlr@subsubsection}
+\let\tmlr@section\section
+\renewcommand{\section}{\tmlr@floatbarrier\tmlr@section}
 \makeatother
 
 \hypersetup{pdfauthor={}}

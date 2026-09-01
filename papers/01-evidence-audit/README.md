@@ -7,15 +7,18 @@ A critical survey of oscillator networks in machine learning.
 Coupled oscillator networks are drawing sustained attention as machine-learning substrates for the first
 time, and three literatures have converged on them: synchronization physics, neuroscience, and machine
 learning itself. This survey audits what has actually been shown. It organises thirteen load-bearing systems
-by what is learned, records for each the task, the controls it ran, and how it stands against conventional
-baselines, and finds parity and niches rather than dominance. Six of the fifty-five applicable controls
-appear in the surveyed work.
+on two independent questions, whether gradients reach the oscillator dynamics and whether a conventional
+encoder or decoder is trained around it, and records for each the task, the controls it ran, and how it
+stands against conventional baselines. The comparative picture is parity and niches rather than
+dominance. Five controls would separate a trained system's result from the alternative explanations
+for it; of the fifty-five applicable control comparisons they give across the surveyed systems,
+seven have been run.
 
 ## What is here
 
-A prior-art survey reports no new experiments, so this paper is prose and
-nothing else. It cites 88 published sources, marks every non-peer-reviewed one
-as such where it carries weight, and uses no unpublished result of ours.
+A survey reports no new experiments, so this paper is prose and nothing else.
+It cites 129 published sources, marks every non-peer-reviewed one as such where
+it carries weight, and uses no unpublished result of ours.
 
 | path | contents |
 |---|---|
@@ -26,10 +29,11 @@ as such where it carries weight, and uses no unpublished result of ours.
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
 
-The nine hypotheses are what the experimental papers in this repository test.
-[Paper 02](../02-untrained-reservoirs/) takes the second and the seventh — that
-oscillator networks compute without learning, and that attribution needs
-controls the field rarely runs — and measures them.
+The paper closes with eight directions for the field, and those are what the
+experimental papers in this repository take up. [Paper 02](../02-untrained-reservoirs/)
+acts on the second through the fifth: a reporting standard for controls, the
+coupling law as a variable, geometry as a reported design decision, and saying
+where the input enters. It sweeps all four over frozen oscillator fields.
 
 ## Rebuilding it
 

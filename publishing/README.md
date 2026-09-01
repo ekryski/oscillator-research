@@ -22,11 +22,11 @@ FORMATS="tmlr pdf" bash publishing/publish.sh   # `pdf` and `tex` are off by def
 |---|---|
 | `-tmlr.pdf` / `-tmlr.tex` | TMLR submission, via the journal's own style file |
 | `-arxiv.tar.gz` | arXiv upload: `.tex` + style + `references.bib` + figures |
-| `.pdf` | reading and desk review |
 | `.epub` | e-readers |
-| `.html` | a single self-contained file, images embedded |
+| `.html` | a single self-contained file, images embedded and styled |
 | `.docx` | venues that ask for Word |
-| `.tex` | plain LaTeX source |
+| `.pdf` | reading and desk review — **off by default**, duplicates `-tmlr.pdf` |
+| `.tex` | plain LaTeX source — **off by default**, duplicates `-tmlr.tex` |
 
 Requires [pandoc](https://pandoc.org) and a TeX engine — BasicTeX is enough, and
 its default packages cover everything the build needs. TeX binaries install to
@@ -96,17 +96,29 @@ links**: a `](` inside the alt text is where an image reference ends as far as
 most Markdown parsers are concerned, so a citation in a caption silently turns
 the figure's source into that citation's URL. Cite in the body instead.
 
-## The abstract
+## The title and the abstract
 
-The abstract is written in the manuscript, under `## Abstract`, so it is edited
-beside the prose rather than in a metadata file someone has to remember exists.
-`lib/abstract.py` lifts it out at build time and hands it to pandoc as
-title-block metadata, and removes it from the body copy: leaving it in both
-places is what renders it twice.
+Both are written in the manuscript, the title as its `# ` heading and the
+abstract under `## Abstract`, so they are edited beside the prose rather than in
+a metadata file someone has to remember exists, and so a reader who opens the
+Markdown on GitHub sees what the paper is called and what it claims.
 
-It is therefore a single source. `cite_this.py` reads the same section for the
-`AB` field of the RIS export, so the citation metadata cannot drift from the
-paper.
+`lib/title.py` and `lib/abstract.py` lift each one out at build time and hand it
+to pandoc as title-block metadata, then remove it from the body copy: leaving it
+in both places is what renders it twice. The title is stripped from every build,
+the abstract only from the builds that pass `--abstract-out`, because pandoc
+sets the title in all of them but not every path wants the abstract in the title
+block. Neither is ever numbered as a section, by different routes: the title is
+invisible to the numbering, because the manuscripts' own sections start at `##`
+and that is where `check_sections.py` begins matching, while the abstract's
+heading is matched and then explicitly skipped, over the span `abstract.py`
+itself defines.
+
+Each is therefore a single source. `metadata/paper.yaml` carries what is left:
+the author list, keywords and the LaTeX front matter, the parts of a title block
+that are not also part of the paper as it reads. `cite_this.py` reads the title
+and the abstract from the manuscript for the BibTeX, RIS and CFF exports, so the
+citation metadata cannot drift from the paper.
 
 ## Appendices
 
@@ -307,12 +319,92 @@ is not reported as a dead DOI.
 
 ### A different citation style
 
-Pandoc's default for the reading formats is Chicago author-date. For a venue
-style, drop its CSL file in `publishing/csl/` and add
-`--csl=publishing/csl/<style>.csl` to the `cite` array in `publish.sh`. The
+The reading formats take their style from `CSL`, which names a file in
+`publishing/csl/`. It defaults to `apa`, and `ieee` is vendored alongside it:
+
+```
+CSL=ieee bash publishing/publish.sh
+```
+
+An unknown name fails the build rather than producing a document with no
+citations in it. For any other venue, drop its file in `publishing/csl/` — the
 [CSL style repository](https://github.com/citation-style-language/styles) has
-essentially every journal. The TMLR path does not use CSL — it runs the
+essentially every journal. The TMLR path ignores `CSL` entirely: it runs the
 journal's own `tmlr.bst` through BibTeX.
+
+**Author-year and numeric are not interchangeable for these manuscripts.** They
+are written in author-year prose — "Fries (2015) develops that observation",
+"dated as in Rivera-Sierra et al. (2026)" — and a numeric style replaces the
+name with a bracketed number, so the sentence loses its subject and reads "[12]
+develops that observation". Worse, a table cell whose entire content is a
+citation renders as "[122]" and nothing else, which is how Appendix C's model
+column came out blank. Switching to `ieee` for a numeric venue therefore means
+rewriting the prose to match, in the form those venues expect: "Reference [12]
+shows...". The switch is one variable; the rewrite is the work.
+
+### Section numbers
+
+Numbers live in the heading text of the Markdown, written by
+`lib/number_sections.py`, so that a reader on GitHub can resolve "Section 2.3.3"
+and "Appendix D" against visible headings. The script is idempotent and has a
+`--check` mode that the build runs, so a moved heading fails rather than
+shipping stale numbers.
+
+Because the numbers are in the text, **both other numbering sources are off**:
+pandoc's `--number-sections`, and LaTeX's own. The second is easy to miss —
+`tmlr.latex` sets `secnumdepth`, which pandoc's flag does not touch, so dropping
+`--number-sections` alone still produces "1 1 Introduction" in the PDF. The
+build passes `--variable=secnumdepth=0` for that.
+
+### Citations that can land on the wrong work
+
+`lib/check_citemap.py` reports three ways a citation goes wrong quietly, and the
+build fails on any of them.
+
+A **shared label**: `[Nunley 2026](...)` derives its citekey from the label's
+author and year, so two works by one author in one year collapse onto a single
+key. One wins, the other's citations all follow it, and the other drops out of
+the bibliography — with the reference list still complete and every claim still
+cited. It happened five times here. A letter suffix, `Huang et al. 2026a`, is
+the fix.
+
+A **shared link**: two entries carrying one DOI or arXiv id are two records of
+one work, and only the first is reachable, so the second is never cited. Merge
+them.
+
+A citation **matched on its label alone**: its link matches no `doi`, `eprint`
+or `url` in the bibliography, so nothing checks that the entry is the work the
+link points at. This is how a "Zhang et al. (2023)" in the prose came to print a
+Zhang 2023 about a different subject. Recording the identifier the link uses is
+what fixes it, and `entry_links` reads the arXiv id out of a `Preprint:
+arXiv:...` note as well as out of the fields, because most of the DBLP-sourced
+entries carry the venue page in `url` and the preprint only in the note.
+
+### Figure and table numbers
+
+LaTeX numbers its own floats, so the PDF captions already read "Figure 3:" and
+"Table 1:". HTML, EPUB and DOCX number nothing, which left the manuscript's
+"every paper in Table 1" pointing at no table a reader could identify.
+`filters/number-floats.lua` prefixes the caption in exactly the formats that
+need it, figures and tables on independent counters, in document order, and
+returns an empty filter under LaTeX so the numbers are never written twice.
+
+Hardcoding the number into the Markdown is the other option and is worse: the
+PDF would then read "Figure 3: Figure 3.", and inserting one figure would
+silently renumber every figure after it. `lib/check_sections.py` covers the
+other half, failing the build when the prose cites a "Figure 7" or "Table 6"
+that no caption in the document provides.
+
+### Invisible characters
+
+`lib/preprocess.py` strips zero-width spaces, directional and bidi marks,
+variation selectors and the Unicode tag block from every built format, and says
+so loudly when it finds any. The tag block is the usual carrier when prose is
+watermarked: a run of it encodes text no reader can see. A no-break space is
+normalised to a space rather than deleted, since removing it would run two words
+together. `lib/check_hidden.py` reports what the source files still hold — the
+Markdown is what gets read on GitHub, and the `.bib` never passes through
+preprocess.
 
 ## Citing these papers
 
@@ -349,6 +441,9 @@ publishing/
 │   ├── check_bib.py        which entries are not yet complete enough to publish
 │   ├── check_first_cite.py is every system and author cited where first named
 │   ├── check_sections.py   does every Section/Appendix pointer resolve
+│   ├── check_citemap.py    can any citation land on the wrong work
+│   ├── check_hidden.py     invisible characters left in the source files
+│   ├── number_sections.py  write the section numbers into the headings
 │   └── check_links.py      does every citation still resolve
 ├── templates/
 │   ├── tmlr.latex          pandoc template targeting the TMLR style file
