@@ -15,7 +15,7 @@ merely worse untrained but unreadable. On an order-discrimination task built so 
 cannot answer it, the same frozen fields read temporal order at 0.97 to 1.00, and a severed-coupling control
 attributes that memory predominantly to per-oscillator phase integration.
 
-## Introduction
+## 1 Introduction
 
 Coupled oscillators are having a revival as a machine-learning substrate. Hardware
 reservoirs classify spoken digits with a handful of spintronic oscillators
@@ -68,9 +68,9 @@ Contributions:
    severed-coupling control that attributes the memory predominantly to per-oscillator
    integration.
 
-## Background: the physics under test
+## 2 Background: the physics under test
 
-### Coupling laws
+### 2.1 Coupling laws
 
 All six families share the update
 θ̇ᵢ = ωᵢ + couplingᵢ(θ; K) + driveᵢ − λ·sin θᵢ,
@@ -92,7 +92,7 @@ Untrained sakaguchi/harmonic2 runs run at canonical nonzero parameters (α = π/
 *training* initialization, where the deviation is learned; it is not a distinct untrained
 physics). Both canonical values are sensitivity-tested in §5.5.
 
-### Lattice geometries
+### 2.2 Lattice geometries
 
 Six shapes share the identical local coupling stencil and parameter budget; only the wrap
 rule at the lattice edge differs: sheet (both axes open), cylinder (one periodic axis),
@@ -104,7 +104,7 @@ and sheet/cylinder/torus form a 0/1/2-periodic-axis series; (iii) *dimensionalit
 curvature and poles. (iv) To our knowledge no published oscillator-network work varies
 lattice topology under controls, so either a positive effect or its absence is a new datum.
 
-### Why oscillator physics might matter for audio at all
+### 2.3 Why oscillator physics might matter for audio at all
 
 Speech is oscillation at every scale: prosody (~1 Hz), syllable rhythm (4–8 Hz), phone
 transitions (10–40 Hz), pitch and formants (100–3,000 Hz). An oscillator field is a frequency-selective medium: intrinsic timescales, locking behavior, and spatial wave modes
@@ -115,7 +115,7 @@ The premise is not ours and is best established in neuroscience, where oscillato
 which acoustic structure a frozen field transduces. The matrix turns each supposition into
 a measured factor rather than an architectural assumption.
 
-## The system under test
+## 3 The system under test
 
 Everything upstream and downstream of the field is fixed and parameter-free (or
 frozen-random); the only fitted object in the primary protocol is a linear ridge probe.
@@ -153,9 +153,9 @@ same order; only the boxed stage differs between an oscillator arm and its floor
 separation it finds must already exist in the features rather than being computed by the readout.](resources/figures/g7-probe-mechanism.png)
 
 
-## Methods
+## 4 Methods
 
-### Task and data
+### 4.1 Task and data
 
 AudioMNIST [Becker 2024]: 30,000 recordings, 60 speakers × 10 digits × 50 repetitions at
 48 kHz. Bank: repetitions 0–19 per speaker×digit, resampled to 16 kHz, peak-normalized to
@@ -165,7 +165,7 @@ frames. Training/evaluation sets are drawn from the bank with replacement (repea
 receive fresh noise draws); the protocol size is 2,048 training / 512 test clips per run,
 and all decision bars are scored only at this size.
 
-### Primary frontend (mel envelope)
+### 4.2 Primary frontend (mel envelope)
 
 512-sample/256-hop Hann STFT → 16 mel bands → log → fixed affine (v+10)/10 clamped at 0 →
 rows [T×16] at 62.5 fps. Zero trainable parameters and no per-utterance statistics
@@ -177,7 +177,7 @@ correlation, identical for every arm; no overlap across clips. A lens-cost contr
 conventional baseline at 40 mel bands so the 16-band bottleneck's cost is a measured number
 in anchor comparisons.
 
-### The transduction ladder (drive pathways)
+### 4.3 The transduction ladder (drive pathways)
 
 Three pathways are chosen so each adds exactly one kind of information or mechanism over
 the last, making result differences attributable to that addition:
@@ -204,7 +204,7 @@ collapsed at every gain tested (§5.2, §6), consistent with Adler theory; train
 the required phase relation is suggested, not shown. Carrier drive admits injection locking
 when |Δω| ≤ A (single-oscillator idealization; measured in §5.3).
 
-### Noise protocol
+### 4.4 Noise protocol
 
 Added white noise with σ = RMS(speech) · 10^(dB/20), drawn i.i.d. per sample over the full
 padded window; 0 dB means noise at speech-equal power (not clean audio), −10 dB means
@@ -216,7 +216,7 @@ Conditions of record: **0 dB primary, +5 dB as the harsher-noise robustness comp
 clip at every level, one seeded noise draw rescaled per level) ship with the paper,
 regenerable by a committed script.
 
-### Drive scale, gain, and the integrator-validity bound
+### 4.5 Drive scale, gain, and the integrator-validity bound
 
 The gain dial multiplies frontend-relative units, so cross-frontend gain equality is
 meaningless: measured row scales at 0 dB are mel-affine RMS 1.32 versus carrier RMS 0.021, a 62.5× units gap. Each frontend therefore runs at its own gate-calibrated gain,
@@ -230,7 +230,7 @@ drive, when a question needs it, is reached by increasing substeps, never by gai
 bound. Prior art for the response shape: input scaling is a canonical reservoir
 hyperparameter with an interior optimum [Lukoševičius 2012].
 
-### Instrumentation (mechanism, never verdicts)
+### 4.6 Instrumentation (mechanism, never verdicts)
 
 Drive-phase PLV per band: each oscillator's phase is compared against the analytic
 (Hilbert) phase of its own row's *delivered drive*; entrained fraction is the share above a
@@ -242,7 +242,7 @@ The global order parameter $R = |\langle e^{i\theta}\rangle|$ (no reference; the
 per-tick drive-increment statistics complete the instrument set. Instruments are
 diagnostics; verdicts come only from the pre-registered accuracy bars.
 
-### Evidential standard
+### 4.7 Evidential standard
 
 **Scope and evidence.** Speech recognition from frozen oscillator fields. Every number reported here comes
 from a pre-registered, protocol-complete run; decision criteria were written before each run and verdicts
@@ -256,12 +256,12 @@ replicates, seeds matched across arms); cross-run and same-seed determinism chec
 arms. Every run records command + commit + seed, accuracies per feature family,
 instruments, and drive-increment statistics.
 
-## Results
+## 5 Results
 
 Throughout: "windowed" is the primary metric (the ridge on per-quarter-window pooled
 statistics); floors are per-condition and per-representation; chance is 0.100.
 
-### Conventional references at exact parameter parity
+### 5.1 Conventional references at exact parameter parity
 
 Five trained baselines (GRU, TCN, small CNN, tiny transformer, minimal S4D-style SSM) at the matched ~2k budget, identical frontend, featurization, ridge, and selection protocol,
 under two protocols: the *frozen-probe* protocol (training against a fixed random readout direction, the physics-symmetric objective used by field arms) and the *trained-head*
@@ -288,7 +288,7 @@ therefore reported for every conventional arm. Literature anchors, with protocol
 and never as head-to-head claims: spintronic hardware reservoirs ~99.6% on TI-46
 [Torrejon 2017]; coRNN on AudioMNIST 78–91% under different frontends [Rusch 2021].
 
-### The untrained matrix: a statics plateau, with design effects bounded below threshold
+### 5.2 The untrained matrix: a statics plateau, with design effects bounded below threshold
 
 The full factorial (six physics × six geometries × three ω levels × two λ × two clamp × two
 frontends) ran at three conditions: A (+5 dB, g=2), B (0 dB, g=2), C (+5 dB, g=1): 600 supported runs each (documented implementation scopes exclude SL × non-torus and SL ×
@@ -350,7 +350,7 @@ trajectory, and from a 32-frame drive-free ring-down. Settle loses everywhere: �
 mean, 0% positive across 600 runs. For untrained envelope-driven fields, the driven
 trajectory carries the information.
 
-### The transduction test: carrier drive does not rescue the plateau
+### 5.3 The transduction test: carrier drive does not rescue the plateau
 
 If the mel transcoder were compressing a dynamical margin, driving the field with the
 band-split waveform itself (the carrier pathway) should restore it. We measured carrier
@@ -388,7 +388,7 @@ the drive-phase reader and the increment instrument (quotable table in supplemen
 designed-ω holds a seed-robust +3–4 point edge over random at gate size in the mid-gain band, an edge that vanishes at protocol size, which is why the scored Caranzano verdict is
 negative. Locking is a mechanism; the probe scores outcomes.
 
-### Readout sufficiency: the linear probe, tested
+### 5.4 Readout sufficiency: the linear probe, tested
 
 The weakest-reader design choice is a measured control, not an assumption. On one
 scored-condition run and its floor twin, an MLP head (2×128) and a small window-token
@@ -407,7 +407,7 @@ reader is stable at +1.7 to +2.9 points. Overfitting is reported, not assumed: e
 nonlinear head shows train–test gaps of +0.09 to +0.20, and the floor MLP memorizes its
 training set outright. All heads carry more parameters than the entire oscillator field.
 
-### Sensitivity of the canonical physics values
+### 5.5 Sensitivity of the canonical physics values
 
 **harmonic2 β:** deviations from kuramoto are identical (−0.98) at β ∈ {0.25, 0.5, 1.0}, insensitive across the literature range [Hansel et al. 1993; Daido 1992] (verified to be a
 genuine accuracy plateau, not a plumbing artifact: the trajectories differ substantially
@@ -426,7 +426,7 @@ enters the record as a measured factor level with its response curve (π/4 = mid
 boundary), not an assumed constant. Matrix-wide, the family deviation at α = π/4 is
 +0.1–0.2 (§5.2): the crown-configuration trough did not generalize.
 
-### Coherence and readability: an inverted-U, suggested
+### 5.6 Coherence and readability: an inverted-U, suggested
 
 A registered scatter over the corrected protocol-size matrices (936 envelope runs:
 312 at each of the three conditions) tested whether readability anti-correlates
@@ -446,7 +446,7 @@ over-synchronization concerns raised independently in the trained-oscillator lit
 ![Readability against coherence across the swept conditions. The relation is not monotone: mild coherence
 accompanies the best reads, and the most strongly locked fields read worse than their less coherent twins.](resources/figures/g9-readability-vs-coherence.png)
 
-### The task axis: untrained state carries temporal order near-perfectly
+### 5.7 The task axis: untrained state carries temporal order near-perfectly
 
 Every task above is statics-dominated, so the field's dynamics are barely interrogated. We
 therefore built a task that statics provably cannot answer: classify two-digit sequences
@@ -489,7 +489,7 @@ hardness ladder (longer sequences, variable gaps, memory-horizon curves), not a
 characterized capability. It is also consistent with the settle result (§5.2): the memory
 lives in the *driven* evolution of the state, not in autonomous ring-down persistence.
 
-## The phase-referenced collapse: model and mechanism
+## 6 The phase-referenced collapse: model and mechanism
 
 The magnitude push is oscillator-state-independent; the Adler torque g·Aᵣ·sin(φᵣ − θᵢ)
 depends on each oscillator's phase relative to a shared reference. The Adler equation
@@ -519,7 +519,7 @@ of this phenomenon, the carrier pathway removes the transcoder and drives the fi
 the band-filtered waveform itself: an additive oscillatory drive engages entrainment, creating phase organization through the locking dynamics with no pre-organization required, turning the untrained-phase question into one about locking range rather than co-organization.
 Section 5.3 reports the outcome: locking occurs, and the plateau stands.
 
-## Discussion
+## 7 Discussion
 
 **The hypothesis, scored.** As tested, at ~2k parameters, on spoken digits, under three drive forms and three conditions, the reservoir premise splits along the task axis. On
 statics-dominated recognition, it survives only in a bounded form: untrained fields carry
@@ -555,7 +555,7 @@ trained oscillator systems.
 The evaluation frame, comprising floors, parity, drive-unit calibration with a validity bound, drive-phase instrumentation and pre-registered bars, is reusable as-is for trained-dynamics
 studies, and ships with this paper for exactly that purpose.
 
-## Related work
+## 8 Related work
 
 Hardware oscillator reservoirs establish the premise's strongest published support
 [Torrejon 2017]; reservoir computing supplies the frame and its cautions [Jaeger 2001;
@@ -576,7 +576,7 @@ parameter-matched conventional baseline on a recognition task. To our knowledge,
 topology under controls, runs a pre-registered factorial of coupling laws untrained, or
 instruments drive-phase locking against delivered drive in a speech setting.
 
-## Reproducibility
+## 9 Reproducibility
 
 Everything the paper rests on is published alongside it. The record holds
 1,940 runs: the 1,800-run two-pathway factorial, the 14-run carrier diagonal,
