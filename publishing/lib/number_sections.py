@@ -122,6 +122,42 @@ def renumber(text: str) -> tuple[str, list[tuple[str, str]]]:
     return out, changed
 
 
+def unnumber(text: str) -> tuple[str, int]:
+    """The manuscript with the numbers taken back off its headings.
+
+    The LaTeX builds want this: LaTeX numbers its own sections, and it sets the
+    number and the title apart by a fixed gap that a plain space in the heading
+    text does not reproduce. So the number is written into the Markdown for the
+    readers of the Markdown, and taken off again on the way to LaTeX, which puts
+    an equivalent one back in its own typography.
+
+    The same `strip_number` the rewrite uses, so the two cannot disagree about
+    what counts as a number — including the one ambiguous case, a top-level
+    appendix heading whose title begins with a one-letter word, and the one
+    known limitation: a top-level title opening with a bare year, "1968 and
+    after", has the shape of a section number and loses it. `renumber` mangles
+    such a heading identically, so this adds no hazard the source did not
+    already carry; a heading like that wants `{-}` or a reworded title.
+    """
+    allow_bare_letter = _appendix_is_lettered(text)
+    found = abstract.SECTION.search(text)
+    abstract_span = found.span() if found else (-1, -1)
+    removed = 0
+
+    def rewrite(m: re.Match[str]) -> str:
+        nonlocal removed
+        hashes, title = m.group(1), m.group(2)
+        raw = m.group(0)
+        tail = raw[len(raw.rstrip()):]
+        if abstract_span[0] <= m.start() < abstract_span[1]:
+            return raw
+        body = strip_number(title, len(hashes) - TOP_LEVEL, allow_bare_letter)
+        removed += body != title
+        return f"{hashes} {body}" + tail
+
+    return HEADING.sub(rewrite, text), removed
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="write section numbers into manuscript headings")
     ap.add_argument("--check", action="store_true", help="report only, exit non-zero if stale")

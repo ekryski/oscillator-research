@@ -151,16 +151,19 @@ for dir in papers/*/; do
     vector=(--lua-filter=publishing/filters/table-row-rules.lua)
     # Section numbers live in the heading text, written by number_sections.py, so
     # that a reader of the Markdown on GitHub can resolve "Section 2.3.3" and
-    # "Appendix D". Both other numbering sources are therefore switched off:
-    # pandoc's --number-sections, and LaTeX's own, which the TMLR template turns
-    # on through secnumdepth and which pandoc's --number-sections does not touch.
-    # Miss the second and the PDF reads "1 1 Introduction".
+    # "Appendix D". pandoc's own --number-sections is therefore off: with both on
+    # the PDF reads "1 1 Introduction".
+    #
+    # LaTeX is the exception and keeps numbering itself, because it sets the
+    # number off from the title by a fixed gap that a plain space in the heading
+    # text does not reproduce. preprocess.py takes the numbers back off on that
+    # path, so the template's secnumdepth is left alone and puts them back.
     # The reading formats also need a plain author string, because pandoc's stock
     # template renders our structured author as "true".
     # The manuscript's top level is `##`, because the title and abstract come
     # from metadata rather than being restated in the prose. Without the shift
     # pandoc maps `##` to a subsection and the headings come out a level too deep.
-    common+=(--shift-heading-level-by=-1 --variable=secnumdepth=0
+    common+=(--shift-heading-level-by=-1
              --variable=author="$(python3 publishing/lib/byline.py "$meta")")
     # TMLR places the appendix after the references, and its author guide
     # excludes appendices from the length that risks a longer review. The LaTeX

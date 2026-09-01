@@ -411,6 +411,22 @@ def main() -> None:
         # leaving it in the body too is what produced two of them
         a.abstract_out.write_text(abstract_mod.as_yaml(abstract_mod.read(text)))
         text = abstract_mod.strip(text)
+    n_math = n_img = n_unnumbered = 0
+    if a.target == "latex":
+        # LaTeX numbers its own sections, and sets the number off from the title
+        # by a fixed gap the plain space in the heading text does not reproduce.
+        # The numbers are in the Markdown for the people who read the Markdown;
+        # here they come back off and LaTeX puts its own equivalent back.
+        #
+        # Before the appendix split, and not after, for two reasons: the split
+        # copy's appendix would otherwise keep its letters and come out "A A Use
+        # of AI assistance", and the letter-or-word decision for a top-level
+        # appendix heading is only sound while the whole document is in view.
+        #
+        # Imported here, not at the top: number_sections reads APPENDIX back out
+        # of this module, so a module-level import closes the cycle.
+        import number_sections
+        text, n_unnumbered = number_sections.unnumber(text)
     appendix = ""
     if a.appendix_out is not None and APPENDIX.search(text):
         text, appendix = APPENDIX.split(text, 1)
@@ -418,7 +434,6 @@ def main() -> None:
     text, n_hidden = strip_hidden(text)
     text, n_links, disagreements = rewrite_links(text, known, by_url)
     text, n_brackets = rewrite_brackets(text, known)
-    n_math = n_img = 0
     if a.target == "latex":
         text, n_img = to_vector_images(text)
         for line in warn_pseudo_math(text):
@@ -452,6 +467,7 @@ def main() -> None:
               f"    {line}", file=sys.stderr)
     extra = f", {n_math} math characters" if n_math else ""
     extra += f", {n_img} images to vector" if n_img else ""
+    extra += f", {n_unnumbered} headings unnumbered for LaTeX" if n_unnumbered else ""
     # loud rather than silent: a hidden character in the source means the
     # Markdown still carries it even though the built formats no longer do
     extra += f", {n_hidden} HIDDEN CHARACTERS STRIPPED" if n_hidden else ""

@@ -1,7 +1,7 @@
 """Writing the build's section numbers into the headings, repeatably."""
 
 from check_sections import numbering
-from number_sections import renumber
+from number_sections import renumber, unnumber
 
 DOC = """## Abstract
 
@@ -129,3 +129,50 @@ def test_the_written_numbers_are_the_ones_check_sections_resolves_against():
     out, _ = renumber(DOC)
     for number, title in numbering(out).items():
         assert title.startswith(f"{number} ")
+
+
+def test_unnumber_takes_the_numbers_back_off():
+    # the LaTeX path wants LaTeX's own numbering, and its own gap after it
+    src = ("## Abstract\n\nText.\n\n## 1 Introduction\n\n### 1.1 What it is\n\n"
+           "<!-- appendix -->\n\n## A Use of AI\n\n### A.1 Detail\n")
+    out, n = unnumber(src)
+    assert "## Introduction" in out
+    assert "### What it is" in out
+    assert "## Use of AI" in out
+    assert "### Detail" in out
+    assert n == 4
+
+
+def test_unnumber_leaves_the_abstract_alone():
+    src = "## Abstract\n\nText.\n\n## 1 Introduction\n"
+    out, _ = unnumber(src)
+    assert "## Abstract" in out
+
+
+def test_unnumber_and_renumber_agree_on_what_counts_as_a_number():
+    # both call the same strip_number, so a title neither would touch stays
+    # whole through either. This is the contract: a heading cannot mean one
+    # thing to the writer of the numbers and another to the remover.
+    src = "## Abstract\n\nText.\n\n## Introduction\n\n### Scope and terms\n"
+    numbered, _ = renumber(src)
+    stripped, _ = unnumber(numbered)
+    assert stripped == src
+
+
+def test_a_title_opening_with_a_year_loses_it_to_both():
+    # a known limitation of the shared shape match, not of unnumber: at top
+    # level "1968" has the shape of a section number. renumber mangles such a
+    # heading the same way, into "1 and after". No heading in either manuscript
+    # opens with one; a future one would need `{-}` or a reworded title.
+    src = "## Abstract\n\nText.\n\n## 1968 and after\n"
+    assert unnumber(src)[0].endswith("## and after\n")
+    assert renumber(src)[0].endswith("## 1 and after\n")
+
+
+def test_unnumber_reverses_renumber():
+    src = ("## Abstract\n\nText.\n\n## Introduction\n\n### What it is\n\n"
+           "## Method\n")
+    numbered, _ = renumber(src)
+    assert "## 1 Introduction" in numbered
+    back, _ = unnumber(numbered)
+    assert back == src

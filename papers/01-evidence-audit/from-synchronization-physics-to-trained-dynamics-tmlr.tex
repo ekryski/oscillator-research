@@ -6,7 +6,7 @@
 \documentclass[10pt]{article}
 \usepackage{xcolor}
 \usepackage{amsmath,amssymb}
-\setcounter{secnumdepth}{0}
+\setcounter{secnumdepth}{3}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
@@ -209,10 +209,9 @@ tasks, training and model architecture parity from which to baseline
 future ONN research efforts with more precise controls.
 \end{abstract}
 
-\section{1 Introduction and
-background}\label{introduction-and-background}
+\section{Introduction and background}\label{introduction-and-background}
 
-\subsection{1.1 What is an oscillator}\label{what-is-an-oscillator}
+\subsection{What is an oscillator}\label{what-is-an-oscillator}
 
 An \textbf{oscillator} is a system that keeps a rhythm of its own. Left
 undisturbed it does not settle at a resting point; it returns to a
@@ -275,7 +274,7 @@ coupling range, damping, spectral placement or sparsity, is a way of
 steering the field toward that regime and holding it there, which is
 also why the same decisions reappear in Section 3.1 as failure modes.
 
-\subsection{1.2 The evolution of oscillator
+\subsection{The evolution of oscillator
 understanding}\label{the-evolution-of-oscillator-understanding}
 
 Literature from three different fields arrive at the similar
@@ -286,7 +285,7 @@ findings that cortex runs on rhythms and uses them to route information.
 Applications within machine learning are much more recent, and almost
 every system we surveyed aligns with findings from the other two fields.
 
-\subsubsection{1.2.1 Within physics and
+\subsubsection{Within physics and
 mathematics}\label{within-physics-and-mathematics}
 
 The observed coupling of oscillators has been on record since 1665, when
@@ -363,7 +362,7 @@ and its earliest two entries are arguments that physics can compute at
 all rather than coupling laws to build with.}
 \end{figure}
 
-\subsubsection{1.2.2 Within neuroscience}\label{within-neuroscience}
+\subsubsection{Within neuroscience}\label{within-neuroscience}
 
 Neuroscience researchers began observing oscillatory coupling directly
 in cortical tissue: neurons in the feline visual cortex oscillate at 40
@@ -531,8 +530,7 @@ synchronization term should hurt grouping tasks specifically. The
 Hopf-cochlea precedent \citep{camalet2000} predicts that designed
 frequency placement should beat learned placement.
 
-\subsubsection{1.2.3 Within machine
-learning}\label{within-machine-learning}
+\subsubsection{Within machine learning}\label{within-machine-learning}
 
 \textbf{What an oscillator network is.} Section 1.2.1 gives a rule for
 how coupled units pull on each other, and Section 1.2.2 gives a reason
@@ -693,7 +691,7 @@ the lineage the machine-learning literature has reached, not its own
 chronology.}
 \end{figure}
 
-\subsection{1.3 Other neural network
+\subsection{Other neural network
 architectures}\label{other-neural-network-architectures}
 
 Oscillator networks are not the only option, and several of the systems
@@ -778,8 +776,7 @@ from scratch, which is the substance of both the efficiency argument
 made for it and the training difficulty reported against it.}
 \end{figure}
 
-\subsection{1.4 Motivation for this survey: independent convergence
-across
+\subsection{Motivation for this survey: independent convergence across
 fields}\label{motivation-for-this-survey-independent-convergence-across-fields}
 
 The case for reviewing oscillator networks is not that any single result
@@ -853,7 +850,7 @@ from evidence:
   about what it has delivered.
 \end{enumerate}
 
-\subsection{1.5 Evidence standard and
+\subsection{Evidence standard and
 limitations}\label{evidence-standard-and-limitations}
 
 \textbf{Evidence standard.} This survey reports no new experiments and
@@ -902,9 +899,9 @@ Five limitations bound every claim that follows.
   reflect those interests. No unpublished work of ours is used or cited.
 \end{enumerate}
 
-\section{2 Oscillator neural networks}\label{oscillator-neural-networks}
+\section{Oscillator neural networks}\label{oscillator-neural-networks}
 
-\subsection{2.1 Scope and terms}\label{scope-and-terms}
+\subsection{Scope and terms}\label{scope-and-terms}
 
 A ``coupled oscillator network'' here means a machine-learning system
 whose state evolves under oscillator dynamics: phase-only models of the
@@ -924,9 +921,9 @@ coupled system from data, most recently through Koopman operator methods
 survey asks what oscillator dynamics does for a machine-learning system,
 not what a machine-learning system can say about oscillator dynamics.
 
-\subsection{2.2 Taxonomy}\label{taxonomy}
+\subsection{Taxonomy}\label{taxonomy}
 
-\subsubsection{2.2.1 Overview}\label{overview}
+\subsubsection{Overview}\label{overview}
 
 Two independent questions separate the surveyed systems, and crossing
 them gives four quadrants rather than a tree. The first is
@@ -950,7 +947,7 @@ Section 2.3 rather than as further branches, because nesting them
 produces a tree no system occupies uniquely.}
 \end{figure}
 
-\subsubsection{2.2.2 Untrained designed
+\subsubsection{Untrained designed
 dynamics}\label{untrained-designed-dynamics}
 
 Nothing is fitted anywhere. Every parameter is chosen, and the physics
@@ -972,7 +969,7 @@ oscillators whose frequencies are set by construction, not fitted, and
 it delivers sharp, compressive, actively amplified tuning that no
 learned filterbank has bettered.
 
-\subsubsection{2.2.3 Trained designed
+\subsubsection{Trained designed
 dynamics}\label{trained-designed-dynamics}
 
 Gradients reach the dynamics, and the dynamics is essentially the whole
@@ -989,7 +986,7 @@ frozen-reservoir control, against which its trained dynamics wins
 clearly, with single-step and linearized dynamics performing near the
 untrained level (blog-published).
 
-\subsubsection{2.2.4 Untrained dynamics with a trained encoder or
+\subsubsection{Untrained dynamics with a trained encoder or
 decoder}\label{untrained-dynamics-with-a-trained-encoder-or-decoder}
 
 The dynamics is fixed, randomly or by design, and a readout is fitted to
@@ -1019,7 +1016,7 @@ tonotopic cochlea is the limiting case in which every parameter is
 chosen. This is the one branch where that comparison has been run and
 design holds up.
 
-\subsubsection{2.2.5 Trained dynamics with a trained encoder or
+\subsubsection{Trained dynamics with a trained encoder or
 decoder}\label{trained-dynamics-with-a-trained-encoder-or-decoder}
 
 Gradients flow through the oscillator dynamics \emph{and} through
@@ -1065,10 +1062,10 @@ what synchronization can be claimed to add rather than settling it. If
 it carries, whatever synchronization contributes is inductive bias, and
 only a controlled ablation can measure it.
 
-\subsection{2.3 Comparison of the current
+\subsection{Comparison of the current
 landscape}\label{comparison-of-the-current-landscape}
 
-\subsubsection{2.3.1 What the systems are built
+\subsubsection{What the systems are built
 from}\label{what-the-systems-are-built-from}
 
 Appendix D records what each system \emph{is}: its oscillator family,
@@ -1158,7 +1155,7 @@ space by design, envelope-band initialization decides success on
 raw-waveform speech, and the cochlea literature designs the bank
 outright.
 
-\subsubsection{2.3.2 What the systems are evaluated
+\subsubsection{What the systems are evaluated
 on}\label{what-the-systems-are-evaluated-on}
 
 A survey of this shape would normally open its comparison with a shared
@@ -1239,7 +1236,7 @@ sits at the short end, and the one system three orders of magnitude out
 is linear.}
 \end{figure}
 
-\subsubsection{2.3.3 What the systems report as
+\subsubsection{What the systems report as
 controls}\label{what-the-systems-report-as-controls}
 
 The controls table is where this survey's argument is decided. The five
@@ -1342,7 +1339,7 @@ Of the fifty-five applicable control comparisons these five give across
 the twelve systems, seven have been run, plus this one near-instance;
 Appendix G itemises them.
 
-\subsubsection{2.3.4 How the systems compare with conventional
+\subsubsection{How the systems compare with conventional
 architectures}\label{how-the-systems-compare-with-conventional-architectures}
 
 Each system's own reported numbers, set against the architectures of
@@ -1402,15 +1399,15 @@ time-series work generally is thin, so absence of dominance there is
 absence of peer-reviewed attempts rather than a claim on capability thus
 far.
 
-\section{3 Discussion}\label{discussion}
+\section{Discussion}\label{discussion}
 
-\subsection{3.1 Research challenges}\label{research-challenges}
+\subsection{Research challenges}\label{research-challenges}
 
 Where the evidence stops. Each subsection states a bound the literature
 itself establishes, drawn from the same sources that make the positive
 case above. These are not objections from outside the field.
 
-\subsubsection{3.1.1 Attribution, and the controls that are
+\subsubsection{Attribution, and the controls that are
 missing}\label{attribution-and-the-controls-that-are-missing}
 
 Each of the five controls in Section 2.3.3 exists because a published
@@ -1499,7 +1496,7 @@ random-phase control, marked as the nearest published instance, freezes
 phases rather than deleting the coupling.}
 \end{figure}
 
-\subsubsection{3.1.2 What training moves, and what it does
+\subsubsection{What training moves, and what it does
 not}\label{what-training-moves-and-what-it-does-not}
 
 Universality says nothing about trainability, and the adjacent
@@ -1533,8 +1530,7 @@ family. The literature therefore cannot say whether an optimum is
 task-dependent, which is the natural expectation if some tasks want the
 dynamics for transduction and others want it for memory.
 
-\subsubsection{3.1.3 Structure and
-geometry}\label{structure-and-geometry}
+\subsubsection{Structure and geometry}\label{structure-and-geometry}
 
 Geometry is varied in four of the surveyed systems, and in none of them
 as a single variable. Neural Wave Machines \citep{keller2023} comes
@@ -1562,7 +1558,7 @@ sparsity study covers that regime. The oscillator-side evidence is also
 a non-peer-reviewed study of one system whose authors themselves flag
 protocol drift between posts.
 
-\subsubsection{3.1.4 The dynamics as both resource and
+\subsubsection{The dynamics as both resource and
 hazard}\label{the-dynamics-as-both-resource-and-hazard}
 
 Three lines of work, none of them aimed at the others, point the same
@@ -1598,7 +1594,7 @@ report failed horizon scaling, so publication bias could manufacture the
 pattern, and no published study we found isolates horizon length as the
 single variable on a fixed nonlinear oscillator substrate.
 
-\subsubsection{3.1.5 The physics the field has not
+\subsubsection{The physics the field has not
 used}\label{the-physics-the-field-has-not-used}
 
 Section 1.2.3 counted how many of the surveyed systems use each coupling
@@ -1621,7 +1617,7 @@ within one coupling family, on one task. We found none that compares
 across families, so the choice of a Kuramoto-type coupling over a
 Winfree or Stuart-Landau one remains a convention rather than a finding.
 
-\subsubsection{3.1.6 The missing shared
+\subsubsection{The missing shared
 protocol}\label{the-missing-shared-protocol}
 
 The field has no shared benchmark, no shared reporting convention, and
@@ -1630,7 +1626,7 @@ papers but not across them easily. This is more of a coordination and
 standards-setting concern than a scientific error, and it is one of the
 first things that could benefit the community.
 
-\subsection{3.2 Future directions}\label{future-directions}
+\subsection{Future directions}\label{future-directions}
 
 These are directions for the field rather than protocols for a paper.
 Each follows from a specific gap above, and each would be worth doing
@@ -1740,7 +1736,7 @@ whichever way it came out.
 
 Appendix G collects the questions these directions leave open.
 
-\section{4 Conclusion}\label{conclusion}
+\section{Conclusion}\label{conclusion}
 
 The current wave of oscillator architectures has produced real systems.
 The oscillatory recurrences and their linear state-space descendants
@@ -1818,7 +1814,7 @@ measurable is, on the present record, still open.
 \section*{Appendix}\label{appendix}
 \addcontentsline{toc}{section}{Appendix}
 
-\section{A Use of AI assistance}\label{a-use-of-ai-assistance}
+\section{Use of AI assistance}\label{use-of-ai-assistance}
 
 Generative AI tools were used in preparing this survey to search for and
 surface candidate prior art, to write the tooling that produces the
@@ -1828,7 +1824,7 @@ verified every reference and every claim attributed to a source.
 Responsibility for the content, including any error of attribution,
 rests with the author.
 
-\section{B Glossary}\label{b-glossary}
+\section{Glossary}\label{glossary}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
@@ -1911,7 +1907,7 @@ that means the coupling term. \\
 unrolled and backpropagated through during training. \\
 \end{longtable}
 
-\section{C Oscillator physics models}\label{c-oscillator-physics-models}
+\section{Oscillator physics models}\label{oscillator-physics-models}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
@@ -2031,8 +2027,8 @@ simplicial representations give qualitatively different synchronization,
 so higher-order coupling is not one generalisation but at least two. \\
 \end{longtable}
 
-\section{D Oscillator systems: design and
-classification}\label{d-oscillator-systems-design-and-classification}
+\section{Oscillator systems: design and
+classification}\label{oscillator-systems-design-and-classification}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
@@ -2115,8 +2111,8 @@ mechanism & dynamics & simulated & preprints \\
 generative forward process & score network & simulated & NeurIPS 2025 \\
 \end{longtable}
 
-\section{E Oscillator systems: reported
-results}\label{e-oscillator-systems-reported-results}
+\section{Oscillator systems: reported
+results}\label{oscillator-systems-reported-results}
 
 Numbers are as published and are \textbf{not comparable across rows}:
 different tasks, different baselines, different tuning effort (Section
@@ -2198,8 +2194,8 @@ modelling & above a parameter-matched transformer at 5M (preprint) & 5M
 domains & --- & --- & per-step score objectives \\
 \end{longtable}
 
-\section{F How the control counts are
-derived}\label{f-how-the-control-counts-are-derived}
+\section{How the control counts are
+derived}\label{how-the-control-counts-are-derived}
 
 The counts quoted in Sections 2.3.3 and 4 are derived from Table 1 as
 follows. Twelve rows times five controls gives sixty possible control
@@ -2246,8 +2242,8 @@ they are the reservoir-computing precedent this survey measures
 oscillator systems against rather than oscillator systems whose dynamics
 is itself under test.
 
-\section{G Questions the record leaves
-open}\label{g-questions-the-record-leaves-open}
+\section{Questions the record leaves
+open}\label{questions-the-record-leaves-open}
 
 Ten questions no published work settles, each following from a gap in
 Section 3.1 and each with a note on what evidence would close it.
