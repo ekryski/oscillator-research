@@ -22,11 +22,11 @@ FORMATS="tmlr pdf" bash publishing/publish.sh   # `pdf` and `tex` are off by def
 |---|---|
 | `-tmlr.pdf` / `-tmlr.tex` | TMLR submission, via the journal's own style file |
 | `-arxiv.tar.gz` | arXiv upload: `.tex` + style + `references.bib` + figures |
-| `.pdf` | reading and desk review |
 | `.epub` | e-readers |
-| `.html` | a single self-contained file, images embedded |
+| `.html` | a single self-contained file, images embedded and styled |
 | `.docx` | venues that ask for Word |
-| `.tex` | plain LaTeX source |
+| `.pdf` | reading and desk review — **off by default**, duplicates `-tmlr.pdf` |
+| `.tex` | plain LaTeX source — **off by default**, duplicates `-tmlr.tex` |
 
 Requires [pandoc](https://pandoc.org) and a TeX engine — BasicTeX is enough, and
 its default packages cover everything the build needs. TeX binaries install to
@@ -307,12 +307,68 @@ is not reported as a dead DOI.
 
 ### A different citation style
 
-Pandoc's default for the reading formats is Chicago author-date. For a venue
-style, drop its CSL file in `publishing/csl/` and add
-`--csl=publishing/csl/<style>.csl` to the `cite` array in `publish.sh`. The
+The reading formats take their style from `CSL`, which names a file in
+`publishing/csl/`. It defaults to `apa`, and `ieee` is vendored alongside it:
+
+```
+CSL=ieee bash publishing/publish.sh
+```
+
+An unknown name fails the build rather than producing a document with no
+citations in it. For any other venue, drop its file in `publishing/csl/` — the
 [CSL style repository](https://github.com/citation-style-language/styles) has
-essentially every journal. The TMLR path does not use CSL — it runs the
+essentially every journal. The TMLR path ignores `CSL` entirely: it runs the
 journal's own `tmlr.bst` through BibTeX.
+
+**Author-year and numeric are not interchangeable for these manuscripts.** They
+are written in author-year prose — "Fries (2015) develops that observation",
+"dated as in Rivera-Sierra et al. (2026)" — and a numeric style replaces the
+name with a bracketed number, so the sentence loses its subject and reads "[12]
+develops that observation". Worse, a table cell whose entire content is a
+citation renders as "[122]" and nothing else, which is how Appendix C's model
+column came out blank. Switching to `ieee` for a numeric venue therefore means
+rewriting the prose to match, in the form those venues expect: "Reference [12]
+shows...". The switch is one variable; the rewrite is the work.
+
+### Section numbers
+
+Numbers live in the heading text of the Markdown, written by
+`lib/number_sections.py`, so that a reader on GitHub can resolve "Section 2.3.3"
+and "Appendix D" against visible headings. The script is idempotent and has a
+`--check` mode that the build runs, so a moved heading fails rather than
+shipping stale numbers.
+
+Because the numbers are in the text, **both other numbering sources are off**:
+pandoc's `--number-sections`, and LaTeX's own. The second is easy to miss —
+`tmlr.latex` sets `secnumdepth`, which pandoc's flag does not touch, so dropping
+`--number-sections` alone still produces "1 1 Introduction" in the PDF. The
+build passes `--variable=secnumdepth=0` for that.
+
+### Figure and table numbers
+
+LaTeX numbers its own floats, so the PDF captions already read "Figure 3:" and
+"Table 1:". HTML, EPUB and DOCX number nothing, which left the manuscript's
+"every paper in Table 1" pointing at no table a reader could identify.
+`filters/number-floats.lua` prefixes the caption in exactly the formats that
+need it, figures and tables on independent counters, in document order, and
+returns an empty filter under LaTeX so the numbers are never written twice.
+
+Hardcoding the number into the Markdown is the other option and is worse: the
+PDF would then read "Figure 3: Figure 3.", and inserting one figure would
+silently renumber every figure after it. `lib/check_sections.py` covers the
+other half, failing the build when the prose cites a "Figure 7" or "Table 6"
+that no caption in the document provides.
+
+### Invisible characters
+
+`lib/preprocess.py` strips zero-width spaces, directional and bidi marks,
+variation selectors and the Unicode tag block from every built format, and says
+so loudly when it finds any. The tag block is the usual carrier when prose is
+watermarked: a run of it encodes text no reader can see. A no-break space is
+normalised to a space rather than deleted, since removing it would run two words
+together. `lib/check_hidden.py` reports what the source files still hold — the
+Markdown is what gets read on GitHub, and the `.bib` never passes through
+preprocess.
 
 ## Citing these papers
 
@@ -349,6 +405,9 @@ publishing/
 │   ├── check_bib.py        which entries are not yet complete enough to publish
 │   ├── check_first_cite.py is every system and author cited where first named
 │   ├── check_sections.py   does every Section/Appendix pointer resolve
+│   ├── check_citemap.py    is any citation label claimed by two works
+│   ├── check_hidden.py     invisible characters left in the source files
+│   ├── number_sections.py  write the section numbers into the headings
 │   └── check_links.py      does every citation still resolve
 ├── templates/
 │   ├── tmlr.latex          pandoc template targeting the TMLR style file

@@ -51,8 +51,8 @@ papers/
 ├── 01-evidence-audit/
 │   ├── README.md
 │   ├── from-synchronization-physics-to-trained-dynamics.md   the manuscript
-│   ├── ….pdf .html .epub .docx .tex                          built beside it
-│   ├── …-tmlr.pdf  …-arxiv.tar.gz                      submission builds
+│   ├── ….html .epub .docx                                    built beside it
+│   ├── …-tmlr.pdf  …-tmlr.tex  …-arxiv.tar.gz                submission builds
 │   ├── metadata/    front matter, and how to cite this paper
 │   └── references/  the works it cites
 └── 02-untrained-reservoirs/
@@ -71,7 +71,7 @@ bibliography it cites, and its own citation metadata all live in one folder.
 
 The manuscripts are plain Markdown; `publishing/` turns them into every other
 format without touching the source, writing each one beside the Markdown it came
-from — PDF, EPUB, HTML, DOCX, LaTeX, a TMLR submission build against the
+from — a styled HTML page, EPUB, DOCX, a TMLR submission build against the
 journal's own style file, and a ready-to-upload arXiv bundle:
 
 ```bash
@@ -79,9 +79,15 @@ bash publishing/publish.sh
 ```
 
 Citations are resolved against a real bibliography whose author lists, titles,
-venues and years come from the DOI registries and DBLP rather than from prose,
-with tooling to check that every link still resolves and that no entry is too
-incomplete to publish.
+venues and years come from the DOI registries and DBLP rather than from prose.
+Every build runs a set of checks over the sources and fails loudly rather than
+shipping something wrong: whether any entry is too incomplete to publish, whether
+a citation label is claimed by two different works, whether every system and
+author is cited where it is first named, whether every "Section 2.3.3" and
+"Appendix D" pointer resolves, whether the section numbers in the headings are
+still current, and whether any invisible character has found its way into the
+source. Section numbers are written into the Markdown itself, so a cross-
+reference read on GitHub points at a heading you can see.
 
 To cite a paper, see the citation section in its README —
 [01](papers/01-evidence-audit/README.md#citing-this-paper),

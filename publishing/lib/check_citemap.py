@@ -1,17 +1,26 @@
 #!/usr/bin/env python3
-"""Report citation labels that two different works both answer to.
+"""Report the two ways a citation can still land on the wrong work.
 
-Citations resolve by label, not by URL: `[Nunley 2026](...)` becomes a citekey
-derived from the label's author and year. When two entries derive the same key
-one silently wins, every citation meant for the other lands on the wrong paper,
-and that paper drops out of the bibliography entirely. Nothing else in the build
-notices — the reference list is still complete, every claim is still cited, and
-the citation simply points at a different work.
+A shared LABEL was the original hazard. `[Nunley 2026](...)` derives a citekey
+from the label's author and year, and when two works derive the same key one
+silently wins: every citation meant for the other lands on the wrong paper, and
+that paper drops out of the bibliography entirely. Nothing else in the build
+notices — the reference list is still complete and every claim is still cited.
+This happened five times here: coRNN against UnICORNN, Kuramoto Attention
+against FSN, the Un-0 blog against its code repository, two Huang papers that
+collided the moment one was upgraded to its published year, and HiPPO against
+Mamba. The fix each time is a letter suffix, which the label parser understands.
 
-This has happened five times in this repository: coRNN against UnICORNN, Kuramoto
-Attention against FSN, the Un-0 blog against its code repository, two Huang papers
-that collided the moment one was upgraded to its published year, and HiPPO against
-Mamba. The fix each time is a letter suffix, which the label parser now understands.
+`preprocess.py` now resolves link citations by URL first, so a shared label no
+longer misdirects a citation that carries a URL the bibliography knows. It still
+misdirects the ones that do not — bracket citations, and links to works whose
+entry records no matching identifier — so the report stays.
+
+A shared LINK is the hazard that URL resolution introduces: two bibliography
+entries carrying one identifier means one work was entered twice, the index that
+resolution reads keeps only the first, and citations to the second silently
+follow it. That is the label collision again, one level down, so it is reported
+in the same place.
 
     python3 publishing/lib/check_citemap.py            # report
     python3 publishing/lib/check_citemap.py --strict   # and fail
@@ -25,8 +34,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import bibfile
 from extract_bib import citekey, split_author_year
 from paths import papers
+from preprocess import entry_links
 
 
 def collisions(citemap: dict[str, list[str]]) -> list[tuple[str, str, str, str]]:
@@ -43,8 +54,26 @@ def collisions(citemap: dict[str, list[str]]) -> list[tuple[str, str, str, str]]
     return out
 
 
+def shared_links(bib: str) -> list[tuple[str, str, str]]:
+    """(link key, entry that claims it, entry that loses it) in one .bib.
+
+    Two entries carrying one DOI, eprint or URL are two records of one work.
+    Only the first is reachable through the URL index, so the second's citations
+    resolve to the first — and the second's own entry is never cited at all.
+    """
+    seen: dict[str, str] = {}
+    out = []
+    for entry in bibfile.entries(bib):
+        for link in entry_links(entry.fields):
+            if link in seen and seen[link] != entry.key:
+                out.append((link, seen[link], entry.key))
+            else:
+                seen.setdefault(link, entry.key)
+    return out
+
+
 def main() -> int:
-    ap = argparse.ArgumentParser(description="citation labels two works share")
+    ap = argparse.ArgumentParser(description="labels and links two works share")
     ap.add_argument("--strict", action="store_true")
     a = ap.parse_args()
     total = 0
@@ -56,8 +85,16 @@ def main() -> int:
         print(f"\n{paper.slug}: {len(found)} label(s) claimed by two works")
         for derived, label, first, second in found:
             print(f"  {label:34s} -> {derived:18s} {first} vs {second}")
+        if not paper.bib.exists():
+            continue
+        dupes = shared_links(paper.bib.read_text())
+        total += len(dupes)
+        print(f"{paper.slug}: {len(dupes)} link(s) claimed by two bibliography entries")
+        for link, first, second in dupes:
+            print(f"  {link:52s} {first} vs {second}")
     if total:
-        print("\nDisambiguate with a letter suffix, as in 'Huang et al. 2026a'.")
+        print("\nDisambiguate a label with a letter suffix, as in 'Huang et al. 2026a';\n"
+              "a shared link means one work has two entries — merge them.")
     return 1 if (total and a.strict) else 0
 
 

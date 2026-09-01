@@ -41,6 +41,15 @@ TEMPLATES="publishing/templates"
 # posting bundle. The plain `pdf` and `tex` formats are dropped from the default
 # because they duplicate the tmlr ones — pass them explicitly if you want them.
 FORMATS="${FORMATS:-tmlr epub html docx arxiv}"
+# Citation style for the reading formats. The default is author-year because the
+# manuscripts are written that way ("Fries (2015) develops that observation"):
+# under a numeric style citeproc replaces the name with a bracketed number, the
+# sentence loses its subject, and a table cell whose whole content is a citation
+# renders as "[122]" and nothing else. `CSL=ieee` is kept ready for venues that
+# require numeric — switching it means rewriting the prose to match, since
+# author-year phrasing and numeric citations are not interchangeable.
+CSL="${CSL:-apa}"
+[ -f "publishing/csl/$CSL.csl" ] || { echo "no such style: publishing/csl/$CSL.csl" >&2; exit 1; }
 TMLR_MODE="${TMLR_MODE:-submission}"
 FILTER="${1:-}"
 
@@ -133,18 +142,23 @@ for dir in papers/*/; do
     # they render on GitHub and in every HTML-ish format. preprocess.py points
     # the LaTeX copies at the vector PDF beside each PNG, because a raster
     # figure in a submission PDF is visibly worse and reviewers zoom.
-    raster=(--lua-filter=publishing/filters/number-figures.lua
+    raster=(--lua-filter=publishing/filters/number-floats.lua
             --css=publishing/css/tables.css)
     # the HTML outputs separate table rows through tables.css; this is the same
     # decision for the LaTeX ones, where booktabs rules only the head and foot
     vector=(--lua-filter=publishing/filters/table-row-rules.lua)
-    # section numbers come from pandoc, not from the heading text, so every
-    # format agrees; and the reading formats need a plain author string,
-    # because pandoc's stock template renders our structured author as "true"
-    # the manuscript's top level is `##`, because the title and abstract come
+    # Section numbers live in the heading text, written by number_sections.py, so
+    # that a reader of the Markdown on GitHub can resolve "Section 2.3.3" and
+    # "Appendix D". Both other numbering sources are therefore switched off:
+    # pandoc's --number-sections, and LaTeX's own, which the TMLR template turns
+    # on through secnumdepth and which pandoc's --number-sections does not touch.
+    # Miss the second and the PDF reads "1 1 Introduction".
+    # The reading formats also need a plain author string, because pandoc's stock
+    # template renders our structured author as "true".
+    # The manuscript's top level is `##`, because the title and abstract come
     # from metadata rather than being restated in the prose. Without the shift
-    # pandoc maps `##` to a subsection and every number comes out as 0.n
-    common+=(--number-sections --shift-heading-level-by=-1
+    # pandoc maps `##` to a subsection and the headings come out a level too deep.
+    common+=(--shift-heading-level-by=-1 --variable=secnumdepth=0
              --variable=author="$(python3 publishing/lib/byline.py "$meta")")
     # TMLR places the appendix after the references, and its author guide
     # excludes appendices from the length that risks a longer review. The LaTeX
@@ -167,7 +181,7 @@ for dir in papers/*/; do
     # this: its stylefile mandates natbib author-year — "citations within the
     # text should ... include the authors' last names and year" — so the two
     # builds cite differently on purpose.
-    cite=(--citeproc --bibliography="$bib" --csl=publishing/csl/ieee.csl)
+    cite=(--citeproc --bibliography="$bib" --csl="publishing/csl/$CSL.csl")
 
     for fmt in $FORMATS; do
         case "$fmt" in
@@ -247,7 +261,16 @@ for dir in papers/*/; do
                     --output="$dir$name.epub" "$body" && echo "    $dir$name.epub"
                 ;;
             html)
+                # paper.css is HTML-only on purpose: its scroll container for wide
+                # tables and its sticky caption are browser techniques that EPUB
+                # readers handle unevenly. reference-section-title labels the
+                # bibliography, which citeproc otherwise leaves unlabelled. It arrives
+                # as a paragraph, not a heading: citeproc emits an h1 and
+                # --shift-heading-level-by then demotes it out of the heading range,
+                # which is why paper.css reaches it through `p:has(+ div#refs)`.
                 pandoc "${common[@]}" "${cite[@]}" "${raster[@]}" --to=html5 --toc --toc-depth=3 \
+                    --css=publishing/css/paper.css \
+                    --metadata=reference-section-title="References" \
                     --embed-resources --output="$dir$name.html" "$body" \
                     && echo "    $dir$name.html"
                 ;;
@@ -291,6 +314,10 @@ done
 echo
 echo "=== bibliography completeness"
 python3 publishing/lib/check_bib.py
+
+echo
+echo "=== section numbers in the manuscript"
+python3 publishing/lib/number_sections.py --check
 
 echo
 echo "=== invisible characters in the sources"

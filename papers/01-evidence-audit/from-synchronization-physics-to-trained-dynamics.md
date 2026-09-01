@@ -2,9 +2,9 @@
 
 Coupled oscillator networks are drawing increased attention as machine-learning substrates, while at the same time literature from physics, neuroscience and neuromorphic computing appear to be converging on the same oscillatory dynamics from different directions. Physics now describes oscillatory synchronization regimes that exhibit computation properties rather than mere order. Neuroscience research has identified the neuron as a complex chemical and physical system with functional oscillatory properties. The machine learning field has recently produced oscillator architectures that demonstrate computational effectiveness on certain tasks such as classification, image generation and path navigation, even providing evidence to suggest that oscillatory neural networks (ONNs) can be trained, learn, remember and reason. Such observations across multiple scientific disciplines are the motivation for this paper and our overarching hypothesis that an oscillatory substrate whose native operations are resonance and entrainment more closely resemble the biological neurons refined through evolutionary "training" to sense and learn from signals in our physical world, and that a trainable model built from those dynamics would make questions about learning, forgetting and rhythm disruption addressable in simulation. We do not aim to test this hypothesis in this paper, but use it as motivation to provide a critical survey of the current landscape of ONNs. We organise thirteen published systems on two questions: whether gradients reach the oscillator dynamics and whether a conventional encoder or decoder is trained around it, which separates designed dynamics that are never learned, apparent learning via untrained dynamics with a trained readout, and trained dynamics with and without a conventional network wrapped around them. For each model classification we record the task, the data used, the controls, and how it compares against conventional artificial neural network (ANN) baselines at comparable parameter budgets, tasks and training. The comparative picture is an analysis of parity and niches rather than a particular architecture's dominance, as the current body of work on ONNs is, in our opinion, too immature to assert such a comparison. The evidence surveyed rarely isolates the dynamics: of the fifty-five applicable control comparisons the five give across the surveyed systems, seven have been run, the coupling term has been removed as a single variable just twice and never at a matched budget on a paper's headline task, and no report varies coupling range or boundary conditions as a single variable. We identify these gaps in greater detail and close with eight concrete directions for the field that we believe would help the field establish more cross-referential data, tasks, training and model architecture parity from which to baseline future ONN research efforts with more precise controls.
 
-## Introduction and background
+## 1 Introduction and background
 
-### What is an oscillator
+### 1.1 What is an oscillator
 
 An **oscillator** is a system that keeps a rhythm of its own. Left undisturbed it does not settle at a resting point; it returns to a closed trajectory, a *limit cycle*, and comes back to that trajectory after being pushed off it. A clock pendulum, drawing on a stored energy source to hold its swing against friction, is the familiar case, and its whole state is one number: how far around the cycle it currently is, its **phase**. Models that keep only that number are *phase-only*, and the Kuramoto and Winfree families this survey meets most often are of that kind. Models that keep the distance from the centre as well, the **amplitude**, describe a state living in a plane rather than on a circle: the Stuart-Landau equation is the canonical form, and the damped second-order recurrences of the coRNN ([Rusch & Mishra 2021a](https://arxiv.org/abs/2010.00951)) and LinOSS ([Rusch & Rus 2025](https://arxiv.org/abs/2410.03943)) lines are the machine-learning case.
 
@@ -16,11 +16,11 @@ An **oscillator** is a system that keeps a rhythm of its own. Left undisturbed i
 
 That partial regime is also where recurrent computation is reported to peak. Computation in recurrent networks is maximised near the boundary between ordered and chaotic dynamics ([Bertschinger & Natschläger 2004](https://doi.org/10.1162/089976604323057443)), reservoirs are deliberately parked near that edge, and and hierarchical modular structure makes that edge markedly less sensitive to precise tuning ([Kuśmierz et al. 2025](https://doi.org/10.1103/PhysRevLett.134.148402)), a result about autonomous dynamics rather than about trainability. Every design decision surveyed here, whether coupling range, damping, spectral placement or sparsity, is a way of steering the field toward that regime and holding it there, which is also why the same decisions reappear in Section 3.1 as failure modes.
 
-### The evolution of oscillator understanding
+### 1.2 The evolution of oscillator understanding
 
 Literature from three different fields arrive at the similar observations from different directions. Physics and mathematics come first chronologically, describing when a coupled population locks and what its structure does to that. Literature from neuroscience presents findings that cortex runs on rhythms and uses them to route information. Applications within machine learning are much more recent, and almost every system we surveyed aligns with findings from the other two fields.
 
-#### Within physics and mathematics
+#### 1.2.1 Within physics and mathematics
 
 The observed coupling of oscillators has been on record since 1665, when Christiaan Huygens, found that two pendulum clocks hung from the same wooden beam settled into antiphase within about thirty minutes and resynchronized when disturbed (later published in 1673). Huygens attributed this to motion too small to see, transmitted through the wood beam they shared. The prehistory of the self-sustained oscillator runs from Airy's first mathematical treatment in 1830 through Poincaré's limit cycle and Blondel's naming of the phenomenon, a lineage traced in full by [Rivera-Sierra, Bisquert & Fenollosa (2026)](https://doi.org/10.1021/acs.chemrev.5c00878), whose survey of self-oscillatory devices for unconventional computing covers similar background as this paper, but from the materials and neuromorphic hardware angle. Fast forward a few hundred years: Huygens' observation was mathematically explained by the Kuramoto coupling function ([Kuramoto 1975](https://doi.org/10.1007/BFb0013365)) and the famous experiment demonstrating multiple metronomes on a moving surface, started at different times, synchronizing. Huygens' experiments were later replicated and explained by [Bennett, Schatz, Rockwood & Wiesenfeld (2002)](https://doi.org/10.1098/rspa.2001.0888). In biology the same synchronization phenomenon was observed at population scale and mathematically modelled, from the patterned flashing of firefly swarms to circadian and cardiac rhythms ([Strogatz & Stewart 1993](https://doi.org/10.1038/scientificamerican1293-102)).
 
@@ -30,7 +30,7 @@ Further work on the coupling laws themselves has continued, while the current ON
 
 ![Every physics and mathematics source cited in this survey, in date order. The upper track is the account of when a coupled population locks; the lower track is what structure and operating regime do to it. The axis is piecewise, because four entries predate 1930 and most postdate 1990. Almost every machine-learning system in Section 2 takes its coupling law from the upper track, and from the 1967 to 1992 stretch of it in particular. The single exception is AKOrN ([Miyato et al. 2025](https://arxiv.org/abs/2410.13821)), built on the D-dimensional generalisation of [Chandra, Girvan & Ott (2019)](https://doi.org/10.1103/PhysRevX.9.011002) in the lower track. The rest of the lower track is untouched by the surveyed systems, and its earliest two entries are arguments that physics can compute at all rather than coupling laws to build with.](resources/figures/fig3-physics-timeline.png)
 
-#### Within neuroscience
+#### 1.2.2 Within neuroscience
 
 Neuroscience researchers began observing oscillatory coupling directly in cortical tissue: neurons in the feline visual cortex oscillate at 40 to 60 Hz and phase-lock across columns when they respond to the same object, which is why synchrony was proposed as the mechanism binding distributed features into a single percept ([Gray, König, Engel & Singer 1989](https://doi.org/10.1038/338334a0)). [Fries (2015)](https://doi.org/10.1016/j.neuron.2015.09.034) develops that observation into a "Communication through Coherence" (CTC) hypothesis which essentially states that: inter-neuron communication is selective based on gamma-band coherence and synchronization.
 
@@ -56,7 +56,7 @@ Disruption of these rhythms is a recognised signature across neurological and ps
 
 Two of the neuroscience findings in this section translate directly into testable machine-learning claims, and both reappear in Section 3 as gaps. The binding result ([Gray et al. 1989](https://doi.org/10.1038/338334a0)) predicts that removing the synchronization term should hurt grouping tasks specifically. The Hopf-cochlea precedent ([Camalet et al. 2000](https://www.pnas.org/doi/10.1073/pnas.97.7.3183)) predicts that designed frequency placement should beat learned placement.
 
-#### Within machine learning
+#### 1.2.3 Within machine learning
 
 **What an oscillator network is.** Section 1.2.1 gives a rule for how coupled units pull on each other, and Section 1.2.2 gives a reason to expect that rule to compute something. An oscillator network is what results when both are pointed at a machine-learning task. An **oscillator network**, or oscillatory neural network (ONN), is a machine-learning system whose state is a population of oscillators and whose computation is the evolution of that population under a coupling law. Three choices define one. The **coupling function** is borrowed from the physics. It is the rule that turns the phase difference between two units into a contribution to each one's rate of change, and choosing Kuramoto rather than Winfree or Sakaguchi fixes which collective states the population can reach at all; Section 2.3.1 sets the forms actually in use side by side. The **geometry** is which units are coupled to which, and it decides both the parameter cost and the operating regime. The **input and readout** decide how a task reaches the field and how an answer is taken out of it. Everything else is the same machinery any other neural network uses.
 
@@ -76,7 +76,7 @@ Set against the physics, the pattern is stark and is one of this survey's findin
 
 ![The oscillator models this survey cites, above the surveyed systems built on each one. A filled marker means at least one system in Section 2 uses that coupling form; an open marker means we found none that does. Each system is placed at the year of the model it uses rather than the year it was published, so the lower track measures how far into the lineage the machine-learning literature has reached, not its own chronology.](resources/figures/fig7-model-timeline.png)
 
-### Other neural network architectures
+### 1.3 Other neural network architectures
 
 Oscillator networks are not the only option, and several of the systems in Section 2 embed one inside a conventional network rather than replacing it. Judging what the oscillator dynamics contributes therefore means knowing what the conventional architectures already do, both as the baselines an oscillator system is measured against and as the components it is often combined with. This section sets out the main families and how each one handles state, which is the property an oscillator field differs on most.
 
@@ -92,7 +92,7 @@ Oscillator networks are not the only option, and several of the systems in Secti
 
 ![Conventional neural network architectures, by how each one holds the past. Above the axis, a state is carried forward one step at a time; below it, the whole window is recomputed at every step. An oscillator field belongs to the upper track, but its state evolves under a fixed differential equation rather than under a transition learned from scratch, which is the substance of both the efficiency argument made for it and the training difficulty reported against it.](resources/figures/fig8-ann-timeline.png)
 
-### Motivation for this survey: independent convergence across fields
+### 1.4 Motivation for this survey: independent convergence across fields
 
 The case for reviewing oscillator networks is not that any single result is decisive. It is that literatures with different methods and incentives have moved toward the same description of computation, coupling and coherence, and did so largely without citing each other.
 
@@ -106,7 +106,7 @@ Three motivations sit behind the interest, and they are worth separating from ev
 2. **Alignment with the signals**. The signals biological sensing evolved to handle are physical waves, and the transducers that receive them are frequency-selective by construction, the cochlea being the clearest case. A substrate whose native operations are resonance, entrainment and phase relationship is therefore not an arbitrary inductive bias for these signals; it is the same class of object as the thing being sensed.
 3. **Explanatory**: a trainable model built from the same dynamics as the biological account would make questions about learning, forgetting and rhythm disruption addressable in simulation. All three are hypotheses about what the field could deliver. This survey is about what it has delivered.
 
-### Evidence standard and limitations
+### 1.5 Evidence standard and limitations
 
 **Evidence standard.** This survey reports no new experiments and cites no unpublished results. Every claim is attributed to a published source. A substantial part of the trained-Kuramoto evidence exists only as technical blog posts, preprints, or community repositories. That material is included, because excluding it would misrepresent the state of the field, and it is marked as non-peer-reviewed everywhere it carries weight. Where a claim rests on such a source, the text says so at the point of use rather than in a footnote.
 
@@ -118,33 +118,33 @@ Five limitations bound every claim that follows.
 4. **A fast-moving field.** Every "lacks evidence" claim carries an implicit "that we found". Several systems surveyed here are months old, and there may be work under review addressing the gaps we identify.
 5. **Interest disclosure.** The authors conduct their own experimental work on oscillator substrates. The gaps identified reflect those interests. No unpublished work of ours is used or cited.
 
-## Oscillator neural networks
+## 2 Oscillator neural networks
 
-### Scope and terms
+### 2.1 Scope and terms
 
 A "coupled oscillator network" here means a machine-learning system whose state evolves under oscillator dynamics: phase-only models of the Kuramoto and Winfree family, second-order oscillator ODEs, linear oscillatory state-space models, amplitude-phase models, and physical oscillator hardware. Thirteen load-bearing systems meet that definition and are tabulated in Appendix D. The same words are used differently in physics, neuroscience and machine learning, and several of the comparisons below depend on which sense is meant; Appendix B is a glossary of the terms as this survey uses them.
 
 One adjacent literature is deliberately outside that definition. A substantial body of work uses neural networks to *model* oscillator dynamics rather than to compute with them, learning the evolution of a coupled system from data, most recently through Koopman operator methods ([Sasikumar & Balasubramaniam 2026](https://doi.org/10.1016/j.chaos.2026.117944)). That is the inverse of the question here. This survey asks what oscillator dynamics does for a machine-learning system, not what a machine-learning system can say about oscillator dynamics.
 
-### Taxonomy
+### 2.2 Taxonomy
 
-#### Overview
+#### 2.2.1 Overview
 
 Two independent questions separate the surveyed systems, and crossing them gives four quadrants rather than a tree. The first is **whether gradients reach the dynamics**: is the oscillator field fitted to the task, or fixed by design or at random before training begins. The second is **whether anything else is trained**: does a conventional encoder, decoder or readout sit around the field and do part of the work. The first question is where the field's claims differ most. The second is where its attribution problems live, because a trained scaffold can carry a result that is then reported as the dynamics'.
 
 ![The taxonomy used in this survey. Systems split on two independent questions: whether gradients reach the dynamics, and whether a trained conventional network wraps it. Coupling law, geometry and substrate cut across all four quadrants and are carried as columns in Section 2.3 rather than as further branches, because nesting them produces a tree no system occupies uniquely.](resources/figures/fig9-taxonomy.png)
 
-#### Untrained designed dynamics
+#### 2.2.2 Untrained designed dynamics
 
 Nothing is fitted anywhere. Every parameter is chosen, and the physics performs the computation directly. Oscillator Ising machines ([Wang & Roychowdhury 2019](https://link.springer.com/chapter/10.1007/978-3-030-19311-9_19)) are the clear case: injection locking is engineered so that the equilibrium the hardware falls into is the answer to a combinatorial problem, and there is no training step of any kind. This is the strongest form of the run-the-physics argument: if a system's parameters can be chosen so that its natural dynamics settles on the answer, the computation costs whatever the physics costs and no more. It is also why designing a substrate around a specific task, rather than training a general one to perform it, should be further studied by the field.
 
 The biological precedent sits in the same quadrant and is worth keeping in view because it is the one place where designed beats learned on the record. The cochlea is a tonotopically arranged bank of active oscillators whose frequencies are set by construction, not fitted, and it delivers sharp, compressive, actively amplified tuning that no learned filterbank has bettered.
 
-#### Trained designed dynamics
+#### 2.2.3 Trained designed dynamics
 
 Gradients reach the dynamics, and the dynamics is essentially the whole model rather than a component of one. Un-0 ([Unconventional AI 2026a](https://unconv.ai/blog/introducing-un-0-generating-images-with-coupled-oscillators/)) is a pure Kuramoto pool with learned all-to-all coupling and learned natural frequencies, trained end to end for image generation; WONN ([Dai & Song 2026](https://arxiv.org/abs/2605.20922)) uses Winfree coupling and writes the input into the natural frequencies rather than adding it as a drive. Both are the field's scale demonstrations, and both are also where the attribution question is cleanest, because there is comparatively little conventional machinery to which a result could be misattributed. Un-0 is the only system in the survey that publishes the control this quadrant makes possible: a frozen-reservoir control, against which its trained dynamics wins clearly, with single-step and linearized dynamics performing near the untrained level (blog-published).
 
-#### Untrained dynamics with a trained encoder or decoder
+#### 2.2.4 Untrained dynamics with a trained encoder or decoder
 
 The dynamics is fixed, randomly or by design, and a readout is fitted to it. This is the oldest branch and the best evidenced, because a field was built on it: echo-state networks and liquid state machines fix random recurrent dynamics and train only a linear readout ([Jaeger 2001](https://www.ai.rug.nl/minds/uploads/EchoStatesTechRep.pdf); [Maass et al. 2002](https://direct.mit.edu/neco/article/14/11/2531/6650)), a construction whose scope and limits were consolidated a decade later ([Lukoševičius & Jaeger 2009](https://doi.org/10.1016/j.cosrev.2009.03.005)).
 
@@ -152,7 +152,7 @@ The oscillator-specific evidence here is the strongest in the survey. A single p
 
 The distinguishing feature within this quadrant is **where the fixed dynamics comes from**, and it matters because Section 3.1 shows designed structure repeatedly failing to beat randomized twins elsewhere. Random initialization is the reservoir default, deterministic construction is a documented alternative at equal accuracy, and the tonotopic cochlea is the limiting case in which every parameter is chosen. This is the one branch where that comparison has been run and design holds up.
 
-#### Trained dynamics with a trained encoder or decoder
+#### 2.2.5 Trained dynamics with a trained encoder or decoder
 
 Gradients flow through the oscillator dynamics *and* through conventional layers around it. This quadrant drives the current wave and carries the heaviest attribution burden, since a conventional scaffold surrounds the part under test.
 
@@ -160,9 +160,9 @@ Within it, the useful sub-division is **architectural role**, because it predict
 
 The theory underwriting this quadrant is real and worth stating, because it establishes that the function class is there to be learned even where the evidence that it *is* learned is thin. The family is universal, with quantitative approximation and generalization bounds ([Huang et al. 2026a](https://arxiv.org/abs/2512.01015); [Huang et al. 2026b](https://arxiv.org/abs/2603.09742)) and an infinite-horizon extension ([Sagodi & Park 2026](https://arxiv.org/abs/2602.08640)); input-to-state stability has been established for coupled oscillator networks ([Stölzle & Della Santina 2024](https://arxiv.org/abs/2409.08439)); and contraction conditions are known for composing stable recurrent modules ([Kozachkov, Ennis & Slotine 2022](https://arxiv.org/abs/2106.08928)). One result cuts the other way, and it is the sharpest thing theory says here: within-layer coupling may not be required for the family's universality, because a diagonal, uncoupled bank could suffice ([Lanthaler et al. 2023](https://arxiv.org/abs/2305.08753)). That is proved for a bank of forced harmonic oscillators with a nonlinear readout rather than for the Kuramoto-family models most of the surveyed systems use, so it bounds what synchronization can be claimed to add rather than settling it. If it carries, whatever synchronization contributes is inductive bias, and only a controlled ablation can measure it.
 
-### Comparison of the current landscape
+### 2.3 Comparison of the current landscape
 
-#### What the systems are built from
+#### 2.3.1 What the systems are built from
 
 Appendix D records what each system *is*: its oscillator family, the part of a model the dynamics constitutes, what gradients reach, and whether the work is peer reviewed. Appendix E records what each system *reports*: task, data, headline result, parameter count and training horizon. Both are inventory. The three things worth reading across them are the coupling law, the geometry, and where the input enters, because those are the choices the physics says are consequential and the papers make in passing.
 
@@ -176,7 +176,7 @@ Appendix D records what each system *is*: its oscillator family, the part of a m
 
 **Damping and frequency placement** are the two physics parameters the surveyed papers do report, and each turns out to be doing two jobs at once. The spectral radius of an echo-state network is simultaneously its stability condition and its memory-nonlinearity operating point; coRNN's damping guarantees its gradient bounds *and* shapes its expressivity; D-LinOSS uses learnable damping as its stability mechanism and proves it strictly enlarges the reachable dynamics; and per-unit damping has a unimodal sweet spot in a speech-oscillator study ([Chandravadia & Imam 2026](https://doi.org/10.1016/j.patter.2026.101563)). Frequency placement shows the design-beats-training pattern repeatedly: state-space models find their spectrum's initialization load-bearing, D-LinOSS initializes in spectrum space by design, envelope-band initialization decides success on raw-waveform speech, and the cochlea literature designs the bank outright.
 
-#### What the systems are evaluated on
+#### 2.3.2 What the systems are evaluated on
 
 A survey of this shape would normally open its comparison with a shared benchmark. The field has not established one yet, and that absence is itself one of the gaps this survey identifies. Some convergence has started: Sudoku is now reported by two independent groups, AKOrN and WONN, and CIFAR and ImageNet recur across several systems, though at different tasks. The spread is still the point, though. Read down the task column of Appendix E: class-conditional image generation scored by FID, ImageNet-1K top-1 classification, maze path finding and Sudoku, object discovery, multi-object binding robustness at small scale, character-level language modelling, generation on periodic domains, extreme-length sequence classification, general time-series benchmarks, spoken-digit recognition, and combinatorial optimisation. Almost no two rows share a task, and where two rows do, they rarely share a protocol.
 
@@ -190,7 +190,7 @@ Training horizon is comparable in the same way and shows a conspicuous pattern. 
 
 ![Steps unrolled and backpropagated through, by system. Filled markers are nonlinear dynamics with no stated gradient bound; open markers are linear dynamics, or gradients bounded by dissipation. coRNN and UnICORNN are not plotted: they train long sequences, but prove gradient bounds from damping before doing so. Every nonlinear system sits at the short end, and the one system three orders of magnitude out is linear.](resources/figures/fig12-training-horizon.png)
 
-#### What the systems report as controls
+#### 2.3.3 What the systems report as controls
 
 The controls table is where this survey's argument is decided. The five controls below are not a standard anyone has adopted; they are assembled in Section 3.1 from cases where each control's *absence* is documented to have misled. A mark means the surveyed work reports running that control. A dash means **we did not find it reported in the work we surveyed**, not that it was not run, and not that the result would change if it were. The pattern, rather than any single mark, is the observation.
 
@@ -214,7 +214,7 @@ nearest published instance rather than the control itself; a dash means we did n
 
 Two systems remove the coupling term as a single variable, and the way they do it is an important finding. Kuramoto Orientation Diffusion sets K(t) = 0 in its forward process and reports the result in a table, which is the one unambiguous instance in the record. AKOrN ablates its learned coupling matrix as a J = 0 bar inside a robustness figure, with no number in the text and no statement of whether that variant was retrained without coupling or had its coupling zeroed at evaluation, which is the difference between measuring what coupling contributes and measuring a readout meeting unfamiliar dynamics. KomplexNet's random-phase control is a third near-instance that freezes phases rather than deleting the coupling. Neither of the two is run at a matched parameter budget against the full model on a task the paper leads with, so the term that names the family has been isolated twice, once legibly. Of the fifty-five applicable control comparisons these five give across the twelve systems, seven have been run, plus this one near-instance; Appendix G itemises them.
 
-#### How the systems compare with conventional architectures
+#### 2.3.4 How the systems compare with conventional architectures
 
 Each system's own reported numbers, set against the architectures of Section 2.3, read as follows. Un-0's ImageNet-64 FID of 6.74 is competitive with first-generation diffusion baselines and far from the modern frontier, where one-step models reach FID around 1.5 on harder benchmarks ([Deng et al. 2026](https://arxiv.org/abs/2602.04770)), as its authors acknowledge; a community matched-budget replication found a DCGAN clearly stronger on MNIST (Kuramoto-MNIST ([hcm444 2026](https://github.com/hcm444/Kuramoto-MNIST)), community repository). Its authors also report an observation about scale that no one has yet tested independently: quality keeps improving as the model grows, but more slowly than for the conventional diffusion models they compare against, EDM ([Karras et al. 2022](https://arxiv.org/abs/2206.00364)) and GDD ([Zheng & Yang 2024](https://arxiv.org/abs/2405.20750)), so the gap to the frontier widens rather than closes with size. That is a single blog-published observation from the system's own authors rather than a scaling study, and it is the clearest reason the field needs one: whether trained oscillator networks scale competitively is the question a prospective adopter will ask first, and nothing peer reviewed currently answers it. WONN's 76.78% ImageNet-1K at 12.3M parameters makes it the first synchronization architecture competitive at that scale, not better than modern baselines. Its reasoning results are the sharper claim: 80.1% on Maze-hard at 1% of the parameters of the prior state of the art, which is a parameter-efficiency margin rather than an accuracy win, and is not a matched-budget comparison in the sense of Section 2.3.3, since the budgets differ by two orders of magnitude in the oscillator system's favour. AKOrN's reported advantages are robustness, calibration and reasoning-style tasks rather than accuracy dominance.
 
@@ -224,13 +224,13 @@ The energy argument, often the headline motivation, currently rests on adjacent 
 
 Comparative numbers across these papers are not protocol-matched: baselines differ in tuning effort, parameter budgets are rarely matched, seeds are rarely reported, and the strongest trained-Kuramoto evidence is not peer reviewed. Each niche is supported by one or two papers. We also note lanes where no oscillator system exists at all: to our knowledge none performs generative or streaming speech, and streaming time-series work generally is thin, so absence of dominance there is absence of peer-reviewed attempts rather than a claim on capability thus far.
 
-## Discussion
+## 3 Discussion
 
-### Research challenges
+### 3.1 Research challenges
 
 Where the evidence stops. Each subsection states a bound the literature itself establishes, drawn from the same sources that make the positive case above. These are not objections from outside the field.
 
-#### Attribution, and the controls that are missing
+#### 3.1.1 Attribution, and the controls that are missing
 
 Each of the five controls in Section 2.3.3 exists because a published result shows what happens when it is absent. *Frozen twins*: untrained oscillator dynamics can carry a task unaided (Section 2.2.4), so a trained gain must be measured against one, and Un-0 ([Unconventional AI 2026a](https://unconv.ai/blog/introducing-un-0-generating-images-with-coupled-oscillators/)) is the only trained-synchronization system we found reporting that control. *Decoder-only controls*: wherever a conventional encoder or decoder wraps the dynamics, the compute may live there. *Initialization sensitivity*: learnable front-ends that end where they started ([Anderson, Kinnunen & Harte 2023](https://arxiv.org/abs/2302.10014)) show apparent learning can be initialization in disguise, and visible parameter motion without recovery of a known-good solution ([Milling et al. 2026](https://www.nature.com/articles/s41598-026-49403-4)) shows motion is not value. *Randomized twins*: designed structure can reduce to generic sparsity, and across fifteen biological-pathway-informed models randomized sparse masks matched or beat the biology-informed ones ([Caranzano et al. 2026](https://arxiv.org/abs/2505.04300)). *Matched-budget baselines*: a community replication of Un-0's recipe on MNIST, matched to a DCGAN on parameter count, batch size, training length and best-of-32 selection, reports the DCGAN as the stronger generator on that benchmark (Kuramoto-MNIST ([hcm444 2026](https://github.com/hcm444/Kuramoto-MNIST)), community repository). It is the only external matched-budget comparison of a trained-synchronization system we found, and it runs against the system's own headline.
 
@@ -240,31 +240,31 @@ Where the controls were run, they changed conclusions: Un-0's frozen-reservoir c
 
 ![Controls reported by each system. A filled square means the surveyed work reports running that control; an open square means we did not find it reported, which is not evidence that it was not run. Two systems remove the coupling term as a single variable, the mechanism the Kuramoto family is named after, and neither does so at a matched budget on the task its paper leads with. KomplexNet ([Muzellec et al. 2025](https://arxiv.org/abs/2502.21077))'s random-phase control, marked as the nearest published instance, freezes phases rather than deleting the coupling.](resources/figures/fig13-controls-grid.png)
 
-#### What training moves, and what it does not
+#### 3.1.2 What training moves, and what it does not
 
 Universality says nothing about trainability, and the adjacent literature is pointed about one parameter group. Learnable audio front-ends move little from initialization; mel-initialized filters barely train at all even when distilled toward a fully specified designed teacher ([Lostanlen et al. 2023](https://arxiv.org/abs/2307.13821)); a state-space model's frequency bias is set at initialization and conventional training does not move it ([Yu et al. 2025](https://arxiv.org/abs/2410.02035)); and where front-ends are compared head to head, gradient-learned placement wins neither contest: front-ends that keep adapting at inference beat both the hand-designed and the gradient-learned kind ([Zhang et al. 2025](https://arxiv.org/abs/2502.03260); [Meng et al. 2026](https://arxiv.org/abs/2510.18206)). In Kuramoto networks specifically, the one study making natural frequencies first-class learnable parameters reports roughly half of randomly initialized runs failing through landscape multistability, rescued by designed spectral seeding (toy scale, preprint). And where oscillator systems succeed with *fixed* frequencies chosen by design, as when envelope-band initialization makes a coRNN ([Rusch & Mishra 2021a](https://arxiv.org/abs/2010.00951)) trainable on raw waveform where a vanilla RNN fails ([Chandravadia & Imam 2026](https://doi.org/10.1016/j.patter.2026.101563)), design rather than learning determined the frequency structure. "Oscillator networks learn" is therefore well supported for coupling and readout-adjacent parameters and specifically doubtful for frequency placement.
 
 Parameter sensitivity is reported *within* a paper and almost never *across* tasks. WONN ([Dai & Song 2026](https://arxiv.org/abs/2605.20922)) and AKOrN ([Miyato et al. 2025](https://arxiv.org/abs/2410.13821)) each report results on more than one task family, and both configure their model separately for each, but neither reports whether a setting tuned for one task carries to another; the remaining systems fix a single family. The literature therefore cannot say whether an optimum is task-dependent, which is the natural expectation if some tasks want the dynamics for transduction and others want it for memory.
 
-#### Structure and geometry
+#### 3.1.3 Structure and geometry
 
 Geometry is varied in four of the surveyed systems, and in none of them as a single variable. Neural Wave Machines ([Keller & Welling 2023](https://proceedings.mlr.press/v202/keller23a.html)) comes closest, running a one-dimensional ring core and a two-dimensional torus core against a globally coupled coRNN at equivalent parameters and explicitly to isolate the effect of the imposed structure, but its two cores differ in convolution kernel as well as in topology. Kuramoto Orientation Diffusion contrasts global with 5x5 local coupling while retuning the coupling strength between the two. WONN ([Dai & Song 2026](https://arxiv.org/abs/2605.20922)) contrasts convolutional with attentive coupling, and reports that the convolutional variant "introduces substantially more parameters", so the comparison is not budget-matched either. Un-0's sparsity study contrasts dense, random-sparse and modular fabrics, the only one of the four to do so with learned couplings. What no published work we found does is vary coupling *range* or boundary conditions as a single variable at a matched budget, so the question of what geometry buys is answered nowhere by a controlled sweep. And designed structure must beat its randomized twin before design gets credit, a caution Un-0's random-versus-modular comparison only partially addresses. Two scope limits apply to the sparsity evidence as well. Sparsity of interactions and sparsity of parameters coincide in all-to-all coupling matrices but come apart in tied parameterizations, where a convolutional or spectral kernel keeps every interaction while holding few parameters, and no sparsity study covers that regime. The oscillator-side evidence is also a non-peer-reviewed study of one system whose authors themselves flag protocol drift between posts.
 
-#### The dynamics as both resource and hazard
+#### 3.1.4 The dynamics as both resource and hazard
 
 Three lines of work, none of them aimed at the others, point the same way. *Operating-regime theory* puts computation near the order-chaos boundary and reservoirs are deliberately parked there. *Failure modes named in the trained-oscillator literature*: Un-0's sparsity study reports dense all-to-all fields easily falling into catastrophic synchronization, a globally locked, zero-gradient state, and FSN opens from the same thesis. The useful regime is partial coherence, exactly what the physics says finite-range nonlocal coupling generically produces. *Optimization landscape*: frequency-parameter loss surfaces are highly non-convex with narrow basins, established for sinusoidal-frequency estimation by gradient descent ([Hayes et al. 2023](https://arxiv.org/abs/2210.14476); [Turian & Henry 2020](https://arxiv.org/abs/2012.04572)), known since Rife and Boorstyn in 1974, observed as spectral-gap gradient suppression in quantum circuits ([Poppel et al. 2026](https://arxiv.org/abs/2602.23409)), and reported as multistability seed-failures in Kuramoto frequency learning.
 
 The hazard is manageable, since the successes exist. But the published management strategies are themselves evidence for the diagnosis: coRNN proves its gradient bounds *from* its damping, LinOSS ([Rusch & Rus 2025](https://arxiv.org/abs/2410.03943)) obtains stability from implicit discretization, D-LinOSS ([Boyer et al. 2025](https://arxiv.org/abs/2505.12171)) parameterizes damping so every mode stays contractive, and Un-0's remedy is topological. The theory arrives at the same requirement from the other direction, and the coincidence is worth naming. Each fix above adds damping to make training work. Independently, the approximation rates proved for these models hold only if the system is incrementally stable, which is the property damping provides. Damping is therefore not a workaround sitting beside the theory; it is what both the trainability and the approximation-rate guarantees depend on. One caveat on the inference itself: papers do not report failed horizon scaling, so publication bias could manufacture the pattern, and no published study we found isolates horizon length as the single variable on a fixed nonlinear oscillator substrate.
 
-#### The physics the field has not used
+#### 3.1.5 The physics the field has not used
 
 Section 1.2.3 counted how many of the surveyed systems use each coupling form and found the count concentrated between 1967 and 1992. What follows is what that leaves unexplored. No surveyed system uses inertial, simplicial, hypergraph or Dirac coupling. Swarmalators, in which phase and spatial position couple to each other, were proposed as a substrate for bio-inspired computing in 2019 ([O'Keeffe & Bettstetter 2019](https://arxiv.org/abs/1903.11561)), and we found no machine-learning system built on them, trained or untrained. The bounds of the physics parameters are unmapped: no published work sweeps coupling strength, frequency spread or delay to the point where the system leaves its useful regime, so the operating envelope is known only anecdotally. One paper compares coupling functions on a single task under controls, and its result is a null. FSN removes the static frustration phases, which reduces its Kuramoto-Sakaguchi coupling to plain Kuramoto, and reports the two statistically indistinguishable at convergence over matched seeds, with the frustration buying early-training speed rather than final quality. That is one comparison, within one coupling family, on one task. We found none that compares across families, so the choice of a Kuramoto-type coupling over a Winfree or Stuart-Landau one remains a convention rather than a finding.
 
-#### The missing shared protocol
+#### 3.1.6 The missing shared protocol
 
 The field has no shared benchmark, no shared reporting convention, and no agreed set of controls, which is why Section 2.3 can compare within papers but not across them easily. This is more of a coordination and standards-setting concern than a scientific error, and it is one of the first things that could benefit the community.
 
-### Future directions
+### 3.2 Future directions
 
 These are directions for the field rather than protocols for a paper. Each follows from a specific gap above, and each would be worth doing whichever way it came out.
 
@@ -279,7 +279,7 @@ These are directions for the field rather than protocols for a paper. Each follo
 
 Appendix G collects the questions these directions leave open.
 
-## Conclusion
+## 4 Conclusion
 
 The current wave of oscillator architectures has produced real systems. The oscillatory recurrences and their linear state-space descendants hold strong long-sequence records, with approximation results behind them for a related construction; trained synchronization models generate images and classify at ImageNet scale; frozen physical oscillators rival trained networks on narrow tasks at a fraction of the parameter count. Read against tuned conventional baselines, though, the record is parity and niches rather than dominance, and the surveyed authors mostly say so: the strongest generative result is competitive with first-generation diffusion and far from the current frontier, the largest classification result is the first of its kind at that scale rather than the best, and the clearest wins are shaped like LinOSS ([Rusch & Rus 2025](https://arxiv.org/abs/2410.03943)) on eighteen-thousand-step sequences, which is a real advantage on a specific axis.
 
@@ -295,11 +295,11 @@ The convergence that makes oscillator networks interesting, across physics, neur
 
 ## Appendix {-}
 
-## Use of AI assistance
+## A Use of AI assistance
 
 Generative AI tools were used in preparing this survey to search for and surface candidate prior art, to write the tooling that produces the manuscript's distributable formats and checks its bibliography, and to generate figures. The author wrote the manuscript and independently verified every reference and every claim attributed to a source. Responsibility for the content, including any error of attribution, rests with the author.
 
-## Glossary
+## B Glossary
 
 | Term | As used in this survey |
 |---|---|
@@ -326,7 +326,7 @@ Generative AI tools were used in preparing this survey to search for and surface
 
 : Terms as this survey uses them. Where physics, neuroscience and machine learning use a word differently, the sense given here is the one intended throughout.
 
-## Oscillator physics models
+## C Oscillator physics models
 
 | Model | What the coupling gained |
 |---|---|
@@ -358,7 +358,7 @@ Generative AI tools were used in preparing this survey to search for and surface
 
 : Oscillator physics models, in the order they were derived, and what each one's coupling gained over the one before it. Huygens's observation heads the table as the first record of the coupling rather than as a model of it. Airy, Poincaré and Blondel are the prehistory of the self-sustained oscillator, dated as in [Rivera-Sierra, Bisquert & Fenollosa (2026)](https://doi.org/10.1021/acs.chemrev.5c00878). Almost every machine-learning system surveyed in this paper uses one of the entries from Landau and Stuart, Winfree, Kuramoto, Kuramoto–Sakaguchi, Schuster and Wagner, Daido, or Chandra, Girvan & Ott; the model timeline in Section 1.2.3 marks which rows those are, and no surveyed system is built on any of the others.
 
-## Oscillator systems: design and classification
+## D Oscillator systems: design and classification
 
 | System | Oscillator family | Architectural role | What is trained | Substrate | Status |
 |---|---|---|---|---|---|
@@ -379,7 +379,7 @@ Generative AI tools were used in preparing this survey to search for and surface
 : Design and classification of each surveyed system: its oscillator family, the part of a model the dynamics constitutes, what
 gradients reach, and whether the work is peer reviewed.
 
-## Oscillator systems: reported results
+## E Oscillator systems: reported results
 
 Numbers are as published and are **not comparable across rows**: different tasks, different baselines, different tuning effort (Section 2.3.2). They are recorded so that claims can be checked against their sources, not so that systems can be ranked.
 
@@ -401,7 +401,7 @@ Numbers are as published and are **not comparable across rows**: different tasks
 
 : Reported results for the same systems, in the same order as Appendix D. These are as published and are **not comparable across rows**: different tasks, different baselines, different tuning effort (Section 2.3.2).
 
-## How the control counts are derived
+## F How the control counts are derived
 
 The counts quoted in Sections 2.3.3 and 4 are derived from Table 1 as follows. Twelve rows
 times five controls gives sixty possible control comparisons. Five are marked not applicable: the single-term
@@ -425,7 +425,7 @@ Table 1 covers twelve of the thirteen systems in Appendix D. ESN ([Jaeger 2001](
 because they are the reservoir-computing precedent this survey measures oscillator systems
 against rather than oscillator systems whose dynamics is itself under test.
 
-## Questions the record leaves open
+## G Questions the record leaves open
 
 Ten questions no published work settles, each following from a gap in Section 3.1 and each with a note on what evidence would close it.
 
