@@ -190,8 +190,8 @@ type: software
 title: "Oscillator Research"
 abstract: >-
   Scientific research into coupled oscillators as a computational substrate for
-  speech. Each paper ships with the code and the raw per-run data that produced
-  its numbers.
+  speech. Every experimental paper ships with the code and the raw per-run data
+  that produced its numbers.
 authors:
 {authors}
 repository-code: "{REPO_URL}"

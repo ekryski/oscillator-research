@@ -16,7 +16,7 @@ Speech is the natural place to press on it, because speech is oscillation at eve
 
 Whether any of that survives contact with controlled measurement is the open question, and it is the question this research addresses. The work is deliberately small-scale and control-heavy: single-variable comparisons, pre-registered decision criteria written before each run, no-dynamics floors under every accuracy, parameter-matched conventional baselines, and randomized twins for every designed structure. Negative results are reported with the same weight as positive ones.
 
-Every paper ships with the code and the raw per-run data that produced its numbers, so any claim here can be peer reviewed and validated or refuted.
+Every experimental paper ships with the code and the raw per-run data that produced its numbers, so any claim here can be peer reviewed and validated or refuted.
 
 ## Papers
 
