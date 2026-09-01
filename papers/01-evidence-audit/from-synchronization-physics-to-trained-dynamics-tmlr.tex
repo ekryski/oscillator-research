@@ -1201,6 +1201,18 @@ not a demonstrated limitation: generative speech, streaming inference
 and measured energy on hardware contain no oscillator system at all, so
 nothing has been shown to fail there.
 
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Steps unrolled and backpropagated through, by system. Filled markers are nonlinear dynamics with no stated gradient bound; open markers are linear dynamics, or gradients bounded by dissipation. coRNN and UnICORNN are not plotted: they train long sequences, but prove gradient bounds from damping before doing so. Every nonlinear system sits at the short end, and the one system three orders of magnitude out is linear.}]{resources/figures/fig12-training-horizon.pdf}}
+\caption{Steps unrolled and backpropagated through, by system. Filled
+markers are nonlinear dynamics with no stated gradient bound; open
+markers are linear dynamics, or gradients bounded by dissipation. coRNN
+and UnICORNN are not plotted: they train long sequences, but prove
+gradient bounds from damping before doing so. Every nonlinear system
+sits at the short end, and the one system three orders of magnitude out
+is linear.}
+\end{figure}
+
 \textbf{What is comparable.} Two kinds of comparison survive those
 limits. A paper's own ablations are protocol-matched by construction, so
 the controls table below compares like with like even where nothing else
@@ -1223,18 +1235,6 @@ rules that avoid backpropagation through the dynamics entirely:
 equilibrium propagation for Kuramoto frequencies \citep{ahmadi2026} and
 local force-measurement rules for driven nonlinear oscillators
 \citep{bosch2025}.
-
-\begin{figure}
-\centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Steps unrolled and backpropagated through, by system. Filled markers are nonlinear dynamics with no stated gradient bound; open markers are linear dynamics, or gradients bounded by dissipation. coRNN and UnICORNN are not plotted: they train long sequences, but prove gradient bounds from damping before doing so. Every nonlinear system sits at the short end, and the one system three orders of magnitude out is linear.}]{resources/figures/fig12-training-horizon.pdf}}
-\caption{Steps unrolled and backpropagated through, by system. Filled
-markers are nonlinear dynamics with no stated gradient bound; open
-markers are linear dynamics, or gradients bounded by dissipation. coRNN
-and UnICORNN are not plotted: they train long sequences, but prove
-gradient bounds from damping before doing so. Every nonlinear system
-sits at the short end, and the one system three orders of magnitude out
-is linear.}
-\end{figure}
 
 \subsubsection{What the systems report as
 controls}\label{what-the-systems-report-as-controls}
@@ -1509,17 +1509,19 @@ set at initialization and conventional training does not move it
 gradient-learned placement wins neither contest: front-ends that keep
 adapting at inference beat both the hand-designed and the
 gradient-learned kind (\citet{ada-fe}; \citet{leaf-apcen}). In Kuramoto
-networks specifically, the one study making natural frequencies
-first-class learnable parameters reports roughly half of randomly
-initialized runs failing through landscape multistability, rescued by
-designed spectral seeding (toy scale, preprint). And where oscillator
-systems succeed with \emph{fixed} frequencies chosen by design, as when
-envelope-band initialization makes a coRNN \citep{rusch2021} trainable
-on raw waveform where a vanilla RNN fails \citep{chandravadia2026},
-design rather than learning determined the frequency structure.
-``Oscillator networks learn'' is therefore well supported for coupling
-and readout-adjacent parameters and specifically doubtful for frequency
-placement.
+networks specifically, the one study to train natural frequencies as a
+parameter in their own right rather than jointly with coupling
+\citep{ahmadi2026} reports roughly half of randomly initialized runs
+failing through loss-landscape multistability, rescued by seeding the
+frequencies from the eigenvectors of the coupling Laplacian, on a
+nine-oscillator network with seven learnable frequencies separating two
+vowels (preprint). And where oscillator systems succeed with
+\emph{fixed} frequencies chosen by design, as when envelope-band
+initialization makes a coRNN \citep{rusch2021} trainable on raw waveform
+where a vanilla RNN fails \citep{chandravadia2026}, design rather than
+learning determined the frequency structure. ``Oscillator networks
+learn'' is therefore well supported for coupling and readout-adjacent
+parameters and specifically doubtful for frequency placement.
 
 Parameter sensitivity is reported \emph{within} a paper and almost never
 \emph{across} tasks. WONN \citep{wonn} and AKOrN \citep{akorn} each
