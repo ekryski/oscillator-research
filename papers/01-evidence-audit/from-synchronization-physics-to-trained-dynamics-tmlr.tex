@@ -132,21 +132,25 @@ architectures}, \xmpquote{literature survey}},
 \renewcommand{\fps@figure}{!htbp}
 \renewcommand{\fps@table}{!htbp}
 \makeatother
-% A float may still drift past the heading of the subsection that introduces it,
-% which reads as though it belongs to the next one: the physics timeline was
-% landing under "Within neuroscience". Flushing pending floats at every
-% subsection boundary keeps each figure inside the subsection that cites it.
-% placeins would do this, but it is not in a BasicTeX installation, and the
-% mechanism is short: if any float is still waiting when a subsection begins,
-% flush it first. \@deferlist holds exactly those floats, so the page break
-% only fires when one is actually pending.
+% A float may drift past the heading that introduces it and read as though it
+% belongs to the next one: the physics timeline was landing under "Within
+% neuroscience". Flushing pending floats at a heading fixes that. placeins would
+% do it, but it is not in a BasicTeX installation, and the mechanism is short:
+% if any float is still waiting when a section begins, flush it first.
+% \@deferlist holds exactly those floats, so the break only fires when one is
+% actually pending.
+%
+% At \section only, deliberately. Attaching it to every subsection and
+% subsubsection clears the page so often that a figure with any text after it
+% gets a page to itself: figures 3 and 4 were taking a page each, at 242 and 155
+% words of surrounding text. Section-level keeps each figure inside the numbered
+% section that cites it, which is what a cross-reference names, and leaves LaTeX
+% free to pack the pages in between.
 \makeatletter
 \newcommand{\tmlr@floatbarrier}{\par\vspace{\z@}%
   \ifx\@deferlist\@empty\else\clearpage\fi}
-\let\tmlr@subsection\subsection
-\renewcommand{\subsection}{\tmlr@floatbarrier\tmlr@subsection}
-\let\tmlr@subsubsection\subsubsection
-\renewcommand{\subsubsection}{\tmlr@floatbarrier\tmlr@subsubsection}
+\let\tmlr@section\section
+\renewcommand{\section}{\tmlr@floatbarrier\tmlr@section}
 \makeatother
 
 \hypersetup{pdfauthor={}}
@@ -185,7 +189,7 @@ physical world, and that a trainable model built from those dynamics
 would make questions about learning, forgetting and rhythm disruption
 addressable in simulation. We do not aim to test this hypothesis in this
 paper, but use it as motivation to provide a critical survey of the
-current landscape of ONNs. We organise thirteen published systems on two
+current landscape of ONNs. We organize thirteen published systems on two
 questions: whether gradients reach the oscillator dynamics and whether a
 conventional encoder or decoder is trained around it, which separates
 designed dynamics that are never learned, apparent learning via
@@ -248,23 +252,23 @@ complete lock and complete disorder is measured by the \textbf{order
 parameter} \emph{R}, which runs from 0 to 1. Both extremes are useless
 for computation. At \emph{R} near 1 every unit does the same thing, so
 the population has one degree of freedom left and can carry no signal;
-at \emph{R} near 0 nothing is organised for a readout to pick up. The
+at \emph{R} near 0 nothing is organized for a readout to pick up. The
 regime that matters is the partial coherence between them, in which some
 units lock while others drift.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={The three coupling regimes reported in the synchronization literature, drawn schematically. Full synchrony leaves no degrees of freedom to carry a signal and incoherence leaves nothing organised; the useful regime is the partial coherence between them, which finite-range nonlocal coupling generically produces. The phases shown are illustrative, not simulated.}]{resources/figures/fig2-coupling-regimes.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={The three coupling regimes reported in the synchronization literature, drawn schematically. Full synchrony leaves no degrees of freedom to carry a signal and incoherence leaves nothing organized; the useful regime is the partial coherence between them, which finite-range nonlocal coupling generically produces. The phases shown are illustrative, not simulated.}]{resources/figures/fig2-coupling-regimes.pdf}}
 \caption{The three coupling regimes reported in the synchronization
 literature, drawn schematically. Full synchrony leaves no degrees of
-freedom to carry a signal and incoherence leaves nothing organised; the
+freedom to carry a signal and incoherence leaves nothing organized; the
 useful regime is the partial coherence between them, which finite-range
 nonlocal coupling generically produces. The phases shown are
 illustrative, not simulated.}
 \end{figure}
 
 That partial regime is also where recurrent computation is reported to
-peak. Computation in recurrent networks is maximised near the boundary
+peak. Computation in recurrent networks is maximized near the boundary
 between ordered and chaotic dynamics \citep{bertschinger2004},
 reservoirs are deliberately parked near that edge, and hierarchical
 modular structure makes that edge markedly less sensitive to precise
@@ -298,16 +302,16 @@ from Airy's first mathematical treatment in 1830 through Poincaré's
 limit cycle and Blondel's naming of the phenomenon, a lineage traced in
 full by \citet{rivera-sierra2026}, whose survey of self-oscillatory
 devices for unconventional computing covers similar background as this
-paper, but from the materials and neuromorphic hardware angle. Fast
-forward a few hundred years: Huygens' observation was given its
-mathematical form by the Kuramoto coupling function
-\citep{kuramoto1975}, and the same locking is what a row of metronomes
-started at different times on a shared moving platform demonstrates
-\citep{pantaleone2002}. Huygens' experiments were later replicated and
-explained by \citet{bennett2002}. In biology the same synchronization
-phenomenon was observed at population scale and mathematically modelled,
-from the patterned flashing of firefly swarms to circadian and cardiac
-rhythms \citep{strogatz1993}.
+paper, but from the materials and neuromorphic hardware angle. Three
+centuries after Huygens, his observation was given its mathematical form
+by the Kuramoto coupling function \citep{kuramoto1975}, and the same
+locking is what a row of metronomes started at different times on a
+shared moving platform demonstrates \citep{pantaleone2002}. Huygens'
+experiments were later replicated and explained by \citet{bennett2002}.
+In biology the same synchronization phenomenon was observed at
+population scale and mathematically modelled, from the patterned
+flashing of firefly swarms to circadian and cardiac rhythms
+\citep{strogatz1993}.
 
 That collective physical dynamics can \emph{be} computation is much more
 recent, predating the current oscillatory neural network (ONN) wave by
@@ -318,17 +322,17 @@ that such a system has emergent computational properties.
 efficiency endgame, also inspired by biological adaptations, and the
 synchronization canon of \citet{winfree1967}, \citet{kuramoto1975}, the
 \citet{strogatz2000} review, and the \citet{pikovsky2001} textbook set
-out how coupled oscillator populations self-organise.
+out how coupled oscillator populations self-organize.
 
 Further work on the coupling laws themselves has continued, while the
 current ONN landscape in machine learning has not yet caught up. The
-single sinusoid was generalised in several directions:
+single sinusoid was generalized in several directions:
 \citet{sakaguchi1986} added a phase lag that breaks the symmetry and
 admits partial coherence rather than forcing all-or-nothing locking;
 \citet{daido1992} replaced the sinusoid with an arbitrary periodic
 function; \citet{schuster1989} put an explicit delay inside the coupling
 so that interaction depends on history rather than on the instantaneous
-state. Then it was generalised past pairs entirely. \citet{tanaka2011}
+state. Then it was generalized past pairs entirely. \citet{tanaka2011}
 coupled three phases at once and found an infinite number of coexisting
 synchronized states where pairwise coupling gives one;
 \citet{ashwin2016} showed such terms are not an embellishment but what
@@ -338,8 +342,8 @@ extensive set of stable partially synchronized states; \citet{mulas2020}
 did the same over hypergraphs, where a many-body interaction can exist
 without its sub-interactions; and \citet{zhang2023} showed those two
 representations give qualitatively different synchronization, so
-higher-order coupling is at least two distinct generalisations rather
-than one. Multistability on such structures is now characterised
+higher-order coupling is at least two distinct generalizations rather
+than one. Multistability on such structures is now characterized
 directly \citep{bacic2026}. Separately, the oscillator itself was moved
 off the circle: \citet{chandra2019} wrote the units as unit vectors in D
 dimensions with rotation-matrix natural frequencies, and
@@ -349,7 +353,7 @@ coupling gained over the one before it.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Every physics and mathematics source cited in this survey, in date order. The upper track is the account of when a coupled population locks; the lower track is what structure and operating regime do to it. The axis is piecewise, because four entries predate 1930 and most postdate 1990. Almost every machine-learning system in Section 2 takes its coupling law from the upper track, and from the 1967 to 1992 stretch of it in particular. The single exception is AKOrN {[}@\{akorn\}{]}, built on the D-dimensional generalisation of @chandra2019 in the lower track. The rest of the lower track is untouched by the surveyed systems, and its earliest two entries are arguments that physics can compute at all rather than coupling laws to build with.}]{resources/figures/fig3-physics-timeline.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Every physics and mathematics source cited in this survey, in date order. The upper track is the account of when a coupled population locks; the lower track is what structure and operating regime do to it. The axis is piecewise, because four entries predate 1930 and most postdate 1990. Almost every machine-learning system in Section 2 takes its coupling law from the upper track, and from the 1967 to 1992 stretch of it in particular. The single exception is AKOrN {[}@\{akorn\}{]}, built on the D-dimensional generalization of @chandra2019 in the lower track. The rest of the lower track is untouched by the surveyed systems, and its earliest two entries are arguments that physics can compute at all rather than coupling laws to build with.}]{resources/figures/fig3-physics-timeline.pdf}}
 \caption{Every physics and mathematics source cited in this survey, in
 date order. The upper track is the account of when a coupled population
 locks; the lower track is what structure and operating regime do to it.
@@ -357,7 +361,7 @@ The axis is piecewise, because four entries predate 1930 and most
 postdate 1990. Almost every machine-learning system in Section 2 takes
 its coupling law from the upper track, and from the 1967 to 1992 stretch
 of it in particular. The single exception is AKOrN \citep{akorn}, built
-on the D-dimensional generalisation of \citet{chandra2019} in the lower
+on the D-dimensional generalization of \citet{chandra2019} in the lower
 track. The rest of the lower track is untouched by the surveyed systems,
 and its earliest two entries are arguments that physics can compute at
 all rather than coupling laws to build with.}
@@ -414,7 +418,7 @@ and whether it does so on visual tasks in particular, is an open and
 directly checkable question, and one Section 3.2 returns to.
 
 Beyond the gamma band, \citet{buzsaki2006} makes the broader claim that
-self-emerged oscillatory timing is the brain's fundamental organiser of
+self-emerged oscillatory timing is the brain's fundamental organizer of
 neuronal information, and that spontaneous activity is the source of
 cognitive capacity rather than noise to be averaged away. The
 small-world connectivity of cortex lets these rhythms carry computation
@@ -488,7 +492,7 @@ side, where a system's result cannot be attributed to its oscillator
 dynamics because the control that would isolate it has not been run. Two
 fields arrived at the same impasse without reference to each other.
 
-Disruption of these rhythms is a recognised signature across
+Disruption of these rhythms is a recognized signature across
 neurological and psychiatric disorders rather than a correlate of one
 \citep{uhlhaas2006}, and the relationship has been made interventional:
 driving gamma-band activity at 40 Hz reduced amyloid load in a mouse
@@ -592,7 +596,7 @@ where the dynamics sits.
   and UnICORNN \citep{unicornn} makes the same construction fast by
   keeping the units independent. Their linear descendants trade the
   nonlinearity for scale: LinOSS \citep{rusch2025} obtains unconditional
-  stability from an implicit discretisation and reaches roughly
+  stability from an implicit discretization and reaches roughly
   eighteen-thousand-step sequences by parallel scan, and D-LinOSS
   \citep{d-linoss} makes the damping itself learnable and proves this
   strictly enlarges the reachable dynamics, since fixed damping covers
@@ -602,10 +606,10 @@ where the dynamics sits.
 \item
   \textbf{Trained synchronization models} put Kuramoto-type dynamics to
   work directly. AKOrN \citep{akorn} uses the D-dimensional
-  generalisation as a layer inside a conventional network and reports
+  generalization as a layer inside a conventional network and reports
   its gains on object discovery, calibration and reasoning-style tasks
   rather than on raw accuracy. WONN \citep{wonn} evolves representations
-  on a torus under generalised Winfree dynamics, writing the input into
+  on a torus under generalized Winfree dynamics, writing the input into
   the natural frequencies rather than adding it as a drive. It is the
   first synchronization architecture to reach ImageNet-1K scale at all,
   and it is also the only one in the survey evaluated on logical
@@ -662,7 +666,7 @@ survey's findings. \textbf{Almost every machine-learning system here
 uses a coupling law from the 1967 to 1992 window.} Kuramoto and
 Kuramoto--Sakaguchi account for nearly all of the trained systems. Past
 them the tally is short enough to state exactly. The Stuart-Landau form
-appears once \citep{zhang2026}. The D-dimensional generalisation appears
+appears once \citep{zhang2026}. The D-dimensional generalization appears
 once, as the basis of AKOrN. Higher-order coupling appears once, in a
 dense associative memory \citep{nagerl2025}. Delay coupling is the
 exception, long established in reservoir computing where a single
@@ -1048,7 +1052,7 @@ rather than through a long chain: Kuramoto Orientation Diffusion
 The theory underwriting this quadrant is real and worth stating, because
 it establishes that the function class is there to be learned even where
 the evidence that it \emph{is} learned is thin. The family is universal,
-with quantitative approximation and generalisation bounds
+with quantitative approximation and generalization bounds
 \citep{huang, huang2025} and an infinite-horizon extension
 \citep{sagodi}; input-to-state stability has been established for
 coupled oscillator networks \citep{stolzle2024}; and contraction
@@ -1170,7 +1174,7 @@ FID, ImageNet-1K top-1 classification, maze path finding and Sudoku,
 object discovery, multi-object binding robustness at small scale,
 character-level language modelling, generation on periodic domains,
 extreme-length sequence classification, general time-series benchmarks,
-spoken-digit recognition, and combinatorial optimisation. Almost no two
+spoken-digit recognition, and combinatorial optimization. Almost no two
 rows share a task, and where two rows do, they rarely share a protocol.
 
 Shared cross-disciplinary benchmarks largely do not exist here for three
@@ -1182,7 +1186,7 @@ diagram and a deep-learning group reporting top-1 accuracy are not being
 careless with each other's conventions; they are answering different
 questions. The field is also young. Most of the trained-dynamics systems
 here postdate 2023, and a subfield converges on shared benchmarks once
-its methods stabilise, not before. And the substrates are not
+its methods stabilize, not before. And the substrates are not
 commensurable: a time-multiplexed physical oscillator and a
 322M-parameter simulated Kuramoto pool cannot be run on one task suite
 even in principle.
@@ -1229,7 +1233,7 @@ Orientation Diffusion never trains a long chain at all. The oscillator
 systems that do handle long horizons changed the problem rather than
 solving it: coRNN and UnICORNN prove gradient bounds from damping first,
 LinOSS makes the dynamics linear, D-LinOSS keeps every mode contractive
-by construction. Theory tracks the same line, with generalisation bounds
+by construction. Theory tracks the same line, with generalization bounds
 growing linearly in horizon and approximation rates requiring
 incremental stability. Meanwhile a parallel literature develops training
 rules that avoid backpropagation through the dynamics entirely:
@@ -1338,7 +1342,7 @@ parameter budget against the full model on a task the paper leads with,
 so the term that names the family has been isolated twice, once legibly.
 Of the fifty-five applicable control comparisons these five give across
 the twelve systems, seven have been run, plus this one near-instance;
-Appendix G itemises them.
+Appendix G itemizes them.
 
 \subsubsection{How the systems compare with conventional
 architectures}\label{how-the-systems-compare-with-conventional-architectures}
@@ -1444,7 +1448,7 @@ coupling. AKOrN \citep{akorn} does the same to a coupling that is
 \emph{learned}. Its update carries three terms: a natural-frequency
 rotation \textbf{\ensuremath{\Omega}}, a sum over neighbours weighted by
 a learned coupling matrix \textbf{J}, and the input, with both
-\ensuremath{\Omega} and J optimised against the task objective. Figure 8
+\ensuremath{\Omega} and J optimized against the task objective. Figure 8
 of that paper reports a J = 0 bar beside a separate \ensuremath{\Omega}
 = 0 bar, so the two physics terms were treated as independent axes
 rather than swapped wholesale, and with J = 0 the population decouples
@@ -1583,7 +1587,7 @@ Kuramoto frequency learning.
 The hazard is manageable, since the successes exist. But the published
 management strategies are themselves evidence for the diagnosis: coRNN
 proves its gradient bounds \emph{from} its damping, LinOSS
-\citep{rusch2025} obtains stability from implicit discretisation,
+\citep{rusch2025} obtains stability from implicit discretization,
 D-LinOSS \citep{d-linoss} parameterizes damping so every mode stays
 contractive, and Un-0's remedy is topological. The theory arrives at the
 same requirement from the other direction, and the coincidence is worth
@@ -1684,7 +1688,7 @@ whichever way it came out.
   establish what its namesake mechanism contributes, by comparing
   coupling functions on one task under one harness, and by reaching past
   the 1967 to 1992 window into the higher-order, delayed and
-  D-dimensional forms the physics has characterised. The specific value
+  D-dimensional forms the physics has characterized. The specific value
   of the later physics is that each form makes a different capability
   available, and none has been tried. Higher-order coupling produces
   many coexisting stable states where pairwise coupling produces one,
@@ -1770,7 +1774,7 @@ four are matched-budget baselines from Kuramoto Attention
 \citep{kuramoto-attention} and FSN \citep{nunley2026} and from RON
 \citep{ceni2024}, and single-term coupling ablations from Kuramoto
 Orientation Diffusion \citep{kuramoto-orientation-diffusion} and AKOrN
-\citep{akorn}. Appendix G itemises them. Where a control has been run it
+\citep{akorn}. Appendix G itemizes them. Where a control has been run it
 has changed what the paper could conclude, and in one case it reversed
 the headline: a matched-budget community replication found a
 conventional baseline clearly stronger than the oscillator system it
@@ -1993,7 +1997,7 @@ in-phase and anti-phase branches. Lifted to a whole population by
 giving the population mass-like behaviour and a hysteretic rather than
 smooth approach to synchrony, the form used for power grids and
 Josephson junctions. \\
-\cmidrule{1-2}\citet{daido1992} & Coupling generalised from a sine to an
+\cmidrule{1-2}\citet{daido1992} & Coupling generalized from a sine to an
 arbitrary periodic function, described by an order function rather than
 a single order parameter. \\
 \cmidrule{1-2}\citet{abrams2004} & Chimera states: identical,
@@ -2023,11 +2027,11 @@ represent. \\
 through the topological Dirac operator, producing a collective rhythm
 that emerges with no external drive. \\
 \cmidrule{1-2}\citet{de-aguiar2023} & The scalar coupling constant
-replaced by a coupling matrix, generalising the Sakaguchi phase lag to a
+replaced by a coupling matrix, generalizing the Sakaguchi phase lag to a
 full rotation of the interaction in D dimensions. \\
 \cmidrule{1-2}\citet{zhang2023} & The finding that hypergraph and
 simplicial representations give qualitatively different synchronization,
-so higher-order coupling is not one generalisation but at least two. \\
+so higher-order coupling is not one generalization but at least two. \\
 \end{longtable}
 
 \section{Oscillator systems: design and
@@ -2168,13 +2172,13 @@ ESN / LSM & time series & the frozen-dynamics paradigm (survey
 \textasciitilde99.6\% recognition & one device & --- \\
 \cmidrule{1-5}RON & time-series benchmarks & reported above ESN and
 trained RNN baselines & --- & --- \\
-\cmidrule{1-5}Oscillator Ising machines & combinatorial optimisation &
+\cmidrule{1-5}Oscillator Ising machines & combinatorial optimization &
 physics performs the search & --- & --- \\
 \cmidrule{1-5}coRNN / UnICORNN & long-sequence classification & state of
 the art at publication & --- & long BPTT, damping-bounded gradients \\
 \cmidrule{1-5}LinOSS / D-LinOSS & sequences to \textasciitilde18k steps;
 EigenWorms & 95.0\% vs 70.9\% for Mamba \citep{mamba}-class baselines &
---- & parallel scan, implicit discretisation \\
+--- & parallel scan, implicit discretization \\
 \cmidrule{1-5}Neural Wave Machines & sequence and physics tasks &
 travelling waves, emergent topography, parameter efficiency & --- &
 --- \\

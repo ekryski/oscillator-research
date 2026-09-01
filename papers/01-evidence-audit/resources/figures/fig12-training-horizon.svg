@@ -33,7 +33,7 @@
 <line x1="598.5955259023403" y1="138" x2="598.5955259023403" y2="174" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
 <rect x="593.5955259023403" y="123" width="10" height="10" fill="#FFFFFF" stroke="#24231F" stroke-width="1.3"/>
 <text x="587.5955259023403" y="127" text-anchor="end" font-size="9.6" fill="#24231F" font-weight="bold" font-style="normal">LinOSS · D-LinOSS</text>
-<text x="587.5955259023403" y="138" text-anchor="end" font-size="8.4" fill="#5F5E5A" font-weight="normal" font-style="normal">linear, implicitly discretised</text>
+<text x="587.5955259023403" y="138" text-anchor="end" font-size="8.4" fill="#5F5E5A" font-weight="normal" font-style="normal">linear, implicitly discretized</text>
 <line x1="214.11124323990592" y1="128" x2="261.11243239905923" y2="128" stroke="#24231F" stroke-width="3" stroke-linecap="round"/>
 <rect x="20" y="240" width="9" height="9" fill="#24231F" stroke="#24231F"/>
 <text x="35" y="248" text-anchor="start" font-size="9" fill="#5F5E5A" font-weight="normal" font-style="normal">nonlinear dynamics, no stated gradient bound</text>

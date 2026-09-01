@@ -189,7 +189,7 @@ def track(b, events, px, mid, W, up, lane_h, offset, square, filled=None, size=8
 
     Drawing each item complete before starting the next puts a later point's
     leader line straight through an earlier point's text, so the two passes
-    are not an optimisation.
+    are not an optimization.
     """
     filled = filled or (lambda label: True)
     placed = [(x, mid + (-offset - lane * lane_h if up else offset + lane * lane_h), lab, flip)
@@ -427,7 +427,7 @@ def fig_training_horizon():
         (1, "Kuramoto Orientation Diffusion", "per-step score objectives", True, -80),
         (17, "Un-0", "10–25 integration steps", True, -48, 24),
         (18, "WONN", "18 steps (6 layers × 3)", True, -20),
-        (18000, "LinOSS · D-LinOSS", "linear, implicitly discretised", False, -48),
+        (18000, "LinOSS · D-LinOSS", "linear, implicitly discretized", False, -48),
     ]
     for v, name, note, nonlinear, dy, *extra in points:
         x = px(v)
