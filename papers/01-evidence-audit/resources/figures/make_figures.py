@@ -638,7 +638,7 @@ def fig_oscillator_anatomy():
     b.append(text(ccx + 13, ccy - 16, "r", 9, anchor="start"))
     b.append(polyline(arc(ccx, ccy, 12, 0, ta), FAINT, 1))
     b.append(text(ccx + 17, ccy - 2, "θ", 9, anchor="start"))
-    b.append(text(x + pw / 2, note_y, "trajectories relax onto a limit cycle", 8, fill=MID))
+    b.append(text(x + pw / 2, note_y, "Stuart–Landau relaxes onto a limit cycle", 8, fill=MID))
 
     # (c) a population, each unit keeping its own phase
     x = x0 + 2 * (pw + gx)
