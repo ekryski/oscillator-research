@@ -1,0 +1,13 @@
+TY  - RPRT
+AU  - Kryski, E.
+TI  - From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning
+PY  - 2026
+UR  - https://github.com/ekryski/oscillator-research/blob/main/papers/01-evidence-audit/
+KW  - coupled oscillators
+KW  - Kuramoto model
+KW  - reservoir computing
+KW  - synchronization
+KW  - neural architectures
+KW  - literature survey
+AB  - Coupled oscillator networks are drawing sustained attention as machine-learning substrates for the first time, and three literatures have converged on them from different directions: synchronization physics now describes regimes that look like computation rather than mere order, neuroscience treats the oscillator description of the neuron as a working model rather than an analogy, and since 2020 machine learning has produced oscillator architectures that run at scale. The standing motivation, which we treat as motivation and not as finding, is that a substrate whose native operations are resonance and entrainment belongs to the same class of object as the signals biology evolved to sense, and that a trainable model built from those dynamics would make questions about learning, forgetting and rhythm disruption addressable in simulation. What that motivation has so far delivered is the subject here. We organise thirteen load-bearing systems by what is learned, distinguishing untrained dynamics with a trained readout, trained dynamics, and designed dynamics that are never learned, and record for each the task and data it reports, the controls it ran, and how it stands against conventional baselines at comparable budgets. Two things follow. The comparative picture is parity and niches rather than dominance. And the evidence rarely isolates the dynamics: six of the fifty-five applicable controls appear in the surveyed work, and no system has removed the coupling term as a single variable. We close with nine hypotheses, each paired with the experiment that would settle it.
+ER  - 

@@ -10,12 +10,17 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+# These come from the standard Python template and name setuptools build
+# output. Left unanchored they also match any directory of ours with the same
+# name, anywhere in the tree — `publishing/lib/` holds the publishing scripts
+# and `dist/` would match a publishing output directory. Anchor them to the
+# repository root, which is the only place setuptools ever writes them.
+/dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -216,3 +221,66 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------------------
+# Research data and run artifacts
+# ---------------------------------------------------------------------------
+
+# Speech corpora are never committed — download them and build the local bank
+# per each paper's README. AudioMNIST is redistributable but large, and other
+# corpora carry their own licences. Each src/data/ carries its own .gitignore
+# that keeps only its README, so the directory stays documented but empty.
+**/data/AudioMNIST/
+**/data/LibriTTS/
+**/data/LJSpeech*/
+**/data/VCTK*/
+**/data/musan/
+*.wav.tar
+*.tar.gz
+*.tar.bz2
+
+# Derived stimulus banks and any other local cache (deterministic, rebuildable
+# from the corpus by a committed script).
+**/cache/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.npz
+
+# Model checkpoints and per-run scratch. Only the per-cell results.json (and
+# the trained-arm training curves) are committed under papers/*/results/.
+checkpoints/
+**/checkpoints/
+runs/
+**/results/.artifacts/
+**/*-instr.pt
+
+# Audio and figures generated INTO a working tree rather than into the
+# committed resources/ trees stay local.
+scratch/
+out/
+tmp/
+
+# The built formats now sit beside each manuscript under papers/, and ARE
+# committed: a reader who lands on a paper's folder should find the PDF next to
+# the Markdown, not a build instruction. (Once CI publishes them as versioned
+# release artifacts they come back out of the tree — see the tracking issue.)
+# Only the preprocessing scratch is derived-and-disposable.
+publishing/.work/
+
+# The arXiv bundles are the exception, caught by the *.tar.gz rule above and
+# left there deliberately. They are a submission artifact rather than something
+# to read, and tar records an mtime, so the file changes on every build even
+# when nothing in the paper did — the one built format that would churn the
+# history for no reason. Rebuild one when you need it:
+#     FORMATS=arxiv bash publishing/publish.sh 01
+
+# macOS
+.DS_Store
+
+# Personal publishing strategy: named contacts, fee-waiver positions, venue
+# tactics, and the alumni-affiliation details. This repository is public and
+# none of that belongs in it. Kept in the working tree because it is the thing
+# actually being worked from.
+independent-researcher-publishing-playbook.md

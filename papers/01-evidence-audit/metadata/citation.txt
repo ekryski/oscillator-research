@@ -1,0 +1,16 @@
+From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning
+
+APA
+Kryski, E. (2026). From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning [Preprint]. https://github.com/ekryski/oscillator-research/blob/main/papers/01-evidence-audit/
+
+MLA
+Kryski, Eric. "From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning." 2026, https://github.com/ekryski/oscillator-research/blob/main/papers/01-evidence-audit/.
+
+CHICAGO
+Kryski, E. 2026. "From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning." Preprint. https://github.com/ekryski/oscillator-research/blob/main/papers/01-evidence-audit/.
+
+IEEE
+E. Kryski, "From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning," preprint, 2026. [Online]. Available: https://github.com/ekryski/oscillator-research/blob/main/papers/01-evidence-audit/
+
+HARVARD
+Kryski, E. (2026) 'From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning'. Preprint. Available at: https://github.com/ekryski/oscillator-research/blob/main/papers/01-evidence-audit/

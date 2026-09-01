@@ -1,0 +1,9 @@
+# Lint config for the repository-level tooling (publishing/). The experiment code
+# has its own config in papers/02-untrained-reservoirs/src/pyproject.toml.
+line-length = 100
+target-version = "py312"
+exclude = ["papers/*/src"]
+
+[lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501"]

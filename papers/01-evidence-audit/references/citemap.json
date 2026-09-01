@@ -1,0 +1,448 @@
+{
+ "abrams2004": [
+  "Abrams & Strogatz",
+  "Abrams & Strogatz 2004"
+ ],
+ "achterberg2023": [
+  "Achterberg, Akarca et al. 2023"
+ ],
+ "ada-fe": [
+  "Ada-FE",
+  "Zhang et al. 2025"
+ ],
+ "ahmadi2026": [
+  "Ahmadi 2026"
+ ],
+ "akbari2025": [
+  "Akbari, Mason, Gruber & Nicola 2025"
+ ],
+ "akorn": [
+  "AKOrN",
+  "Miyato et al. 2025"
+ ],
+ "anderson2023": [
+  "Anderson et al. 2023",
+  "Anderson, Kinnunen & Harte 2023"
+ ],
+ "appeltant2011": [
+  "Appeltant et al. 2011"
+ ],
+ "ashwin2016": [
+  "Ashwin & Rodrigues (2016)"
+ ],
+ "assaneo2020": [
+  "Assaneo, Rimmele, Sanz Perl & Poeppel 2021"
+ ],
+ "attwell2001": [
+  "Attwell & Laughlin 2001"
+ ],
+ "bacic2026": [
+  "Ba\u010di\u0107 et al. 2026"
+ ],
+ "bennett2002": [
+  "Bennett et al. (2002)",
+  "Bennett, Schatz, Rockwood & Wiesenfeld 2002",
+  "Huygens (1665)"
+ ],
+ "bertschinger2004": [
+  "Bertschinger & Natschl\u00e4ger 2004"
+ ],
+ "blouw2018": [
+  "Blouw et al. 2019"
+ ],
+ "bosch2025": [
+  "B\u00f6sch et al. 2025"
+ ],
+ "breakspear2010": [
+  "Breakspear, Heitmann & Daffertshofer 2010"
+ ],
+ "buzsaki2006": [
+  "Buzs\u00e1ki 2006"
+ ],
+ "cabral2011": [
+  "Cabral, Hugues, Sporns & Deco 2011"
+ ],
+ "calmon2022": [
+  "Calmon et al. (2022)"
+ ],
+ "camalet2000": [
+  "Camalet et al. 2000"
+ ],
+ "caranzano2025": [
+  "Caranzano et al. 2026"
+ ],
+ "castaldo2026": [
+  "Castaldo, Aristides, Clusella, Garcia-Ojalvo & Ruffini 2026"
+ ],
+ "ceni2024": [
+  "Ceni et al. 2024",
+  "RON"
+ ],
+ "cfc": [
+  "CfC",
+  "Hasani et al. 2022"
+ ],
+ "chandra2019": [
+  "Chandra, Girvan & Ott (2019)"
+ ],
+ "chandravadia2026": [
+  "Chandravadia & Imam 2026"
+ ],
+ "chen2025": [
+  "Chen et al. 2025"
+ ],
+ "childs2008": [
+  "Childs & Strogatz 2008"
+ ],
+ "cho2014": [
+  "Cho et al. 2014"
+ ],
+ "coles2023": [
+  "Coles et al. 2023"
+ ],
+ "d-linoss": [
+  "Boyer et al. 2025",
+  "D-LinOSS"
+ ],
+ "daido1992": [
+  "Daido",
+  "Daido 1992"
+ ],
+ "dan2025": [
+  "Dan et al. 2025",
+  "Dan, Ding & Wu 2025",
+  "HoloGraph"
+ ],
+ "de-aguiar2023": [
+  "de Aguiar (2023)"
+ ],
+ "deng2026": [
+  "Deng et al. 2026"
+ ],
+ "doelling2023": [
+  "Doelling, Arnal & Assaneo 2023"
+ ],
+ "dogonasheva2026": [
+  "Dogonasheva, Giraud, Zakharov & Gutkin (2026)"
+ ],
+ "edm": [
+  "EDM",
+  "Karras et al. 2022"
+ ],
+ "elman1990": [
+  "Elman 1990"
+ ],
+ "ermentrout1991": [
+  "Ermentrout",
+  "Ermentrout 1991"
+ ],
+ "fries2015": [
+  "Fries 2015"
+ ],
+ "gdd": [
+  "GDD",
+  "Zheng & Yang 2024"
+ ],
+ "goyal2021": [
+  "Goyal et al. 2021"
+ ],
+ "gray1989": [
+  "Gray, K\u00f6nig, Engel & Singer 1989"
+ ],
+ "hayes2023": [
+  "Hayes et al. 2023"
+ ],
+ "heimburg2005": [
+  "Heimburg & Jackson 2005"
+ ],
+ "hizanidis2016": [
+  "Hizanidis et al. 2016"
+ ],
+ "hochreiter1997": [
+  "Hochreiter & Schmidhuber 1997"
+ ],
+ "hodgkin1952": [
+  "Hodgkin & Huxley 1952",
+  "Hodgkin\u2013Huxley",
+  "Hodgkin\u2013Huxley (1952)"
+ ],
+ "hopfield1982": [
+  "Hopfield (1982)"
+ ],
+ "how-train-your-hippo": [
+  "\"How to Train Your HiPPO\"",
+  "Gu et al. 2023a"
+ ],
+ "huang": [
+  "Huang et al.",
+  "Huang et al. 2026b"
+ ],
+ "huang2025": [
+  "Huang et al. 2026a"
+ ],
+ "iaccarino2016": [
+  "Iaccarino et al. 2016"
+ ],
+ "jaeger2001": [
+  "ESN",
+  "Jaeger 2001"
+ ],
+ "keller2023": [
+  "Keller & Welling 2023",
+  "Neural Wave Machines"
+ ],
+ "kern2003": [
+  "Kern & Stoop 2003"
+ ],
+ "kope": [
+  "KoPE",
+  "Xiao et al. 2026"
+ ],
+ "kozachkov2022": [
+  "Kozachkov, Ennis & Slotine 2022"
+ ],
+ "kuramoto-attention": [
+  "Kuramoto Attention",
+  "Nunley 2026a"
+ ],
+ "kuramoto-mnist": [
+  "Kuramoto-MNIST",
+  "hcm444 2026"
+ ],
+ "kuramoto-orientation-diffusion": [
+  "Kuramoto Orientation Diffusion",
+  "Song et al. 2025"
+ ],
+ "kuramoto1975": [
+  "Kuramoto",
+  "Kuramoto (1975)",
+  "Kuramoto 1975"
+ ],
+ "kuramoto2002": [
+  "Kuramoto & Battogtokh (2002)",
+  "Kuramoto & Battogtokh 2002"
+ ],
+ "kusmierz2025": [
+  "Ku\u015bmierz et al. 2025"
+ ],
+ "kwon2023": [
+  "Kwon et al. 2023"
+ ],
+ "kynkaanniemi2019": [
+  "Kynk\u00e4\u00e4nniemi et al. 2019"
+ ],
+ "landau1944": [
+  "Landau",
+  "Landau 1944"
+ ],
+ "lanthaler2023": [
+  "Lanthaler et al. 2023",
+  "Lanthaler, Rusch & Mishra 2023"
+ ],
+ "leaf-apcen": [
+  "LEAF-APCEN",
+  "Meng et al. 2026"
+ ],
+ "lecun1998": [
+  "LeCun et al. 1998"
+ ],
+ "lieber2024": [
+  "Lieber et al. 2024"
+ ],
+ "litwin-kumar2012": [
+  "Litwin-Kumar & Doiron 2012"
+ ],
+ "ltc": [
+  "Hasani et al. 2021",
+  "LTC"
+ ],
+ "lukosevicius2009": [
+  "Luko\u0161evi\u010dius & Jaeger 2009",
+  "survey"
+ ],
+ "maass2002": [
+  "LSM",
+  "Maass et al. 2002",
+  "Maass, Natschl\u00e4ger & Markram 2002"
+ ],
+ "mamba": [
+  "Gu & Dao 2023b",
+  "Mamba"
+ ],
+ "mead1990": [
+  "Mead (1990)"
+ ],
+ "millan2020": [
+  "Mill\u00e1n, Torres & Bianconi (2020)"
+ ],
+ "milling2026": [
+  "Milling et al. 2026"
+ ],
+ "mit-code": [
+  "MIT code",
+  "Unconventional AI 2026b"
+ ],
+ "morris1981": [
+  "Morris & Lecar (1981)",
+  "Morris & Lecar 1981",
+  "Morris\u2013Lecar"
+ ],
+ "mulas2020": [
+  "Mulas, Kuehn & Jost (2020)"
+ ],
+ "murenn": [
+  "Lostanlen et al. 2023",
+  "MuReNN"
+ ],
+ "muzellec2025": [
+  "KomplexNet",
+  "Muzellec et al. 2025"
+ ],
+ "nagerl2025": [
+  "Nagerl & Berloff 2025"
+ ],
+ "neftci2019": [
+  "Neftci, Mostafa & Zenke 2019"
+ ],
+ "nunley2026": [
+  "FSN",
+  "Nunley 2026b"
+ ],
+ "o-keeffe2019": [
+  "O'Keeffe & Bettstetter 2019"
+ ],
+ "oscillator-ising-machines": [
+  "Oscillator Ising machines",
+  "Wang & Roychowdhury 2019"
+ ],
+ "pikovsky2001": [
+  "Pikovsky et al. 2001",
+  "Pikovsky, Rosenblum & Kurths (2001)"
+ ],
+ "pittman-polletta2021": [
+  "Pittman-Polletta et al. 2021"
+ ],
+ "poppel2026": [
+  "Poppel et al. 2026"
+ ],
+ "rivera-sierra2026": [
+  "Rivera-Sierra, Bisquert & Fenollosa (2026)"
+ ],
+ "rodan2011": [
+  "Rodan & Tino 2011"
+ ],
+ "rusch2021": [
+  "Rusch & Mishra 2021",
+  "Rusch & Mishra 2021a",
+  "coRNN"
+ ],
+ "rusch2025": [
+  "LinOSS",
+  "Rusch & Rus 2025"
+ ],
+ "s4": [
+  "Gu et al. 2021",
+  "S4"
+ ],
+ "sagodi": [
+  "Sagodi & Park",
+  "Sagodi & Park 2026"
+ ],
+ "sajjadi2018": [
+  "Sajjadi et al. 2018"
+ ],
+ "sakaguchi1986": [
+  "Kuramoto\u2013Sakaguchi",
+  "Sakaguchi & Kuramoto 1986"
+ ],
+ "sasikumar2026": [
+  "Sasikumar & Balasubramaniam 2026"
+ ],
+ "schuster1989": [
+  "Schuster & Wagner (1989)"
+ ],
+ "skardal2019": [
+  "Skardal & Arenas (2019)"
+ ],
+ "sparsity-study": [
+  "sparsity study",
+  "Unconventional AI 2026c"
+ ],
+ "spikevoice": [
+  "SpikeVoice",
+  "Wang et al. 2024"
+ ],
+ "stiefel2016": [
+  "Stiefel & Ermentrout (2016)",
+  "Stiefel & Ermentrout 2016"
+ ],
+ "stolzle2024": [
+  "St\u00f6lzle & Della Santina 2024"
+ ],
+ "strogatz1993": [
+  "Strogatz & Stewart 1993"
+ ],
+ "strogatz2000": [
+  "Strogatz (2000)"
+ ],
+ "stuart1960": [
+  "Stuart",
+  "Stuart 1960"
+ ],
+ "tanaka2011": [
+  "Tanaka & Aoyagi (2011)"
+ ],
+ "tanaka2019": [
+  "Tanaka et al. 2019"
+ ],
+ "torrejon2017": [
+  "Spintronic reservoir",
+  "Torrejon et al. 2017"
+ ],
+ "turcu2022": [
+  "Turcu & Abbott 2022"
+ ],
+ "turian2020": [
+  "Turian & Henry 2020"
+ ],
+ "uhlhaas2006": [
+  "Uhlhaas & Singer 2006"
+ ],
+ "un-0": [
+  "Un-0",
+  "Unconventional AI 2026a"
+ ],
+ "unicornn": [
+  "Rusch & Mishra 2021b",
+  "UnICORNN"
+ ],
+ "vanderpol1926": [
+  "Van der Pol 1926",
+  "Van der Pol oscillator"
+ ],
+ "vaswani2017": [
+  "Vaswani et al. 2017"
+ ],
+ "winfree1967": [
+  "Winfree",
+  "Winfree (1967)",
+  "Winfree 1967"
+ ],
+ "wonn": [
+  "Dai & Song 2026",
+  "WONN"
+ ],
+ "yeung1999": [
+  "Yeung & Strogatz (1999)"
+ ],
+ "yu2025": [
+  "Yu et al. 2025"
+ ],
+ "zhang2023": [
+  "Zhang et al. 2023"
+ ],
+ "zhang2026": [
+  "Stuart\u2013Landau",
+  "Zhang et al. 2026"
+ ]
+}

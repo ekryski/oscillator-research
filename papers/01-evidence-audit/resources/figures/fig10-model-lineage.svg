@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="508" viewBox="0 0 660 508" font-family="Helvetica, Arial, sans-serif">
+<title>The oscillator dynamics each surveyed system is built on</title>
+<rect width="660" height="508" fill="#FFFFFF"/>
+<rect x="18" y="20" width="310" height="104" rx="4" fill="#F2F1EE" stroke="#24231F" stroke-width="1.2"/>
+<text x="32" y="42" text-anchor="start" font-size="11" fill="#24231F" font-weight="bold" font-style="normal">Winfree</text>
+<text x="314" y="41" text-anchor="end" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">phase only</text>
+<line x1="32" y1="51" x2="314" y2="51" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="173.0" y="75" text-anchor="middle" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">dθi/dt = ωi + Z(θi) Σj P(θj)</text>
+<text x="173.0" y="95" text-anchor="middle" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="normal">influence P and sensitivity Z are separate functions</text>
+<text x="173.0" y="113" text-anchor="middle" font-size="8.4" fill="#24231F" font-weight="bold" font-style="normal">WONN</text>
+<rect x="342" y="20" width="310" height="104" rx="4" fill="#F2F1EE" stroke="#24231F" stroke-width="1.2"/>
+<text x="356" y="42" text-anchor="start" font-size="11" fill="#24231F" font-weight="bold" font-style="normal">Kuramoto</text>
+<text x="638" y="41" text-anchor="end" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">phase only</text>
+<line x1="356" y1="51" x2="638" y2="51" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="497.0" y="75" text-anchor="middle" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">dθi/dt = ωi + (K/N) Σj sin(θj − θi)</text>
+<text x="497.0" y="95" text-anchor="middle" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="normal">a single sinusoid of the phase difference</text>
+<text x="497.0" y="113" text-anchor="middle" font-size="8.4" fill="#24231F" font-weight="bold" font-style="normal">Un-0 · KomplexNet · Kuramoto Attention · Kuramoto Orientation Diffusion</text>
+<rect x="18" y="137" width="310" height="104" rx="4" fill="#F2F1EE" stroke="#24231F" stroke-width="1.2"/>
+<text x="32" y="159" text-anchor="start" font-size="11" fill="#24231F" font-weight="bold" font-style="normal">Kuramoto–Sakaguchi</text>
+<text x="314" y="158" text-anchor="end" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">phase only</text>
+<line x1="32" y1="168" x2="314" y2="168" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="173.0" y="192" text-anchor="middle" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">dθi/dt = ωi + (K/N) Σj sin(θj − θi − α)</text>
+<text x="173.0" y="212" text-anchor="middle" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="normal">the same sinusoid, carrying a phase lag α</text>
+<text x="173.0" y="230" text-anchor="middle" font-size="8.4" fill="#24231F" font-weight="bold" font-style="normal">FSN</text>
+<rect x="342" y="137" width="310" height="104" rx="4" fill="#F2F1EE" stroke="#24231F" stroke-width="1.2"/>
+<text x="356" y="159" text-anchor="start" font-size="11" fill="#24231F" font-weight="bold" font-style="normal">Daido harmonics, with delay</text>
+<text x="638" y="158" text-anchor="end" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">phase only</text>
+<line x1="356" y1="168" x2="638" y2="168" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="497.0" y="192" text-anchor="middle" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">dθi/dt = ωi + Σj Γ(θj(t − τ) − θi)</text>
+<text x="497.0" y="212" text-anchor="middle" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="normal">an arbitrary periodic Γ, and coupling that depends on history</text>
+<text x="497.0" y="230" text-anchor="middle" font-size="8.4" fill="#24231F" font-weight="bold" font-style="normal">FSN</text>
+<rect x="18" y="254" width="310" height="104" rx="4" fill="#F2F1EE" stroke="#24231F" stroke-width="1.2"/>
+<text x="32" y="276" text-anchor="start" font-size="11" fill="#24231F" font-weight="bold" font-style="normal">D-dimensional Kuramoto</text>
+<text x="314" y="275" text-anchor="end" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">phase on a sphere</text>
+<line x1="32" y1="285" x2="314" y2="285" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="173.0" y="309" text-anchor="middle" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">dxi/dt = Ωi xi + Pxi (ci + Σj Jij xj)</text>
+<text x="173.0" y="329" text-anchor="middle" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="normal">unit vectors in D dimensions; the phase leaves the circle</text>
+<text x="173.0" y="347" text-anchor="middle" font-size="8.4" fill="#24231F" font-weight="bold" font-style="normal">AKOrN</text>
+<rect x="342" y="254" width="310" height="104" rx="4" fill="#DEDCD6" stroke="#24231F" stroke-width="1.2"/>
+<text x="356" y="276" text-anchor="start" font-size="11" fill="#24231F" font-weight="bold" font-style="normal">Stuart–Landau</text>
+<text x="638" y="275" text-anchor="end" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">amplitude and phase</text>
+<line x1="356" y1="285" x2="638" y2="285" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="497.0" y="309" text-anchor="middle" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">dzi/dt = (μ + iωi)zi − |zi|²zi + K Σj (zj − zi)</text>
+<text x="497.0" y="329" text-anchor="middle" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="normal">complex state: amplitude and phase both evolve</text>
+<text x="497.0" y="347" text-anchor="middle" font-size="8.4" fill="#24231F" font-weight="bold" font-style="normal">Zhang et al. 2026</text>
+<rect x="18" y="371" width="310" height="104" rx="4" fill="#FFFFFF" stroke="#24231F" stroke-width="1.2"/>
+<text x="32" y="393" text-anchor="start" font-size="11" fill="#24231F" font-weight="bold" font-style="normal">Damped second-order</text>
+<text x="314" y="392" text-anchor="end" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">no coupling term</text>
+<line x1="32" y1="402" x2="314" y2="402" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="173.0" y="426" text-anchor="middle" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">y″ = σ(Wy + W′y′ + Vu + b) − γy − εy′</text>
+<text x="173.0" y="446" text-anchor="middle" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="normal">an oscillatory recurrence; damping bounds the gradients</text>
+<text x="173.0" y="464" text-anchor="middle" font-size="8.4" fill="#24231F" font-weight="bold" font-style="normal">coRNN · UnICORNN · RON · Neural Wave Machines</text>
+<rect x="342" y="371" width="310" height="104" rx="4" fill="#FFFFFF" stroke="#24231F" stroke-width="1.2"/>
+<text x="356" y="393" text-anchor="start" font-size="11" fill="#24231F" font-weight="bold" font-style="normal">Linear oscillatory state space</text>
+<text x="638" y="392" text-anchor="end" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">no coupling term</text>
+<line x1="356" y1="402" x2="638" y2="402" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="497.0" y="426" text-anchor="middle" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">y″ = −Ay − Gy′ + Bu,   A, G diagonal</text>
+<text x="497.0" y="446" text-anchor="middle" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="normal">linear, so the whole sequence solves by parallel scan</text>
+<text x="497.0" y="464" text-anchor="middle" font-size="8.4" fill="#24231F" font-weight="bold" font-style="normal">LinOSS · D-LinOSS</text>
+<line x1="18" y1="486" x2="642" y2="486" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="18" y="500" text-anchor="start" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="normal">Physical substrates run their own device dynamics and are written as none of these forms: the spintronic reservoir, and oscillator Ising machines.</text>
+</svg>

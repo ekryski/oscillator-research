@@ -1,0 +1,129 @@
+$-- Pandoc template producing a TMLR-conforming LaTeX document.
+$--
+$-- Derived from `pandoc -D latex`, changed only where TMLR requires it. The
+$-- style file itself (templates/tmlr/tmlr.sty) is vendored unmodified from
+$-- github.com/JmlrOrg/tmlr-style-file — TMLR states that tweaking it may be
+$-- grounds for rejection, so every adjustment lives here in the preamble
+$-- instead. The partials called below ($common.latex()$ and friends) resolve
+$-- from pandoc's own data directory, so this stays in step with the default
+$-- template rather than freezing a copy of it.
+$--
+$-- tmlr-mode selects the three faces of the same manuscript:
+$--   submission  anonymous, "Under review as submission to TMLR" (the default)
+$--   preprint    de-anonymized, no mention of TMLR — for arXiv or a website
+$--   accepted    camera-ready, needs tmlr-month, tmlr-year and tmlr-openreview
+$document-metadata.latex()$
+$passoptions.latex()$
+\documentclass[10pt]{article}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+$-- TMLR numbers its sections; pandoc suppresses numbering unless asked
+\setcounter{secnumdepth}{$if(secnumdepth)$$secnumdepth$$else$3$endif$}
+$fonts.latex()$
+$font-settings.latex()$
+$common.latex()$
+$-- tmlr.sty sets the page rectangle, the fonts, the running head and natbib's
+$-- citation style. It loads last so that nothing pandoc pulled in overrides
+$-- the geometry TMLR checks for.
+\usepackage$if(tmlr-mode)$$if(tmlr-submission)$$else$[$tmlr-mode$]$endif$$endif${tmlr}
+$for(header-includes)$
+$header-includes$
+$endfor$
+% Table rows in a survey carry paragraphs, not single words, and pandoc's
+% longtables set them solid. Both knobs are needed: \arraystretch scales the
+% row strut, \extrarowheight lifts the text off the rule above it.
+\renewcommand{\arraystretch}{1.35}
+\setlength{\extrarowheight}{3pt}
+$after-header-includes.latex()$
+$hypersetup.latex()$
+$if(tmlr-submission)$
+$-- Double-blind covers the file, not just the page: hyperref writes the author
+$-- into the PDF's own metadata, where `pdfinfo` finds it even though tmlr.sty
+$-- has replaced the title block with "Anonymous authors".
+% Float placement. LaTeX's defaults reserve most of a page for text, so a
+% figure taller than about a third of the block gets deferred, often past the
+% section that introduces it: the physics timeline was landing inside the
+% neuroscience subsection. These let a float take more of the page it belongs
+% on, which keeps figures with the prose that references them.
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.85}
+\renewcommand{\textfraction}{0.06}
+\renewcommand{\floatpagefraction}{0.72}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+% Pandoc emits figures with the default [tbp], so a float can only ever move
+% forward to the top of a later page. `!htbp` adds "here" and tells LaTeX to
+% ignore the size fractions when deciding, which is what actually keeps a tall
+% figure in the subsection that introduces it rather than a page or two later.
+\makeatletter
+\renewcommand{\fps@figure}{!htbp}
+\renewcommand{\fps@table}{!htbp}
+\makeatother
+% A float may still drift past the heading of the subsection that introduces it,
+% which reads as though it belongs to the next one: the physics timeline was
+% landing under "Within neuroscience". Flushing pending floats at every
+% subsection boundary keeps each figure inside the subsection that cites it.
+% placeins would do this, but it is not in a BasicTeX installation, and the
+% mechanism is short: if any float is still waiting when a subsection begins,
+% flush it first. \@deferlist holds exactly those floats, so the page break
+% only fires when one is actually pending.
+\makeatletter
+\newcommand{\tmlr@floatbarrier}{\par\vspace{\z@}%
+  \ifx\@deferlist\@empty\else\clearpage\fi}
+\let\tmlr@subsection\subsection
+\renewcommand{\subsection}{\tmlr@floatbarrier\tmlr@subsection}
+\let\tmlr@subsubsection\subsubsection
+\renewcommand{\subsubsection}{\tmlr@floatbarrier\tmlr@subsubsection}
+\makeatother
+
+\hypersetup{pdfauthor={}}
+$endif$
+
+$-- The camera-ready running head is "Published in TMLR (month/year)" and the
+$-- title block carries the OpenReview link; both come from these three.
+\def\month{$if(tmlr-month)$$tmlr-month$$else$MM$endif$}
+\def\year{$if(tmlr-year)$$tmlr-year$$else$YYYY$endif$}
+\def\openreview{\url{$if(tmlr-openreview)$$tmlr-openreview$$else$https://openreview.net/forum?id=XXXX$endif$}}
+
+\title{$title$$if(subtitle)$ \\ $subtitle$$endif$}
+
+$-- TMLR's author block is \name/\email/\addr separated by \AND, not pandoc's
+$-- \and. Under the default (anonymous) option tmlr.sty discards it entirely
+$-- and prints "Anonymous authors" — this only renders for preprint/accepted.
+\author{$for(author)$\name $author.name$$if(author.email)$ \email $author.email$$endif$$if(author.affiliation)$ \\
+      \addr $author.affiliation$$endif$$sep$
+      \AND $endfor$}
+\date{}
+
+\begin{document}
+\maketitle
+$if(abstract)$
+\begin{abstract}
+$abstract$
+\end{abstract}
+$endif$
+
+$for(include-before)$
+$include-before$
+
+$endfor$
+$body$
+
+$if(nocite-ids)$
+\nocite{$for(nocite-ids)$$it$$sep$, $endfor$}
+$endif$
+$-- TMLR ships its own .bst; pandoc's --natbib path emits \citep/\citet and
+$-- leaves BibTeX to format the list, which is what the style file expects.
+$-- \bibliographystyle comes from pandoc's own partial via biblio-style, so
+$-- that there is exactly one of it — BibTeX takes the FIRST it sees in the
+$-- .aux and silently ignores the rest, which is how a paper ends up
+$-- formatted by plainnat while appearing to ask for tmlr.
+$-- The bundle always ships the bibliography as references.bib; BibTeX wants
+$-- that name without its extension.
+\bibliography{references}
+$for(include-after)$
+$include-after$
+
+$endfor$
+\end{document}

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="262" viewBox="0 0 660 262" font-family="Helvetica, Arial, sans-serif">
+<title>Training horizon across oscillator systems</title>
+<rect width="660" height="262" fill="#FFFFFF"/>
+<text x="330" y="24" text-anchor="middle" font-size="11.5" fill="#24231F" font-weight="bold" font-style="normal">Backpropagated steps across trained oscillator models</text>
+<line x1="96" y1="176" x2="604" y2="176" stroke="#24231F" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="96.0" y1="176" x2="96.0" y2="182" stroke="#24231F" stroke-width="1.2" stroke-linecap="round"/>
+<text x="96.0" y="195" text-anchor="middle" font-size="9" fill="#5F5E5A" font-weight="normal" font-style="normal">1</text>
+<line x1="214.11124323990592" y1="176" x2="214.11124323990592" y2="182" stroke="#24231F" stroke-width="1.2" stroke-linecap="round"/>
+<text x="214.11124323990592" y="195" text-anchor="middle" font-size="9" fill="#5F5E5A" font-weight="normal" font-style="normal">10</text>
+<line x1="332.22248647981183" y1="176" x2="332.22248647981183" y2="182" stroke="#24231F" stroke-width="1.2" stroke-linecap="round"/>
+<text x="332.22248647981183" y="195" text-anchor="middle" font-size="9" fill="#5F5E5A" font-weight="normal" font-style="normal">100</text>
+<line x1="450.3337297197178" y1="176" x2="450.3337297197178" y2="182" stroke="#24231F" stroke-width="1.2" stroke-linecap="round"/>
+<text x="450.3337297197178" y="195" text-anchor="middle" font-size="9" fill="#5F5E5A" font-weight="normal" font-style="normal">1,000</text>
+<line x1="568.4449729596237" y1="176" x2="568.4449729596237" y2="182" stroke="#24231F" stroke-width="1.2" stroke-linecap="round"/>
+<text x="568.4449729596237" y="195" text-anchor="middle" font-size="9" fill="#5F5E5A" font-weight="normal" font-style="normal">10,000</text>
+<text x="350" y="214" text-anchor="middle" font-size="9.4" fill="#5F5E5A" font-weight="normal" font-style="normal">steps unrolled and backpropagated through (log scale)</text>
+<line x1="96.0" y1="74" x2="96.0" y2="174" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<rect x="91.0" y="59" width="10" height="10" fill="#24231F" stroke="#24231F" stroke-width="1.3"/>
+<text x="107.0" y="63" text-anchor="start" font-size="9.6" fill="#24231F" font-weight="bold" font-style="normal">Kuramoto Attention · FSN</text>
+<text x="107.0" y="74" text-anchor="start" font-size="8.4" fill="#5F5E5A" font-weight="normal" font-style="normal">one dynamics step per layer</text>
+<line x1="96.0" y1="106" x2="96.0" y2="174" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<rect x="91.0" y="91" width="10" height="10" fill="#24231F" stroke="#24231F" stroke-width="1.3"/>
+<text x="107.0" y="95" text-anchor="start" font-size="9.6" fill="#24231F" font-weight="bold" font-style="normal">Kuramoto Orientation Diffusion</text>
+<text x="107.0" y="106" text-anchor="start" font-size="8.4" fill="#5F5E5A" font-weight="normal" font-style="normal">per-step score objectives</text>
+<line x1="241.3298518471892" y1="138" x2="241.3298518471892" y2="174" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<rect x="236.3298518471892" y="123" width="10" height="10" fill="#24231F" stroke="#24231F" stroke-width="1.3"/>
+<text x="265.32985184718916" y="127" text-anchor="start" font-size="9.6" fill="#24231F" font-weight="bold" font-style="normal">Un-0</text>
+<text x="265.32985184718916" y="138" text-anchor="start" font-size="8.4" fill="#5F5E5A" font-weight="normal" font-style="normal">10–25 integration steps</text>
+<line x1="244.26179618262262" y1="166" x2="244.26179618262262" y2="174" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<rect x="239.26179618262262" y="151" width="10" height="10" fill="#24231F" stroke="#24231F" stroke-width="1.3"/>
+<text x="255.26179618262262" y="155" text-anchor="start" font-size="9.6" fill="#24231F" font-weight="bold" font-style="normal">WONN</text>
+<text x="255.26179618262262" y="166" text-anchor="start" font-size="8.4" fill="#5F5E5A" font-weight="normal" font-style="normal">18 steps (6 layers × 3)</text>
+<line x1="598.5955259023403" y1="138" x2="598.5955259023403" y2="174" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<rect x="593.5955259023403" y="123" width="10" height="10" fill="#FFFFFF" stroke="#24231F" stroke-width="1.3"/>
+<text x="587.5955259023403" y="127" text-anchor="end" font-size="9.6" fill="#24231F" font-weight="bold" font-style="normal">LinOSS · D-LinOSS</text>
+<text x="587.5955259023403" y="138" text-anchor="end" font-size="8.4" fill="#5F5E5A" font-weight="normal" font-style="normal">linear, implicitly discretised</text>
+<line x1="214.11124323990592" y1="128" x2="261.11243239905923" y2="128" stroke="#24231F" stroke-width="3" stroke-linecap="round"/>
+<rect x="20" y="240" width="9" height="9" fill="#24231F" stroke="#24231F"/>
+<text x="35" y="248" text-anchor="start" font-size="9" fill="#5F5E5A" font-weight="normal" font-style="normal">nonlinear dynamics, no stated gradient bound</text>
+<rect x="330" y="240" width="9" height="9" fill="#FFFFFF" stroke="#24231F"/>
+<text x="345" y="248" text-anchor="start" font-size="9" fill="#5F5E5A" font-weight="normal" font-style="normal">linear, or gradients bounded by dissipation</text>
+</svg>

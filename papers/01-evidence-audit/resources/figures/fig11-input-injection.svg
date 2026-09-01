@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="218" viewBox="0 0 660 218" font-family="Helvetica, Arial, sans-serif">
+<title>The four input-injection forms found in the literature</title>
+<rect width="660" height="218" fill="#FFFFFF"/>
+<text x="330" y="28" text-anchor="middle" font-size="12" fill="#24231F" font-weight="bold" font-style="normal">Where the input enters the dynamics</text>
+<rect x="58" y="56" width="544" height="44" rx="4" fill="#F2F1EE" stroke="#C9C7C1" stroke-width="1"/>
+<text x="84" y="84" text-anchor="start" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">dθi/dt   =</text>
+<text x="188" y="84" text-anchor="middle" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">ωi</text>
+<text x="218" y="84" text-anchor="middle" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">+</text>
+<text x="248" y="84" text-anchor="middle" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">K</text>
+<text x="330" y="84" text-anchor="middle" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">Σj sin(θj − θi)</text>
+<text x="432" y="84" text-anchor="middle" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">+</text>
+<text x="486" y="84" text-anchor="middle" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">u(t)</text>
+<line x1="188" y1="92" x2="188" y2="110" stroke="#9C9A94" stroke-width="1" stroke-linecap="round"/>
+<circle cx="188" cy="118" r="8.5" fill="#FFFFFF" stroke="#24231F" stroke-width="1.2"/>
+<text x="188" y="121.5" text-anchor="middle" font-size="9.5" fill="#24231F" font-weight="bold" font-style="normal">1</text>
+<line x1="248" y1="92" x2="248" y2="110" stroke="#9C9A94" stroke-width="1" stroke-linecap="round"/>
+<circle cx="248" cy="118" r="8.5" fill="#FFFFFF" stroke="#24231F" stroke-width="1.2"/>
+<text x="248" y="121.5" text-anchor="middle" font-size="9.5" fill="#24231F" font-weight="bold" font-style="normal">2</text>
+<line x1="330" y1="92" x2="330" y2="110" stroke="#9C9A94" stroke-width="1" stroke-linecap="round"/>
+<circle cx="330" cy="118" r="8.5" fill="#FFFFFF" stroke="#24231F" stroke-width="1.2"/>
+<text x="330" y="121.5" text-anchor="middle" font-size="9.5" fill="#24231F" font-weight="bold" font-style="normal">3</text>
+<line x1="486" y1="92" x2="486" y2="110" stroke="#9C9A94" stroke-width="1" stroke-linecap="round"/>
+<circle cx="486" cy="118" r="8.5" fill="#FFFFFF" stroke="#24231F" stroke-width="1.2"/>
+<text x="486" y="121.5" text-anchor="middle" font-size="9.5" fill="#24231F" font-weight="bold" font-style="normal">4</text>
+<circle cx="69" cy="156" r="8.5" fill="#FFFFFF" stroke="#24231F" stroke-width="1.2"/>
+<text x="69" y="159.5" text-anchor="middle" font-size="9.5" fill="#24231F" font-weight="bold" font-style="normal">1</text>
+<text x="86" y="154" text-anchor="start" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">written into the natural frequency</text>
+<text x="86" y="167" text-anchor="start" font-size="8.8" fill="#5F5E5A" font-weight="normal" font-style="normal">WONN</text>
+<circle cx="381" cy="156" r="8.5" fill="#FFFFFF" stroke="#24231F" stroke-width="1.2"/>
+<text x="381" y="159.5" text-anchor="middle" font-size="9.5" fill="#24231F" font-weight="bold" font-style="normal">2</text>
+<text x="398" y="154" text-anchor="start" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">input-gated coupling strength</text>
+<text x="398" y="167" text-anchor="start" font-size="8.8" fill="#5F5E5A" font-weight="normal" font-style="normal">KomplexNet</text>
+<circle cx="69" cy="196" r="8.5" fill="#FFFFFF" stroke="#24231F" stroke-width="1.2"/>
+<text x="69" y="199.5" text-anchor="middle" font-size="9.5" fill="#24231F" font-weight="bold" font-style="normal">3</text>
+<text x="86" y="194" text-anchor="start" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">an extra phase-coupled term</text>
+<text x="86" y="207" text-anchor="start" font-size="8.8" fill="#5F5E5A" font-weight="normal" font-style="normal">AKOrN · Un-0</text>
+<circle cx="381" cy="196" r="8.5" fill="#FFFFFF" stroke="#24231F" stroke-width="1.2"/>
+<text x="381" y="199.5" text-anchor="middle" font-size="9.5" fill="#24231F" font-weight="bold" font-style="normal">4</text>
+<text x="398" y="194" text-anchor="start" font-size="10" fill="#24231F" font-weight="normal" font-style="normal">additive drive term</text>
+<text x="398" y="207" text-anchor="start" font-size="8.8" fill="#5F5E5A" font-weight="normal" font-style="normal">coRNN · LinOSS</text>
+</svg>

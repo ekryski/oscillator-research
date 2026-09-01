@@ -1,0 +1,13 @@
+/* Table rows in these papers carry paragraphs, not single words, and pandoc's
+   default stylesheet sets them nearly solid. This is the HTML and EPUB
+   counterpart of the \arraystretch and \extrarowheight lines the LaTeX builds
+   add; without it the same table reads very differently depending on which
+   format the reader opened. */
+table { border-collapse: collapse; }
+th, td {
+  padding: 0.55em 0.7em;
+  vertical-align: top;
+  line-height: 1.45;
+}
+thead th { border-bottom: 1.5px solid currentColor; }
+tbody tr + tr td { border-top: 1px solid rgba(128, 128, 128, 0.28); }

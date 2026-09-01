@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="304" viewBox="0 0 660 304" font-family="Helvetica, Arial, sans-serif">
+<title>Taxonomy of oscillator-based machine learning</title>
+<rect width="660" height="304" fill="#FFFFFF"/>
+<rect x="168" y="44" width="232" height="118" rx="4" fill="#F2F1EE" stroke="#24231F" stroke-width="1.2"/>
+<text x="182" y="65" text-anchor="start" font-size="10.4" fill="#24231F" font-weight="bold" font-style="normal">Untrained, designed</text>
+<text x="182" y="78" text-anchor="start" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="italic">nothing is fitted anywhere in the system</text>
+<line x1="182" y1="87" x2="386" y2="87" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="182" y="104" text-anchor="start" font-size="8.6" fill="#24231F" font-weight="normal" font-style="normal">Oscillator Ising machines</text>
+<text x="182" y="117" text-anchor="start" font-size="8.6" fill="#24231F" font-weight="normal" font-style="normal">(Hopf cochlea, the biological case)</text>
+<rect x="416" y="44" width="232" height="118" rx="4" fill="#F2F1EE" stroke="#24231F" stroke-width="1.2"/>
+<text x="430" y="65" text-anchor="start" font-size="10.4" fill="#24231F" font-weight="bold" font-style="normal">Untrained, with a trained readout</text>
+<text x="430" y="78" text-anchor="start" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="italic">the readout is fitted, the dynamics is not</text>
+<line x1="430" y1="87" x2="634" y2="87" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="430" y="104" text-anchor="start" font-size="8.6" fill="#24231F" font-weight="normal" font-style="normal">ESN · LSM</text>
+<text x="430" y="117" text-anchor="start" font-size="8.6" fill="#24231F" font-weight="normal" font-style="normal">RON · Spintronic reservoir</text>
+<rect x="168" y="178" width="232" height="118" rx="4" fill="#DEDCD6" stroke="#24231F" stroke-width="1.2"/>
+<text x="182" y="199" text-anchor="start" font-size="10.4" fill="#24231F" font-weight="bold" font-style="normal">Trained, designed</text>
+<text x="182" y="212" text-anchor="start" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="italic">gradients reach the dynamics, and nothing else</text>
+<line x1="182" y1="221" x2="386" y2="221" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="182" y="238" text-anchor="start" font-size="8.6" fill="#24231F" font-weight="normal" font-style="normal">Un-0</text>
+<text x="182" y="251" text-anchor="start" font-size="8.6" fill="#24231F" font-weight="normal" font-style="normal">WONN</text>
+<rect x="416" y="178" width="232" height="118" rx="4" fill="#DEDCD6" stroke="#24231F" stroke-width="1.2"/>
+<text x="430" y="199" text-anchor="start" font-size="10.4" fill="#24231F" font-weight="bold" font-style="normal">Trained, inside a trained network</text>
+<text x="430" y="212" text-anchor="start" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="italic">gradients reach the dynamics and its scaffolding</text>
+<line x1="430" y1="221" x2="634" y2="221" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="430" y="238" text-anchor="start" font-size="8.6" fill="#24231F" font-weight="normal" font-style="normal">AKOrN · KomplexNet · HoloGraph</text>
+<text x="430" y="251" text-anchor="start" font-size="8.6" fill="#24231F" font-weight="normal" font-style="normal">Kuramoto Attention · FSN · NWM</text>
+<text x="430" y="264" text-anchor="start" font-size="8.6" fill="#24231F" font-weight="normal" font-style="normal">coRNN · UnICORNN · LinOSS · D-LinOSS</text>
+<text x="430" y="277" text-anchor="start" font-size="8.6" fill="#24231F" font-weight="normal" font-style="normal">Kuramoto Orientation Diffusion</text>
+<text x="284.0" y="26" text-anchor="middle" font-size="9.2" fill="#24231F" font-weight="bold" font-style="normal">no trained network around it</text>
+<text x="532.0" y="26" text-anchor="middle" font-size="9.2" fill="#24231F" font-weight="bold" font-style="normal">a trained encoder or decoder around it</text>
+<line x1="168" y1="32" x2="648" y2="32" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<text x="152" y="99.0" text-anchor="end" font-size="9.2" fill="#24231F" font-weight="bold" font-style="normal">the dynamics is fixed</text>
+<text x="152" y="112.0" text-anchor="end" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="normal">by design or at random</text>
+<text x="152" y="233.0" text-anchor="end" font-size="9.2" fill="#24231F" font-weight="bold" font-style="normal">the dynamics is trained</text>
+<text x="152" y="246.0" text-anchor="end" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="normal">gradients flow through it</text>
+<line x1="158" y1="44" x2="158" y2="296" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+</svg>

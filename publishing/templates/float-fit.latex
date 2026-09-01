@@ -1,0 +1,13 @@
+% Pandoc's default template caps an image at \textheight, which leaves a tall
+% portrait figure no room for its own caption: the float then cannot be placed
+% and LaTeX reports "Float too large for page". Reserve a few lines for it.
+%
+% The two \def's are pandoc's own, repeated here rather than reused: this file
+% is included through --include-in-header, and relying on a macro the template
+% may or may not have defined by that point cost a silent PDF build failure.
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxfitheight{\ifdim\Gin@nat@height>0.86\textheight 0.86\textheight
+                  \else\Gin@nat@height\fi}
+\setkeys{Gin}{width=\maxwidth,height=\maxfitheight,keepaspectratio}
+\makeatother
