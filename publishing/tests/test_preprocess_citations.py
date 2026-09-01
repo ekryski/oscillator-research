@@ -230,3 +230,41 @@ def test_two_entries_holding_one_identifier_are_reported():
 
 def test_a_bibliography_with_no_duplicate_identifiers_is_quiet():
     assert shared_links(BIB) == []
+
+
+class TestArxivIdInANote:
+    """Most DBLP entries put the venue page in `url` and the preprint in `note`.
+
+    A manuscript that cites the preprint then matches the entry on nothing but
+    its author-year label, which is the path a mislabelled entry slips through.
+    """
+
+    def test_a_preprint_note_is_an_identifier(self):
+        fields = {"url": "https://openreview.net/forum?id=F3s69XzWOia",
+                  "note": "Preprint: arXiv:2010.00951"}
+        assert "arxiv:2010.00951" in entry_links(fields)
+
+    def test_an_old_style_archive_id_is_matched(self):
+        assert "arxiv:cond-mat/0210694" in entry_links(
+            {"note": "Preprint: arXiv:cond-mat/0210694"})
+
+    def test_a_version_suffix_is_dropped(self):
+        assert "arxiv:2511.08094" in entry_links(
+            {"note": "Preprint: arXiv:2511.08094v2"})
+
+    def test_a_note_with_no_preprint_adds_nothing(self):
+        assert entry_links({"note": "Published as a poster."}) == []
+
+    def test_the_note_id_matches_the_link_a_manuscript_writes(self):
+        # the whole point: both sides reduce to one key
+        fields = {"url": "https://openreview.net/forum?id=x",
+                  "note": "Preprint: arXiv:2010.00951"}
+        assert url_key("https://arxiv.org/abs/2010.00951") in \
+            entry_links(fields)
+
+    def test_an_entry_still_answers_to_its_other_identifiers(self):
+        fields = {"doi": "10.1016/j.neunet.2019.03.005",
+                  "note": "Preprint: arXiv:1808.04962"}
+        links = entry_links(fields)
+        assert "doi:10.1016/j.neunet.2019.03.005" in links
+        assert "arxiv:1808.04962" in links

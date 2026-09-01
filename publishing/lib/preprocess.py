@@ -205,6 +205,15 @@ BARE_ARXIV = re.compile(
     r"^(?:arxiv:)?(\d{4}\.\d{4,5}|[a-z-]+(?:\.[A-Za-z]{2})?/\d{7})(?:v\d+)?$", re.I)
 #: which bibliography fields identify the work rather than describe it
 IDENTIFIER_FIELDS = ("doi", "eprint", "url")
+#: an arXiv id recorded inside a `note` instead of an `eprint` field. Most of
+#: the DBLP-sourced entries carry it that way — `url` is the venue's own page
+#: and the note reads "Preprint: arXiv:2010.00951" — and a manuscript that
+#: cites the preprint would otherwise match the entry on nothing but its
+#: author-year label, which is the resolution path a mislabelled entry slips
+#: through. `bibtex_compat.one_identifier` keeps the note beside the URL for
+#: the same reason: it is often the copy a reader can actually open.
+NOTE_ARXIV = re.compile(
+    r"arxiv:\s*(\d{4}\.\d{4,5}|[a-z-]+(?:\.[A-Za-z]{2})?/\d{7})(?:v\d+)?", re.I)
 
 
 def url_key(value: str) -> str:
@@ -239,7 +248,10 @@ def entry_links(fields: dict[str, str]) -> list[str]:
     DOI in `url` — several do, where the DOI is the only page the work has —
     still matches a manuscript link written as a doi.org address.
     """
-    return [url_key(fields[f]) for f in IDENTIFIER_FIELDS if fields.get(f)]
+    keys = [url_key(fields[f]) for f in IDENTIFIER_FIELDS if fields.get(f)]
+    if m := NOTE_ARXIV.search(fields.get("note", "")):
+        keys.append("arxiv:" + m.group(1).lower())
+    return keys
 
 
 def url_index(bib: str) -> dict[str, str]:

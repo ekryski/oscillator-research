@@ -356,6 +356,30 @@ pandoc's `--number-sections`, and LaTeX's own. The second is easy to miss —
 `--number-sections` alone still produces "1 1 Introduction" in the PDF. The
 build passes `--variable=secnumdepth=0` for that.
 
+### Citations that can land on the wrong work
+
+`lib/check_citemap.py` reports three ways a citation goes wrong quietly, and the
+build fails on any of them.
+
+A **shared label**: `[Nunley 2026](...)` derives its citekey from the label's
+author and year, so two works by one author in one year collapse onto a single
+key. One wins, the other's citations all follow it, and the other drops out of
+the bibliography — with the reference list still complete and every claim still
+cited. It happened five times here. A letter suffix, `Huang et al. 2026a`, is
+the fix.
+
+A **shared link**: two entries carrying one DOI or arXiv id are two records of
+one work, and only the first is reachable, so the second is never cited. Merge
+them.
+
+A citation **matched on its label alone**: its link matches no `doi`, `eprint`
+or `url` in the bibliography, so nothing checks that the entry is the work the
+link points at. This is how a "Zhang et al. (2023)" in the prose came to print a
+Zhang 2023 about a different subject. Recording the identifier the link uses is
+what fixes it, and `entry_links` reads the arXiv id out of a `Preprint:
+arXiv:...` note as well as out of the fields, because most of the DBLP-sourced
+entries carry the venue page in `url` and the preprint only in the note.
+
 ### Figure and table numbers
 
 LaTeX numbers its own floats, so the PDF captions already read "Figure 3:" and
@@ -417,7 +441,7 @@ publishing/
 │   ├── check_bib.py        which entries are not yet complete enough to publish
 │   ├── check_first_cite.py is every system and author cited where first named
 │   ├── check_sections.py   does every Section/Appendix pointer resolve
-│   ├── check_citemap.py    is any citation label claimed by two works
+│   ├── check_citemap.py    can any citation land on the wrong work
 │   ├── check_hidden.py     invisible characters left in the source files
 │   ├── number_sections.py  write the section numbers into the headings
 │   └── check_links.py      does every citation still resolve

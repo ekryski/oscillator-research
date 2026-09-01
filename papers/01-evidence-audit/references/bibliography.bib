@@ -279,6 +279,7 @@
   pages         = {1--5},
   doi           = {10.1109/ICASSP49357.2023.10095188},
   url           = {https://doi.org/10.1109/ICASSP49357.2023.10095188},
+  note          = {Preprint: arXiv:2210.14476},
 }
 
 @article{hizanidis2016,
@@ -734,6 +735,7 @@
   journal       = {Neural Networks},
   volume        = {115},
   doi           = {10.1016/j.neunet.2019.03.005},
+  note          = {Preprint: arXiv:1808.04962},
 }
 
 @article{torrejon2017,
@@ -853,7 +855,12 @@
   publisher    = {{ACM}},
   year         = {2026},
   url          = {https://dl.acm.org/doi/10.1145/3774904.3792675},
-  doi          = {10.1145/3774904.3792675},
+  % The DOI is 10.1145/3774904.3792675, and is deliberately not a field here.
+  % ACM has not registered it with the resolver yet, so doi.org returns 404
+  % while the publisher page below resolves. bibtex_compat.one_identifier
+  % prefers a DOI over a URL, so recording it would print the address that
+  % fails and drop the one that works. Restore the field once doi.org answers;
+  % the URL carries the same DOI in its path meanwhile.
   note          = {Preprint: arXiv:2511.08094},
 }
 

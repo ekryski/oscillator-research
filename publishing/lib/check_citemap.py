@@ -35,6 +35,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import bibfile
+import preprocess
 from extract_bib import citekey, split_author_year
 from paths import papers
 from preprocess import entry_links
@@ -72,6 +73,30 @@ def shared_links(bib: str) -> list[tuple[str, str, str]]:
     return out
 
 
+def label_only(manuscript: str, bib: str) -> list[tuple[str, str]]:
+    """(label, link) for every citation no bibliography identifier matches.
+
+    These are the citations that can go wrong quietly. A citation whose link
+    matches a `doi`, `eprint` or `url` in the bibliography is checked by that
+    match: point it at the wrong entry and the identifiers disagree. A citation
+    with no such match is resolved on its author-year label alone, and a label
+    fits any work by those authors in that year — which is how a "Zhang et al.
+    (2023)" in the prose came to print a Zhang 2023 about a different subject.
+
+    Reported per distinct (label, link) pair, since one work is usually cited
+    many times and one entry is the thing to fix.
+    """
+    by_url = preprocess.url_index(bib)
+    out = []
+    for m in preprocess.LINK.finditer(manuscript):
+        label = " ".join(m.group(1).split())
+        if preprocess.NOT_A_CITATION.search(label):
+            continue
+        if not by_url.get(preprocess.url_key(m.group(2))):
+            out.append((label, m.group(2)))
+    return sorted(set(out))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="labels and links two works share")
     ap.add_argument("--strict", action="store_true")
@@ -92,9 +117,18 @@ def main() -> int:
         print(f"{paper.slug}: {len(dupes)} link(s) claimed by two bibliography entries")
         for link, first, second in dupes:
             print(f"  {link:52s} {first} vs {second}")
+        if not paper.manuscript:
+            continue
+        loose = label_only(paper.manuscript.read_text(), paper.bib.read_text())
+        total += len(loose)
+        print(f"{paper.slug}: {len(loose)} citation(s) matched on the label alone")
+        for label, link in loose:
+            print(f"  {label:34s} {link}")
     if total:
         print("\nDisambiguate a label with a letter suffix, as in 'Huang et al. 2026a';\n"
-              "a shared link means one work has two entries — merge them.")
+              "a shared link means one work has two entries — merge them; a citation\n"
+              "matched on its label alone wants the identifier its link uses recorded\n"
+              "in the entry, as a doi, an eprint, a url or a 'Preprint: arXiv:...' note.")
     return 1 if (total and a.strict) else 0
 
 
