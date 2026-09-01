@@ -225,12 +225,15 @@ stored energy source to hold its swing against friction, is the familiar
 case, and its whole state is one number: how far around the cycle it
 currently is, its \textbf{phase}. Models that keep only that number are
 \emph{phase-only}, and the Kuramoto and Winfree families this survey
-meets most often are of that kind. Models that keep the distance from
-the centre as well, the \textbf{amplitude}, describe a state living in a
-plane rather than on a circle: the Stuart-Landau equation is the
-canonical form, and the damped second-order recurrences of the coRNN
-\citep{rusch2021} and LinOSS \citep{rusch2025} lines are the
-machine-learning case.
+meets most often are of that kind. Models that track an oscillator's
+distance from the centre in addition to its phase carry a second
+coordinate, the \textbf{amplitude}, so the state lives in a plane rather
+than on a circle. The Stuart-Landau equation is the canonical form;
+among the systems surveyed here, the damped second-order recurrences of
+the coRNN \citep{rusch2021} and LinOSS \citep{rusch2025} lines share
+that planar state, though without the amplitude-restoring terms that
+make a rhythm self-sustaining, so they oscillate under drive rather than
+on their own.
 
 \begin{figure}
 \centering
