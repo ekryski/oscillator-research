@@ -1109,13 +1109,14 @@ therefore runs at its own gate-calibrated gain, with effective drive (g
 {0.5, 1, 2}); carrier g = 32 by its own gate. Every sweep obeys an
 integrator-validity bound: a point is valid iff every per-tick drive
 phase increment stays below π (max-criterion; standard
-explicit-integrator discipline <span class="citation" data-cites="hairer1993">(<a href="#ref-hairer1993" role="doc-biblioref">Hairer, 1993</a>)</span>), with rms increment ≤ 0.5
-rad as an accuracy annotation. Measured bounds: carrier valid to g ≈ 75,
-mel to g ≈ 17 at dt = 0.1. Per-run increment statistics are recorded by
-instrumentation in every run. Higher physical drive, when a question
-needs it, is reached by increasing substeps, never by gain past the
-bound. Prior art for the response shape: input scaling is a canonical
-reservoir hyperparameter with an interior optimum <span class="citation" data-cites="lukosevicius2012">(<a href="#ref-lukosevicius2012" role="doc-biblioref">Lukoševičius, 2012</a>)</span>.</p>
+explicit-integrator discipline <span class="citation" data-cites="hairer1993">(<a href="#ref-hairer1993" role="doc-biblioref">Hairer et al., 1993</a>)</span>), with rms
+increment ≤ 0.5 rad as an accuracy annotation. Measured bounds: carrier
+valid to g ≈ 75, mel to g ≈ 17 at dt = 0.1. Per-run increment statistics
+are recorded by instrumentation in every run. Higher physical drive,
+when a question needs it, is reached by increasing substeps, never by
+gain past the bound. Prior art for the response shape: input scaling is
+a canonical reservoir hyperparameter with an interior optimum <span class="citation" data-cites="lukosevicius2012">(<a href="#ref-lukosevicius2012" role="doc-biblioref">Lukoševičius,
+2012</a>)</span>.</p>
 <h2 id="instrumentation-mechanism-never-verdicts">4.6 Instrumentation
 (mechanism, never verdicts)</h2>
 <p>Drive-phase PLV per band: each oscillator’s phase is compared against
@@ -1632,8 +1633,8 @@ readings. The randomized-twin discipline for designed structure follows
 learning front-ends <span class="citation" data-cites="lostanlen zeghidour">(<a href="#ref-lostanlen" role="doc-biblioref">Lostanlen et al., 2023</a>; <a href="#ref-zeghidour" role="doc-biblioref">Zeghidour et al.,
 2021</a>)</span> are the trained counterpoint to our fixed tonotopy. The
 closest body of work to this paper’s premise is the neuro-oscillatory
-speech literature reviewed by <span class="citation" data-cites="dogonasheva2026">(<a href="#ref-dogonasheva2026" role="doc-biblioref">Dogonasheva et al., 2026</a>)</span>, whose three
-model families <span class="citation" data-cites="assaneo2020 doelling2023 pittman-polletta2021">(<a href="#ref-assaneo2020" role="doc-biblioref">Assaneo et al., 2020</a>;
+speech literature reviewed by <span class="citation" data-cites="dogonasheva2026">Dogonasheva et al. (<a href="#ref-dogonasheva2026" role="doc-biblioref">2026</a>)</span>, whose
+three model families <span class="citation" data-cites="assaneo2020 doelling2023 pittman-polletta2021">(<a href="#ref-assaneo2020" role="doc-biblioref">Assaneo et al., 2020</a>;
 <a href="#ref-doelling2023" role="doc-biblioref">Doelling et al.,
 2023</a>; <a href="#ref-pittman-polletta2021" role="doc-biblioref">Pittman-Polletta et al., 2021</a>)</span> all
 obtain their rate flexibility from adaptation of some parameter, and
@@ -1748,8 +1749,9 @@ Neuro-oscillatory models of cortical speech processing. <em>Neural
 Networks</em>, <em>195</em>. <a href="https://doi.org/10.1016/j.neunet.2025.108194">https://doi.org/10.1016/j.neunet.2025.108194</a>
 </div>
 <div id="ref-hairer1993" class="csl-entry" role="listitem">
-Hairer. (1993). <em>Solving ordinary differential equations i: Nonstiff
-problems</em>. Springer Series in Computational Mathematics. <a href="https://doi.org/10.1007/978-3-540-78862-1">https://doi.org/10.1007/978-3-540-78862-1</a>
+Hairer, E., Nørsett, S. P., &amp; Wanner, G. (1993). <em>Solving
+ordinary differential equations i: Nonstiff problems</em> (2nd revised,
+Vol. 8). Springer. <a href="https://doi.org/10.1007/978-3-540-78862-1">https://doi.org/10.1007/978-3-540-78862-1</a>
 </div>
 <div id="ref-hansel1993" class="csl-entry" role="listitem">
 Hansel, D., Mato, G., &amp; Meunier, C. (1993). Clustering and slow

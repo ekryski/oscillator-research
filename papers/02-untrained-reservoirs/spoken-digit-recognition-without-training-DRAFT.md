@@ -568,7 +568,7 @@ theory supplies the analytical spine ([Winfree 1967](https://doi.org/10.1016/002
 randomized-twin discipline for designed structure follows ([Caranzano et al. 2025](https://arxiv.org/abs/2505.04300)); frequency-
 learning front-ends ([Lostanlen et al. 2023](https://arxiv.org/abs/2307.13821); [Zeghidour et al. 2021](https://openreview.net/forum?id=jM76BCb6F9m)) are the trained counterpoint to
 our fixed tonotopy. The closest body of work to this paper's premise is the neuro-oscillatory
-speech literature reviewed by ([Dogonasheva et al. 2026](https://doi.org/10.1016/j.neunet.2025.108194)), whose three model families
+speech literature reviewed by [Dogonasheva et al. 2026](https://doi.org/10.1016/j.neunet.2025.108194), whose three model families
 ([Assaneo et al. 2020](https://doi.org/10.1038/s41562-020-00962-0); [Doelling et al. 2023](https://doi.org/10.1371/journal.pcbi.1011669); [Pittman-Polletta et al. 2021](https://doi.org/10.1371/journal.pcbi.1008783)) all obtain their rate
 flexibility from adaptation of some parameter, and none of which is evaluated against a
 parameter-matched conventional baseline on a recognition task. To our knowledge, no prior work varies oscillator-network lattice
