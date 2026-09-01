@@ -293,6 +293,10 @@ echo "=== bibliography completeness"
 python3 publishing/lib/check_bib.py
 
 echo
+echo "=== invisible characters in the sources"
+python3 publishing/lib/check_hidden.py
+
+echo
 echo "=== citation labels shared by two works"
 python3 publishing/lib/check_citemap.py
 

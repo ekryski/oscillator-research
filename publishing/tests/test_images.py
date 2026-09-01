@@ -45,3 +45,23 @@ def test_a_caption_containing_a_citation_link_still_converts():
            "](resources/figures/fig13-controls-grid.png)")
     out, n = to_vector_images(src)
     assert n == 1 and out.endswith("fig13-controls-grid.pdf)")
+
+
+def test_zero_width_and_tag_characters_are_stripped():
+    from preprocess import strip_hidden
+    # a tag-block run is the usual way generated prose is watermarked
+    payload = "".join(chr(0xE0000 + ord(c) - 0x20) for c in "ID")
+    out, n = strip_hidden(f"real​text{payload}️⁠ here")
+    assert out == "realtext here" and n == 5
+
+
+def test_a_no_break_space_becomes_a_space_rather_than_vanishing():
+    from preprocess import strip_hidden
+    out, n = strip_hidden("two words")
+    assert out == "two words" and n == 1
+
+
+def test_ordinary_text_is_untouched():
+    from preprocess import strip_hidden
+    src = "Kuramoto–Sakaguchi, Buzsáki, θ and ω, 0.97–1.00."
+    assert strip_hidden(src) == (src, 0)

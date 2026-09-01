@@ -175,6 +175,31 @@ def alias_map(citemap: dict[str, list[str]]) -> dict[str, str]:
     return out
 
 
+#: Characters with no visual width. They survive copy-paste, they survive most
+#: editors, and a run of them encodes arbitrary text that no reader can see —
+#: the tag block exists for exactly that and is the usual way generated prose
+#: gets watermarked. None of them has a legitimate use in these manuscripts, so
+#: they are removed from every built format rather than reported and left.
+#: Variation selectors are included: they matter for emoji presentation, which
+#: an academic manuscript does not have, and they are a known carrier too.
+HIDDEN = re.compile(
+    "[\u00ad\u200b-\u200f\u2060-\u2064\ufeff\u180e"   # zero-width, directional marks
+    "\ufe00-\ufe0f"                                        # variation selectors
+    "\u202a-\u202e\u2066-\u2069"                          # bidi overrides
+    "\U000e0000-\U000e007f]"                               # tag block
+)
+#: a no-break space is invisible as a *difference* rather than invisible outright;
+#: deleting it would run two words together, so it is normalised, not dropped
+NBSP = "\u00a0"
+
+
+def strip_hidden(text: str) -> tuple[str, int]:
+    """Remove zero-width and formatting characters; normalise no-break spaces."""
+    text, n = HIDDEN.subn("", text)
+    n += text.count(NBSP)
+    return text.replace(NBSP, " "), n
+
+
 def rewrite_links(text: str, known: dict[str, str]) -> tuple[str, int]:
     hits = 0
 
@@ -247,6 +272,8 @@ def main() -> None:
     appendix = ""
     if a.appendix_out is not None and APPENDIX.search(text):
         text, appendix = APPENDIX.split(text, 1)
+    # before anything else, so no invisible character reaches an output format
+    text, n_hidden = strip_hidden(text)
     text, n_links = rewrite_links(text, known)
     text, n_brackets = rewrite_brackets(text, known)
     n_math = n_img = 0
@@ -267,6 +294,8 @@ def main() -> None:
         # never resolve; it is written separately only so the LaTeX builds can
         # place it after the bibliography
         if appendix.strip():
+            appendix, n_appx = strip_hidden(appendix)
+            n_hidden += n_appx
             appendix, _ = rewrite_links(appendix, known)
             appendix, _ = rewrite_brackets(appendix, known)
             if a.target == "latex":
@@ -275,6 +304,9 @@ def main() -> None:
         a.appendix_out.write_text(appendix.strip() + "\n" if appendix.strip() else "")
     extra = f", {n_math} math characters" if n_math else ""
     extra += f", {n_img} images to vector" if n_img else ""
+    # loud rather than silent: a hidden character in the source means the
+    # Markdown still carries it even though the built formats no longer do
+    extra += f", {n_hidden} HIDDEN CHARACTERS STRIPPED" if n_hidden else ""
     print(f"{a.out.name}: {n_links} link citations, "
           f"{n_brackets} bracket citations rewritten{extra}")
 
