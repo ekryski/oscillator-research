@@ -372,9 +372,9 @@ A **shared link**: two entries carrying one DOI or arXiv id are two records of
 one work, and only the first is reachable, so the second is never cited. Merge
 them.
 
-A citation **matched on its label alone**: its link matches no `doi`, `eprint`
-or `url` in the bibliography, so nothing checks that the entry is the work the
-link points at. This is how a "Zhang et al. (2023)" in the prose came to print a
+A citation **matched on its label alone**: either its link matches no `doi`,
+`eprint` or `url` in the bibliography, or it is a bracket citation and carries no
+link to match. Either way nothing checks that the entry is the work meant. This is how a "Zhang et al. (2023)" in the prose came to print a
 Zhang 2023 about a different subject. Recording the identifier the link uses is
 what fixes it, and `entry_links` reads the arXiv id out of a `Preprint:
 arXiv:...` note as well as out of the fields, because most of the DBLP-sourced

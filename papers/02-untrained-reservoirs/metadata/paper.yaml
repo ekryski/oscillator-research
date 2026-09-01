@@ -1,5 +1,8 @@
 # Front matter for the built formats. Edit here, not in the manuscript.
-title: "Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields"
+# The title and the abstract are written in the manuscript itself: the title
+# as its `# ` heading, the abstract under `## Abstract`, so a reader who opens
+# the Markdown sees both. publish.sh lifts each one out and hands it to pandoc,
+# and removes it from the body copy so it renders once rather than twice.
 author:
   - name: Eric Kryski
     affiliation: Independent researcher

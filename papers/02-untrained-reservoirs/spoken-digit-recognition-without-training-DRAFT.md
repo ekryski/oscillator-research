@@ -1,3 +1,5 @@
+# Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields
+
 ## Abstract
 
 Recent work has revived coupled-oscillator networks as a computational substrate, with several lines
@@ -19,10 +21,10 @@ attributes that memory predominantly to per-oscillator phase integration.
 
 Coupled oscillators are having a revival as a machine-learning substrate. Hardware
 reservoirs classify spoken digits with a handful of spintronic oscillators
-[Torrejon 2017]; oscillator-inspired recurrent networks post competitive accuracy on
-speech-adjacent benchmarks [Rusch 2021]; trained Kuramoto dynamics generate images
-[unconv.ai 2026] and function as computational primitives for vision and reasoning
-[Miyato 2025]. Much of this literature carries, implicitly or explicitly, a reservoir
+([Torrejon 2017](https://doi.org/10.1038/nature23011)); oscillator-inspired recurrent networks post competitive accuracy on
+speech-adjacent benchmarks ([Rusch 2021](https://openreview.net/forum?id=F3s69XzWOia)); trained Kuramoto dynamics generate images
+([unconv.ai 2026](https://unconv.ai/blog/introducing-un-0-generating-images-with-coupled-oscillators/)) and function as computational primitives for vision and reasoning
+([Miyato 2025](https://openreview.net/forum?id=nwDRD4AMoN)). Much of this literature carries, implicitly or explicitly, a reservoir
 premise: that oscillator physics *by itself*, before any training, transduces signals
 into computationally useful structure.
 
@@ -33,7 +35,7 @@ holds, the experiments say which geometries and coupling laws carry the effect a
 data suggests so. If it does not, the experiments say what bounds it, which design
 limitations could mask a real effect (readout capacity, readout data size, field size, frontend conditioning), each with a measured control or a named future test, and what would refute or rescue the claim.
 
-We evaluate spoken digits 0–9 (AudioMNIST [Becker 2024], speaker-disjoint split), the
+We evaluate spoken digits 0–9 (AudioMNIST ([Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)), speaker-disjoint split), the
 standard task of the oscillator-reservoir literature, which makes our numbers placeable
 against published anchors without head-to-head claims. The design principles throughout:
 
@@ -81,11 +83,11 @@ the Kuramoto base:
 
 | family | coupling (essence) | primary source | why it is in the matrix |
 |---|---|---|---|
-| kuramoto | Σⱼ Kᵢⱼ sin(θⱼ−θᵢ) | [Winfree 1967; Kuramoto 1975] | the minimal, exactly analyzed synchronization law; every other family is a controlled deviation from it |
-| sakaguchi | sin(θⱼ−θᵢ−α) | [Sakaguchi & Kuramoto 1986] | frustration shifts the synchronization transition and admits travelling/partially coherent regimes [Abrams & Strogatz 2004] |
-| harmonic2 | + β·sin 2(θⱼ−θᵢ) | [Daido 1992; Hansel et al. 1993] | higher harmonics create multi-cluster attractors; cluster states as candidate feature diversity |
-| winfree | sensitivity × influence product | [Winfree 1967]; ML neighbor [Dai & Song 2026] | the ancestral population model, a genuinely different signal pathway |
-| stuart–landau (sl) | complex ż = (μ+iω)z − \|z\|²z + coupling | [Stuart 1960; Aranson & Kramer 2002] | adds the amplitude channel: extra state per oscillator |
+| kuramoto | Σⱼ Kᵢⱼ sin(θⱼ−θᵢ) | ([Winfree 1967](https://doi.org/10.1016/0022-5193%2867%2990051-3); [Kuramoto 1975](https://doi.org/10.1007/BFb0013365)) | the minimal, exactly analyzed synchronization law; every other family is a controlled deviation from it |
+| sakaguchi | sin(θⱼ−θᵢ−α) | ([Sakaguchi & Kuramoto 1986](https://doi.org/10.1143/PTP.76.576)) | frustration shifts the synchronization transition and admits travelling/partially coherent regimes ([Abrams & Strogatz 2004](https://arxiv.org/abs/nlin/0407045)) |
+| harmonic2 | + β·sin 2(θⱼ−θᵢ) | ([Daido 1992](https://doi.org/10.1143/ptp/88.6.1213); [Hansel et al. 1993](https://doi.org/10.1103/PhysRevE.48.3470)) | higher harmonics create multi-cluster attractors; cluster states as candidate feature diversity |
+| winfree | sensitivity × influence product | ([Winfree 1967](https://doi.org/10.1016/0022-5193%2867%2990051-3)); ML neighbor ([Dai & Song 2026](https://arxiv.org/abs/2605.20922)) | the ancestral population model, a genuinely different signal pathway |
+| stuart–landau (sl) | complex ż = (μ+iω)z − \|z\|²z + coupling | ([Stuart 1960](https://doi.org/10.1017/S002211206000116X); [Aranson & Kramer 2002](https://doi.org/10.1103/RevModPhys.74.99)) | adds the amplitude channel: extra state per oscillator |
 | sl-fixedamp | SL coupling, amplitude clamped | this work | isolates coupling-form credit from amplitude-channel credit |
 
 Untrained sakaguchi/harmonic2 runs run at canonical nonzero parameters (α = π/4, β = 0.5) because their zero values are exactly the Kuramoto reference (zero is the correct
@@ -110,7 +112,7 @@ Speech is oscillation at every scale: prosody (~1 Hz), syllable rhythm (4–8 Hz
 transitions (10–40 Hz), pitch and formants (100–3,000 Hz). An oscillator field is a frequency-selective medium: intrinsic timescales, locking behavior, and spatial wave modes
 are its native representational resources.
 
-The premise is not ours and is best established in neuroscience, where oscillator models of cortical speech processing are a developed literature rather than a proposal. Reviewing it, [Dogonasheva et al. 2026] set three families of theta-rhythmic segmentation model against each other and separate them by where the flexibility to track a variable speech rate comes from, which is precisely the question a *frozen* field has to answer without training. In the motor-coupled model, top-down motor onsets force a phase reset in auditory cortex and the auditory oscillation tracks the short interval to the next reset, reproducing individual variability in speech-rhythm perception [Assaneo et al. 2020]. In the adaptive-frequency model the oscillator's own natural frequency moves continuously toward the average period of incoming events, reproducing human timing judgements and tolerating temporal jitter up to about 20% [Doelling et al. 2023]. In the biophysical model the flexibility is intrinsic: an m-current interacting with a super-slow potassium current lets a Hodgkin-Huxley cell phase-lock across a broad frequency range, and the resulting segmentation was validated against the TIMIT corpus [Pittman-Polletta et al. 2021]. Two points carry over to this paper. First, all three achieve their flexibility by *adapting* something, whether phase, frequency or intrinsic current, which is exactly what the frozen field tested here is not allowed to do, so their success is a reason to expect a fixed field to have a ceiling. Second, the review's own criticism of the field is that the first two models are abstracted away from real biophysics and the third has static parameters and no network dynamics, which is the same attribution problem this paper addresses by measurement rather than by argument. The hypothesis space is that frequency matching
+The premise is not ours and is best established in neuroscience, where oscillator models of cortical speech processing are a developed literature rather than a proposal. Reviewing it, ([Dogonasheva et al. 2026](https://doi.org/10.1016/j.neunet.2025.108194)) set three families of theta-rhythmic segmentation model against each other and separate them by where the flexibility to track a variable speech rate comes from, which is precisely the question a *frozen* field has to answer without training. In the motor-coupled model, top-down motor onsets force a phase reset in auditory cortex and the auditory oscillation tracks the short interval to the next reset, reproducing individual variability in speech-rhythm perception ([Assaneo et al. 2020](https://doi.org/10.1038/s41562-020-00962-0)). In the adaptive-frequency model the oscillator's own natural frequency moves continuously toward the average period of incoming events, reproducing human timing judgements and tolerating temporal jitter up to about 20% ([Doelling et al. 2023](https://doi.org/10.1371/journal.pcbi.1011669)). In the biophysical model the flexibility is intrinsic: an m-current interacting with a super-slow potassium current lets a Hodgkin-Huxley cell phase-lock across a broad frequency range, and the resulting segmentation was validated against the TIMIT corpus ([Pittman-Polletta et al. 2021](https://doi.org/10.1371/journal.pcbi.1008783)). Two points carry over to this paper. First, all three achieve their flexibility by *adapting* something, whether phase, frequency or intrinsic current, which is exactly what the frozen field tested here is not allowed to do, so their success is a reason to expect a fixed field to have a ceiling. Second, the review's own criticism of the field is that the first two models are abstracted away from real biophysics and the third has static parameters and no network dynamics, which is the same attribution problem this paper addresses by measurement rather than by argument. The hypothesis space is that frequency matching
 (tonotopic design), interaction topology (geometry), and state richness (amplitude) tune
 which acoustic structure a frozen field transduces. The matrix turns each supposition into
 a measured factor rather than an architectural assumption.
@@ -157,7 +159,7 @@ separation it finds must already exist in the features rather than being compute
 
 ### 4.1 Task and data
 
-AudioMNIST [Becker 2024]: 30,000 recordings, 60 speakers × 10 digits × 50 repetitions at
+AudioMNIST ([Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)): 30,000 recordings, 60 speakers × 10 digits × 50 repetitions at
 48 kHz. Bank: repetitions 0–19 per speaker×digit, resampled to 16 kHz, peak-normalized to
 0.5, energy-trimmed at 1% of peak, ≤1 s, true lengths stored; speaker-disjoint split
 (speakers 1–48 train / 49–60 test; overlap verified zero). Median digit 0.62 s = 38 hop
@@ -187,7 +189,7 @@ the last, making result differences attributable to that addition:
   the baselines and anchors.
 - **Quadrature**. Adds reference-relative phase at the same rate and bands: the per-band
   analytic signal demodulated at band center yields a baseband phase φᵣ(t) (±31 Hz by the hop Nyquist, never raw carrier cycles); drive θ̇ᵢ += g·Aᵣ·sin(φᵣ − θᵢ), the canonical
-  Adler injection form [Adler 1946].
+  Adler injection form ([Adler 1946](https://doi.org/10.1109/JRPROC.1946.229930)).
 - **Carrier (direct)**. Removes the transcoder: a full-clip FFT band-split (16 bands,
   96–1,536 Hz) delivers the band waveforms themselves at 16 kHz; drive θ̇ᵢ += g·xᵣ(t),
   additive and oscillatory, so genuine injection locking becomes possible. Its band limit
@@ -199,7 +201,7 @@ it, so a difference in result is attributable to that addition.](resources/figur
 Evidence notes carried with the ladder: envelope pushes accumulate into readable loudness
 statistics (measured throughout §5.2), and the measured weak envelope-rate locking
 (drive-phase PLV ≈ 0.16 at the calibrated operating point, decaying with gain) *suggests
-additive drive* can weakly phase-lock through the pinning nonlinearity, the Shapiro-step mechanism [Pikovsky et al. 2001], while carrying no claim that it must. Quadrature
+additive drive* can weakly phase-lock through the pinning nonlinearity, the Shapiro-step mechanism ([Pikovsky et al. 2001](https://doi.org/10.1017/CBO9780511755743)), while carrying no claim that it must. Quadrature
 collapsed at every gain tested (§5.2, §6), consistent with Adler theory; trainability of
 the required phase relation is suggested, not shown. Carrier drive admits injection locking
 when |Δω| ≤ A (single-oscillator idealization; measured in §5.3).
@@ -224,11 +226,11 @@ with effective drive (g × row RMS) reported at every operating point. Gains of 
 g = 1.0 (the calibrated units unamplified; its gate read flat ±0.6 across {0.5, 1, 2});
 carrier g = 32 by its own gate. Every sweep obeys an integrator-validity bound: a point is
 valid iff every per-tick drive phase increment stays below π (max-criterion; standard
-explicit-integrator discipline [Hairer et al. 1993]), with rms increment ≤ 0.5 rad as an accuracy annotation. Measured bounds: carrier valid to g ≈ 75, mel to g ≈ 17 at dt = 0.1.
+explicit-integrator discipline ([Hairer et al. 1993](https://doi.org/10.1007/978-3-540-78862-1))), with rms increment ≤ 0.5 rad as an accuracy annotation. Measured bounds: carrier valid to g ≈ 75, mel to g ≈ 17 at dt = 0.1.
 Per-run increment statistics are recorded by instrumentation in every run. Higher physical
 drive, when a question needs it, is reached by increasing substeps, never by gain past the
 bound. Prior art for the response shape: input scaling is a canonical reservoir
-hyperparameter with an interior optimum [Lukoševičius 2012].
+hyperparameter with an interior optimum ([Lukoševičius 2012](https://doi.org/10.1007/978-3-642-35289-8_36)).
 
 ### 4.6 Instrumentation (mechanism, never verdicts)
 
@@ -286,7 +288,7 @@ frozen-probe objective is hostile to ReLU feed-forward architectures (CNN/TCN co
 under it while training fine conventionally at the same size), measured by a scaffold-versus-size control with learned heads at the identical budget. Both protocols are
 therefore reported for every conventional arm. Literature anchors, with protocol caveats
 and never as head-to-head claims: spintronic hardware reservoirs ~99.6% on TI-46
-[Torrejon 2017]; coRNN on AudioMNIST 78–91% under different frontends [Rusch 2021].
+([Torrejon 2017](https://doi.org/10.1038/nature23011)); coRNN on AudioMNIST 78–91% under different frontends ([Rusch 2021](https://openreview.net/forum?id=F3s69XzWOia)).
 
 ### 5.2 The untrained matrix: a statics plateau, with design effects bounded below threshold
 
@@ -318,7 +320,7 @@ below our decision threshold.
 
 **Tonotopic design: no measured benefit over its randomized control, replicated.** The
 pre-registered criterion required designed ω to exceed *randomized* ω (the randomized-twin
-discipline of [Caranzano et al. 2025]) by +5. It was not met on any read, at any scope.
+discipline of ([Caranzano et al. 2025](https://arxiv.org/abs/2505.04300))) by +5. It was not met on any read, at any scope.
 
 Per physics family, pooled over the three conditions under envelope drive (72 twins per
 phase family, 12 per amplitude family), designed − random runs from +0.28 (kuramoto) down to −1.21 (harmonic2), with no family reaching a tenth of the bar, and harmonic2 and winfree
@@ -409,7 +411,7 @@ training set outright. All heads carry more parameters than the entire oscillato
 
 ### 5.5 Sensitivity of the canonical physics values
 
-**harmonic2 β:** deviations from kuramoto are identical (−0.98) at β ∈ {0.25, 0.5, 1.0}, insensitive across the literature range [Hansel et al. 1993; Daido 1992] (verified to be a
+**harmonic2 β:** deviations from kuramoto are identical (−0.98) at β ∈ {0.25, 0.5, 1.0}, insensitive across the literature range ([Hansel et al. 1993](https://doi.org/10.1103/PhysRevE.48.3470); [Daido 1992](https://doi.org/10.1143/ptp/88.6.1213)) (verified to be a
 genuine accuracy plateau, not a plumbing artifact: the trajectories differ substantially
 between β values). β > 1 is excluded by design: the second-harmonic weight multiplies its
 term unnormalized, confounding coupling shape with total strength; a future extension would
@@ -422,7 +424,7 @@ the trough ≈2.4σ). A registered mechanistic prediction, that the deviation tr
 (R 0.095 → 0.066 across the range; textbook Sakaguchi behavior) while envelope locking stays flat, so readability does not track coherence, and the least synchronized field
 (α = π/2, the zero-attraction boundary) reads best, slightly above kuramoto. α therefore
 enters the record as a measured factor level with its response curve (π/4 = mid-range lag;
-1.39 = π/2 − 0.18, the canonical chimera value [Abrams & Strogatz 2004]; π/2 = the
+1.39 = π/2 − 0.18, the canonical chimera value ([Abrams & Strogatz 2004](https://arxiv.org/abs/nlin/0407045)); π/2 = the
 boundary), not an assumed constant. Matrix-wide, the family deviation at α = π/4 is
 +0.1–0.2 (§5.2): the crown-configuration trough did not generalize.
 
@@ -441,7 +443,7 @@ correlations are confounded (R co-varies with pinning, clamp, and family), so th
 discriminating experiment is a causal within-family R-response curve, driving R from ~0.05
 to ~0.6 with everything else fixed. This reading is consistent with the
 over-synchronization concerns raised independently in the trained-oscillator literature
-[unconv.ai 2026; Nunley 2026].
+([unconv.ai 2026](https://unconv.ai/blog/introducing-un-0-generating-images-with-coupled-oscillators/); [Nunley 2026](https://arxiv.org/abs/2606.18694)).
 
 ![Readability against coherence across the swept conditions. The relation is not monotone: mild coherence
 accompanies the best reads, and the most strongly locked fields read worse than their less coherent twins.](resources/figures/g9-readability-vs-coherence.png)
@@ -493,7 +495,7 @@ lives in the *driven* evolution of the state, not in autonomous ring-down persis
 
 The magnitude push is oscillator-state-independent; the Adler torque g·Aᵣ·sin(φᵣ − θᵢ)
 depends on each oscillator's phase relative to a shared reference. The Adler equation
-θ̇ = Δω + A·sin(φ−θ) locks iff |Δω_eff| ≤ A [Adler 1946]; locking is the only mechanism by
+θ̇ = Δω + A·sin(φ−θ) locks iff |Δω_eff| ≤ A ([Adler 1946](https://doi.org/10.1109/JRPROC.1946.229930)); locking is the only mechanism by
 which a reference-relative torque produces a persistent readable phase relation.
 
 The untrained field sits outside the readable regime at every gain, for two reasons that
@@ -558,19 +560,16 @@ studies, and ships with this paper for exactly that purpose.
 ## 8 Related work
 
 Hardware oscillator reservoirs establish the premise's strongest published support
-[Torrejon 2017]; reservoir computing supplies the frame and its cautions [Jaeger 2001;
-Maass 2002; Lukoševičius 2012; Tanaka 2019]. Oscillator-inspired trained networks (coRNN
-[Rusch 2021]; Neural Wave Machines [Keller & Welling 2023]; WONN [Dai & Song 2026];
-AKOrN [Miyato 2025]) and Kuramoto-based generation [unconv.ai 2026] motivate the
+([Torrejon 2017](https://doi.org/10.1038/nature23011)); reservoir computing supplies the frame and its cautions ([Jaeger 2001](https://www.ai.rug.nl/minds/uploads/EchoStatesTechRep.pdf); [Maass 2002](https://doi.org/10.1162/089976602760407955); [Lukoševičius 2012](https://doi.org/10.1007/978-3-642-35289-8_36); [Tanaka 2019](https://doi.org/10.1016/j.neunet.2019.03.005)). Oscillator-inspired trained networks (coRNN
+([Rusch 2021](https://openreview.net/forum?id=F3s69XzWOia)); Neural Wave Machines ([Keller & Welling 2023](https://proceedings.mlr.press/v202/keller23a.html)); WONN ([Dai & Song 2026](https://arxiv.org/abs/2605.20922));
+AKOrN ([Miyato 2025](https://openreview.net/forum?id=nwDRD4AMoN))) and Kuramoto-based generation ([unconv.ai 2026](https://unconv.ai/blog/introducing-un-0-generating-images-with-coupled-oscillators/)) motivate the
 frozen-versus-trained distinction this paper measures from the frozen side. Synchronization
-theory supplies the analytical spine [Winfree 1967; Kuramoto 1975; Sakaguchi & Kuramoto
-1986; Adler 1946; Pikovsky et al. 2001; Strogatz 2000]; chimera states [Kuramoto &
-Battogtokh 2002; Abrams & Strogatz 2004] ground the partial-coherence readings. The
-randomized-twin discipline for designed structure follows [Caranzano et al. 2025]; frequency-
-learning front-ends [Lostanlen et al. 2023; Zeghidour et al. 2021] are the trained counterpoint to
+theory supplies the analytical spine ([Winfree 1967](https://doi.org/10.1016/0022-5193%2867%2990051-3); [Kuramoto 1975](https://doi.org/10.1007/BFb0013365); [Sakaguchi & Kuramoto 1986](https://doi.org/10.1143/PTP.76.576); [Adler 1946](https://doi.org/10.1109/JRPROC.1946.229930); [Pikovsky et al. 2001](https://doi.org/10.1017/CBO9780511755743); [Strogatz 2000](https://doi.org/10.1016/S0167-2789%2800%2900094-4)); chimera states ([Kuramoto & Battogtokh 2002](https://arxiv.org/abs/cond-mat/0210694); [Abrams & Strogatz 2004](https://arxiv.org/abs/nlin/0407045)) ground the partial-coherence readings. The
+randomized-twin discipline for designed structure follows ([Caranzano et al. 2025](https://arxiv.org/abs/2505.04300)); frequency-
+learning front-ends ([Lostanlen et al. 2023](https://arxiv.org/abs/2307.13821); [Zeghidour et al. 2021](https://openreview.net/forum?id=jM76BCb6F9m)) are the trained counterpoint to
 our fixed tonotopy. The closest body of work to this paper's premise is the neuro-oscillatory
-speech literature reviewed by [Dogonasheva et al. 2026], whose three model families
-[Assaneo et al. 2020; Doelling et al. 2023; Pittman-Polletta et al. 2021] all obtain their rate
+speech literature reviewed by ([Dogonasheva et al. 2026](https://doi.org/10.1016/j.neunet.2025.108194)), whose three model families
+([Assaneo et al. 2020](https://doi.org/10.1038/s41562-020-00962-0); [Doelling et al. 2023](https://doi.org/10.1371/journal.pcbi.1011669); [Pittman-Polletta et al. 2021](https://doi.org/10.1371/journal.pcbi.1008783)) all obtain their rate
 flexibility from adaptation of some parameter, and none of which is evaluated against a
 parameter-matched conventional baseline on a recognition task. To our knowledge, no prior work varies oscillator-network lattice
 topology under controls, runs a pre-registered factorial of coupling laws untrained, or
