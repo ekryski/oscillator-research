@@ -349,12 +349,25 @@ def rewrite_links(text: str, known: dict[str, str],
         # ("[Mamba](url)-class" -> "@mamba-class", a key that does not exist)
         return f"@{{{key}}}"
 
-    # a parenthesised citation becomes a bracketed one so citeproc supplies
-    # the parentheses itself rather than nesting them
+    # A parenthesis whose whole content is citations becomes a bracketed group,
+    # so citeproc supplies the parentheses itself rather than nesting them. The
+    # semicolon-separated run matters as much as the single citation: without it
+    # "([A](u); [B](u))" renders "(A (2001); B (2002))", a nested pair that ran
+    # through the whole paper.
+    one_link = r"\[[^\]\[]{2,120}\]\(https?://[^)\s]+\)"
+
+    def parenthesised(m: re.Match) -> str:
+        keys = [one(c) for c in re.finditer(LINK, m.group(1))]
+        # an unresolved label comes back as its own link text, and a group that
+        # is not wholly citations must keep the parentheses it was written with
+        if any(not k.startswith("@") for k in keys):
+            return m.group(0)
+        # "(… , preprint)" keeps its qualifier, as the suffix of the last key,
+        # which is where citeproc and natbib both put one
+        return "[" + "; ".join(keys) + (m.group(2) or "") + "]"
+
     text, n = re.subn(
-        r"\((\[[^\]\[]{2,120}\]\(https?://[^)\s]+\))\)",
-        lambda m: "[" + one(re.match(LINK, m.group(1))).replace("@", "@", 1) + "]",
-        text)
+        rf"\(({one_link}(?:;\s*{one_link})*)(,[^()\[\]]{{1,40}}?)?\)", parenthesised, text)
     text = LINK.sub(one, text)
     # one label cited twenty times would otherwise report the same problem
     # twenty times over, which is how a real warning gets scrolled past

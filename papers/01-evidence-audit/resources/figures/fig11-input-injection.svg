@@ -6,7 +6,7 @@
 <text x="84" y="84" text-anchor="start" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">dθi/dt   =</text>
 <text x="188" y="84" text-anchor="middle" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">ωi</text>
 <text x="218" y="84" text-anchor="middle" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">+</text>
-<text x="248" y="84" text-anchor="middle" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">K</text>
+<text x="248" y="84" text-anchor="middle" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">(K/N)</text>
 <text x="330" y="84" text-anchor="middle" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">Σj sin(θj − θi)</text>
 <text x="432" y="84" text-anchor="middle" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">+</text>
 <text x="486" y="84" text-anchor="middle" font-size="13.5" fill="#24231F" font-weight="normal" font-style="normal">u(t)</text>

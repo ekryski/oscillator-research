@@ -220,7 +220,7 @@ def fig_model_lineage():
     b = []
     panels = [
         ("Winfree", "phase only",
-         "dθi/dt = ωi + Z(θi) Σj P(θj)",
+         "dθi/dt = ωi + Z(θi) (K/N) Σj P(θj)",
          "influence P and sensitivity Z are separate functions",
          "WONN"),
         ("Kuramoto", "phase only",
@@ -248,7 +248,7 @@ def fig_model_lineage():
          "an oscillatory recurrence; damping bounds the gradients",
          "coRNN · UnICORNN · RON · Neural Wave Machines"),
         ("Linear oscillatory state space", "no coupling term",
-         "y″ = −Ay − Gy′ + Bu,   A, G diagonal",
+         "y″ = −Ay − Gy′ + Bu,  A, G diagonal, G = 0 in LinOSS",
          "linear, so the whole sequence solves by parallel scan",
          "LinOSS · D-LinOSS"),
     ]
@@ -370,7 +370,7 @@ def fig_input_injection():
     eq_y = 84
     b.append(box(58, eq_y - 28, 544, 44, FILL_A, HAIR, 4, 1))
     terms = [(84, "dθi/dt   =", "start"), (188, "ωi", "middle"), (218, "+", "middle"),
-             (248, "K", "middle"), (330, "Σj sin(θj − θi)", "middle"),
+             (248, "(K/N)", "middle"), (330, "Σj sin(θj − θi)", "middle"),
              (432, "+", "middle"), (486, "u(t)", "middle")]
     for x, s, anc in terms:
         b.append(text(x, eq_y, s, 13.5, anchor=anc))

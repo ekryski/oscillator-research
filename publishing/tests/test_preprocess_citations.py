@@ -268,3 +268,50 @@ class TestArxivIdInANote:
         links = entry_links(fields)
         assert "doi:10.1016/j.neunet.2019.03.005" in links
         assert "arxiv:1808.04962" in links
+
+
+class TestParenthesisedCitations:
+    """A parenthesis whose content is citations must not nest its own.
+
+    `([A](u))` was already handled. `([A](u); [B](u))` was not, and rendered
+    "(A (2001); B (2002))" — a nested pair that ran through the whole paper,
+    seven times, into the submitted PDF.
+    """
+
+    BIB = """@misc{a, title={A}, url={https://example.org/a}}
+@misc{b, title={B}, url={https://example.org/b}}
+"""
+    KNOWN = {"a": "a", "b": "b"}
+
+    def rewrite(self, text):
+        return rewrite_links(text, self.KNOWN, url_index(self.BIB))[0]
+
+    def test_a_single_citation_in_parentheses_is_bracketed(self):
+        assert self.rewrite("text ([A 2001](https://example.org/a)).") == "text [@{a}]."
+
+    def test_two_citations_in_one_parenthesis_are_one_bracketed_group(self):
+        out = self.rewrite("text ([A 2001](https://example.org/a); [B 2002](https://example.org/b)).")
+        assert out == "text [@{a}; @{b}]."
+
+    def test_three_citations_in_one_parenthesis(self):
+        out = self.rewrite("([A 2001](https://example.org/a); [B 2002](https://example.org/b); "
+                           "[A 2001](https://example.org/a))")
+        assert out == "[@{a}; @{b}; @{a}]"
+
+    def test_a_trailing_qualifier_is_kept_as_a_suffix(self):
+        # "(…, preprint)" is a real pattern in the manuscript
+        out = self.rewrite("text ([A 2001](https://example.org/a), preprint).")
+        assert out == "text [@{a}, preprint]."
+
+    def test_a_citation_outside_parentheses_stays_narrative(self):
+        # "[A 2001](u) shows" must read "A (2001) shows", not "(A, 2001) shows"
+        assert self.rewrite("[A 2001](https://example.org/a) shows") == "@{a} shows"
+
+    def test_a_parenthesis_mixing_prose_between_citations_is_left_alone(self):
+        # the parentheses there are the author's own and carry meaning
+        src = "([A 2001](https://example.org/a); as restated by [B 2002](https://example.org/b))"
+        assert self.rewrite(src) == "(@{a}; as restated by @{b})"
+
+    def test_an_unresolved_label_leaves_the_parenthesis_untouched(self):
+        src = "([Nobody 1999](https://example.org/zz))"
+        assert self.rewrite(src) == src
