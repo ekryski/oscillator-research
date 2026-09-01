@@ -455,14 +455,21 @@ figure img {
   border-radius: 3px;
 }
 
+/* The caption runs the full width of the plate above it rather than the
+   narrower prose measure, and is justified so its block ends flush with both
+   of the plate's edges. This is the one place on screen where justification
+   is used: the rest of the page reserves it for print, where the measure is
+   fixed. A caption is short and sits under a hard edge it has to line up
+   with, and `hyphens: auto` keeps the fluid measure from opening rivers. */
 figcaption {
-  max-width: var(--measure);
-  margin: 0.9rem auto 0;
+  max-width: 100%;
+  margin: 0.9rem 0 0;
   font-family: var(--sans);
-  font-size: 0.8em;
-  line-height: 1.55;
+  font-size: 0.72em;
+  line-height: 1.5;
   color: var(--ink-mute);
-  text-align: center;
+  text-align: justify;
+  hyphens: auto;
   text-wrap: pretty;
 }
 
@@ -754,7 +761,6 @@ div.csl-indent {
   h3 { font-size: 11pt; }
 
   h1, h2, h3, h4, h5, h6,
-  figcaption,
   table > caption,
   div.abstract,
   p.author,

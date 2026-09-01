@@ -392,14 +392,16 @@ background: #fff;
 border: 1px solid var(--rule);
 border-radius: 3px;
 }
+
 figcaption {
-max-width: var(--measure);
-margin: 0.9rem auto 0;
+max-width: 100%;
+margin: 0.9rem 0 0;
 font-family: var(--sans);
-font-size: 0.8em;
-line-height: 1.55;
+font-size: 0.72em;
+line-height: 1.5;
 color: var(--ink-mute);
-text-align: center;
+text-align: justify;
+hyphens: auto;
 text-wrap: pretty;
 }
 
@@ -621,7 +623,6 @@ font-size: 14pt;
 h2 { font-size: 12pt; }
 h3 { font-size: 11pt; }
 h1, h2, h3, h4, h5, h6,
-figcaption,
 table > caption,
 div.abstract,
 p.author,

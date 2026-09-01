@@ -35,6 +35,12 @@ $endfor$
 \renewcommand{\arraystretch}{1.35}
 \setlength{\extrarowheight}{3pt}
 $after-header-includes.latex()$
+% Captions are set a step down from the body, matching the HTML build, where a
+% caption is the one block deliberately smaller than the prose around it. The
+% caption package is loaded by pandoc's partial above, and only when the paper
+% has a table, so this is guarded rather than unconditional: a paper of figures
+% and no tables would otherwise fail on an undefined \captionsetup.
+\ifdefined\captionsetup\captionsetup{font=small}\fi
 $hypersetup.latex()$
 $if(tmlr-submission)$
 $-- Double-blind covers the file, not just the page: hyperref writes the author
