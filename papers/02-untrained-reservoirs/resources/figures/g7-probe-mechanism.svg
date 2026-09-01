@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="790" viewBox="0 0 680 790" font-family="Helvetica, Arial, sans-serif">
+<title>The linear-probe attribution protocol</title>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#5F5E5A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<rect width="680" height="790" fill="#ffffff"/>
+
+<g>
+<rect x="70" y="34" width="200" height="54" rx="4" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.75"/>
+<text x="170" y="56" text-anchor="middle" font-size="14" font-weight="bold" fill="#3C3489">input clip a: "seven"</text>
+<text x="170" y="74" text-anchor="middle" font-size="12" fill="#534AB7">waveform + calibrated noise</text>
+<rect x="410" y="34" width="200" height="54" rx="4" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text x="510" y="56" text-anchor="middle" font-size="14" font-weight="bold" fill="#085041">input clip b: "three"</text>
+<text x="510" y="74" text-anchor="middle" font-size="12" fill="#0F6E56">waveform + calibrated noise</text>
+</g>
+
+<path d="M170 88 L170 112 L300 112 L300 132" fill="none" stroke="#5F5E5A" stroke-width="1" marker-end="url(#ar)"/>
+<path d="M510 88 L510 112 L380 112 L380 132" fill="none" stroke="#5F5E5A" stroke-width="1" marker-end="url(#ar)"/>
+
+<rect x="90" y="134" width="500" height="140" rx="4" fill="none" stroke="#5F5E5A" stroke-width="0.75" stroke-dasharray="5 4"/>
+<text x="340" y="154" text-anchor="middle" font-size="14" font-weight="bold" fill="#1a1a1a">frozen oscillator field</text><text x="340" y="172" text-anchor="middle" font-size="12" font-weight="bold" fill="#1a1a1a">parameters randomized at initialization, never trained</text>
+<text x="340" y="192" text-anchor="middle" font-size="12" fill="#444441">K, &#969; ~ fixed random draws (seed-pinned)</text>
+<text x="340" y="214" text-anchor="middle" font-size="13" fill="#1a1a1a" font-style="italic">&#952;&#775;&#7522; = &#969;&#7522; + &#931;&#11388; K&#7522;&#11388; sin(&#952;&#11388; &#8722; &#952;&#7522;) + g&#183;A&#7523;(t) &#8722; &#955;&#183;sin &#952;&#7522;</text>
+<g fill="#B4B2A9" stroke="#5F5E5A" stroke-width="0.5">
+<circle cx="220" cy="234" r="6"/><circle cx="252" cy="234" r="6"/><circle cx="284" cy="234" r="6"/><circle cx="316" cy="234" r="6"/><circle cx="348" cy="234" r="6"/><circle cx="380" cy="234" r="6"/><circle cx="412" cy="234" r="6"/><circle cx="444" cy="234" r="6"/>
+<circle cx="220" cy="256" r="6"/><circle cx="252" cy="256" r="6"/><circle cx="284" cy="256" r="6"/><circle cx="316" cy="256" r="6"/><circle cx="348" cy="256" r="6"/><circle cx="380" cy="256" r="6"/><circle cx="412" cy="256" r="6"/><circle cx="444" cy="256" r="6"/>
+</g>
+
+<path d="M300 274 L300 298 L180 298 L180 318" fill="none" stroke="#5F5E5A" stroke-width="1" marker-end="url(#ar)"/>
+<path d="M380 274 L380 298 L500 298 L500 318" fill="none" stroke="#5F5E5A" stroke-width="1" marker-end="url(#ar)"/>
+
+<g>
+<rect x="70" y="320" width="220" height="118" rx="4" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.75"/>
+<text x="180" y="342" text-anchor="middle" font-size="14" font-weight="bold" fill="#3C3489">feature vector &#934;(a)</text>
+<rect x="96" y="354" width="16" height="22" rx="2" fill="#7F77DD"/><rect x="120" y="350" width="16" height="26" rx="2" fill="#7F77DD"/><rect x="144" y="364" width="16" height="12" rx="2" fill="#7F77DD"/><rect x="168" y="346" width="16" height="30" rx="2" fill="#7F77DD"/><rect x="192" y="360" width="16" height="16" rx="2" fill="#7F77DD"/><rect x="216" y="352" width="16" height="24" rx="2" fill="#7F77DD"/><rect x="240" y="366" width="16" height="10" rx="2" fill="#7F77DD"/>
+<text x="180" y="400" text-anchor="middle" font-size="12" fill="#534AB7">masked pooled statistics of</text>
+<text x="180" y="416" text-anchor="middle" font-size="12" fill="#534AB7">(sin &#952;, cos &#952;) trajectories, per window</text>
+</g>
+<g>
+<rect x="390" y="320" width="220" height="118" rx="4" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text x="500" y="342" text-anchor="middle" font-size="14" font-weight="bold" fill="#085041">feature vector &#934;(b)</text>
+<rect x="416" y="362" width="16" height="14" rx="2" fill="#1D9E75"/><rect x="440" y="350" width="16" height="26" rx="2" fill="#1D9E75"/><rect x="464" y="368" width="16" height="8" rx="2" fill="#1D9E75"/><rect x="488" y="358" width="16" height="18" rx="2" fill="#1D9E75"/><rect x="512" y="350" width="16" height="26" rx="2" fill="#1D9E75"/><rect x="536" y="368" width="16" height="8" rx="2" fill="#1D9E75"/><rect x="560" y="356" width="16" height="20" rx="2" fill="#1D9E75"/>
+<text x="500" y="400" text-anchor="middle" font-size="12" fill="#0F6E56">masked pooled statistics of</text>
+<text x="500" y="416" text-anchor="middle" font-size="12" fill="#0F6E56">(sin &#952;, cos &#952;) trajectories, per window</text>
+</g>
+
+<path d="M180 438 L180 462 L300 462 L300 482" fill="none" stroke="#5F5E5A" stroke-width="1" marker-end="url(#ar)"/>
+<path d="M500 438 L500 462 L380 462 L380 482" fill="none" stroke="#5F5E5A" stroke-width="1" marker-end="url(#ar)"/>
+
+<rect x="140" y="484" width="400" height="168" rx="4" fill="none" stroke="#5F5E5A" stroke-width="0.75"/>
+<text x="340" y="506" text-anchor="middle" font-size="14" font-weight="bold" fill="#1a1a1a">feature space &#8477;&#7496; — one point per clip</text>
+<line x1="220" y1="640" x2="462" y2="532" stroke="#5F5E5A" stroke-width="1.5"/>
+<text x="472" y="528" font-size="12" fill="#444441">ridge decision</text>
+<text x="472" y="542" font-size="12" fill="#444441">boundary</text>
+<g fill="#7F77DD"><circle cx="212" cy="566" r="5"/><circle cx="240" cy="586" r="5"/><circle cx="262" cy="612" r="5"/><circle cx="230" cy="616" r="5"/><circle cx="288" cy="598" r="5"/><circle cx="254" cy="562" r="5"/><circle cx="322" cy="622" r="5"/><circle cx="416" cy="550" r="5"/></g>
+<g fill="#1D9E75"><circle cx="384" cy="550" r="5"/><circle cx="420" cy="574" r="5"/><circle cx="444" cy="556" r="5"/><circle cx="462" cy="582" r="5"/><circle cx="396" cy="526" r="5"/><circle cx="436" cy="602" r="5"/><circle cx="482" cy="562" r="5"/><circle cx="314" cy="542" r="5"/></g>
+
+<rect x="70" y="676" width="256" height="86" rx="4" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.75"/>
+<text x="198" y="698" text-anchor="middle" font-size="13" font-weight="bold" fill="#2C2C2A">ridge classifier (the probe)</text>
+<text x="198" y="718" text-anchor="middle" font-size="12" fill="#444441" font-style="italic">W = (&#934;&#7488;&#934; + &#955;I)&#8315;&#185;&#934;&#7488;Y</text>
+<text x="198" y="736" text-anchor="middle" font-size="12" fill="#444441">linear &amp; closed-form: separation must</text>
+<text x="198" y="752" text-anchor="middle" font-size="12" fill="#444441">must pre-exist in &#934; — the dynamics wrote it</text>
+
+<rect x="354" y="676" width="256" height="86" rx="4" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.75"/>
+<text x="482" y="698" text-anchor="middle" font-size="13" font-weight="bold" fill="#2C2C2A">no-dynamics control (the floor)</text>
+<text x="482" y="718" text-anchor="middle" font-size="12" fill="#444441">identical ridge on frontend features</text>
+<text x="482" y="734" text-anchor="middle" font-size="12" fill="#444441">directly, field bypassed;</text>
+<text x="482" y="750" text-anchor="middle" font-size="12" fill="#444441">cell &#8722; floor = dynamics&#8217; contribution</text>
+</svg>

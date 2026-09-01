@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="700" viewBox="0 0 680 700" font-family="Helvetica, Arial, sans-serif">
+<title>The three drive pathways</title>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#5F5E5A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<rect width="680" height="700" fill="#ffffff"/>
+
+<rect x="140" y="30" width="400" height="56" rx="4" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.75"/>
+<text x="340" y="52" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C2C2A">16 kHz waveform x(t)</text>
+<text x="340" y="72" text-anchor="middle" font-size="12" fill="#444441" font-style="italic">+ white noise, &#963; = RMS(speech) &#183; 10^(dB/20)</text>
+
+<path d="M240 86 L240 106 L130 106 L130 126" fill="none" stroke="#5F5E5A" stroke-width="1" marker-end="url(#ar)"/>
+<path d="M340 86 L340 126" fill="none" stroke="#5F5E5A" stroke-width="1" marker-end="url(#ar)"/>
+<path d="M440 86 L440 106 L550 106 L550 126" fill="none" stroke="#5F5E5A" stroke-width="1" marker-end="url(#ar)"/>
+
+<g>
+<rect x="30" y="128" width="200" height="182" rx="4" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.75"/>
+<text x="130" y="150" text-anchor="middle" font-size="14" font-weight="bold" fill="#3C3489">envelope (mel) path</text>
+<text x="130" y="174" text-anchor="middle" font-size="12" fill="#534AB7">STFT 512/256 hann</text>
+<text x="130" y="190" text-anchor="middle" font-size="12" fill="#534AB7">&#8595; 16 mel bands &#8595; log</text>
+<text x="130" y="206" text-anchor="middle" font-size="12" fill="#534AB7">&#8595; affine (v+10)/10, clamp &#8805; 0</text>
+<text x="130" y="228" text-anchor="middle" font-size="12" font-weight="bold" fill="#3C3489">rows A&#7523;(t) at 62.5 fps</text>
+<text x="130" y="244" text-anchor="middle" font-size="12" fill="#534AB7">carrier discarded</text>
+<text x="130" y="268" text-anchor="middle" font-size="12" font-style="italic" fill="#3C3489">drive: &#952;&#775;&#7522; += g&#183;A&#7523;(t)</text>
+<text x="130" y="286" text-anchor="middle" font-size="12" fill="#534AB7">additive, state-independent</text>
+</g>
+
+<g>
+<rect x="240" y="128" width="200" height="182" rx="4" fill="#FAECE7" stroke="#993C1D" stroke-width="0.75"/>
+<text x="340" y="150" text-anchor="middle" font-size="14" font-weight="bold" fill="#712B13">quadrature path</text>
+<text x="340" y="174" text-anchor="middle" font-size="12" fill="#993C1D">per-band analytic signal</text>
+<text x="340" y="190" text-anchor="middle" font-size="12" fill="#993C1D">&#8595; demodulate at band center</text>
+<text x="340" y="206" text-anchor="middle" font-size="12" fill="#993C1D">&#8595; baseband phase &#966;&#7523;(t)</text>
+<text x="340" y="228" text-anchor="middle" font-size="12" font-weight="bold" fill="#712B13">(A&#7523;, &#966;&#7523;) at 62.5 fps</text>
+<text x="340" y="244" text-anchor="middle" font-size="12" fill="#993C1D">phase &#8712; &#177;31 Hz baseband</text>
+<text x="340" y="268" text-anchor="middle" font-size="11" font-style="italic" fill="#712B13">drive: &#952;&#775;&#7522; += g&#183;A&#7523;&#183;sin(&#966;&#7523; &#8722; &#952;&#7522;)</text>
+<text x="340" y="286" text-anchor="middle" font-size="12" fill="#993C1D">Adler, reference-relative</text>
+</g>
+
+<g>
+<rect x="450" y="128" width="200" height="182" rx="4" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+<text x="550" y="150" text-anchor="middle" font-size="14" font-weight="bold" fill="#085041">carrier (direct) path</text>
+<text x="550" y="174" text-anchor="middle" font-size="12" fill="#0F6E56">full-clip FFT band-split</text>
+<text x="550" y="190" text-anchor="middle" font-size="12" fill="#0F6E56">16 bands, 96&#8211;1,536 Hz</text>
+<text x="550" y="206" text-anchor="middle" font-size="12" fill="#0F6E56">no transcoding, no rate change</text>
+<text x="550" y="228" text-anchor="middle" font-size="12" font-weight="bold" fill="#085041">rows x&#7523;(t) at 16 kHz</text>
+<text x="550" y="244" text-anchor="middle" font-size="12" fill="#0F6E56">carrier kept (&#177; waveform)</text>
+<text x="550" y="268" text-anchor="middle" font-size="12" font-style="italic" fill="#085041">drive: &#952;&#775;&#7522; += g&#183;x&#7523;(t)</text>
+<text x="550" y="286" text-anchor="middle" font-size="12" fill="#0F6E56">additive, oscillatory</text>
+</g>
+
+<path d="M130 310 L130 334 L340 334 L340 354" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+<path d="M550 310 L550 334 L340 334" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+<path d="M340 310 L340 354" fill="none" stroke="#5F5E5A" stroke-width="1" marker-end="url(#ar)"/>
+
+<rect x="140" y="356" width="400" height="82" rx="4" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.75"/>
+<text x="340" y="378" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C2C2A">tonotopic broadcast</text>
+<text x="340" y="396" text-anchor="middle" font-size="12" fill="#444441">band r drives every oscillator in grid row r,</text>
+<text x="340" y="412" text-anchor="middle" font-size="12" fill="#444441">all channels; gain g calibrated per pathway</text>
+<text x="340" y="428" text-anchor="middle" font-size="12" fill="#444441">(units differ 62.5&#215;); bound: max per-tick kick &lt; &#960;</text>
+
+<rect x="30" y="466" width="620" height="196" rx="4" fill="none" stroke="#5F5E5A" stroke-width="0.75" stroke-dasharray="5 4"/>
+<text x="340" y="490" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a1a1a">what each pathway excites in an untrained field (evidence-tagged)</text>
+<text x="340" y="514" text-anchor="middle" font-size="12" fill="#3C3489">envelope: state-independent pushes accumulate into readable loudness statistics</text>
+<text x="340" y="530" text-anchor="middle" font-size="12" fill="#3C3489">(measured: fields hold floor+3 across matrices A&#8211;C; weak envelope-rate locking observed, PLV &#8776; 0.16)</text>
+<text x="340" y="554" text-anchor="middle" font-size="12" fill="#712B13">quadrature: collapsed at every gain tested (measured, 64&#215; sweep + matrices) &#8212; consistent with</text>
+<text x="340" y="570" text-anchor="middle" font-size="12" fill="#712B13">Adler theory: reference-relative torque requires a consistent phase relation, which random</text>
+<text x="340" y="586" text-anchor="middle" font-size="12" fill="#712B13">dynamics lack; trainability of that relation is suggested, not shown</text>
+<text x="340" y="610" text-anchor="middle" font-size="12" fill="#085041">carrier: oscillatory push admits injection locking when |&#916;&#969;| &#8804; A (Adler, single-oscillator</text>
+<text x="340" y="626" text-anchor="middle" font-size="12" fill="#085041">idealization; measured: drive-phase PLV rises with gain on frequency-matched rows)</text>
+<text x="340" y="648" text-anchor="middle" font-size="11" fill="#5F5E5A">information trade: envelope keeps 0&#8211;8 kHz energy at 16 ms resolution; carrier keeps phase, 96&#8211;1,536 Hz only</text>
+</svg>

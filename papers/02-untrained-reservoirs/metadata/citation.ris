@@ -1,0 +1,13 @@
+TY  - RPRT
+AU  - Kryski, E.
+TI  - Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields
+PY  - 2026
+UR  - https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/
+KW  - coupled oscillators
+KW  - reservoir computing
+KW  - speech recognition
+KW  - Kuramoto model
+KW  - Stuart-Landau
+KW  - lattice geometry
+AB  - Recent work has revived coupled-oscillator networks as a computational substrate, with several lines reporting that oscillator dynamics carry useful task structure even without training. We test that proposition for speech at a deliberately small, fully controlled scale. We freeze every physics parameter of a 1,024-oscillator field (~2k parameters) and measure spoken-digit recognition (AudioMNIST, speaker- disjoint) across a full factorial of six coupling laws, six lattice geometries, three natural-frequency structures, pinning, spectral clamp, and three drive pathways, at three noise and gain conditions, against five trained conventional baselines at exact parameter parity, a no-dynamics linear floor, and published oscillator-reservoir anchors. Untrained fields sit at a statics plateau roughly three points above a linear ridge on band statistics at every condition tested, above every trained conventional baseline at the same parameter budget, yet never far above what their own input representation supports linearly, and no design axis we varied moved that margin. On an order-discrimination task built so that order-free readouts provably cannot answer it, the same frozen fields read temporal order at 0.97 to 1.00, and a severed-coupling control attributes that memory predominantly to per-oscillator phase integration.
+ER  - 

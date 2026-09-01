@@ -1,0 +1,32 @@
+# Front matter for the built formats. Edit here, not in the manuscript.
+title: "Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields"
+author:
+  - name: Eric Kryski
+    affiliation: Independent researcher
+    email: hello@erickryski.com
+keywords:
+  - coupled oscillators
+  - reservoir computing
+  - speech recognition
+  - Kuramoto model
+  - Stuart-Landau
+  - lattice geometry
+# The abstract lives in the manuscript, under `## Abstract`, so it is edited
+# beside the prose. publish.sh lifts it out and hands it to pandoc as the
+# title-block abstract, and removes it from the body so it renders once.
+lang: en-GB
+documentclass: article
+classoption:
+  - 11pt
+geometry: margin=1in
+colorlinks: true
+linkcolor: RoyalBlue
+citecolor: RoyalBlue
+urlcolor: RoyalBlue
+link-citations: true
+reference-section-title: References
+# Pandoc's longtables set paragraph rows solid; these space them out. The TMLR
+# template carries the same two lines.
+header-includes:
+  - \renewcommand{\arraystretch}{1.35}
+  - \setlength{\extrarowheight}{3pt}

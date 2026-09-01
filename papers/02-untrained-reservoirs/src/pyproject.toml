@@ -1,0 +1,43 @@
+[project]
+name = "untrained-oscillator-fields"
+version = "1.0.0"
+description = "Experiment harness for 'Spoken-Digit Recognition Without Training'"
+requires-python = ">=3.12"
+dependencies = [
+    "torch>=2.5",
+    "torchaudio>=2.5",
+    "numpy>=2.0",
+    "soundfile>=0.12",
+    "scipy>=1.14",
+    "matplotlib>=3.9",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501"]
+
+# scripts/ bootstrap sys.path before importing the harness so they stay
+# runnable without an install.
+[tool.ruff.lint.per-file-ignores]
+"scripts/*.py" = ["E402"]
+"scripts/readout_ladder.py" = ["E402", "B007"]  # `ep` is the early-stop epoch count
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["harness"]

@@ -1,0 +1,16 @@
+Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields
+
+APA
+Kryski, E. (2026). Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields [Preprint]. https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/
+
+MLA
+Kryski, Eric. "Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields." 2026, https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/.
+
+CHICAGO
+Kryski, E. 2026. "Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields." Preprint. https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/.
+
+IEEE
+E. Kryski, "Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields," preprint, 2026. [Online]. Available: https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/
+
+HARVARD
+Kryski, E. (2026) 'Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields'. Preprint. Available at: https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/
