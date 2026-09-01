@@ -10,7 +10,8 @@ five trained conventional baselines at exact parameter parity, a no-dynamics lin
 oscillator-reservoir anchors. Untrained fields sit at a statics plateau roughly three points above a linear
 ridge on band statistics at every condition tested, above every trained conventional baseline at the same
 parameter budget, yet never far above what their own input representation supports linearly, and no design
-axis we varied moved that margin. On an order-discrimination task built so that order-free readouts provably
+axis we varied moved that margin, with one exception: phase-referenced drive is not
+merely worse untrained but unreadable. On an order-discrimination task built so that order-free readouts provably
 cannot answer it, the same frozen fields read temporal order at 0.97 to 1.00, and a severed-coupling control
 attributes that memory predominantly to per-oscillator phase integration.
 
@@ -524,9 +525,9 @@ Section 5.3 reports the outcome: locking occurs, and the plateau stands.
 statics-dominated recognition, it survives only in a bounded form: untrained fields carry
 digit information consistently above every trained conventional baseline at the same
 budget, yet only +2–3 points above their own representation's linear content, and that
-margin was indifferent to every design axis we varied: geometry and tonotopic design each showed little impact beyond their controls (the latter even with measured locking),
-the coupling law was worth under a point, gain was nearly inert, and phase-referenced
-input was unreadable. On the order task, the one task whose answer requires memory, the premise holds emphatically: near-ceiling accuracy over chance-blind floors, carried
+margin was indifferent to every design axis we varied but one: geometry and tonotopic design each showed little impact beyond their controls (the latter even with measured locking),
+the coupling law was worth under a point, and gain was nearly inert; the exception is
+the drive pathway, where phase-referenced input was unreadable rather than merely worse. On the order task, the one task whose answer requires memory, the premise holds emphatically: near-ceiling accuracy over chance-blind floors, carried
 predominantly by per-oscillator integration. The synthesis: **the input representation
 determines what the field can encode (measured by floors, not by resonance-matching);
 the task determines whether the dynamics are interrogated at all; the readout determines

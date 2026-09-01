@@ -15,7 +15,8 @@ anchors.
 The short version: untrained fields sit about three points above a linear ridge
 on band statistics at every condition tested — above every trained conventional
 baseline at the same budget, yet never far above what their own input
-representation already supports linearly — and no design axis moved that margin.
+representation already supports linearly — and no design axis moved that margin,
+except the drive pathway, where phase-referenced input is unreadable untrained.
 On a task built so that order-free readouts provably cannot answer it, the same
 frozen fields read temporal order at 0.97-1.00.
 

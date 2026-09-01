@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc 3.11" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2026-08-22" />
+  <meta name="dcterms.date" content="2026-09-01" />
   <meta name="keywords" content="coupled oscillators, reservoir
 computing, speech recognition, Kuramoto model, Stuart-Landau, lattice
 geometry" />
@@ -66,7 +66,7 @@ tbody tr + tr td { border-top: 1px solid rgba(128, 128, 128, 0.28); }
 <h1 class="title">Spoken-Digit Recognition Without Training: Geometry,
 Coupling, and Drive Effects in Frozen Oscillator Fields</h1>
 <p class="author">Eric Kryski</p>
-<p class="date">2026-08-22</p>
+<p class="date">2026-09-01</p>
 <div class="abstract">
 <div class="abstract-title">Abstract</div>
 <p>Recent work has revived coupled-oscillator networks as a
@@ -84,11 +84,12 @@ Untrained fields sit at a statics plateau roughly three points above a
 linear ridge on band statistics at every condition tested, above every
 trained conventional baseline at the same parameter budget, yet never
 far above what their own input representation supports linearly, and no
-design axis we varied moved that margin. On an order-discrimination task
-built so that order- free readouts provably cannot answer it, the same
-frozen fields read temporal order at 0.97 to 1.00, and a
-severed-coupling control attributes that memory predominantly to
-per-oscillator phase integration.</p>
+design axis we varied moved that margin, with one exception:
+phase-referenced drive is not merely worse untrained but unreadable. On
+an order-discrimination task built so that order-free readouts provably
+cannot answer it, the same frozen fields read temporal order at 0.97 to
+1.00, and a severed-coupling control attributes that memory
+predominantly to per-oscillator phase integration.</p>
 </div>
 </header>
 <nav id="TOC" role="doc-toc">
@@ -927,18 +928,19 @@ statics-dominated recognition, it survives only in a bounded form:
 untrained fields carry digit information consistently above every
 trained conventional baseline at the same budget, yet only +2–3 points
 above their own representation’s linear content, and that margin was
-indifferent to every design axis we varied: geometry and tonotopic
-design each showed little impact beyond their controls (the latter even
-with measured locking), the coupling law was worth under a point, gain
-was nearly inert, and phase-referenced input was unreadable. On the
-order task, the one task whose answer requires memory, the premise holds
-emphatically: near-ceiling accuracy over chance-blind floors, carried
-predominantly by per-oscillator integration. The synthesis: <strong>the
-input representation determines what the field can encode (measured by
-floors, not by resonance-matching); the task determines whether the
-dynamics are interrogated at all; the readout determines how much of the
-whole stack is harvested; and the field’s untrained design, whether
-shape, frequency structure or coupling law, determines almost
+indifferent to every design axis we varied but one: geometry and
+tonotopic design each showed little impact beyond their controls (the
+latter even with measured locking), the coupling law was worth under a
+point, and gain was nearly inert; the exception is the drive pathway,
+where phase-referenced input was unreadable rather than merely worse. On
+the order task, the one task whose answer requires memory, the premise
+holds emphatically: near-ceiling accuracy over chance-blind floors,
+carried predominantly by per-oscillator integration. The synthesis:
+<strong>the input representation determines what the field can encode
+(measured by floors, not by resonance-matching); the task determines
+whether the dynamics are interrogated at all; the readout determines how
+much of the whole stack is harvested; and the field’s untrained design,
+whether shape, frequency structure or coupling law, determines almost
 nothing.</strong> The strong version of the design premise is refuted at
 this scale by the bars as written; the state-memory premise is
 confirmed. The amplitude channel is the one design element that mattered
