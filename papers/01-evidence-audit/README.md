@@ -16,9 +16,9 @@ seven have been run.
 
 ## What is here
 
-A prior-art survey reports no new experiments, so this paper is prose and
-nothing else. It cites 88 published sources, marks every non-peer-reviewed one
-as such where it carries weight, and uses no unpublished result of ours.
+A survey reports no new experiments, so this paper is prose and nothing else.
+It cites 128 published sources, marks every non-peer-reviewed one as such where
+it carries weight, and uses no unpublished result of ours.
 
 | path | contents |
 |---|---|
@@ -29,10 +29,11 @@ as such where it carries weight, and uses no unpublished result of ours.
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
 
-The nine hypotheses are what the experimental papers in this repository test.
-[Paper 02](../02-untrained-reservoirs/) takes the second and the seventh — that
-oscillator networks compute without learning, and that attribution needs
-controls the field rarely runs — and measures them.
+The paper closes with eight directions for the field, and those are what the
+experimental papers in this repository take up. [Paper 02](../02-untrained-reservoirs/)
+acts on the second through the fifth: a reporting standard for controls, the
+coupling law as a variable, geometry as a reported design decision, and saying
+where the input enters. It sweeps all four over frozen oscillator fields.
 
 ## Rebuilding it
 
