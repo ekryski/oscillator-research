@@ -114,8 +114,9 @@ for dir in papers/*/; do
     echo "--- rewriting citations"
     body="$WORK/$slug.md"
     abstract_yaml="$WORK/$slug.abstract.yaml"
+    title_yaml="$WORK/$slug.title.yaml"
     python3 publishing/lib/preprocess.py "$manuscript" "$citemap" --out "$body" \
-        --abstract-out "$abstract_yaml"
+        --abstract-out "$abstract_yaml" --title-out "$title_yaml"
     # the LaTeX path needs its own copy: the default TeX text font has no glyph
     # for Greek or for a subscript i, and drops such characters SILENTLY, so
     # they are mapped to math rather than left to vanish
@@ -136,7 +137,8 @@ for dir in papers/*/; do
     [ -z "$date" ] && date="$(date +%F)"
 
     common=(--from=markdown+tex_math_dollars+pipe_tables+footnotes
-            --metadata-file="$meta" --metadata-file="$abstract_yaml" --metadata=date="$date"
+            --metadata-file="$meta" --metadata-file="$abstract_yaml"
+            --metadata-file="$title_yaml" --metadata=date="$date"
             --resource-path="$dir:$dir/resources/figures" --standalone)
     # The manuscripts reference figures by real relative path, ending .png, so
     # they render on GitHub and in every HTML-ish format. preprocess.py points

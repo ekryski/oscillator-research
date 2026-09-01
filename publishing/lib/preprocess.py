@@ -47,6 +47,7 @@ from urllib.parse import unquote
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import abstract as abstract_mod
 import bibfile
+import title as title_mod
 from extract_bib import BRACKET, LINK, NOT_A_CITATION, citekey, split_author_year
 
 #: an image reference, whose source the LaTeX path needs as a vector PDF
@@ -384,6 +385,10 @@ def main() -> None:
     ap.add_argument("--abstract-out", type=Path,
                     help="lift the ## Abstract section out of the body and write it here as "
                          "pandoc metadata, so it renders in the title block and not twice")
+    ap.add_argument("--title-out", type=Path,
+                    help="write the manuscript's own title here as pandoc metadata. The "
+                         "title is lifted out of the body either way: pandoc sets it from "
+                         "metadata in every format, so a copy left in the body renders twice")
     ap.add_argument("--for", dest="target", default="generic", choices=("generic", "latex"),
                     help="latex also maps Unicode Greek and math onto LaTeX math")
     a = ap.parse_args()
@@ -394,6 +399,13 @@ def main() -> None:
     bib = a.bibliography or a.citemap.parent / "bibliography.bib"
     by_url = url_index(bib.read_text()) if bib.exists() else {}
     text = a.manuscript.read_text()
+    # Unconditionally, unlike the abstract: every format sets its title from
+    # metadata, so there is no build that wants the heading left in the body.
+    # Only writing the metadata file is optional, for the copies pandoc reads
+    # the title block from a different file for.
+    if a.title_out is not None:
+        a.title_out.write_text(title_mod.as_yaml(title_mod.read(text)))
+    text = title_mod.strip(text)
     if a.abstract_out is not None:
         # the abstract is written in the manuscript and rendered from metadata;
         # leaving it in the body too is what produced two of them

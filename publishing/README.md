@@ -96,17 +96,29 @@ links**: a `](` inside the alt text is where an image reference ends as far as
 most Markdown parsers are concerned, so a citation in a caption silently turns
 the figure's source into that citation's URL. Cite in the body instead.
 
-## The abstract
+## The title and the abstract
 
-The abstract is written in the manuscript, under `## Abstract`, so it is edited
-beside the prose rather than in a metadata file someone has to remember exists.
-`lib/abstract.py` lifts it out at build time and hands it to pandoc as
-title-block metadata, and removes it from the body copy: leaving it in both
-places is what renders it twice.
+Both are written in the manuscript, the title as its `# ` heading and the
+abstract under `## Abstract`, so they are edited beside the prose rather than in
+a metadata file someone has to remember exists, and so a reader who opens the
+Markdown on GitHub sees what the paper is called and what it claims.
 
-It is therefore a single source. `cite_this.py` reads the same section for the
-`AB` field of the RIS export, so the citation metadata cannot drift from the
-paper.
+`lib/title.py` and `lib/abstract.py` lift each one out at build time and hand it
+to pandoc as title-block metadata, then remove it from the body copy: leaving it
+in both places is what renders it twice. The title is stripped from every build,
+the abstract only from the builds that pass `--abstract-out`, because pandoc
+sets the title in all of them but not every path wants the abstract in the title
+block. Neither is ever numbered as a section, by different routes: the title is
+invisible to the numbering, because the manuscripts' own sections start at `##`
+and that is where `check_sections.py` begins matching, while the abstract's
+heading is matched and then explicitly skipped, over the span `abstract.py`
+itself defines.
+
+Each is therefore a single source. `metadata/paper.yaml` carries what is left:
+the author list, keywords and the LaTeX front matter, the parts of a title block
+that are not also part of the paper as it reads. `cite_this.py` reads the title
+and the abstract from the manuscript for the BibTeX, RIS and CFF exports, so the
+citation metadata cannot drift from the paper.
 
 ## Appendices
 
