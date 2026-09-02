@@ -189,26 +189,27 @@ physical world, and that a trainable model built from those dynamics
 would make questions about learning, forgetting and rhythm disruption
 addressable in simulation. We do not aim to test this hypothesis in this
 paper, but use it as motivation to provide a critical survey of the
-current landscape of ONNs. We organize thirteen published systems on two
-questions: whether gradients reach the oscillator dynamics and whether a
-conventional encoder or decoder is trained around it, which separates
-designed dynamics that are never learned, apparent learning via
-untrained dynamics with a trained readout, and trained dynamics with and
-without a conventional network wrapped around them. For each model
-classification we record the task, the data used, the controls, and how
-it compares against conventional artificial neural network (ANN)
-baselines at comparable parameter budgets, tasks and training. The
-comparative picture is an analysis of parity and niches rather than a
-particular architecture's dominance, as the current body of work on ONNs
-is, in our opinion, too immature to assert such a comparison. The
-evidence surveyed rarely isolates the dynamics: of the fifty-five
-applicable control comparisons the five give across the surveyed
-systems, seven have been run, the coupling term has been removed as a
-single variable just twice and never at a matched budget on a paper's
-headline task, and no report varies coupling range or boundary
+current landscape of ONNs. We organize eighteen published systems, in
+fifteen lines, on two questions: whether gradients reach the oscillator
+dynamics and whether a conventional encoder or decoder is trained around
+it, which separates designed dynamics that are never learned, apparent
+learning via untrained dynamics with a trained readout, and trained
+dynamics with and without a conventional network wrapped around them.
+For each model classification we record the task, the data used, the
+controls, and how it compares against conventional artificial neural
+network (ANN) baselines at comparable parameter budgets, tasks and
+training. The comparative picture is an analysis of parity and niches
+rather than a particular architecture's dominance, as the current body
+of work on ONNs is, in our opinion, too immature to assert such a
+comparison. The evidence surveyed rarely isolates the dynamics: of the
+sixty-five applicable control comparisons the five give across the
+surveyed systems, sixteen have been run, ten of them by three systems;
+the coupling term has been removed as a single variable three times,
+once without a reported number, once on a single dataset, and once only
+as a retrained model; and no report varies coupling range or boundary
 conditions as a single variable. We identify these gaps in greater
 detail and close with eight concrete directions for the field that we
-believe would help the field establish more cross- referential data,
+believe would help the field establish more cross-referential data,
 tasks, training and model architecture parity from which to baseline
 future ONN research efforts with more precise controls.
 \end{abstract}
@@ -229,11 +230,15 @@ meets most often are of that kind. Models that track an oscillator's
 distance from the centre in addition to its phase carry a second
 coordinate, the \textbf{amplitude}, so the state lives in a plane rather
 than on a circle. The Stuart-Landau equation is the canonical form;
-among the systems surveyed here, the damped second-order recurrences of
-the coRNN \citep{rusch2021} and LinOSS \citep{rusch2025} lines share
-that planar state, though without the amplitude-restoring terms that
-make a rhythm self-sustaining, so they oscillate under drive rather than
-on their own.
+among the systems surveyed here, the second-order recurrences of the
+coRNN \citep{rusch2021}, UnICORNN \citep{unicornn} and LinOSS
+\citep{rusch2025} lines share that planar state, but as damped or linear
+oscillators without the amplitude-restoring term that makes a limit
+cycle self-sustaining: started from rest, as all of them are, they
+oscillate with whatever amplitude the input gives them rather than
+returning to a rhythm of their own. Only coRNN among them is damped in
+the model itself; UnICORNN is undamped by construction and LinOSS has no
+damping term, a distinction Section 2.3.1 returns to.
 
 \begin{figure}
 \centering
@@ -356,18 +361,19 @@ coupling gained over the one before it.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Every physics and mathematics source cited in this survey, in date order. The upper track is the account of when a coupled population locks; the lower track is what structure and operating regime do to it. The axis is piecewise, because four entries predate 1930 and most postdate 1990. Almost every machine-learning system in Section 2 takes its coupling law from the upper track, and from the 1967 to 1992 stretch of it in particular. The single exception is AKOrN {[}@\{akorn\}{]}, built on the D-dimensional generalization of @chandra2019 in the lower track. The rest of the lower track is untouched by the surveyed systems, and its earliest two entries are arguments that physics can compute at all rather than coupling laws to build with.}]{resources/figures/fig3-physics-timeline.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Every physics and mathematics source cited in this survey, in date order. The upper track is the account of when a coupled population locks; the lower track is what structure and operating regime do to it. The axis is piecewise, because four entries predate 1930 and most postdate 1990. Almost every machine-learning system in Section 2 takes its coupling law from the upper track, and from the 1967 to 1992 stretch of it in particular. The exceptions are AKOrN {[}@\{akorn\}{]} and, through it, HoloGraph {[}@\{dan2025\}{]}, built on the D-dimensional generalization of @chandra2019 in the lower track. The rest of the lower track is untouched by the surveyed systems, and its earliest two entries are arguments that physics can compute at all rather than coupling laws to build with.}]{resources/figures/fig3-physics-timeline.pdf}}
 \caption{Every physics and mathematics source cited in this survey, in
 date order. The upper track is the account of when a coupled population
 locks; the lower track is what structure and operating regime do to it.
 The axis is piecewise, because four entries predate 1930 and most
 postdate 1990. Almost every machine-learning system in Section 2 takes
 its coupling law from the upper track, and from the 1967 to 1992 stretch
-of it in particular. The single exception is AKOrN \citep{akorn}, built
-on the D-dimensional generalization of \citet{chandra2019} in the lower
-track. The rest of the lower track is untouched by the surveyed systems,
-and its earliest two entries are arguments that physics can compute at
-all rather than coupling laws to build with.}
+of it in particular. The exceptions are AKOrN \citep{akorn} and, through
+it, HoloGraph \citep{dan2025}, built on the D-dimensional generalization
+of \citet{chandra2019} in the lower track. The rest of the lower track
+is untouched by the surveyed systems, and its earliest two entries are
+arguments that physics can compute at all rather than coupling laws to
+build with.}
 \end{figure}
 
 \subsubsection{Within neuroscience}\label{within-neuroscience}
@@ -560,30 +566,35 @@ else is the same machinery any other neural network uses.
 
 Geometry deserves its own picture because it is treated as an
 implementation detail in most of the surveyed work and is not one.
-All-to-all coupling connects every pair, as in Un-0 \citep{un-0} and
-AKOrN \citep{akorn}; a ring with a finite coupling range connects each
-unit only to units near it; a lattice arranges the units in space and
-couples neighbours, as in Neural Wave Machines \citep{keller2023}; a
-modular fabric is dense inside its blocks and sparse between them.
-All-to-all coupling costs O(N\ensuremath{^{2}}) parameters and is the
-bulk of the largest system surveyed here. Finite-range nonlocal coupling
-is the case in which the physics reports coexisting locked and drifting
-domains \citep{kuramoto2002}, which is the regime Section 1.1 identified
-as the useful one. And no published work we found holds a core fixed and
-varies the geometry, which is why Section 3.1 treats it as an open axis
-rather than a settled one.
+All-to-all coupling connects every pair through its own learned weight,
+as in Un-0 \citep{un-0}; a ring with a finite coupling range connects
+each unit only to units near it; a lattice arranges the units in space
+and couples neighbours through a shared kernel, as in Neural Wave
+Machines \citep{keller2023} and the convolutional variant of AKOrN
+\citep{akorn}; attention connects every pair through weights recomputed
+from the current state, as in AKOrN's attentive variant and WONN
+\citep{wonn}; a modular fabric is dense inside its blocks and sparse
+between them. All-to-all coupling costs O(N\ensuremath{^{2}}) parameters
+and is the bulk of the largest system surveyed here. Finite-range
+nonlocal coupling is the case in which the physics reports coexisting
+locked and drifting domains \citep{kuramoto2002}, which is the regime
+Section 1.1 identified as the useful one. And no published work we found
+holds a core fixed and varies the geometry, which is why Section 3.1
+treats it as an open axis rather than a settled one.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Four coupling geometries over the same twelve oscillators. All-to-all coupling is what Un-0 and AKOrN use, and its O(N) parameter cost is the bulk of Un-0's 322M parameters at 16k oscillators. Finite coupling range is the case the physics canon reports chimera states in. A lattice is the geometry of Neural Wave Machines. The modular fabric is the best performer in the one published sparsity study of a trained oscillator network, which is blog-published and covers one system.}]{resources/figures/fig5-geometries.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Four coupling geometries over the same twelve oscillators. All-to-all coupling with a free weight per pair is what Un-0 uses, and its O(N) parameter cost is the bulk of Un-0's 322M parameters at 16k oscillators; AKOrN and WONN reach every pair through attention weights instead, and AKOrN's convolutional variant couples a fixed neighbourhood. Finite coupling range is the case the physics canon reports chimera states in. A lattice is the geometry of Neural Wave Machines. The modular fabric is the best performer in the one published sparsity study of a trained oscillator network, which is blog-published and covers one system.}]{resources/figures/fig5-geometries.pdf}}
 \caption{Four coupling geometries over the same twelve oscillators.
-All-to-all coupling is what Un-0 and AKOrN use, and its
-O(N\ensuremath{^{2}}) parameter cost is the bulk of Un-0's 322M
-parameters at 16k oscillators. Finite coupling range is the case the
-physics canon reports chimera states in. A lattice is the geometry of
-Neural Wave Machines. The modular fabric is the best performer in the
-one published sparsity study of a trained oscillator network, which is
-blog-published and covers one system.}
+All-to-all coupling with a free weight per pair is what Un-0 uses, and
+its O(N\ensuremath{^{2}}) parameter cost is the bulk of Un-0's 322M
+parameters at 16k oscillators; AKOrN and WONN reach every pair through
+attention weights instead, and AKOrN's convolutional variant couples a
+fixed neighbourhood. Finite coupling range is the case the physics canon
+reports chimera states in. A lattice is the geometry of Neural Wave
+Machines. The modular fabric is the best performer in the one published
+sparsity study of a trained oscillator network, which is blog-published
+and covers one system.}
 \end{figure}
 
 \textbf{Recent contributions.} The systems fall into three groups by
@@ -594,51 +605,104 @@ where the dynamics sits.
 \tightlist
 \item
   \textbf{Oscillatory recurrences} replace the recurrence of an RNN with
-  a damped second-order ODE. The coRNN \citep{rusch2021} proves gradient
-  bounds directly from its damping terms rather than relying on gating,
-  and UnICORNN \citep{unicornn} makes the same construction fast by
-  keeping the units independent. Their linear descendants trade the
-  nonlinearity for scale: LinOSS \citep{rusch2025} obtains unconditional
-  stability from an implicit discretization and reaches roughly
-  eighteen-thousand-step sequences by parallel scan, and D-LinOSS
-  \citep{d-linoss} makes the damping itself learnable and proves this
-  strictly enlarges the reachable dynamics, since fixed damping covers
-  only a measure-zero set of eigenvalue configurations. The family has a
-  universality theorem, and it is reservoir-shaped: a bank of forced
-  harmonic oscillators plus a readout suffices \citep{lanthaler2023}.
+  a second-order oscillator ODE. The coRNN \citep{rusch2021} is a
+  network of coupled, damped, nonlinear oscillators: its hidden units
+  interact through full weight matrices inside the nonlinearity, its
+  damping bounds the energy of the hidden state, and its gradient bounds
+  follow from a structure-preserving discretization under a condition
+  that ties the time step to the weight norms, rather than from gating.
+  UnICORNN \citep{unicornn} keeps the second-order form but drops both
+  the damping and the coupling within a layer: each unit is an
+  independent undamped oscillator, y'\,' =
+  \ensuremath{-}{[}\ensuremath{\sigma}(w y + Vu + b) +
+  \ensuremath{\alpha}y{]} with w a vector applied elementwise, the
+  system is Hamiltonian, and a symplectic discretization conserves
+  phase-space volume, which is what its gradient bounds rest on; layers
+  are stacked densely, each unit carries a trainable time step, and the
+  result runs thirty to forty times faster than coRNN. One consequence
+  matters for Section 2.3.2: UnICORNN trains nonlinear dynamics with
+  full backpropagation through the 17,984-step EigenWorms sequences and
+  reaches 90.3\% there, a record set in 2021. Their linear descendants
+  trade the nonlinearity for scale: LinOSS \citep{rusch2025} is a bank
+  of uncoupled forced harmonic oscillators, y'\,' = \ensuremath{-}Ay +
+  Bu + b with A diagonal and no damping term, that is stable for any
+  non-negative A, reaches sequences of roughly fifty thousand steps by
+  parallel scan, and comes in two discretizations, a conservative one
+  and an implicit one whose numerical dissipation the authors read as a
+  forgetting mechanism; D-LinOSS \citep{d-linoss} adds an explicit
+  learnable damping term and proves that this enlarges the reachable
+  dynamics from a measure-zero set of eigenvalues, which the earlier
+  discretizations tie to frequency, to the full unit disk. The family
+  has universality theorems, and their construction is a fixed bank of
+  uncoupled forced harmonic oscillators followed by a nonlinear readout
+  \citep{lanthaler2023}; LinOSS proves its own for its continuous-time
+  model. Two wording notes are worth recording, because they misled an
+  earlier draft of this survey and may mislead a reader. The UnICORNN
+  paper twice calls its parameter \ensuremath{\alpha} ``the damping
+  parameter'' in its experiments section, while its model section calls
+  the same \ensuremath{\alpha} the oscillation frequency and states that
+  the system has no damping or friction term; \ensuremath{\alpha}
+  multiplies the position, enters the Hamiltonian as the restoring
+  potential, and cannot dissipate energy, so we read the model as the
+  undamped one its name declares. And the LinOSS paper never uses the
+  word damping, while D-LinOSS describes its predecessors as undamped
+  harmonic oscillators whose discretization couples frequency and
+  damping: the dissipation in question belongs to the implicit
+  integrator, not to a term of the model.
 \item
   \textbf{Trained synchronization models} put Kuramoto-type dynamics to
   work directly. AKOrN \citep{akorn} uses the D-dimensional
-  generalization as a layer inside a conventional network and reports
-  its gains on object discovery, calibration and reasoning-style tasks
-  rather than on raw accuracy. WONN \citep{wonn} evolves representations
-  on a torus under generalized Winfree dynamics, writing the input into
-  the natural frequencies rather than adding it as a drive. It is the
-  first synchronization architecture to reach ImageNet-1K scale at all,
-  and it is also the only one in the survey evaluated on logical
-  reasoning and path finding as well as recognition: on Maze-hard it
-  reports 80.1\% at 1\% of the parameters of the prior state of the art,
-  which is the largest parameter-efficiency margin any system here
-  claims. Un-0 \citep{un-0} trains an all-to-all Kuramoto pool end to
-  end for image generation and is the only system in the survey to
-  publish a frozen-dynamics control against itself, though only as blog
-  posts with released code. KomplexNet \citep{muzellec2025} carries
-  phase dynamics inside a complex-valued CNN and reports the field's
-  most direct evidence for the binding hypothesis, a random-phase
-  control that costs roughly 10 to 15\% on multi-object grouping.
-  Kuramoto Attention \citep{kuramoto-attention} replaces attention
-  layers with a single Kuramoto--Sakaguchi step, and FSN
-  \citep{nunley2026} builds a value pathway from frustration angles,
-  repulsive harmonics and a delay term at once, arguing explicitly that
-  a fully synchronized network computes nothing further. Kuramoto
-  Orientation Diffusion \citep{kuramoto-orientation-diffusion} makes
-  stochastic Kuramoto the forward process of a diffusion model, which
-  suits generation on periodic domains. HoloGraph \citep{dan2025} swaps
-  the diffusion-style message passing of a graph network for
-  synchronization between coupled oscillators, aimed at the
-  over-smoothing repeated diffusion causes. Neural Wave Machines
-  \citep{keller2023} couple oscillators locally on a lattice and report
-  parameter-efficiency advantages from the travelling waves that result.
+  generalization as a layer inside a conventional network, with the
+  coupling defined by a convolution kernel or by attention rather than
+  by a free all-to-all matrix, and reports its gains on object
+  discovery, adversarial and corruption robustness, calibration and
+  Sudoku rather than on clean classification accuracy, where it trails a
+  ResNet-18. WONN \citep{wonn} evolves representations on a torus under
+  generalized Winfree dynamics, writing the input into the natural
+  frequencies rather than adding it as a drive. Its authors describe it
+  as the first synchronization architecture to scale competitively to
+  ImageNet-1K, and the qualifier matters, since their own table trains
+  AKOrN on ImageNet-1K at 67.45\%; it is also the only system in the
+  survey evaluated on path finding, and one of two on Sudoku. On
+  Maze-hard it reports 76.2\% in a single pass and 80.1\% when the
+  lowest-energy of 32 sampled trajectories is selected, at 0.396M
+  parameters. The paper frames this as 1\% of the parameters of the
+  prior state of the art, but the best result in its own table is
+  TRM-Att at 85.3\% with 7M parameters, so the reading we take is a
+  model eighteen times smaller that trails the best result by five
+  points and beats the 27M-parameter HRM by two to six. Un-0
+  \citep{un-0} trains an all-to-all Kuramoto pool end to end for image
+  generation and publishes a frozen-dynamics control, a decoder-only
+  control and a randomized-structure twin against itself, though only as
+  blog posts with released code. KomplexNet \citep{muzellec2025} runs
+  Kuramoto dynamics on the phases of a complex-valued CNN's first layer,
+  with a coupling kernel trained through a synchrony loss on
+  ground-truth object masks, and reports the most complete set of
+  controls in the survey: a twin trained without the Kuramoto step, a
+  twin whose coupling kernel is held at a fixed Gaussian, and
+  parameter-matched real-valued and Transformer baselines. Its headline
+  margin of 10 to 15\% over the real-valued model is measured on
+  overlapping and noisy digits; in distribution the synchronization step
+  is worth two to three points. Kuramoto Attention
+  \citep{kuramoto-attention} keeps the query-key selection of an
+  attention layer and replaces its value path with a single Kuramoto
+  step, and FSN \citep{nunley2026} builds that value pathway from static
+  frustration angles, Daido harmonics and an anticipating delay term at
+  once, arguing that consensus records where the attended context is
+  rather than what followed it, so it suits retrieval but not
+  prediction. Kuramoto Orientation Diffusion
+  \citep{kuramoto-orientation-diffusion} makes stochastic Kuramoto the
+  forward process of a diffusion model, which suits generation on
+  periodic domains. HoloGraph \citep{dan2025} swaps the diffusion-style
+  message passing of a graph network for synchronization between AKOrN's
+  vector-valued oscillators with a feedback term, aimed at the
+  over-smoothing repeated diffusion causes; it is the one peer-reviewed
+  system in this group whose ablations concern spectral features and
+  depth rather than the dynamics. Neural Wave Machines
+  \citep{keller2023} replace coRNN's dense coupling matrices with a
+  convolution kernel over a lattice, so each oscillator couples only to
+  its neighbours, and report travelling waves along with a parameter
+  saving that follows from the locality by construction.
 \item
   \textbf{Physical substrates} run the dynamics in hardware instead of
   simulating it. A single spin-torque oscillator, time-multiplexed as a
@@ -679,13 +743,13 @@ Swarmalators, in which phase and spatial position couple to each other,
 were proposed as a substrate for bio-inspired computing seven years ago
 \citep{o-keeffe2019} and we found no machine-learning system built on
 them. One of the properties those later models offer is asked for
-directly. FSN argues that a fully synchronized network computes nothing
-further, and Un-0's sparsity study reports dense fields collapsing into
-a globally locked, zero-gradient state, so partial coherence is a stated
-requirement of the systems themselves rather than an inference of ours.
-Multistability and coupling beyond pairwise carry no comparable stated
-demand, and no surveyed system has tested whether either helps. The gap
-is untested rather than considered.
+directly. FSN argues that consensus records where the attended context
+is rather than what followed it, and Un-0's sparsity study reports dense
+fields collapsing into a globally locked, zero-gradient state, so
+partial coherence is a stated requirement of the systems themselves
+rather than an inference of ours. Multistability and coupling beyond
+pairwise carry no comparable stated demand, and no surveyed system has
+tested whether either helps. The gap is untested rather than considered.
 
 \begin{figure}
 \centering
@@ -721,8 +785,11 @@ explode. The LSTM \citep{hochreiter1997} answers it with gated paths
 along which a value passes unchanged, and the gated recurrent unit
 \citep{cho2014} reaches the same effect with two gating units where the
 LSTM uses four. Oscillator recurrences answer the same question with
-different machinery, bounding the gradient with damping rather than with
-gates, which is why coRNN can prove what an LSTM can only demonstrate.
+different machinery, bounding the gradient through the structure of the
+dynamics rather than with gates, a dissipative energy bound and a
+structure-preserving discretization in coRNN, conservation of
+phase-space volume in UnICORNN, which is why both can prove what an LSTM
+can only demonstrate.
 
 \textbf{Convolutions carry no state.} A convolutional network
 \citep{lecun1998} applies the same local filter across position and lets
@@ -750,8 +817,10 @@ Transformer-quality language modelling. This is the family the
 oscillatory recurrences are closest to: LinOSS \emph{is} a state-space
 model whose transition is a bank of harmonic oscillators, which is why
 it is also the oscillator system with the longest gradient horizon in
-the survey. Hybrids interleave the two, keeping a few attention layers
-for recall over a mostly recurrent stack \citep{lieber2024}.
+the survey, roughly fifty thousand steps; UnICORNN's 17,984 is the
+longest for a nonlinear one. Hybrids interleave the two, keeping a few
+attention layers for recall over a mostly recurrent stack
+\citep{lieber2024}.
 
 \textbf{Spiking networks are the nearest neighbour.} A spiking unit is
 an oscillator of a restricted kind: it integrates input, crosses a
@@ -770,7 +839,8 @@ state makes oscillator networks easier to train is open, and this
 survey's own evidence cautions against assuming it.} No published work
 compares a spiking network and an oscillator network on one task under
 matched conditions, and every nonlinear oscillator system in the record
-works at a short gradient horizon (Section 2.3).
+that lacks a proven gradient bound works at a short gradient horizon
+(Section 2.3).
 
 \begin{figure}
 \centering
@@ -804,28 +874,30 @@ now interventional rather than merely descriptive. \textbf{In machine
 learning}, oscillator dynamics has begun to appear in architectures that
 run on mainstream tasks at non-trivial scale: 76.78\% top-1 on
 ImageNet-1K at 12.3M parameters (WONN, preprint), class-conditional
-generation on ImageNet-64 at FID 6.74 (Un-0, blog-published), sequence
-classification at roughly eighteen thousand steps (LinOSS), object
-discovery and Sudoku (AKOrN), and character-level language modelling
-(Kuramoto Attention, preprint). What these results establish is that the
-dynamics can be trained at these scales at all, which was not on the
-record five years ago. What they do not establish is how the systems
-stand against tuned conventional baselines, which Section 2.3.4 takes
-up.
+generation on ImageNet-64 at FID 6.74 (Un-0, blog-published), regression
+over fifty-thousand-step windows (LinOSS), object discovery and Sudoku
+(AKOrN), and character- and byte-level language modelling (Kuramoto
+Attention, preprint). What these results establish is that the dynamics
+can be trained at these scales at all; the long-sequence result has a
+2021 precedent in UnICORNN's 17,984-step classification, and the rest
+were not on the record five years ago. What they do not establish is how
+the systems stand against tuned conventional baselines, which Section
+2.3.4 takes up.
 
 The machine-learning literature has so far built on the simpler end of
 that physics, and it is already getting results there. The coupling laws
 in use generally end around the 1992-era physics models (Figure 7), and
-the geometries in the surveyed machine-learning models are all-to-all or
-nothing, with Un-0 only recently demonstrating a sparse geometry, while
-the more recent physics models demonstrate behaviour ONN researchers
-have reason to want. Partial coherence is the clearest case: two of the
-surveyed systems name full synchronization as the failure mode they are
-trying to avoid. Multistability and coupling beyond pairwise are untried
-here rather than unwanted. That gap reads as headroom rather than
-deficiency: more expressive coupling laws are sitting unused, and the
-results already obtained with the simple ones are the reason to think
-the richer ones are worth trying.
+the geometries in the surveyed machine-learning models are all-to-all,
+convolutional or attention-defined, with Un-0's sparsity study the only
+one to vary connectivity on purpose, while the more recent physics
+models demonstrate behaviour ONN researchers have reason to want.
+Partial coherence is the clearest case: two of the surveyed systems name
+full synchronization as the failure mode they are trying to avoid.
+Multistability and coupling beyond pairwise are untried here rather than
+unwanted. That gap reads as headroom rather than deficiency: more
+expressive coupling laws are sitting unused, and the results already
+obtained with the simple ones are the reason to think the richer ones
+are worth trying.
 
 Three motivations sit behind the interest, and they are worth separating
 from evidence:
@@ -915,11 +987,15 @@ A ``coupled oscillator network'' here means a machine-learning system
 whose state evolves under oscillator dynamics: phase-only models of the
 Kuramoto and Winfree family, second-order oscillator ODEs, linear
 oscillatory state-space models, amplitude-phase models, and physical
-oscillator hardware. Thirteen load-bearing systems meet that definition
-and are tabulated in Appendix D. The same words are used differently in
-physics, neuroscience and machine learning, and several of the
-comparisons below depend on which sense is meant; Appendix B is a
-glossary of the terms as this survey uses them.
+oscillator hardware. Eighteen load-bearing systems meet that definition
+and are tabulated in Appendix D as fifteen rows, since three pairs share
+an architecture and a control record: the echo-state network and the
+liquid state machine, LinOSS \citep{rusch2025} and D-LinOSS
+\citep{d-linoss}, and Kuramoto Attention \citep{kuramoto-attention} and
+FSN \citep{nunley2026}. The same words are used differently in physics,
+neuroscience and machine learning, and several of the comparisons below
+depend on which sense is meant; Appendix B is a glossary of the terms as
+this survey uses them.
 
 One adjacent literature is deliberately outside that definition. A
 substantial body of work uses neural networks to \emph{model} oscillator
@@ -981,18 +1057,23 @@ learned filterbank has bettered.
 dynamics}\label{trained-designed-dynamics}
 
 Gradients reach the dynamics, and the dynamics is essentially the whole
-model rather than a component of one. Un-0 \citep{un-0} is a pure
-Kuramoto pool with learned all-to-all coupling and learned natural
-frequencies, trained end to end for image generation; WONN \citep{wonn}
-uses Winfree coupling and writes the input into the natural frequencies
-rather than adding it as a drive. Both are the field's scale
-demonstrations, and both are also where the attribution question is
-cleanest, because there is comparatively little conventional machinery
-to which a result could be misattributed. Un-0 is the only system in the
-survey that publishes the control this quadrant makes possible: a
-frozen-reservoir control, against which its trained dynamics wins
-clearly, with single-step and linearized dynamics performing near the
-untrained level (blog-published).
+model rather than a component of one; a thin conventional encoder or
+decoder may remain, and in Un-0 it is under 13\% of the parameters. Un-0
+\citep{un-0} is a pure Kuramoto pool with learned all-to-all coupling
+and learned natural frequencies, read out by a convolutional decoder and
+trained end to end for image generation; WONN \citep{wonn} uses
+generalized Winfree coupling, writes the input into the natural
+frequencies through a learned embedding rather than adding it as a
+drive, and updates those frequencies once per layer. Both are the
+field's scale demonstrations, and both are also where the attribution
+question is cleanest, because there is comparatively little conventional
+machinery to which a result could be misattributed, which is also what
+makes a decoder-only control meaningful for Un-0. Un-0 publishes the
+controls this quadrant makes possible: a frozen-reservoir control,
+against which its trained dynamics wins clearly, with single-step
+learned dynamics performing near the untrained level on CIFAR-10, and a
+decoder-only control that does worse than either (blog-published). WONN
+publishes neither.
 
 \subsubsection{Untrained dynamics with a trained encoder or
 decoder}\label{untrained-dynamics-with-a-trained-encoder-or-decoder}
@@ -1009,11 +1090,18 @@ single physical spin-torque oscillator, time-multiplexed as a frozen
 reservoir, reaches roughly 99.6\% spoken-digit recognition with one
 device rather than a network of them \citep{torrejon2017}. Untrained
 networks of randomly coupled damped oscillators, RON \citep{ceni2024},
-are reported to outperform both echo-state and fully trained recurrent
-baselines on time-series benchmarks, which is a trained-versus-untrained
-comparison in the untrained direction. And designed dynamics can replace
-random dynamics at no cost: deterministic minimum-complexity reservoirs
-match classical random echo-state networks \citep{rodan2011}.
+are reported to beat a leaky echo-state network on every benchmark they
+run, and to beat fully trained recurrent models, including a trained
+version of themselves, on chaotic forecasting and on small-parameter
+classification, while losing to the trained models on the long-memory
+classification tasks; the trainable parameters are matched, which the
+paper enforces, and the random reservoir then carries about fifty times
+more units than the trained networks. That is a trained-versus-untrained
+comparison in the untrained direction, and the paper's trained twin is
+the frozen-twin control of Section 2.3.3 run in reverse. And designed
+dynamics can replace random dynamics at no cost: deterministic
+minimum-complexity reservoirs match classical random echo-state networks
+\citep{rodan2011}.
 
 The distinguishing feature within this quadrant is \textbf{where the
 fixed dynamics comes from}, and it matters because Section 3.1 shows
@@ -1063,12 +1151,14 @@ conditions are known for composing stable recurrent modules
 \citep{kozachkov2022}. One result cuts the other way, and it is the
 sharpest thing theory says here: within-layer coupling may not be
 required for the family's universality, because a diagonal, uncoupled
-bank could suffice \citep{lanthaler2023}. That is proved for a bank of
-forced harmonic oscillators with a nonlinear readout rather than for the
-Kuramoto-family models most of the surveyed systems use, so it bounds
-what synchronization can be claimed to add rather than settling it. If
-it carries, whatever synchronization contributes is inductive bias, and
-only a controlled ablation can measure it.
+bank could suffice \citep{lanthaler2023}. That is proved for a fixed
+bank of forced harmonic oscillators with a nonlinear readout, in
+continuous time, rather than for the Kuramoto-family models most of the
+surveyed systems use, and a discretization inherits it only for small
+time steps, so it bounds what synchronization can be claimed to add
+rather than settling it. If it carries, whatever synchronization
+contributes is inductive bias, and only a controlled ablation can
+measure it.
 
 \subsection{Comparison of the current
 landscape}\label{comparison-of-the-current-landscape}
@@ -1087,13 +1177,17 @@ and the papers make in passing.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={The oscillator dynamics each surveyed system is built on, grouped by how the dynamics is written rather than by when it was published. The first six forms carry an explicit coupling term between units. The last two do not, which is why Section 2.3.3 records a coupling ablation for those rows as not applicable rather than as missing. Appendix C places all of them in the wider lineage.}]{resources/figures/fig10-model-lineage.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={The oscillator dynamics each surveyed system is built on, grouped by how the dynamics is written rather than by when it was published. The first seven forms carry a coupling term between units, whether as a phase difference, a projected vector sum, or, in the coupled second-order recurrences, full or convolutional weight matrices inside the nonlinearity. The last two do not: UnICORNN's units are independent within a layer and LinOSS's state matrices are diagonal, which is why Section 2.3.3 records a coupling ablation for those rows as not applicable rather than as missing. Appendix C places all of them in the wider lineage.}]{resources/figures/fig10-model-lineage.pdf}}
 \caption{The oscillator dynamics each surveyed system is built on,
 grouped by how the dynamics is written rather than by when it was
-published. The first six forms carry an explicit coupling term between
-units. The last two do not, which is why Section 2.3.3 records a
-coupling ablation for those rows as not applicable rather than as
-missing. Appendix C places all of them in the wider lineage.}
+published. The first seven forms carry a coupling term between units,
+whether as a phase difference, a projected vector sum, or, in the
+coupled second-order recurrences, full or convolutional weight matrices
+inside the nonlinearity. The last two do not: UnICORNN's units are
+independent within a layer and LinOSS's state matrices are diagonal,
+which is why Section 2.3.3 records a coupling ablation for those rows as
+not applicable rather than as missing. Appendix C places all of them in
+the wider lineage.}
 \end{figure}
 
 \textbf{Where the input enters} looks like an implementation detail and
@@ -1104,12 +1198,12 @@ value written into the natural frequency do different things
 \citet{pikovsky2001}), and drive competes with mutual order in forced
 populations \citep{childs2008}. Hardware treats injection locking as the
 computation itself. The surveyed systems scatter across the four
-available forms silently: additive drive (coRNN, LinOSS), phase-coupled
-conditioning (AKOrN's projected conditioning, Un-0's conditioning
-oscillators sin-coupled into the field), input written into natural
-frequencies (WONN), and input-gated coupling strength (KomplexNet). No
-paper in this set contrasts two injection forms under controls or
-discusses the choice as a choice.
+available forms silently: additive drive (LinOSS; coRNN, inside its
+nonlinearity), phase-coupled conditioning (AKOrN's projected
+conditioning, Un-0's conditioning oscillators sin-coupled into the
+field), input written into natural frequencies (WONN), and input-gated
+coupling strength (KomplexNet). No paper in this set contrasts two
+injection forms under controls or discusses the choice as a choice.
 
 \begin{figure}
 \centering
@@ -1128,21 +1222,22 @@ something the record answers: one surveyed system has varied them
 together; none has varied either alone. Un-0's sparsity study
 \citep{sparsity-study} reports that static masks fixed before training
 remove 50 to 98.4\% of couplings and maintain or \emph{improve}
-generation; that the best ImageNet-64 result is a modular variant at
-reduced parameter count; that optimal sparsity scales with system size;
-and that above a critical sparsity performance degrades, the extreme
-failure being input-output disconnection. Its own summary is that
-connectivity acts as a control knob, not a monotonic regularizer. Two
-attributions carry independent interest: improvements track generative
-\emph{recall}, meaning diversity, rather than precision, under the
-established decomposition \citep{sajjadi2018, kynkaanniemi2019}, and
-sparse systems tolerate higher learning rates, with dense failures
-blamed on collapse into global lock. All of this is blog-published, one
-system, one modality. The physics is consistent with it: chimera
-coexistence is generic for nonlocal finite-range coupling, modular
-fabrics natively produce chimera-like states and metastable timescale
-hierarchies \citep{hizanidis2016, litwin-kumar2012}, sparse recurrent
-fabrics classify at high capacity through resonant amplification
+generation; that at the smallest ImageNet-64 size the best result is a
+modular variant at reduced parameter count; that optimal sparsity scales
+with system size; and that above a critical sparsity performance
+degrades, the extreme failure being input-output disconnection. Its own
+summary is that connectivity acts as a control knob, not a monotonic
+regularizer. Two attributions carry independent interest: improvements
+track generative \emph{recall}, meaning diversity, rather than
+precision, under the established decomposition
+\citep{sajjadi2018, kynkaanniemi2019}, and sparse systems tolerate
+higher learning rates, with dense failures blamed on collapse into
+global lock. All of this is blog-published, one system, one modality.
+The physics is consistent with it: chimera coexistence is generic for
+nonlocal finite-range coupling, modular fabrics natively produce
+chimera-like states and metastable timescale hierarchies
+\citep{hizanidis2016, litwin-kumar2012}, sparse recurrent fabrics
+classify at high capacity through resonant amplification
 \citep{turcu2022}, and in conventional networks near-independent
 recurrent modules generalize better out of distribution
 \citep{goyal2021} while spatial wiring costs make modularity emerge
@@ -1152,10 +1247,14 @@ recurrent modules generalize better out of distribution
 the surveyed papers do report, and each turns out to be doing two jobs
 at once. The spectral radius of an echo-state network is simultaneously
 its stability condition and its memory-nonlinearity operating point;
-coRNN's damping guarantees its gradient bounds \emph{and} shapes its
-expressivity; D-LinOSS uses learnable damping as its stability mechanism
-and proves it strictly enlarges the reachable dynamics; and per-unit
-damping has a unimodal sweet spot in a speech-oscillator study
+coRNN's damping bounds the energy of its hidden state, which its
+gradient analysis then rests on, while its authors offer only heuristics
+and a robustness sweep on what damping does for expressivity; D-LinOSS
+learns its damping to widen the reachable spectrum, and keeps its
+eigenvalues inside the unit disk by constraining the frequency given the
+damping and time step rather than by the damping itself; and a
+speech-oscillator study built on coRNN sweeps its frequency and damping
+ranges together and finds the low-frequency band decisive
 \citep{chandravadia2026}. Frequency placement shows the
 design-beats-training pattern repeatedly: state-space models find their
 spectrum's initialization load-bearing, D-LinOSS initializes in spectrum
@@ -1200,25 +1299,28 @@ general claim of the form ``oscillator networks are better at X'' cannot
 be supported by this record, because no two systems have been run on X
 under one protocol. Narrower claims can be made, and two papers make
 them: Kuramoto Attention reports beating a parameter-matched Transformer
-at the 5M scale, and RON reports beating echo-state and fully trained
-recurrent baselines on time-series benchmarks. Each of those stands for
-its own task at its own scale against its own baseline. What does not
-follow from either is that the result carries to another task, another
-parameter budget, or another oscillator system. And an absent result is
-not a demonstrated limitation: generative speech, streaming inference
-and measured energy on hardware contain no oscillator system at all, so
-nothing has been shown to fail there.
+at the 5M scale on byte-level code, and RON reports beating echo-state
+and fully trained recurrent baselines on chaotic forecasting. Each of
+those stands for its own task at its own scale against its own baseline.
+What does not follow from either is that the result carries to another
+task, another parameter budget, or another oscillator system. And an
+absent result is not a demonstrated limitation: generative speech,
+streaming inference and measured energy on hardware contain no
+oscillator system at all, so nothing has been shown to fail there.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Steps unrolled and backpropagated through, by system. Filled markers are nonlinear dynamics with no stated gradient bound; open markers are linear dynamics, or gradients bounded by dissipation. coRNN and UnICORNN are not plotted: they train long sequences, but prove gradient bounds from damping before doing so. Every nonlinear system sits at the short end, and the one system three orders of magnitude out is linear.}]{resources/figures/fig12-training-horizon.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Steps unrolled and backpropagated through, by system. Filled markers are nonlinear dynamics with no stated gradient bound; half-filled markers are nonlinear dynamics whose gradients are controlled by the structure of the dynamics, a dissipative energy bound with a time-step condition in coRNN and Neural Wave Machines, and Hamiltonian conservation in UnICORNN; the open marker is linear dynamics. Every nonlinear system without a stated bound trains at twenty-five steps or fewer; the two nonlinear systems that reach thousands of steps carry a proof, and the only system beyond twenty thousand is linear.}]{resources/figures/fig12-training-horizon.pdf}}
 \caption{Steps unrolled and backpropagated through, by system. Filled
-markers are nonlinear dynamics with no stated gradient bound; open
-markers are linear dynamics, or gradients bounded by dissipation. coRNN
-and UnICORNN are not plotted: they train long sequences, but prove
-gradient bounds from damping before doing so. Every nonlinear system
-sits at the short end, and the one system three orders of magnitude out
-is linear.}
+markers are nonlinear dynamics with no stated gradient bound;
+half-filled markers are nonlinear dynamics whose gradients are
+controlled by the structure of the dynamics, a dissipative energy bound
+with a time-step condition in coRNN and Neural Wave Machines, and
+Hamiltonian conservation in UnICORNN; the open marker is linear
+dynamics. Every nonlinear system without a stated bound trains at
+twenty-five steps or fewer; the two nonlinear systems that reach
+thousands of steps carry a proof, and the only system beyond twenty
+thousand is linear.}
 \end{figure}
 
 \textbf{What is comparable.} Two kinds of comparison survive those
@@ -1230,19 +1332,29 @@ baselines, rare but present, worth reading closely.
 
 Training horizon is comparable in the same way and shows a conspicuous
 pattern. Un-0 trains with 10 to 25 integration steps and reports no
-stability machinery of any kind; WONN unrolls 18 steps, six layers of
-three; Kuramoto Attention takes one dynamics step per layer; Kuramoto
+stability machinery of any kind; WONN unrolls 18 steps for images, six
+layers of three, and a single layer of 24 or 16 steps for Maze-hard and
+Sudoku; AKOrN settles for 3 to 16 steps per block; KomplexNet runs 15;
+Kuramoto Attention takes one dynamics step per layer; Kuramoto
 Orientation Diffusion never trains a long chain at all. The oscillator
-systems that do handle long horizons changed the problem rather than
-solving it: coRNN and UnICORNN prove gradient bounds from damping first,
-LinOSS makes the dynamics linear, D-LinOSS keeps every mode contractive
-by construction. Theory tracks the same line, with generalization bounds
-growing linearly in horizon and approximation rates requiring
-incremental stability. Meanwhile a parallel literature develops training
-rules that avoid backpropagation through the dynamics entirely:
-equilibrium propagation for Kuramoto frequencies \citep{ahmadi2026} and
-local force-measurement rules for driven nonlinear oscillators
-\citep{bosch2025}.
+systems that do handle long horizons each brought a guarantee with them
+rather than a recipe: coRNN bounds its hidden-state energy through
+damping and its gradients through a structure-preserving discretization
+with a time-step condition, and trains to five thousand steps; UnICORNN
+removes the damping, integrates a Hamiltonian system symplectically so
+that phase-space volume is conserved, and trains with full
+backpropagation through 17,984-step sequences, made affordable by
+inverting the recurrence instead of storing it; LinOSS makes the
+dynamics linear and stable for any non-negative frequency, and reaches
+fifty thousand; D-LinOSS constrains its eigenvalues to the unit disk.
+Two of those four are nonlinear, so the wall is not nonlinearity as
+such; it is nonlinear dynamics without a proof. Theory tracks the same
+line, with generalization bounds growing linearly in horizon and
+approximation rates requiring incremental stability. Meanwhile a
+parallel literature develops training rules that avoid backpropagation
+through the dynamics entirely: equilibrium propagation for Kuramoto
+frequencies \citep{ahmadi2026} and local force-measurement rules for
+driven nonlinear oscillators \citep{bosch2025}.
 
 \subsubsection{What the systems report as
 controls}\label{what-the-systems-report-as-controls}
@@ -1266,8 +1378,9 @@ mark, is the observation.
 \caption{Controls reported by each system. A tick means the surveyed
 work reports running that control; \ensuremath{\approx} marks the
 nearest published instance rather than the control itself; a dash means
-we did not find it reported, which is not evidence it was not
-run.}\tabularnewline
+we did not find it reported, which is not evidence it was not run.
+Damping is not one of the five, but the record holds two ablations of it
+that span a pair of papers (Section 2.3.3).}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 System
@@ -1303,49 +1416,88 @@ Single-term ablation of coupling
 \bottomrule\noalign{}
 \endlastfoot
 Un-0 & \ensuremath{\checkmark} & \ensuremath{\checkmark} &
-\ensuremath{\checkmark} (modular vs random masks) & not reported
-(external replication only) & --- \\
-\cmidrule{1-6}AKOrN & --- & --- & --- & --- & \ensuremath{\checkmark} (a
-J = 0 bar in a robustness figure; no number in the text, protocol
-unstated) \\
-\cmidrule{1-6}WONN & --- & --- & --- & --- & --- \\
+\ensuremath{\checkmark} (modular vs random masks) & --- (an external
+reimplementation exists but is not matched; Section 2.3.4) & --- \\
+\cmidrule{1-6}AKOrN & --- & \ensuremath{\checkmark} (ItrConv and ItrSA:
+the same iterated layers without the Kuramoto update) & --- &
+\ensuremath{\approx} (those baselines at matched FLOPs and memory and
+``roughly the same number of parameters''; counts not printed) &
+\ensuremath{\checkmark} (a J = 0 bar in a robustness figure; no number
+in the text, protocol unstated) \\
+\cmidrule{1-6}WONN & --- & --- & --- & \ensuremath{\approx} (ResNet-18
+at 11.7M against 12.3M on ImageNet-1K, an off-the-shelf baseline under a
+different training recipe) & --- \\
 \cmidrule{1-6}Kuramoto Attention / FSN & --- & --- & --- &
-\ensuremath{\checkmark} (param-matched transformer, 5M) & not reported
-(thirteen ablations, none removed the synchronization step) \\
-\cmidrule{1-6}KomplexNet & --- & --- & --- & --- & \ensuremath{\approx}
-(random-phase control: the nearest published instance, not the ablation
-itself) \\
-\cmidrule{1-6}Kuramoto Orientation Diffusion & --- & --- & --- & --- &
-\ensuremath{\checkmark} (K(t) = 0 in the forward process, reported
-numerically) \\
-\cmidrule{1-6}Neural Wave Machines & --- & --- & --- & --- & --- \\
-\cmidrule{1-6}coRNN / UnICORNN & --- & --- & --- & --- & n/a (no
-coupling term) \\
-\cmidrule{1-6}LinOSS / D-LinOSS & --- & --- & --- & --- & n/a (no
-coupling term) \\
-\cmidrule{1-6}RON & n/a (untrained by construction) & --- & --- &
-\ensuremath{\checkmark} (ESN and trained RNN baselines) & --- \\
+\ensuremath{\checkmark} (parameter-matched Transformers at 1M and 5M) &
+\ensuremath{\approx} (a learned value projection in place of the
+Kuramoto step, +0.25 BPC; the matched Transformer is the
+no-synchronization model) \\
+\cmidrule{1-6}KomplexNet & \ensuremath{\checkmark} (coupling kernel held
+at a fixed Gaussian) & \ensuremath{\checkmark} (real-valued twin;
+complex twin without the Kuramoto step) & --- & \ensuremath{\checkmark}
+(parameter-matched real-valued model, and a ViT of comparable size) &
+\ensuremath{\checkmark} (retrained without the Kuramoto step, ``random
+phases at the first layer''; not also zeroed at evaluation) \\
+\cmidrule{1-6}Kuramoto Orientation Diffusion & --- &
+\ensuremath{\checkmark} (Gaussian score model with the same U-Net) & ---
+& \ensuremath{\checkmark} (the same U-Net; the same experiment as the
+previous cell) & \ensuremath{\checkmark} (K(t) = 0 in the forward
+process, reported numerically on one dataset) \\
+\cmidrule{1-6}HoloGraph & --- & --- & --- & --- & --- \\
+\cmidrule{1-6}Neural Wave Machines & --- & --- & --- & --- (the globally
+coupled coRNN it is compared with shares hyperparameters, not a
+parameter count) & --- \\
+\cmidrule{1-6}coRNN & --- & --- & --- & \ensuremath{\checkmark} (a
+9k-parameter LSTM on Lorenz-96, in the supplement, where coRNN loses) &
+--- \\
+\cmidrule{1-6}UnICORNN & --- & --- & --- & \ensuremath{\checkmark} (the
+same 9k-parameter Lorenz-96 comparison, where UnICORNN loses) & n/a (no
+coupling within a layer) \\
+\cmidrule{1-6}LinOSS / D-LinOSS & --- & --- & --- & --- (counts reported
+and unmatched) & n/a (diagonal state matrices; D-LinOSS against
+LinOSS-IMEX ablates damping, not coupling) \\
+\cmidrule{1-6}RON & n/a (untrained by construction; its trained twin
+hcoRNN is the same comparison run in reverse) & --- & --- &
+\ensuremath{\checkmark} (ESN and trained RNN baselines at matched
+trainable parameters) & --- \\
 \cmidrule{1-6}Spintronic reservoir & n/a & --- & --- & --- & --- \\
 \cmidrule{1-6}Oscillator Ising machines & n/a (no training) & --- & ---
 & --- & --- \\
 \end{longtable}
 
-Two systems remove the coupling term as a single variable, and the way
-they do it is an important finding. Kuramoto Orientation Diffusion sets
-K(t) = 0 in its forward process and reports the result in a table, which
-is the one unambiguous instance in the record. AKOrN ablates its learned
-coupling matrix as a J = 0 bar inside a robustness figure, with no
-number in the text and no statement of whether that variant was
-retrained without coupling or had its coupling zeroed at evaluation,
-which is the difference between measuring what coupling contributes and
-measuring a readout meeting unfamiliar dynamics. KomplexNet's
-random-phase control is a third near-instance that freezes phases rather
-than deleting the coupling. Neither of the two is run at a matched
-parameter budget against the full model on a task the paper leads with,
-so the term that names the family has been isolated twice, once legibly.
-Of the fifty-five applicable control comparisons these five give across
-the twelve systems, seven have been run, plus this one near-instance;
-Appendix G itemizes them.
+Three systems remove the coupling term as a single variable, and the way
+each does it is itself a finding. Kuramoto Orientation Diffusion sets
+K(t) = 0 in its forward process and reports the result in a table: on
+Brodatz textures the hundred-step FID rises from 18.5 to 33.8, though
+the reference-only process still beats the Gaussian baseline at 38.3, so
+part of the gain belongs to the periodic design rather than to the
+coupling, and the ablation is one dataset with single runs. KomplexNet
+trains a copy of its network without the Kuramoto step, ``random phases
+at the first layer''; because the phase update has no other term,
+deleting the coupling and freezing the phases are the same operation,
+and the retrained model loses two to three points in distribution, five
+to six under overlap and about thirty under Gaussian noise. AKOrN
+ablates its learned coupling matrix as a J = 0 bar inside a robustness
+figure, with no number in the text and no statement of whether that
+variant was retrained without coupling or had its coupling zeroed at
+evaluation, which is the difference between measuring what coupling
+contributes and measuring a readout meeting unfamiliar dynamics. None of
+the three is what a shared protocol would ask for: a retrained and a
+zeroed-at-test variant side by side, on more than one dataset, with
+seeds. Damping, which is not among the five controls, has been ablated
+twice, each time across a pair of papers by the same group. UnICORNN is
+coRNN with the damping and the within-layer coupling removed and a layer
+stack added, and D-LinOSS with its damping set to zero recovers LinOSS's
+conservative discretization exactly, so the two papers of each pair
+publish both sides of a comparison that neither runs alone. That the
+authors published both sides at all is to their credit, and the second
+pair is the cleaner instance, since only one term moves, though its
+LinOSS numbers are carried over from the earlier paper rather than
+re-run; we would still prefer the two sides in one paper under one
+protocol, which is what Section 3.2 asks for. Of the sixty-five
+applicable control comparisons these five give across the fourteen rows,
+sixteen have been run, ten of them by three systems, plus three
+near-instances; Appendix F itemizes them.
 
 \subsubsection{How the systems compare with conventional
 architectures}\label{how-the-systems-compare-with-conventional-architectures}
@@ -1355,8 +1507,13 @@ Section 2.3, read as follows. Un-0's ImageNet-64 FID of 6.74 is
 competitive with first-generation diffusion baselines and far from the
 modern frontier, where one-step models reach FID around 1.5 on harder
 benchmarks \citep{deng2026}, as its authors acknowledge; a community
-matched-budget replication found a DCGAN clearly stronger on MNIST
-(Kuramoto-MNIST \citep{kuramoto-mnist}, community repository). Its
+reimplementation on MNIST, 512 oscillators trained for 800 epochs
+against a class-conditional DCGAN that its own write-up puts at roughly
+ten times the parameters, judges the DCGAN the visibly stronger
+generator without reporting a metric (Kuramoto-MNIST
+\citep{kuramoto-mnist}, community repository); it is not a
+matched-budget comparison, and it agrees with rather than overturns the
+authors' own statement that conventional generators remain stronger. Its
 authors also report an observation about scale that no one has yet
 tested independently: quality keeps improving as the model grows, but
 more slowly than for the conventional diffusion models they compare
@@ -1367,26 +1524,43 @@ and it is the clearest reason the field needs one: whether trained
 oscillator networks scale competitively is the question a prospective
 adopter will ask first, and nothing peer reviewed currently answers it.
 WONN's 76.78\% ImageNet-1K at 12.3M parameters makes it the first
-synchronization architecture competitive at that scale, not better than
-modern baselines. Its reasoning results are the sharper claim: 80.1\% on
-Maze-hard at 1\% of the parameters of the prior state of the art, which
-is a parameter-efficiency margin rather than an accuracy win, and is not
-a matched-budget comparison in the sense of Section 2.3.3, since the
-budgets differ by two orders of magnitude in the oscillator system's
-favour. AKOrN's reported advantages are robustness, calibration and
-reasoning-style tasks rather than accuracy dominance.
+synchronization architecture competitive at that scale: it beats a
+ResNet-18 of similar size by seven points and trails a ResNet-50 of
+twice the size by a tenth of a point, under training recipes the paper
+does not match and with baseline ViTs well below their published best.
+Its reasoning results are the sharper claim, and they need the same
+care: 76.2\% on Maze-hard in one pass, 80.1\% with best-of-32 energy
+voting, at 0.396M parameters, against 85.3\% for the 7M-parameter
+TRM-Att and 74.5\% for the 27M-parameter HRM. That is a
+parameter-efficiency margin rather than an accuracy win, and not a
+matched-budget comparison in the sense of Section 2.3.3. AKOrN's
+reported advantages are adversarial and corruption robustness,
+calibration and Sudoku rather than clean-accuracy dominance, where it
+trails a ResNet-18 by three to five points.
 
 The wins that exist are niche-shaped, and the niches are real. LinOSS
-beats Mamba-class baselines on extreme-length sequences, 95.0\% against
-70.9\% on roughly eighteen-thousand-step EigenWorms, which is the
-clearest protocol-matched oscillator win in the survey and sits exactly
-where a fixed-size dynamical state should have the advantage over
-attention. Kuramoto Attention reports beating a parameter-matched
-Transformer at the 5M scale only (preprint). Untrained oscillator
-reservoirs beat trained RNNs on some time-series benchmarks. KomplexNet
-wins on multi-object binding robustness at small scale. A single
-physical oscillator does spoken digits at roughly 99.6\% with one
-device. Neural Wave Machines report parameter-efficiency advantages.
+beats state-space baselines on extreme-length sequences: 95.0\% on the
+17,984-step EigenWorms task against 70.9\% for Mamba, the weakest
+baseline, and 87.8\% for LRU, the strongest, and half of Mamba's error
+on fifty-thousand-step heart-rate windows. It is the clearest
+protocol-matched oscillator win in the survey and sits exactly where a
+fixed-size dynamical state should have the advantage over attention,
+with three caveats the paper itself supplies: the win belongs to the
+dissipative implicit variant, since the conservative variant scores
+80.0\% on EigenWorms and loses to five baselines there; the parameter
+budgets are not matched, with LinOSS at five to nine times the
+parameters of Mamba and S6 on that task; and the baseline numbers are
+carried over from prior work rather than re-run. The first of those is
+evidence for this survey's own reading in Section 3.1.4 that
+dissipation, rather than oscillation, is doing the work. Kuramoto
+Attention beats a parameter-matched Transformer at the 5M scale on
+byte-level code, by median only on enwik8, and trails it at 1M
+(preprint). Untrained oscillator reservoirs beat trained RNNs on some
+time-series benchmarks. KomplexNet wins on multi-object binding
+robustness at small scale. A single physical oscillator does spoken
+digits at roughly 99.6\% with one device. Neural Wave Machines report a
+parameter saving that follows from their convolutional coupling, with
+45k of their 50k parameters in the encoder and decoder.
 
 The energy argument, often the headline motivation, currently rests on
 adjacent substrates rather than on oscillator networks. A
@@ -1421,8 +1595,10 @@ missing}\label{attribution-and-the-controls-that-are-missing}
 Each of the five controls in Section 2.3.3 exists because a published
 result shows what happens when it is absent. \emph{Frozen twins}:
 untrained oscillator dynamics can carry a task unaided (Section 2.2.4),
-so a trained gain must be measured against one, and Un-0 \citep{un-0} is
-the only trained-synchronization system we found reporting that control.
+so a trained gain must be measured against one, and Un-0 \citep{un-0}
+and KomplexNet \citep{muzellec2025}, whose fixed-Gaussian-kernel twin
+comes within a point of its trained kernel in distribution, are the two
+trained-synchronization systems we found reporting it.
 \emph{Decoder-only controls}: wherever a conventional encoder or decoder
 wraps the dynamics, the compute may live there. \emph{Initialization
 sensitivity}: learnable front-ends that end where they started
@@ -1432,76 +1608,95 @@ solution \citep{milling2026} shows motion is not value. \emph{Randomized
 twins}: designed structure can reduce to generic sparsity, and across
 fifteen biological-pathway-informed models randomized sparse masks
 matched or beat the biology-informed ones \citep{caranzano2025}.
-\emph{Matched-budget baselines}: a community replication of Un-0's
-recipe on MNIST, matched to a DCGAN on parameter count, batch size,
-training length and best-of-32 selection, reports the DCGAN as the
-stronger generator on that benchmark (Kuramoto-MNIST
-\citep{kuramoto-mnist}, community repository). It is the only external
-matched-budget comparison of a trained-synchronization system we found,
-and it runs against the system's own headline.
+\emph{Matched-budget baselines}: where the budget is actually matched
+the result can reverse. At 9k parameters on the chaotic Lorenz-96
+system, both coRNN \citep{rusch2021} and UnICORNN \citep{unicornn} lose
+to an LSTM in their own supplements, which their authors attribute to a
+design that rules out chaos by construction. A community
+reimplementation of Un-0's recipe on MNIST is often read as the same
+kind of test; it is not, since its class-conditional DCGAN carries
+roughly ten times the parameters and its verdict is visual
+(Kuramoto-MNIST \citep{kuramoto-mnist}, community repository). It is the
+only external comparison of a trained-synchronization system we found,
+and it should be read as a reimplementation rather than as a
+budget-matched control.
 
 \emph{Single-term ablations} are the gap that matters most, because the
 term in question names the family, and the gap is now one of reporting
 rather than of absence. Kuramoto Orientation Diffusion
 \citep{kuramoto-orientation-diffusion} sets K(t) = 0 and keeps only the
-phase-reference drift, reporting a rise of more than fifteen FID points
-at a hundred steps: the clearest single-variable removal in the record,
-though it ablates a forward diffusion process rather than a trained
-coupling. AKOrN \citep{akorn} does the same to a coupling that is
-\emph{learned}. Its update carries three terms: a natural-frequency
-rotation \textbf{\ensuremath{\Omega}}, a sum over neighbours weighted by
-a learned coupling matrix \textbf{J}, and the input, with both
-\ensuremath{\Omega} and J optimized against the task objective. Figure 8
-of that paper reports a J = 0 bar beside a separate \ensuremath{\Omega}
-= 0 bar, so the two physics terms were treated as independent axes
-rather than swapped wholesale, and with J = 0 the population decouples
-completely: each oscillator turns under its own frequency and the input
-alone. What the paper does not say is whether that variant was retrained
-without coupling or had a learned J zeroed at evaluation, and the
-difference decides what the number means. A retrained variant measures
-what the coupling contributes; zeroing a learned J at test time largely
-measures a readout meeting dynamics it was never fitted to. The value
-itself appears in no table and no sentence, only as a bar, so a reader
-cannot tell which was done. Kuramoto Attention
-\citep{kuramoto-attention} reports twelve single-axis ablations and a
+phase-reference drift, reporting a rise of fifteen FID points at a
+hundred steps relative to its locally coupled model on Brodatz textures:
+the clearest single-variable removal in the record, though it ablates a
+forward diffusion process rather than a trained coupling, on one
+dataset, without seeds. AKOrN \citep{akorn} does the same to a coupling
+that is \emph{learned}. Its update carries a natural-frequency rotation
+\textbf{\ensuremath{\Omega}}, a sum over neighbours weighted by a
+learned coupling \textbf{J}, a conditioning stimulus computed from the
+input and held fixed over the steps, and a learned step size with
+renormalization onto the sphere, with \ensuremath{\Omega} and J
+optimized against the task objective. Figure 8 of that paper reports a J
+= 0 bar beside a separate \ensuremath{\Omega} = 0 bar in a random-noise
+robustness test on CIFAR-10, so the two physics terms were treated as
+independent axes rather than swapped wholesale, and with J = 0 each
+layer's population decouples completely: each oscillator turns under its
+own frequency and its stimulus alone. What the paper does not say is
+whether that variant was retrained without coupling or had a learned J
+zeroed at evaluation, and the difference decides what the number means.
+A retrained variant measures what the coupling contributes; zeroing a
+learned J at test time largely measures a readout meeting dynamics it
+was never fitted to. The value itself appears in no table and no
+sentence, only as a bar, so a reader cannot tell which was done; the
+paper's own ablation table instead finds that the projection and
+renormalization, not J or \ensuremath{\Omega}, carry the largest effect.
+KomplexNet \citep{muzellec2025} reports the retrained half of that pair.
+Its complex-valued twin trained ``without the Kuramoto synchrony (random
+phases at the first layer)'' is the coupling ablation, since the phase
+update contains nothing but the coupling, and it costs two to three
+points in distribution, five to six on overlapping digits and about
+thirty under Gaussian noise; the same paper's twin with a fixed Gaussian
+kernel shows that training the kernel adds under a point in
+distribution, and its parameter-matched real-valued and Transformer
+baselines complete the set. What it cannot say is what a trained
+KomplexNet does with its coupling switched off. Kuramoto Attention
+\citep{kuramoto-attention} reports twelve single-axis ablations and one
 value-transport comparison, of which one replaces the on-manifold
-circular mean with a dense linear value projection at a cost of +0.25
-BPC, which is the nearest anything in the trained line comes to
-isolating the synchronization step, though it swaps the value path
-rather than removing the coupling. FSN \citep{nunley2026} reports three
-mechanism ablations, removing the frustration phases, the feed-forward
+circular mean, the Kuramoto step by the paper's own account, with a
+dense linear value projection at a cost of +0.25 BPC; the
+parameter-matched Transformer it is scored against is the
+no-synchronization model at the same size, so the pair is a coupling
+ablation in all but name. FSN \citep{nunley2026} reports three mechanism
+ablations, removing the static frustration angles, the feed-forward
 block and the delay term, and flags its own delay result as screen-level
-rather than converged. KomplexNet \citep{muzellec2025}'s random-phase
-control is the closest published instance and reports its complex-valued
-model beating a real-valued baseline by roughly 10 to 15\% under
-distribution shift, while KoPE \citep{kope} removes its whole phase
+rather than converged. KoPE \citep{kope} removes its whole phase
 dynamics rather than the coupling term.
 
 Where the controls were run, they changed conclusions: Un-0's
-frozen-reservoir control, KomplexNet's random-phase control, and the
-matched-budget DCGAN. In each of those three cases the control changed
-what could be concluded from the paper, which is the argument for
-running them: they are not a procedural formality but the step that
-decides whether a reported gain is attributable to the dynamics. The
-binding results are also a reason not to assume the missing ablations
-would come back empty. If synchronization is the mechanism that groups
-distributed features, as the neuroscience in Section 1.2.2 reports, then
-removing it should cost accuracy on grouping tasks specifically, and be
-harmless on tasks that do not require grouping. An ablation that finds
-nothing on one task family is therefore not evidence that the coupling
-does nothing.
+frozen-reservoir control, KomplexNet's random-phase and fixed-kernel
+controls, Kuramoto Orientation Diffusion's reference-only process, and
+the matched-parameter Lorenz-96 comparison in the coRNN and UnICORNN
+supplements. In each of those cases the control changed what could be
+concluded from the paper, which is the argument for running them: they
+are not a procedural formality but the step that decides whether a
+reported gain is attributable to the dynamics. The binding results are
+also a reason not to assume the missing ablations would come back empty.
+If synchronization is the mechanism that groups distributed features, as
+the neuroscience in Section 1.2.2 reports, then removing it should cost
+accuracy on grouping tasks specifically, and be harmless on tasks that
+do not require grouping. An ablation that finds nothing on one task
+family is therefore not evidence that the coupling does nothing.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Controls reported by each system. A filled square means the surveyed work reports running that control; an open square means we did not find it reported, which is not evidence that it was not run. Two systems remove the coupling term as a single variable, the mechanism the Kuramoto family is named after, and neither does so at a matched budget on the task its paper leads with. KomplexNet {[}@\{muzellec2025\}{]}'s random-phase control, marked as the nearest published instance, freezes phases rather than deleting the coupling.}]{resources/figures/fig13-controls-grid.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Controls reported by each system. A filled square means the surveyed work reports running that control; an open square means we did not find it reported, which is not evidence that it was not run. Three systems remove the coupling term as a single variable, the mechanism the Kuramoto family is named after; one reports no number, one reports a single dataset, and one, KomplexNet {[}@\{muzellec2025\}{]}, reports only a retrained model. Half-filled squares mark the nearest published instance rather than the control itself.}]{resources/figures/fig13-controls-grid.pdf}}
 \caption{Controls reported by each system. A filled square means the
 surveyed work reports running that control; an open square means we did
-not find it reported, which is not evidence that it was not run. Two
+not find it reported, which is not evidence that it was not run. Three
 systems remove the coupling term as a single variable, the mechanism the
-Kuramoto family is named after, and neither does so at a matched budget
-on the task its paper leads with. KomplexNet \citep{muzellec2025}'s
-random-phase control, marked as the nearest published instance, freezes
-phases rather than deleting the coupling.}
+Kuramoto family is named after; one reports no number, one reports a
+single dataset, and one, KomplexNet \citep{muzellec2025}, reports only a
+retrained model. Half-filled squares mark the nearest published instance
+rather than the control itself.}
 \end{figure}
 
 \subsubsection{What training moves, and what it does
@@ -1544,13 +1739,15 @@ dynamics for transduction and others want it for memory.
 
 Geometry is varied in four of the surveyed systems, and in none of them
 as a single variable. Neural Wave Machines \citep{keller2023} comes
-closest, running a one-dimensional ring core and a two-dimensional torus
-core against a globally coupled coRNN at equivalent parameters and
-explicitly to isolate the effect of the imposed structure, but its two
-cores differ in convolution kernel as well as in topology. Kuramoto
-Orientation Diffusion contrasts global with 5x5 local coupling while
-retuning the coupling strength between the two. WONN \citep{wonn}
-contrasts convolutional with attentive coupling, and reports that the
+closest, running a one-dimensional core of twenty-three disjoint rings
+and a two-dimensional torus core against a globally coupled coRNN with
+the same hyperparameters and hidden size, explicitly to isolate the
+effect of the imposed structure; but the parameter counts of that
+comparison are neither matched nor reported, and its two cores differ in
+convolution kernel as well as in topology. Kuramoto Orientation
+Diffusion contrasts global with 5x5 local coupling while retuning the
+coupling strength between the two. WONN \citep{wonn} contrasts
+convolutional with attentive coupling, and reports that the
 convolutional variant ``introduces substantially more parameters'', so
 the comparison is not budget-matched either. Un-0's sparsity study
 contrasts dense, random-sparse and modular fabrics, the only one of the
@@ -1577,32 +1774,39 @@ order-chaos boundary and reservoirs are deliberately parked there.
 \emph{Failure modes named in the trained-oscillator literature}: Un-0's
 sparsity study reports dense all-to-all fields easily falling into
 catastrophic synchronization, a globally locked, zero-gradient state,
-and FSN opens from the same thesis. The useful regime is partial
-coherence, exactly what the physics says finite-range nonlocal coupling
-generically produces. \emph{Optimization landscape}: frequency-parameter
-loss surfaces are highly non-convex with narrow basins, established for
-sinusoidal-frequency estimation by gradient descent
-\citep{hayes2023, turian2020}, known since Rife and Boorstyn in 1974,
-observed as spectral-gap gradient suppression in quantum circuits
+and FSN's case against consensus runs the same way. The useful regime is
+partial coherence, exactly what the physics says finite-range nonlocal
+coupling generically produces. \emph{Optimization landscape}:
+frequency-parameter loss surfaces are highly non-convex with narrow
+basins, established for sinusoidal-frequency estimation by gradient
+descent \citep{hayes2023, turian2020}, known since Rife and Boorstyn in
+1974, observed as spectral-gap gradient suppression in quantum circuits
 \citep{poppel2026}, and reported as multistability seed-failures in
 Kuramoto frequency learning.
 
 The hazard is manageable, since the successes exist. But the published
-management strategies are themselves evidence for the diagnosis: coRNN
-proves its gradient bounds \emph{from} its damping, LinOSS
-\citep{rusch2025} obtains stability from implicit discretization,
-D-LinOSS \citep{d-linoss} parameterizes damping so every mode stays
-contractive, and Un-0's remedy is topological. The theory arrives at the
-same requirement from the other direction, and the coincidence is worth
-naming. Each fix above adds damping to make training work.
-Independently, the approximation rates proved for these models hold only
-if the system is incrementally stable, which is the property damping
-provides. Damping is therefore not a workaround sitting beside the
-theory; it is what both the trainability and the approximation-rate
-guarantees depend on. One caveat on the inference itself: papers do not
-report failed horizon scaling, so publication bias could manufacture the
-pattern, and no published study we found isolates horizon length as the
-single variable on a fixed nonlinear oscillator substrate.
+management strategies are themselves evidence for the diagnosis, and
+they are less uniform than a first reading suggests: coRNN bounds its
+hidden-state energy through damping and its gradients through a
+time-step condition, UnICORNN removes the damping and relies on
+conservation instead, LinOSS \citep{rusch2025} is stable for any
+non-negative frequency and its implicit variant, the one that wins on
+long sequences, carries numerical dissipation, D-LinOSS \citep{d-linoss}
+learns an explicit damping term to widen its spectrum, and Un-0's remedy
+is topological. The theory arrives at a related requirement from the
+other direction, and the coincidence is worth naming. Three of the five
+fixes above dissipate energy, and the one linear model that does not,
+the conservative LinOSS variant, loses to the dissipative one on the
+longest task. Independently, the approximation rates proved for these
+models hold only if the system is incrementally stable, which is the
+property dissipation provides. Dissipation is therefore not a workaround
+sitting beside the theory; it is what both the trainability results and
+the approximation-rate guarantees lean on, with UnICORNN the standing
+exception that trains long sequences on conservation alone. One caveat
+on the inference itself: papers do not report failed horizon scaling, so
+publication bias could manufacture the pattern, and no published study
+we found isolates horizon length as the single variable on a fixed
+nonlinear oscillator substrate.
 
 \subsubsection{The physics the field has not
 used}\label{the-physics-the-field-has-not-used}
@@ -1618,14 +1822,17 @@ The bounds of the physics parameters are unmapped: no published work
 sweeps coupling strength, frequency spread or delay to the point where
 the system leaves its useful regime, so the operating envelope is known
 only anecdotally. One paper compares coupling functions on a single task
-under controls, and its result is a null. FSN removes the static
-frustration phases, which reduces its Kuramoto--Sakaguchi coupling to
-plain Kuramoto, and reports the two statistically indistinguishable at
-convergence over matched seeds, with the frustration buying
-early-training speed rather than final quality. That is one comparison,
-within one coupling family, on one task. We found none that compares
-across families, so the choice of a Kuramoto-type coupling over a
-Winfree or Stuart-Landau one remains a convention rather than a finding.
+under controls, and its result is a null. FSN removes its static
+frustration angles and reports the no-phase model indistinguishable from
+the full one at a thirty-epoch budget, three seeds against five, with
+the angles buying early-training speed rather than final quality;
+because the delay term it keeps is itself a frustrated coupling with a
+data-determined angle, the comparison does not reach plain Kuramoto,
+which the same paper reports as a clearly worse model. That is one
+comparison, within one coupling family, on one task, and not yet at
+convergence. We found none that compares across families, so the choice
+of a Kuramoto-type coupling over a Winfree or Stuart-Landau one remains
+a convention rather than a finding.
 
 \subsubsection{The missing shared
 protocol}\label{the-missing-shared-protocol}
@@ -1658,34 +1865,40 @@ whichever way it came out.
   Reasoning is already Sudoku, reported independently by AKOrN and WONN,
   with WONN's Maze-hard a candidate for path finding. Long-horizon
   sequence work already runs on the UEA archive and EigenWorms, where
-  LinOSS and D-LinOSS report. Character-level language modelling already
-  runs on enwik8, where Kuramoto Attention and FSN report. Spoken-digit
-  recognition on TI-46 is the one task an oscillator has run in
-  hardware. What is missing from each is not the dataset but the
-  protocol around it: a tuned conventional baseline at a matched
-  parameter budget, seeds reported, and the five controls of Section
-  2.3.3 run alongside. Nothing in Section 2.3 can be turned into a
-  ranking until this exists, and its absence is currently mistaken for
-  parity in both directions.
+  UnICORNN, LinOSS and D-LinOSS report. Character-level language
+  modelling already runs on enwik8, and byte-level code on CodeParrot,
+  where Kuramoto Attention and FSN report. Spoken-digit recognition on
+  TI-46 is the one task an oscillator has run in hardware. What is
+  missing from each is not the dataset but the protocol around it: a
+  tuned conventional baseline at a matched parameter budget, seeds
+  reported, and the five controls of Section 2.3.3 run alongside.
+  Nothing in Section 2.3 can be turned into a ranking until this exists,
+  and its absence is currently mistaken for parity in both directions.
 \item
   \textbf{A reporting standard for controls.} The five controls of
   Section 2.3.3 should become a norm rather than an exception: frozen
   twins, decoder-only controls, randomized-structure twins,
   matched-budget baselines and single-term ablations, with multi-seed
-  variance reported alongside. Seven of fifty-five possible control
-  comparisons is what a field looks like before its reporting habits
-  have settled, and settling them costs less now than it will once the
-  literature is large. Concretely, a paper introducing a trained
-  oscillator system would say for each of the five controls (frozen
-  twin, decoder-only, randomized twin, matched-budget baseline,
-  single-term ablation of the coupling) whether it was run, and give the
-  resulting number rather than only the headline result. Where a control
-  does not apply it is worth saying so and saying why: a frozen twin
-  means nothing for a system whose dynamics is never trained, and a
-  coupling ablation means nothing for a model that has no coupling term.
-  An unreported control and an inapplicable one look identical to a
-  reader, and distinguishing them took us a close reading of every paper
-  in Table 1.
+  variance reported alongside. Sixteen of sixty-five possible control
+  comparisons, ten of them from three systems, is what a field looks
+  like before its reporting habits have settled, and settling them costs
+  less now than it will once the literature is large. Concretely, a
+  paper introducing a trained oscillator system would say for each of
+  the five controls (frozen twin, decoder-only, randomized twin,
+  matched-budget baseline, single-term ablation of the coupling) whether
+  it was run, and give the resulting number rather than only the
+  headline result. Where a control does not apply it is worth saying so
+  and saying why: a frozen twin means nothing for a system whose
+  dynamics is never trained, and a coupling ablation means nothing for a
+  model that has no coupling term. An unreported control and an
+  inapplicable one look identical to a reader, and distinguishing them
+  took us a close reading of every paper in Table 1; an earlier draft of
+  this survey still got several of them wrong, which is the argument for
+  a standard rather than for close reading. Where two papers from one
+  group publish the two sides of an ablation, as coRNN and UnICORNN do
+  for damping and coupling and LinOSS and D-LinOSS do for damping, the
+  standard would ask for the comparison to be run once more, under one
+  protocol, in the later paper.
 \item
   \textbf{Treat the coupling law as a variable.} The field should
   establish what its namesake mechanism contributes, by comparing
@@ -1750,38 +1963,43 @@ Appendix G collects the questions these directions leave open.
 
 The current wave of oscillator architectures has produced real systems.
 The oscillatory recurrences and their linear state-space descendants
-hold strong long-sequence records, with approximation results behind
-them for a related construction; trained synchronization models generate
-images and classify at ImageNet scale; frozen physical oscillators rival
-trained networks on narrow tasks at a fraction of the parameter count.
-Read against tuned conventional baselines, though, the record is parity
-and niches rather than dominance, and the surveyed authors mostly say
-so: the strongest generative result is competitive with first-generation
-diffusion and far from the current frontier, the largest classification
-result is the first of its kind at that scale rather than the best, and
-the clearest wins are shaped like LinOSS \citep{rusch2025} on
-eighteen-thousand-step sequences, which is a real advantage on a
-specific axis.
+hold strong long-sequence records, one of them nonlinear, with
+approximation results behind them; trained synchronization models
+generate images and classify at ImageNet scale; frozen physical
+oscillators rival trained networks on narrow tasks at a fraction of the
+parameter count. Read against tuned conventional baselines, though, the
+record is parity and niches rather than dominance, and the surveyed
+authors mostly say so: the strongest generative result is competitive
+with first-generation diffusion and far from the current frontier, the
+largest classification result is the first of its kind at that scale
+rather than the best, and the clearest wins are shaped like LinOSS
+\citep{rusch2025} on eighteen- to fifty-thousand-step sequences, which
+is a real advantage on a specific axis.
 
 Our central finding is that the evidence rarely isolates the dynamics,
 so it is not yet clear what the oscillator physics itself contributes.
 Five controls would separate a trained system's result from the
-alternative explanations for it, and applied across the twelve systems
-in Table 1 they give sixty possible comparisons. Five do not apply,
-since a frozen twin means nothing for a system that never trains its
-dynamics and a coupling ablation means nothing for a model with no
-coupling term, which leaves fifty-five. Seven have been run, and three
-of those seven belong to one system: Un-0 \citep{un-0} reports a frozen
-twin, a decoder-only comparison and a randomized twin. The remaining
-four are matched-budget baselines from Kuramoto Attention
-\citep{kuramoto-attention} and FSN \citep{nunley2026} and from RON
-\citep{ceni2024}, and single-term coupling ablations from Kuramoto
-Orientation Diffusion \citep{kuramoto-orientation-diffusion} and AKOrN
-\citep{akorn}. Appendix G itemizes them. Where a control has been run it
-has changed what the paper could conclude, and in one case it reversed
-the headline: a matched-budget community replication found a
-conventional baseline clearly stronger than the oscillator system it
-reimplemented.
+alternative explanations for it, and applied across the fourteen rows of
+Table 1 they give seventy possible comparisons. Five do not apply, since
+a frozen twin means nothing for a system that never trains its dynamics
+and a coupling ablation means nothing for a model whose units do not
+couple within a layer, which leaves sixty-five. Sixteen have been run,
+and ten of those belong to three systems: Un-0 \citep{un-0} reports a
+frozen twin, a decoder-only comparison and a randomized twin; KomplexNet
+\citep{muzellec2025} reports a frozen kernel, a no-dynamics twin,
+parameter-matched baselines and a model retrained without its coupling;
+Kuramoto Orientation Diffusion \citep{kuramoto-orientation-diffusion}
+reports a same-network Gaussian baseline and a K(t) = 0 forward process.
+The remaining six are a no-dynamics baseline and a coupling ablation
+from AKOrN \citep{akorn}, and matched-budget baselines from Kuramoto
+Attention \citep{kuramoto-attention} and FSN \citep{nunley2026}, from
+RON \citep{ceni2024}, and from coRNN \citep{rusch2021} and UnICORNN
+\citep{unicornn} on one supplementary task. Appendix F itemizes them.
+Where a control has been run it has changed what the paper could
+conclude, and in two cases it reversed a headline: at matched parameters
+on a chaotic system both oscillatory recurrences lose to an LSTM, and a
+fixed coupling kernel comes within a point of KomplexNet's learned one
+in distribution.
 
 Three further gaps sit alongside that one, and Section 3.1 sets out the
 evidence for each. We found no scaling study for trained oscillator
@@ -1912,7 +2130,9 @@ conventional layers around it. \\
 architecture at the same parameter count on the same task. \\
 \cmidrule{1-2}\textbf{Single-term ablation} & Removing one term of the
 dynamics, holding everything else fixed. For a Kuramoto-family model
-that means the coupling term. \\
+that means the coupling term. A variant retrained without the term and a
+trained model with the term zeroed at evaluation answer different
+questions, and a report should say which it ran. \\
 \cmidrule{1-2}\textbf{Gradient horizon} & How many dynamics steps are
 unrolled and backpropagated through during training. \\
 \end{longtable}
@@ -2018,7 +2238,8 @@ simplicial complex, giving a discontinuous desynchronization transition
 and an extensive set of stable partially synchronized states. \\
 \cmidrule{1-2}\citet{chandra2019} & Oscillators as unit vectors in D
 dimensions with rotation-matrix natural frequencies, so the phase is no
-longer confined to a circle. This is the coupling AKOrN uses. \\
+longer confined to a circle. This is the coupling AKOrN uses, and
+HoloGraph through it. \\
 \cmidrule{1-2}\citet{millan2020} & Phases carried by edges and triangles
 rather than only by nodes, coupled through the boundary operators, so
 the topology of the complex drives the dynamics directly. \\
@@ -2049,7 +2270,8 @@ classification}\label{oscillator-systems-design-and-classification}
   >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
 \caption{Design and classification of each surveyed system: its
 oscillator family, the part of a model the dynamics constitutes, what
-gradients reach, and whether the work is peer reviewed.}\tabularnewline
+gradients reach, and whether the work is peer reviewed. Fifteen rows
+cover eighteen systems.}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 System
@@ -2094,31 +2316,48 @@ time-multiplexed & Nature 2017 \\
 \cmidrule{1-6}Oscillator Ising machines
 \citep{oscillator-ising-machines} & engineered injection locking &
 solver substrate & nothing; designed & hardware & peer-reviewed \\
-\cmidrule{1-6}coRNN \citep{rusch2021} / UnICORNN \citep{unicornn} &
-damped second-order & recurrent core & dynamics, no phase coupling &
-simulated & ICLR/ICML 2021 \\
+\cmidrule{1-6}coRNN \citep{rusch2021} & coupled damped second-order:
+full weight matrices inside the nonlinearity & recurrent core &
+dynamics, including the coupling & simulated & ICLR 2021 \\
+\cmidrule{1-6}UnICORNN \citep{unicornn} & independent undamped
+second-order: Hamiltonian, no coupling within a layer & recurrent core &
+dynamics, and a per-unit time step & simulated & ICML 2021 \\
 \cmidrule{1-6}LinOSS \citep{rusch2025} / D-LinOSS \citep{d-linoss} &
-linear oscillatory SSM & recurrent core & linear dynamics, learnable
-damping & simulated & ICLR 2025 (LinOSS); preprint (D-LinOSS) \\
-\cmidrule{1-6}Neural Wave Machines \citep{keller2023} & locally coupled
-oscillatory RNN & recurrent core & dynamics & simulated & ICML 2023 \\
-\cmidrule{1-6}Un-0 \citep{un-0} & Kuramoto, all-to-all & whole model &
-coupling \textbf{K} and frequencies \textbf{\ensuremath{\omega}} &
-simulated & \textbf{blogs + MIT code \citep{mit-code}; not peer
+linear oscillatory SSM: uncoupled forced harmonic oscillators, undamped
+in LinOSS, learnable damping in D-LinOSS & recurrent core & linear
+dynamics & simulated & ICLR 2025 oral (LinOSS); preprint (D-LinOSS) \\
+\cmidrule{1-6}Neural Wave Machines \citep{keller2023} & coRNN with
+convolutional coupling over a lattice & recurrent core & dynamics,
+including the coupling kernel & simulated & ICML 2023 \\
+\cmidrule{1-6}Un-0 \citep{un-0} & Kuramoto, all-to-all & whole model,
+with a convolutional decoder under 13\% of the parameters & coupling
+\textbf{K}, frequencies \textbf{\ensuremath{\omega}} and the decoder &
+simulated & \textbf{blogs + MIT-licensed code \citep{mit-code}; not peer
 reviewed} \\
-\cmidrule{1-6}WONN \citep{wonn} & Winfree & whole model & dynamics;
-input written as frequencies & simulated & preprint \\
-\cmidrule{1-6}AKOrN \citep{akorn} & D-dimensional Kuramoto & layer in a
-conventional net & dynamics & simulated & ICLR 2025 \\
-\cmidrule{1-6}KomplexNet \citep{muzellec2025} & Kuramoto in a
-complex-valued CNN & layer in a conventional net & dynamics & simulated
-& TMLR 2025 \\
+\cmidrule{1-6}WONN \citep{wonn} & generalized Winfree, trigonometric or
+MLP-parameterized, with attention-defined coupling & whole model, with a
+learned input embedding and per-layer update networks & dynamics; input
+written as the initial frequencies & simulated & preprint \\
+\cmidrule{1-6}AKOrN \citep{akorn} & D-dimensional Kuramoto,
+convolutional or attentive coupling & layer in a conventional net &
+dynamics, including \ensuremath{\Omega}, J and the step size & simulated
+& ICLR 2025 oral \\
+\cmidrule{1-6}KomplexNet \citep{muzellec2025} & Kuramoto on the phases
+of a complex-valued CNN's first layer & layer in a conventional net &
+coupling kernel, through a mask-supervised synchrony loss, and the
+network & simulated & TMLR 2025 \\
 \cmidrule{1-6}Kuramoto Attention \citep{kuramoto-attention} / FSN
-\citep{nunley2026} & Kuramoto; Kuramoto--Sakaguchi (FSN) & attention
-mechanism & dynamics & simulated & preprints \\
+\citep{nunley2026} & Kuramoto (Kuramoto Attention);
+Kuramoto--Sakaguchi--Daido with delay (FSN) & attention mechanism &
+dynamics & simulated & preprints \\
 \cmidrule{1-6}Kuramoto Orientation Diffusion
-\citep{kuramoto-orientation-diffusion} & stochastic Kuramoto &
-generative forward process & score network & simulated & NeurIPS 2025 \\
+\citep{kuramoto-orientation-diffusion} & stochastic Kuramoto; coupling
+and noise schedules fixed & generative forward process & score network &
+simulated & NeurIPS 2025 \\
+\cmidrule{1-6}HoloGraph \citep{dan2025} & D-dimensional Kuramoto with a
+feedback term, over graph adjacency & layer in a conventional net &
+dynamics; a learnable scaling of the adjacency & simulated & Nature
+Communications 2025 \\
 \end{longtable}
 
 \section{Oscillator systems: reported
@@ -2173,50 +2412,90 @@ ESN / LSM & time series & the frozen-dynamics paradigm (survey
 \citep{lukosevicius2009}) & --- & --- \\
 \cmidrule{1-5}Spintronic reservoir & spoken digits &
 \textasciitilde99.6\% recognition & one device & --- \\
-\cmidrule{1-5}RON & time-series benchmarks & reported above ESN and
-trained RNN baselines & --- & --- \\
+\cmidrule{1-5}RON & time-series classification and chaotic forecasting &
+above a leaky ESN on every task; above trained RNNs on chaotic
+forecasting and small-parameter classification; below coRNN and its
+trained twin on sMNIST, psMNIST, noise-padded CIFAR-10 and FordA &
+matched trainable parameters, 0.1k to 134k, with 13,000 oscillators
+against 256 trained units & --- \\
 \cmidrule{1-5}Oscillator Ising machines & combinatorial optimization &
 physics performs the search & --- & --- \\
-\cmidrule{1-5}coRNN / UnICORNN & long-sequence classification & state of
-the art at publication & --- & long BPTT, damping-bounded gradients \\
-\cmidrule{1-5}LinOSS / D-LinOSS & sequences to \textasciitilde18k steps;
-EigenWorms & 95.0\% vs 70.9\% for Mamba \citep{mamba}-class baselines &
---- & parallel scan, implicit discretization \\
-\cmidrule{1-5}Neural Wave Machines & sequence and physics tasks &
-travelling waves, emergent topography, parameter efficiency & --- &
---- \\
+\cmidrule{1-5}coRNN & psMNIST (784 steps), noise-padded CIFAR-10
+(1,000), the adding problem (to 5,000) & comparable to the state of the
+art; best single-layer RNN on sMNIST and psMNIST at publication & 34k to
+134k & full BPTT; energy bounded by damping, gradients bounded under a
+time-step condition on the weights \\
+\cmidrule{1-5}UnICORNN & psMNIST, noise-padded CIFAR-10, EigenWorms
+(17,984 steps), IMDB, vital signs & 98.4\% on psMNIST; 90.3\% on
+EigenWorms with full BPTT, against 57.9\% for a truncated-BPTT LSTM &
+35k to 135k; a few thousand on EigenWorms & full BPTT through 17,984
+steps, made invertible; gradients bounded by Hamiltonian conservation \\
+\cmidrule{1-5}LinOSS / D-LinOSS & UEA archive including EigenWorms
+(17,984 steps), PPG-DaLiA (49,920-step windows), weather forecasting &
+EigenWorms 95.0\% (LinOSS-IM), 80.0\% (LinOSS-IMEX), 93.9\% (D-LinOSS),
+against 70.9\% for Mamba \citep{mamba} and 87.8\% for LRU; PPG-DaLiA
+error 6.4 against 10.65 for Mamba (MSE \ensuremath{\times}
+10\ensuremath{^{-2}}) & 134k on EigenWorms, against 27k for Mamba and
+15k for S6 & parallel scan; implicit (dissipative) or symplectic
+(conservative) discretization \\
+\cmidrule{1-5}Neural Wave Machines & sMNIST and psMNIST; rotating MNIST;
+a Hamiltonian physics suite & 98.6\% and 94.8\% at 50k parameters
+against 99.1\% and 95.0\% for coRNN at 134k; travelling waves and
+emergent topography & 50k, of which 45k are the encoder and decoder & 18
+to 60 steps on the physics tasks; 784 on sMNIST \\
 \cmidrule{1-5}Un-0 & class-conditional images, CIFAR-10 and ImageNet-64
 & FID \textasciitilde8.8 (CIFAR-10); FID 6.74 (ImageNet-64) & 19.4M;
 322M & 10--25 integration steps \\
-\cmidrule{1-5}WONN & ImageNet-1K and CIFAR classification; Maze-hard;
-Sudoku & 76.78\% top-1 on ImageNet-1K; 80.1\% on Maze-hard at 1\% of
-prior state-of-the-art parameters & 12.3M & 18 unrolled steps (6 layers
-\ensuremath{\times} 3) \\
-\cmidrule{1-5}AKOrN & object discovery, Sudoku & robustness and
-calibration advantages, not accuracy dominance & --- & short iterative
-settles \\
-\cmidrule{1-5}KomplexNet & multi-object binding, small scale &
-synchronization helps \textasciitilde10--15\% & --- & --- \\
+\cmidrule{1-5}WONN & ImageNet-1K, ImageNet-100 and CIFAR classification;
+Maze-hard; Sudoku & 76.78\% top-1 on ImageNet-1K (ResNet-18 69.73\%,
+ResNet-50 76.89\%); 76.2\% on Maze-hard, 80.1\% with best-of-32 energy
+voting (TRM-Att 85.3\%, HRM 74.5\%); 100\% on Sudoku & 12.3M
+(ImageNet-1K); 0.396M (Maze-hard); 1.58M (Sudoku) & 18 steps for images
+(6 layers \ensuremath{\times} 3); 24 (Maze-hard); 16 (Sudoku) \\
+\cmidrule{1-5}AKOrN & object discovery, Sudoku, CIFAR-10 robustness and
+calibration & robustness and calibration advantages; 100\% on Sudoku in
+distribution and 89.5\% out of distribution with voting; clean CIFAR-10
+accuracy below ResNet-18 & not printed; baselines matched in FLOPs and
+memory & 8 steps per block for object discovery, 16 for Sudoku, 3 to 6
+for CIFAR-10 \\
+\cmidrule{1-5}KomplexNet & multi-object recognition on Multi-MNIST
+variants: 2 to 9 digits, overlap, noise, CIFAR backgrounds & 10 to 15\%
+over a real-valued model under overlap and noise; 2 to 3 points in
+distribution & small; matched to the real-valued baseline in its
+appendix & 15 Kuramoto steps at the first layer, backpropagated
+through \\
 \cmidrule{1-5}Kuramoto Attention / FSN & character-level language
-modelling & above a parameter-matched Transformer at 5M (preprint) & 5M
-& one dynamics step per layer \\
+modelling (enwik8) and byte-level code (CodeParrot) & above a
+parameter-matched Transformer at 5M on code and by median on enwik8;
+below it at 1M (preprints) & 1M; 5M & one dynamics step per layer \\
 \cmidrule{1-5}Kuramoto Orientation Diffusion & generation on periodic
-domains & --- & --- & per-step score objectives \\
+domains: fingerprints, textures, terrain, CIFAR-10 & Brodatz FID 18.5 at
+100 steps and 14.2 at 1,000, against 38.3 and 20.4 for the same-network
+Gaussian baseline; CIFAR-10 28.2 against 38.0 at 100 steps, but 10.8
+against 3.2 at 1,000 & same U-Net as the baseline; count not reported &
+forward chain of 100 to 1,000 steps simulated; per-step score
+objectives, no gradient through the chain \\
+\cmidrule{1-5}HoloGraph & node and graph classification on ten citation,
+web and molecule graphs; fMRI task decoding & best or near-best against
+eight GNN baselines including KuramotoGNN and GraphCON; accuracy stable
+to 128 layers & not reported in the main text & unrolled
+forward-difference stack, to 128 layers \\
 \end{longtable}
 
 \section{How the control counts are
 derived}\label{how-the-control-counts-are-derived}
 
 The counts quoted in Sections 2.3.3 and 4 are derived from Table 1 as
-follows. Twelve rows times five controls gives sixty possible control
-comparisons. Five are marked not applicable: the single-term coupling
-ablation for coRNN \citep{rusch2021} / UnICORNN \citep{unicornn} and for
-LinOSS \citep{rusch2025} / D-LinOSS \citep{d-linoss}, neither of which
-has a coupling term to remove, and the frozen twin for RON
-\citep{ceni2024}, the spintronic reservoir and oscillator Ising
-machines, none of which trains its dynamics in the first place. That
-leaves \textbf{fifty-five applicable comparisons}, of which
-\textbf{seven are reported}:
+follows. Fourteen rows times five controls gives seventy possible
+control comparisons. Five are marked not applicable: the single-term
+coupling ablation for UnICORNN \citep{unicornn}, whose units do not
+couple within a layer, and for LinOSS \citep{rusch2025} / D-LinOSS
+\citep{d-linoss}, whose state matrices are diagonal, and the frozen twin
+for RON \citep{ceni2024}, the spintronic reservoir and oscillator Ising
+machines, none of which trains its dynamics in the first place. coRNN
+\citep{rusch2021} is coupled through its full weight matrices, so its
+coupling cell is applicable and empty. That leaves \textbf{sixty-five
+applicable comparisons}, of which \textbf{sixteen are reported}:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -2228,25 +2507,71 @@ leaves \textbf{fifty-five applicable comparisons}, of which
 \item
   Un-0, randomized twin (modular against random masks).
 \item
+  AKOrN \citep{akorn}, decoder-only (ItrConv and ItrSA, the same
+  iterated layers without the Kuramoto update).
+\item
+  AKOrN, single-term ablation of the coupling (a J = 0 bar in a
+  robustness figure).
+\item
   Kuramoto Attention \citep{kuramoto-attention} / FSN
   \citep{nunley2026}, matched-budget baseline (parameter-matched
-  Transformer at 5M).
+  Transformers at 1M and 5M).
 \item
-  RON, matched-budget baseline (echo-state and trained recurrent
-  baselines).
+  KomplexNet \citep{muzellec2025}, frozen twin (coupling kernel held at
+  a fixed Gaussian).
+\item
+  KomplexNet, decoder-only (the real-valued twin, and the complex twin
+  without the Kuramoto step).
+\item
+  KomplexNet, matched-budget baseline (a parameter-matched real-valued
+  model, and a ViT of comparable size).
+\item
+  KomplexNet, single-term ablation of the coupling (retrained without
+  the Kuramoto step).
 \item
   Kuramoto Orientation Diffusion \citep{kuramoto-orientation-diffusion},
-  single-term ablation of the coupling (K(t) = 0).
+  decoder-only (the Gaussian score model with the same U-Net).
 \item
-  AKOrN \citep{akorn}, single-term ablation of the coupling (a J = 0 bar
-  in a robustness figure).
+  Kuramoto Orientation Diffusion, matched-budget baseline (the same
+  experiment as item 11, counted once per column as the table does).
+\item
+  Kuramoto Orientation Diffusion, single-term ablation of the coupling
+  (K(t) = 0).
+\item
+  coRNN, matched-budget baseline (a 9k-parameter LSTM on Lorenz-96, in
+  the supplement).
+\item
+  UnICORNN, matched-budget baseline (the same Lorenz-96 comparison).
+\item
+  RON, matched-budget baseline (echo-state and trained recurrent
+  baselines at matched trainable parameters).
 \end{enumerate}
 
-An eighth cell, KomplexNet \citep{muzellec2025}'s random-phase control,
-is marked as the nearest published instance rather than the control
-itself, and is not counted among the seven.
+Three further cells are marked as the nearest published instance rather
+than the control itself, and are not counted among the sixteen: AKOrN's
+matched-budget cell, since its baselines are matched in FLOPs and memory
+and described as roughly matched in parameters but the counts are not
+printed; WONN \citep{wonn}'s matched-budget cell, since the ResNet-18 it
+is compared with is an off-the-shelf model of similar size under a
+different training recipe; and the coupling cell of Kuramoto Attention /
+FSN, whose learned-value-projection ablation replaces the Kuramoto step
+rather than removing it.
 
-Table 1 covers twelve of the thirteen systems in Appendix D. ESN
+Two comparisons the five controls do not capture are recorded in Section
+2.3.3 because they come close to a sixth: UnICORNN is coRNN with the
+damping and the within-layer coupling removed and a layer stack added,
+and D-LinOSS with its damping set to zero recovers LinOSS's conservative
+discretization, so each pair of papers publishes both sides of a damping
+ablation that neither paper runs alone.
+
+An earlier draft of this survey counted seven of fifty-five. The
+difference is entirely controls that the papers report and that draft
+had missed, together with one cell it had marked not applicable in
+error. We record the correction here because it is itself evidence for
+the argument of Section 3.2 that reported controls need a reporting
+standard to be legible.
+
+Table 1 covers fourteen of the fifteen rows in Appendix D. ESN
 \citep{jaeger2001} and LSM \citep{maass2002} are omitted from it because
 they are the reservoir-computing precedent this survey measures
 oscillator systems against rather than oscillator systems whose dynamics
@@ -2263,11 +2588,13 @@ Section 3.1 and each with a note on what evidence would close it.
 \tightlist
 \item
   \textbf{Is the synchronization term load-bearing?} Removed as a single
-  variable twice, in a diffusion forward process and in one bar of a
-  robustness figure, and never at a matched budget on a headline task;
-  theory says expressivity survives without it; the binding literature
-  says something is lost on grouping tasks. A single-term ablation
-  across task classes would say what synchronization is \emph{for}.
+  variable three times, in a diffusion forward process on one dataset,
+  in one bar of a robustness figure, and in a model retrained without
+  the term, never with a retrained and a zeroed-at-test variant side by
+  side; theory says expressivity survives without it; the binding
+  literature says something is lost on grouping tasks. A single-term
+  ablation across task classes would say what synchronization is
+  \emph{for}.
 \item
   \textbf{Which physics parameters repay training?} Frozen-vs-trained at
   matched parameters, per parameter group, with decoder-only and

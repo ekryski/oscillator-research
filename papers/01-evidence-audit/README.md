@@ -6,13 +6,13 @@ A critical survey of oscillator networks in machine learning.
 
 Coupled oscillator networks are drawing sustained attention as machine-learning substrates for the first
 time, and three literatures have converged on them: synchronization physics, neuroscience, and machine
-learning itself. This survey audits what has actually been shown. It organises thirteen load-bearing systems
-on two independent questions, whether gradients reach the oscillator dynamics and whether a conventional
+learning itself. This survey audits what has actually been shown. It organises eighteen load-bearing systems,
+in fifteen lines, on two independent questions, whether gradients reach the oscillator dynamics and whether a conventional
 encoder or decoder is trained around it, and records for each the task, the controls it ran, and how it
 stands against conventional baselines. The comparative picture is parity and niches rather than
 dominance. Five controls would separate a trained system's result from the alternative explanations
-for it; of the fifty-five applicable control comparisons they give across the surveyed systems,
-seven have been run.
+for it; of the sixty-five applicable control comparisons they give across the surveyed systems,
+sixteen have been run, ten of them by three systems.
 
 ## What is here
 

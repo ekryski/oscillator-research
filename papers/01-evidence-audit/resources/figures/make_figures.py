@@ -212,11 +212,12 @@ def fig_model_lineage():
 
     The earlier version showed four coupling laws chosen for how they read as
     equations. That misdescribes the survey: AKOrN's oscillators leave the
-    circle entirely, and the coRNN and LinOSS lines carry no coupling term to
-    write down. Each panel therefore names the systems that use it, and the
-    forms with no system are in Appendix A rather than here.
+    circle entirely, coRNN couples its units through full weight matrices inside
+    the nonlinearity while UnICORNN and LinOSS couple nothing within a layer.
+    Each panel therefore names the systems that use it, and the forms with no
+    system are in Appendix C rather than here.
     """
-    W, H = 660, 508
+    W, H = 660, 625
     b = []
     panels = [
         ("Winfree", "phase only",
@@ -238,22 +239,27 @@ def fig_model_lineage():
         ("D-dimensional Kuramoto", "phase on a sphere",
          "dxi/dt = Ωi xi + Pxi (ci + Σj Jij xj)",
          "unit vectors in D dimensions; the phase leaves the circle",
-         "AKOrN"),
+         "AKOrN · HoloGraph"),
         ("Stuart–Landau", "amplitude and phase",
          "dzi/dt = (μ + iωi)zi − |zi|²zi + K Σj (zj − zi)",
          "complex state: amplitude and phase both evolve",
          "Zhang et al. 2026"),
-        ("Damped second-order", "no coupling term",
+        ("Coupled second-order", "coupled and damped",
          "y″ = σ(Wy + W′y′ + Vu + b) − γy − εy′",
-         "an oscillatory recurrence; damping bounds the gradients",
-         "coRNN · UnICORNN · RON · Neural Wave Machines"),
+         "full or convolutional W couple the units inside the nonlinearity",
+         "coRNN · Neural Wave Machines · RON"),
+        ("Independent second-order", "no coupling within a layer",
+         "y″ = −[σ(w y + Vu + b) + αy],  w a vector",
+         "Hamiltonian and undamped; units interact only across layers",
+         "UnICORNN"),
         ("Linear oscillatory state space", "no coupling term",
          "y″ = −Ay − Gy′ + Bu,  A, G diagonal, G = 0 in LinOSS",
          "linear, so the whole sequence solves by parallel scan",
          "LinOSS · D-LinOSS"),
     ]
     fills = {"phase only": FILL_A, "phase on a sphere": FILL_A,
-             "amplitude and phase": FILL_B, "no coupling term": FILL_C}
+             "amplitude and phase": FILL_B, "coupled and damped": FILL_B,
+             "no coupling within a layer": FILL_C, "no coupling term": FILL_C}
     pw, ph, gx, gy = 310, 104, 14, 13
     for i, (name, kind, eq, note, systems) in enumerate(panels):
         x = 18 + (i % 2) * (pw + gx)
@@ -265,8 +271,9 @@ def fig_model_lineage():
         b.append(text(x + pw / 2, y + 55, eq, 10))
         b.append(text(x + pw / 2, y + 75, note, 8.2, fill=MID))
         b.append(text(x + pw / 2, y + 93, systems, 8.4, weight="bold"))
-    b.append(line(18, 486, 642, 486, HAIR, 1))
-    b.append(text(18, 500, "Physical substrates run their own device dynamics and are written "
+    foot = 20 + ((len(panels) + 1) // 2) * (ph + gy) - gy + 13
+    b.append(line(18, foot, 642, foot, HAIR, 1))
+    b.append(text(18, foot + 14, "Physical substrates run their own device dynamics and are written "
                   "as none of these forms: the spintronic reservoir, and oscillator Ising "
                   "machines.", 8.2, anchor="start", fill=MID))
     svg("fig10-model-lineage", W, H, "\n".join(b),
@@ -324,7 +331,7 @@ def fig_taxonomy():
          ["Oscillator Ising machines", "(Hopf cochlea, the biological case)"], FILL_A),
         ("Untrained, with a trained readout", "the readout is fitted, the dynamics is not",
          ["ESN · LSM", "RON · Spintronic reservoir"], FILL_A),
-        ("Trained, designed", "gradients reach the dynamics, and nothing else",
+        ("Trained, designed", "gradients reach the dynamics; at most a thin readout",
          ["Un-0", "WONN"], FILL_B),
         ("Trained, inside a trained network",
          "gradients reach the dynamics and its scaffolding",
@@ -400,80 +407,117 @@ def fig_input_injection():
 
 
 def fig_training_horizon():
-    """Backpropagated steps per system, marked by what makes the gradient safe."""
+    """Backpropagated steps per system, marked by what makes the gradient safe.
+
+    An earlier version left coRNN and UnICORNN off the axis on the grounds that
+    their bounds came from damping. UnICORNN's do not, and both train through
+    thousands of steps, so every trained system is plotted and the marker says
+    what controls the gradient: nothing stated, the structure of the dynamics,
+    or linearity.
+    """
     import math
-    W, H = 660, 262
+    W, H = 660, 440
     b = []
     b.append(text(330, 24, "Backpropagated steps across trained oscillator models",
                   11.5, weight="bold"))
-    x0, x1, axis_y = 96, 604, 176
-    lo, hi = 1, 20000
+    x0, x1, axis_y = 96, 604, 346
+    lo, hi = 1, 100000
 
     def px(v):
         return x0 + (x1 - x0) * math.log10(v) / math.log10(hi / lo)
 
     b.append(line(x0, axis_y, x1, axis_y, INK, 1.4))
-    for tick in (1, 10, 100, 1000, 10000):
+    for tick in (1, 10, 100, 1000, 10000, 100000):
         x = px(tick)
         b.append(line(x, axis_y, x, axis_y + 6, INK, 1.2))
         b.append(text(x, axis_y + 19, f"{tick:,}", 9, fill=MID))
     b.append(text(350, axis_y + 38, "steps unrolled and backpropagated through (log scale)",
                   9.4, fill=MID))
 
-    # filled = nonlinear dynamics, nothing bounding the gradient
-    # open   = linear, or gradients bounded by dissipation
+    def marker(x, y, kind):
+        """free: filled. structure: half-filled. linear: open."""
+        if kind == "free":
+            return (f'<rect x="{x-5}" y="{y-5}" width="10" height="10" '
+                    f'fill="{INK}" stroke="{INK}" stroke-width="1.3"/>')
+        out = (f'<rect x="{x-5}" y="{y-5}" width="10" height="10" '
+               f'fill="{FILL_C}" stroke="{INK}" stroke-width="1.3"/>')
+        if kind == "structure":
+            out += f'<path d="M{x-5} {y+5} L{x+5} {y+5} L{x+5} {y-5} Z" fill="{INK}"/>'
+        return out
+
+    # (steps, name, note, gradient control, label height above the axis, range)
     points = [
-        (1, "Kuramoto Attention · FSN", "one dynamics step per layer", True, -112),
-        (1, "Kuramoto Orientation Diffusion", "per-step score objectives", True, -80),
-        (17, "Un-0", "10–25 integration steps", True, -48, 24),
-        (18, "WONN", "18 steps (6 layers × 3)", True, -20),
-        (18000, "LinOSS · D-LinOSS", "linear, implicitly discretized", False, -48),
+        (1, "Kuramoto Attention · FSN", "one dynamics step per layer", "free", 310, None),
+        (1, "Kuramoto Orientation Diffusion",
+         "per-step score objectives; no gradient through the chain", "free", 278, None),
+        (8, "AKOrN", "3–16 steps per block", "free", 246, (3, 16)),
+        (15, "KomplexNet", "15 steps at the first layer", "free", 214, None),
+        (17, "Un-0", "10–25 integration steps", "free", 182, (10, 25)),
+        (18, "WONN", "18 (images) · 24 (Maze-hard) · 16 (Sudoku)", "free", 150, None),
+        (784, "Neural Wave Machines", "18–60 on physics tasks; 784 on sMNIST",
+         "structure", 118, None),
+        (5000, "coRNN", "784–5,000; energy bound, time-step condition",
+         "structure", 86, None),
+        (17984, "UnICORNN", "17,984 on EigenWorms; Hamiltonian, symplectic",
+         "structure", 54, None),
+        (49920, "LinOSS · D-LinOSS", "linear; 17,984 on EigenWorms, 49,920 on PPG-DaLiA",
+         "linear", 22, None),
     ]
-    for v, name, note, nonlinear, dy, *extra in points:
-        x = px(v)
-        y = axis_y + dy
+    for v, name, note, kind, up, span in points:
+        x, y = px(v), axis_y - up
         b.append(line(x, y + 10, x, axis_y - 2, HAIR, 1))
-        b.append(f'<rect x="{x-5}" y="{y-5}" width="10" height="10" '
-                 f'fill="{INK if nonlinear else FILL_C}" stroke="{INK}" stroke-width="1.3"/>')
-        # a point carrying a range bar needs its label clear of the bar's end
-        anc, off = ("end", -11) if v > 100 else ("start", 11 + (extra[0] - 11 if extra else 0))
+        if span:
+            b.append(line(px(span[0]), y, px(span[1]), y, INK, 3))
+        b.append(marker(x, y, kind))
+        # labels sit right of the point on the short side and left of it on
+        # the long side, clear of any range bar
+        if v < 100:
+            anc, off = "start", 11 + (px(span[1]) - x if span else 0)
+        else:
+            anc, off = "end", -11
         b.append(text(x + off, y - 1, name, 9.6, anchor=anc, weight="bold"))
         b.append(text(x + off, y + 10, note, 8.4, anchor=anc, fill=MID))
-    # Un-0's range
-    b.append(line(px(10), axis_y - 48, px(25), axis_y - 48, INK, 3))
 
     # the marker legend stays: it decodes the marks, and without it the figure
     # cannot be read. The prose that sat under it is the caption's job.
-    b.append(f'<rect x="20" y="240" width="9" height="9" fill="{INK}" stroke="{INK}"/>')
-    b.append(text(35, 248, "nonlinear dynamics, no stated gradient bound", 9, anchor="start", fill=MID))
-    b.append(f'<rect x="330" y="240" width="9" height="9" fill="{FILL_C}" stroke="{INK}"/>')
-    b.append(text(345, 248, "linear, or gradients bounded by dissipation", 9, anchor="start", fill=MID))
+    ly = H - 22
+    b.append(marker(25, ly - 3, "free"))
+    b.append(text(36, ly, "nonlinear, no stated gradient bound", 9, anchor="start", fill=MID))
+    b.append(marker(230, ly - 3, "structure"))
+    b.append(text(241, ly, "nonlinear, gradient controlled by the dynamics' structure",
+                  9, anchor="start", fill=MID))
+    b.append(marker(535, ly - 3, "linear"))
+    b.append(text(546, ly, "linear dynamics", 9, anchor="start", fill=MID))
     svg("fig12-training-horizon", W, H, "\n".join(b),
         "Training horizon across oscillator systems")
 
 
 def fig_controls_grid():
     """Which controls each system reports — the sparsest column is the observation."""
-    W, H = 660, 362
-    b = []
-    b.append(text(330, 24, "Controls reported, by system", 11.5, weight="bold"))
-    cols = ["Frozen\ntwin", "Decoder-\nonly", "Randomized\ntwin", "Matched-budget\nbaseline",
-            "Single-term\nablation of\nthe coupling"]
+    # 1 reported · 2 not applicable · 3 the closest published instance · 0 not found
     rows = [
         ("Un-0", [1, 1, 1, 0, 0]),
-        ("AKOrN", [0, 0, 0, 0, 1]),
-        ("WONN", [0, 0, 0, 0, 0]),
-        ("Kuramoto Attention · FSN", [0, 0, 0, 1, 0]),
-        ("KomplexNet", [0, 0, 0, 0, 3]),
-        ("Kuramoto Orientation Diffusion", [0, 0, 0, 0, 1]),
+        ("AKOrN", [0, 1, 0, 3, 1]),
+        ("WONN", [0, 0, 0, 3, 0]),
+        ("Kuramoto Attention · FSN", [0, 0, 0, 1, 3]),
+        ("KomplexNet", [1, 1, 0, 1, 1]),
+        ("Kuramoto Orientation Diffusion", [0, 1, 0, 1, 1]),
+        ("HoloGraph", [0, 0, 0, 0, 0]),
         ("Neural Wave Machines", [0, 0, 0, 0, 0]),
-        ("coRNN · UnICORNN", [0, 0, 0, 0, 2]),
+        ("coRNN", [0, 0, 0, 1, 0]),
+        ("UnICORNN", [0, 0, 0, 1, 2]),
         ("LinOSS · D-LinOSS", [0, 0, 0, 0, 2]),
         ("RON", [2, 0, 0, 1, 0]),
         ("Spintronic reservoir", [2, 0, 0, 0, 0]),
         ("Oscillator Ising machines", [2, 0, 0, 0, 0]),
     ]
     lx, cx0, cw, ry0, rh = 20, 244, 78, 98, 19
+    legend_y = ry0 + len(rows) * rh + 14
+    W, H = 660, legend_y + 24
+    b = []
+    b.append(text(330, 24, "Controls reported, by system", 11.5, weight="bold"))
+    cols = ["Frozen\ntwin", "Decoder-\nonly", "Randomized\ntwin", "Matched-budget\nbaseline",
+            "Single-term\nablation of\nthe coupling"]
     for c, label in enumerate(cols):
         for k, part in enumerate(label.split("\n")):
             b.append(text(cx0 + c * cw + cw / 2, 52 + k * 11, part, 8.2, fill=MID))
@@ -500,15 +544,16 @@ def fig_controls_grid():
     last = cx0 + 4 * cw
     b.append(f'<rect x="{last}" y="{ry0-16}" width="{cw}" height="{len(rows)*rh+2}" '
              f'fill="none" stroke="{INK}" stroke-width="1.6" stroke-dasharray="4 3"/>')
-    b.append(f'<rect x="20" y="340" width="10" height="10" fill="{INK}"/>')
-    b.append(text(36, 349, "reported", 9, anchor="start", fill=MID))
-    b.append(f'<rect x="104" y="340" width="10" height="10" fill="none" stroke="{INK}" '
+    ly = legend_y
+    b.append(f'<rect x="20" y="{ly}" width="10" height="10" fill="{INK}"/>')
+    b.append(text(36, ly + 9, "reported", 9, anchor="start", fill=MID))
+    b.append(f'<rect x="104" y="{ly}" width="10" height="10" fill="none" stroke="{INK}" '
              f'stroke-width="1.3"/>')
-    b.append('<path d="M104 350 L114 350 L114 340 Z" fill="' + INK + '"/>')
-    b.append(text(120, 349, "the closest published instance", 9, anchor="start", fill=MID))
-    b.append(f'<rect x="320" y="340" width="10" height="10" fill="none" stroke="{HAIR}" '
+    b.append(f'<path d="M104 {ly+10} L114 {ly+10} L114 {ly} Z" fill="{INK}"/>')
+    b.append(text(120, ly + 9, "the closest published instance", 9, anchor="start", fill=MID))
+    b.append(f'<rect x="320" y="{ly}" width="10" height="10" fill="none" stroke="{HAIR}" '
              f'stroke-width="1.2"/>')
-    b.append(text(336, 349, "not found in the surveyed work", 9, anchor="start", fill=MID))
+    b.append(text(336, ly + 9, "not found in the surveyed work", 9, anchor="start", fill=MID))
     svg("fig13-controls-grid", W, H, "\n".join(b), "Controls reported, by system")
 
 
@@ -682,7 +727,7 @@ def fig_geometries():
 
     panels = []
     # (a) all-to-all: every pair coupled, O(N²) parameters
-    panels.append(("(a) All-to-all", "every pair coupled, O(N²)", "Un-0 · AKOrN",
+    panels.append(("(a) All-to-all", "every pair coupled, O(N²)", "Un-0",
                    "ring", [(j, k) for j in range(12) for k in range(j + 1, 12)]))
     # (b) nonlocal ring: each unit to its two nearest neighbours on each side
     panels.append(("(b) Nonlocal ring", "finite coupling range", "chimera regime",
@@ -885,7 +930,7 @@ ADOPTED = {
     "Schuster & Wagner": "FSN · delay reservoirs",
     "Daido": "FSN",
     "Tanaka & Aoyagi": "Nagerl & Berloff 2025",
-    "Chandra, Girvan & Ott": "AKOrN",
+    "Chandra, Girvan & Ott": "AKOrN · HoloGraph",
 }
 
 
@@ -920,8 +965,9 @@ def fig_model_timeline():
             text(248, y, "no surveyed system found using it", 8, anchor="start", fill=MID)])
 
     def caveat(y):
-        return text(24, y, "coRNN · UnICORNN · RON · LinOSS · D-LinOSS attach to no row above: "
-                    "they carry no coupling term at all.", 8, anchor="start", fill=MID)
+        return text(24, y, "coRNN · UnICORNN · RON · NWM · LinOSS · D-LinOSS attach to no row: "
+                    "where they couple at all, it is through a weight matrix, not a phase law.",
+                    8, anchor="start", fill=MID)
 
     reference_timeline(
         "fig7-model-timeline", 40, 630,
@@ -943,7 +989,7 @@ def fig_model_timeline():
 PEER_REVIEWED = {
     "ESN", "LSM", "Spintronic reservoir", "Oscillator Ising machines",
     "coRNN · UnICORNN", "Neural Wave Machines", "RON", "AKOrN", "LinOSS",
-    "KomplexNet", "Kuramoto Orientation Diffusion",
+    "KomplexNet", "Kuramoto Orientation Diffusion", "HoloGraph",
 }
 
 
@@ -964,8 +1010,8 @@ def fig_system_timeline():
     trained = [
         (2021, "coRNN · UnICORNN"), (2023, "Neural Wave Machines"), (2025, "AKOrN"),
         (2025, "LinOSS"), (2025, "D-LinOSS"), (2025, "KomplexNet"),
-        (2025, "Kuramoto Orientation Diffusion"), (2026, "Un-0"), (2026, "WONN"),
-        (2026, "Kuramoto Attention · FSN"),
+        (2025, "Kuramoto Orientation Diffusion"), (2025, "HoloGraph"), (2026, "Un-0"),
+        (2026, "WONN"), (2026, "Kuramoto Attention · FSN"),
     ]
 
     def keys(y):
