@@ -808,19 +808,35 @@ footprint that grows linearly with context and dominates serving cost at
 scale \citep{kwon2023}. A fixed-size oscillator field is the opposite
 trade, which is the substance of the efficiency argument made for it.
 
+\textbf{Diffusion models iterate over noise rather than over time.} A
+diffusion model \citep{sohl-dickstein2015, ho2020} carries nothing
+between inputs; it generates by running a learned denoiser, itself a
+convolutional or attention network, for a fixed number of steps down a
+noise schedule, so the computation is a dynamical system over noise
+level rather than over the time axis of a signal. That makes it the
+conventional family closest in shape to a trained oscillator field
+settling from a random initial condition, which is why Un-0 is scored
+against diffusion baselines and why Kuramoto Orientation Diffusion could
+replace the Gaussian forward process with stochastic Kuramoto dynamics
+outright.
+
 \textbf{State-space models put a linear dynamical system back in.} S4
 \citep{s4} recovers a constant-size recurrent state while keeping
 parallel training, and finds its spectrum's initialization to be
 load-bearing rather than incidental \citep{how-train-your-hippo}; Mamba
 \citep{mamba} makes the state transition input-dependent and reaches
-Transformer-quality language modelling. This is the family the
-oscillatory recurrences are closest to: LinOSS \emph{is} a state-space
-model whose transition is a bank of harmonic oscillators, which is why
-it is also the oscillator system with the longest gradient horizon in
-the survey, roughly fifty thousand steps; UnICORNN's 17,984 is the
-longest for a nonlinear one. Hybrids interleave the two, keeping a few
-attention layers for recall over a mostly recurrent stack
-\citep{lieber2024}.
+Transformer-quality language modelling. RWKV \citep{peng2023} arrives at
+the same shape from the attention side, rewriting attention as a linear
+recurrence so that a Transformer-style model trains in parallel and runs
+with a constant-size state, which makes it the mainstream counterpart of
+the attention-as-dynamics reading that Kuramoto Attention and FSN give.
+This is the family the oscillatory recurrences are closest to: LinOSS
+\emph{is} a state-space model whose transition is a bank of harmonic
+oscillators, which is why it is also the oscillator system with the
+longest gradient horizon in the survey, roughly fifty thousand steps;
+UnICORNN's 17,984 is the longest for a nonlinear one. Hybrids interleave
+the two, keeping a few attention layers for recall over a mostly
+recurrent stack \citep{lieber2024}.
 
 \textbf{Spiking networks are the nearest neighbour.} A spiking unit is
 an oscillator of a restricted kind: it integrates input, crosses a
@@ -844,10 +860,13 @@ that lacks a proven gradient bound works at a short gradient horizon
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Conventional neural network architectures, by how each one holds the past. Above the axis, a state is carried forward one step at a time; below it, the whole window is recomputed at every step. An oscillator field belongs to the upper track, but its state evolves under a fixed differential equation rather than under a transition learned from scratch, which is the substance of both the efficiency argument made for it and the training difficulty reported against it.}]{resources/figures/fig8-ann-timeline.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Conventional neural network architectures, by how each one holds the past. Above the axis, a state is carried forward one step at a time; below it, the whole window is recomputed at every step. Diffusion sits below the axis as well: it keeps nothing between inputs and iterates a denoiser over noise levels rather than over time, the iteration Kuramoto Orientation Diffusion makes oscillatory. An oscillator field belongs to the upper track, but its state evolves under a fixed differential equation rather than under a transition learned from scratch, which is the substance of both the efficiency argument made for it and the training difficulty reported against it.}]{resources/figures/fig8-ann-timeline.pdf}}
 \caption{Conventional neural network architectures, by how each one
 holds the past. Above the axis, a state is carried forward one step at a
-time; below it, the whole window is recomputed at every step. An
+time; below it, the whole window is recomputed at every step. Diffusion
+sits below the axis as well: it keeps nothing between inputs and
+iterates a denoiser over noise levels rather than over time, the
+iteration Kuramoto Orientation Diffusion makes oscillatory. An
 oscillator field belongs to the upper track, but its state evolves under
 a fixed differential equation rather than under a transition learned
 from scratch, which is the substance of both the efficiency argument
