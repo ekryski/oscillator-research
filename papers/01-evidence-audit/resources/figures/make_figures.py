@@ -905,9 +905,11 @@ def fig_ann_timeline():
     stateful = [
         (1990, "Elman RNN"), (1997, "LSTM"), (2014, "GRU"),
         (2019, "Spiking, surrogate gradients"), (2021, "S4"), (2023, "Mamba"),
+        (2023, "RWKV, attention as a recurrence"),
     ]
     windowed = [
-        (1998, "LeNet, convolutional"), (2017, "Transformer"),
+        (1998, "LeNet, convolutional"), (2015, "Diffusion (Sohl-Dickstein et al.)"),
+        (2017, "Transformer"), (2020, "DDPM"),
         (2024, "Jamba, attention plus state space"),
     ]
     reference_timeline(
