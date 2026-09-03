@@ -32,7 +32,8 @@ papers/
 ├── 01-evidence-audit/
 │   ├── README.md
 │   ├── from-synchronization-physics-to-trained-dynamics.md   the manuscript
-│   ├── ….html .epub .docx                                    built beside it
+│   ├── ….html .epub                                          built beside it
+│   ├── ….docx  …-title-page.docx  …-highlights.docx         the Word submission files
 │   ├── …-tmlr.pdf  …-neunet.pdf  …-arxiv.tar.gz              submission builds, one per venue
 │   ├── …-preprint.pdf  …-preprint.tex                       the same paper with the author named
 │   ├── metadata/    front matter, and how to cite this paper

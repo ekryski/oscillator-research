@@ -121,13 +121,16 @@ and the same PDF serves as the preprint: the class's own running foot reads
 The template fills Elsevier's front matter from `metadata/paper.yaml`: the
 structured affiliation (`organization`, `city`, `state`, `country`), `orcid`,
 `credit` (the CRediT roles, which `\printcredits` prints as their own section),
-`shorttitle` for the running head, `highlights` (three to five, at most 85
-characters each; the class prints them on a page of their own, which is also
-the text the journal's separate highlights file wants) and `keywords`.
-`competing-interests`, `funding` and `data-availability` become the unnumbered
-declaration sections after the body. The generative-AI declaration the journal
-requires is part of the manuscript itself, the last section before the
-`<!-- appendix -->` marker, so every format carries it.
+`shorttitle` and `keywords`. `shorttitle` is the running head the class prints
+at the top of every page; the running foot, "Preprint submitted to Elsevier",
+is the class's own wording for any manuscript not yet accepted and cannot be
+changed to the journal's name. The end matter follows the journal's order:
+the appendices, then `competing-interests`, `funding` and `data-availability`
+as unnumbered declaration sections directly before the references. The
+generative-AI declaration the journal requires is part of the manuscript
+itself, its last section after the appendices, so every format carries it in
+the same place. The highlights are not printed in the PDF: the journal wants
+them as a separate file, which the docx build writes (below).
 
 `templates/neunet.yaml` sets two pandoc-level knobs no template can set for
 itself: `indent: true`, so pandoc does not load `parskip` over the class's
@@ -142,6 +145,27 @@ tlmgr init-usertree; tlmgr --usermode install stix inconsolata footmisc xstring 
 
 Without `stix` the class silently falls back to Computer Modern and says so in
 the TeX log (`publishing/.work/<paper>.neunet.final.log`).
+
+### The Word submission files
+
+Journals that take Word manuscripts want the same things the LaTeX template
+prints, inside the `.docx`, plus two files beside it. `lib/front_matter.py`
+renders all of it from `metadata/paper.yaml`, so the Word and LaTeX routes
+never drift:
+
+- `….docx` is the manuscript in submission form: the title block with the
+  affiliation and the corresponding author, the keywords under the abstract,
+  the body with its appendices, then CRediT, competing interests, funding and
+  data availability directly before the references. A portal that extracts
+  metadata from Word files finds title, abstract, keywords and author where it
+  expects them.
+- `…-title-page.docx` is the separate title page a portal asks for: authors
+  with affiliation marks, corresponding author, ORCID, acknowledgements
+  (`acknowledgements:` in `paper.yaml`, "None." when absent) and funding.
+- `…-highlights.docx` holds the `highlights:` list and nothing else, with
+  "highlights" in the file name as Elsevier asks. The build refuses to write it
+  when there are fewer than three or more than five, or one runs over 85
+  characters; a paper without highlights gets no file.
 
 ### Adding a venue
 

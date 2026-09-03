@@ -23,7 +23,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import subprocess
 import sys
 import urllib.error
@@ -32,6 +31,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import abstract as abstract_mod  # noqa: E402
+import paper_meta  # noqa: E402
 import title as title_mod  # noqa: E402
 
 #: the two Zenodo instances; the sandbox mints throwaway DOIs for rehearsal
@@ -44,36 +44,27 @@ LICENSE = "cc-by-4.0"
 UPLOAD_TYPE, PUBLICATION_TYPE = "publication", "preprint"
 #: the repository the paper's code and record live in, linked from the record
 REPOSITORY = "https://github.com/ekryski/oscillator-research"
-#: `- name: ...` entries under `author:` in paper.yaml, and the keys each carries
-AUTHOR_BLOCK = re.compile(r"^\s*-\s*name:\s*(?P<name>.+?)\s*$(?P<rest>(?:\n\s{4,}\w+:.*$)*)", re.M)
-FIELD = re.compile(r"^\s+(\w+):\s*(.+?)\s*$", re.M)
-KEYWORD_LINE = re.compile(r"^\s*-\s*(.+?)\s*$", re.M)
 
 
 def authors(paper_yaml: str) -> list[dict[str, str]]:
     """The `author:` list of paper.yaml as Zenodo creators.
 
-    paper.yaml is parsed with the same regex approach as byline.py rather
-    than PyYAML, so this script has no dependency the rest of the pipeline
-    lacks. Zenodo wants "Family, Given"; the front matter keeps display order.
+    Zenodo wants "Family, Given"; the front matter keeps display order.
     """
     out = []
-    for m in AUTHOR_BLOCK.finditer(paper_yaml):
-        fields = dict(FIELD.findall(m.group("rest")))
-        given, _, family = m.group("name").strip('" ').rpartition(" ")
+    for person in paper_meta.authors(paper_yaml):
+        given, _, family = person["name"].rpartition(" ")
         creator = {"name": f"{family}, {given}" if given else family}
-        if fields.get("affiliation"):
-            creator["affiliation"] = fields["affiliation"].strip('" ')
-        if fields.get("orcid"):
-            creator["orcid"] = fields["orcid"].strip('" ')
+        for key in ("affiliation", "orcid"):
+            if person.get(key):
+                creator[key] = person[key]
         out.append(creator)
     return out
 
 
 def keywords(paper_yaml: str) -> list[str]:
     """The `keywords:` list of paper.yaml, up to the next top-level key."""
-    m = re.search(r"^keywords:\s*\n((?:\s*-\s*.+\n?)+)", paper_yaml, re.M)
-    return [k.strip('" ') for k in KEYWORD_LINE.findall(m.group(1))] if m else []
+    return paper_meta.items(paper_yaml, "keywords")
 
 
 def build_metadata(paper_yaml: str, title: str, abstract: str, version: str,

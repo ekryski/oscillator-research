@@ -17,12 +17,14 @@ $-- $if(venue-submission)$ in the \documentclass line.
 $--
 $-- Front matter the class prints and where it comes from (metadata/paper.yaml):
 $--   author: name, email, orcid, credit, and organization/city/state/country
-$--   shorttitle, keywords, highlights
+$--   shorttitle (the running head the class prints on every page), keywords
 $--   competing-interests, funding, data-availability: unnumbered sections
-$--   printed after the body, where the journal wants declarations.
+$--   printed after the appendices, directly before the references.
 $-- The generative-AI declaration is part of the manuscript itself, as the
-$-- journal requires, and arrives inside $body$. templates/neunet.yaml carries
-$-- the pandoc-level knobs (indent, natbiboptions) this template relies on.
+$-- journal requires, and closes its appendix chunk. templates/neunet.yaml
+$-- carries the pandoc-level knobs (indent, natbiboptions) this template
+$-- relies on. The running foot, "Preprint submitted to Elsevier", is the
+$-- class's own wording for any unaccepted manuscript and is not configurable.
 $--
 $-- The affiliation index is fixed at 1: one affiliation shared by every
 $-- author. A multi-affiliation paper edits this block.
@@ -91,13 +93,8 @@ $abstract$
 \end{abstract}
 $endif$
 
-$if(highlights)$
-\begin{highlights}
-$for(highlights)$
-\item $highlights$
-$endfor$
-\end{highlights}
-$endif$
+$-- The highlights are not printed: the journal wants them as a separate file,
+$-- which the docx build writes from the same paper.yaml.
 
 $if(keywords)$
 \begin{keywords}
@@ -113,9 +110,14 @@ $include-before$
 $endfor$
 $body$
 
-$-- The declarations, in the order Elsevier's published articles carry them.
-$-- The generative-AI declaration is the last section of $body$, so it lands
-$-- first among them.
+$-- Elsevier's end matter: the appendices, then the declarations directly
+$-- before the reference list. The appendix arrives through include-after and
+$-- ends with the generative-AI declaration, which the manuscript keeps after
+$-- its appendices; the other declarations are printed here from paper.yaml.
+$for(include-after)$
+$include-after$
+
+$endfor$
 \printcredits
 $if(competing-interests)$
 \section*{Declaration of competing interest}
@@ -137,8 +139,4 @@ $-- \bibliographystyle comes from pandoc's own partial via biblio-style, which
 $-- publish.sh sets to the .bst it finds in the venue folder. BibTeX takes the
 $-- first \bibliographystyle it sees, so the template must not add another.
 \bibliography{references}
-$for(include-after)$
-$include-after$
-
-$endfor$
 \end{document}
