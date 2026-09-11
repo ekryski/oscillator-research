@@ -21,6 +21,7 @@ FORMATS="tmlr pdf" bash publishing/publish.sh   # `pdf` and `tex` are off by def
 | format | for |
 |---|---|
 | `-tmlr.pdf` / `-tmlr.tex` | TMLR submission, via the journal's own style file |
+| `-preprint.pdf` / `-preprint.tex` | the preprint face of the same build (`TMLR_MODE=preprint`): author named, no venue mentioned |
 | `-arxiv.tar.gz` | arXiv upload: `.tex` + style + `references.bib` + figures |
 | `.epub` | e-readers |
 | `.html` | a single self-contained file, images embedded and styled |

@@ -25,6 +25,7 @@ it carries weight, and uses no unpublished result of ours.
 | [`from-synchronization-physics-to-trained-dynamics.md`](from-synchronization-physics-to-trained-dynamics.md) | the manuscript — the editing surface |
 | [`….html`](from-synchronization-physics-to-trained-dynamics.html) · [`.epub`](from-synchronization-physics-to-trained-dynamics.epub) · [`.docx`](from-synchronization-physics-to-trained-dynamics.docx) | the same paper for reading and sharing |
 | [`…-tmlr.pdf`](from-synchronization-physics-to-trained-dynamics-tmlr.pdf) | the TMLR submission build, anonymous, in the journal's own style |
+| [`…-preprint.pdf`](from-synchronization-physics-to-trained-dynamics-preprint.pdf) | the same build with the author named and no venue mentioned, for a website, Zenodo or arXiv |
 | [`…-arxiv.tar.gz`](from-synchronization-physics-to-trained-dynamics-arxiv.tar.gz) | LaTeX source, style files, bibliography and figures, ready to upload |
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
@@ -43,8 +44,21 @@ bash publishing/publish.sh 01
 
 Regenerates every format above, in place, from the Markdown. The TMLR build has
 three faces — `TMLR_MODE=submission` (anonymous, the default), `preprint`, or
-`accepted` — against the journal's own style file, vendored unmodified. See
-[publishing/README.md](../../publishing/README.md).
+`accepted` — against the journal's own style file, vendored unmodified; the
+preprint face is written as `…-preprint.pdf` so it never overwrites the
+submission build. See [publishing/README.md](../../publishing/README.md).
+
+To deposit the preprint on Zenodo and reserve a DOI, with the record's metadata
+taken from `metadata/paper.yaml` and the manuscript itself:
+
+```bash
+export ZENODO_TOKEN=...   # a personal access token with the deposit:write scope
+python3 publishing/lib/zenodo_deposit.py papers/01-evidence-audit --dry-run   # inspect
+python3 publishing/lib/zenodo_deposit.py papers/01-evidence-audit             # private draft
+```
+
+The draft is published from the Zenodo page, deliberately by hand, because a
+published record cannot be deleted.
 
 <!-- citation:start -->
 ## Citing this paper

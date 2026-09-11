@@ -163,8 +163,12 @@ for dir in papers/*/; do
     # The manuscript's top level is `##`, because the title and abstract come
     # from metadata rather than being restated in the prose. Without the shift
     # pandoc maps `##` to a subsection and the headings come out a level too deep.
-    common+=(--shift-heading-level-by=-1
-             --variable=author="$(python3 publishing/lib/byline.py "$meta")")
+    common+=(--shift-heading-level-by=-1)
+    # a -V variable shadows metadata of the same name inside a template, so the
+    # display string goes only to the formats rendered by pandoc's own
+    # templates. The TMLR template reads the structured list and prints
+    # \name/\email/\addr from it; handed the string instead, it printed nothing.
+    byline=(--variable=author="$(python3 publishing/lib/byline.py "$meta")")
     # TMLR places the appendix after the references, and its author guide
     # excludes appendices from the length that risks a longer review. The LaTeX
     # paths therefore render it separately and inject it through include-after,
@@ -225,13 +229,17 @@ for dir in papers/*/; do
                     && "$TMLR_ENGINE" -interaction=nonstopmode "$name.tex") >"$log" 2>&1
                 (cd "$out" && "$TMLR_ENGINE" -interaction=nonstopmode "$name.tex") >"$final" 2>&1
                 if [ -f "$out/$name.pdf" ]; then
-                    cp "$out/$name.pdf" "$dir$name-tmlr.pdf"
-                    cp "$out/$name.tex" "$dir$name-tmlr.tex"
+                    # the anonymous submission keeps the -tmlr name; the
+                    # de-anonymized preprint face gets its own, so building one
+                    # never overwrites the other
+                    face="tmlr"; [ "$TMLR_MODE" = preprint ] && face="preprint"
+                    cp "$out/$name.pdf" "$dir$name-$face.pdf"
+                    cp "$out/$name.tex" "$dir$name-$face.tex"
                     # the TeX log hard-wraps at 79 columns, and will happily
                     # split "(14 pages" across two lines
                     pages="$(tr -d '\n' <"$final" | grep -oE "Output written[^)]*" \
                              | grep -oE "[0-9]+ pages" | tail -1)"
-                    echo "    $dir$name-tmlr.pdf ($TMLR_MODE${pages:+, $pages})"
+                    echo "    $dir$name-$face.pdf ($TMLR_MODE${pages:+, $pages})"
                     check_glyphs "$final" || missing=1
                     undefined="$(grep -c "Citation .* undefined" "$final")"
                     [ "$undefined" != 0 ] && {
@@ -248,12 +256,12 @@ for dir in papers/*/; do
                 if [ -z "$PDF_ENGINE" ]; then
                     echo "    (no PDF engine: install a TeX distribution, or 'brew install weasyprint')"
                 elif [ "$PDF_VIA_HTML" = 1 ]; then
-                    pandoc "${common[@]}" "${cite[@]}" "${raster[@]}" --to=html5 --embed-resources \
+                    pandoc "${common[@]}" "${byline[@]}" "${cite[@]}" "${raster[@]}" --to=html5 --embed-resources \
                         --pdf-engine=weasyprint --output="$dir$name.pdf" "$body" \
                         && echo "    $dir$name.pdf (via weasyprint; install TeX for a LaTeX PDF)"
                 else
                     log="$WORK/$slug.pdf.log"
-                    pandoc "${common[@]}" "${cite[@]}" "${vector[@]}" --pdf-engine="$PDF_ENGINE" \
+                    pandoc "${common[@]}" "${byline[@]}" "${cite[@]}" "${vector[@]}" --pdf-engine="$PDF_ENGINE" \
                         --include-in-header="$TEMPLATES/float-fit.latex" \
                         --output="$dir$name.pdf" "$tex_full" 2>"$log" \
                         && echo "    $dir$name.pdf ($PDF_ENGINE)"
@@ -262,7 +270,7 @@ for dir in papers/*/; do
                 fi
                 ;;
             epub)
-                pandoc "${common[@]}" "${cite[@]}" "${raster[@]}" --to=epub3 --toc --toc-depth=2 \
+                pandoc "${common[@]}" "${byline[@]}" "${cite[@]}" "${raster[@]}" --to=epub3 --toc --toc-depth=2 \
                     --output="$dir$name.epub" "$body" && echo "    $dir$name.epub"
                 ;;
             html)
@@ -273,18 +281,18 @@ for dir in papers/*/; do
                 # as a paragraph, not a heading: citeproc emits an h1 and
                 # --shift-heading-level-by then demotes it out of the heading range,
                 # which is why paper.css reaches it through `p:has(+ div#refs)`.
-                pandoc "${common[@]}" "${cite[@]}" "${raster[@]}" --to=html5 --toc --toc-depth=3 \
+                pandoc "${common[@]}" "${byline[@]}" "${cite[@]}" "${raster[@]}" --to=html5 --toc --toc-depth=3 \
                     --css=publishing/css/paper.css \
                     --metadata=reference-section-title="References" \
                     --embed-resources --output="$dir$name.html" "$body" \
                     && echo "    $dir$name.html"
                 ;;
             docx)
-                pandoc "${common[@]}" "${cite[@]}" "${raster[@]}" --to=docx --output="$dir$name.docx" "$body" \
+                pandoc "${common[@]}" "${byline[@]}" "${cite[@]}" "${raster[@]}" --to=docx --output="$dir$name.docx" "$body" \
                     && echo "    $dir$name.docx"
                 ;;
             tex)
-                pandoc "${common[@]}" "${cite[@]}" "${vector[@]}" --to=latex \
+                pandoc "${common[@]}" "${byline[@]}" "${cite[@]}" "${vector[@]}" --to=latex \
                     --output="$dir$name.tex" "$tex_full" \
                     && echo "    $dir$name.tex"
                 ;;

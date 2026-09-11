@@ -34,6 +34,7 @@ papers/
 │   ├── from-synchronization-physics-to-trained-dynamics.md   the manuscript
 │   ├── ….html .epub .docx                                    built beside it
 │   ├── …-tmlr.pdf  …-tmlr.tex  …-arxiv.tar.gz                submission builds
+│   ├── …-preprint.pdf  …-preprint.tex                       the same paper with the author named
 │   ├── metadata/    front matter, and how to cite this paper
 │   └── references/  the works it cites
 └── 02-untrained-reservoirs/

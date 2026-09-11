@@ -11,6 +11,7 @@ author:
   - name: Eric Kryski
     affiliation: Independent researcher
     email: hello@erickryski.com
+    orcid: 0009-0005-7751-9059
 # date is filled in at build time from the manuscript's last commit
 keywords:
   - coupled oscillators

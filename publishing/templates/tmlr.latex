@@ -88,6 +88,11 @@ $-- has replaced the title block with "Anonymous authors".
 \makeatother
 
 \hypersetup{pdfauthor={}}
+$else$
+$-- The named faces write the author list into the file's metadata as well,
+$-- in the same words the title block prints; hyperref's own guess from a
+$-- structured author entry is unusable.
+\hypersetup{pdfauthor={$for(author)$$author.name$$sep$, $endfor$}}
 $endif$
 
 $-- The camera-ready running head is "Published in TMLR (month/year)" and the
