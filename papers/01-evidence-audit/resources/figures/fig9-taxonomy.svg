@@ -15,7 +15,7 @@
 <text x="430" y="117" text-anchor="start" font-size="8.6" fill="#24231F" font-weight="normal" font-style="normal">RON · Spintronic reservoir</text>
 <rect x="168" y="178" width="232" height="118" rx="4" fill="#DEDCD6" stroke="#24231F" stroke-width="1.2"/>
 <text x="182" y="199" text-anchor="start" font-size="10.4" fill="#24231F" font-weight="bold" font-style="normal">Trained, designed</text>
-<text x="182" y="212" text-anchor="start" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="italic">gradients reach the dynamics, and nothing else</text>
+<text x="182" y="212" text-anchor="start" font-size="8.2" fill="#5F5E5A" font-weight="normal" font-style="italic">gradients reach the dynamics; at most a thin readout</text>
 <line x1="182" y1="221" x2="386" y2="221" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
 <text x="182" y="238" text-anchor="start" font-size="8.6" fill="#24231F" font-weight="normal" font-style="normal">Un-0</text>
 <text x="182" y="251" text-anchor="start" font-size="8.6" fill="#24231F" font-weight="normal" font-style="normal">WONN</text>

@@ -10,9 +10,10 @@ metadata rather than a second, drifting copy of the author list.
     python3 publishing/lib/byline.py papers/<paper>/metadata/paper.yaml
 """
 
-import re
 import sys
 from pathlib import Path
 
-names = re.findall(r"^\s*-\s*name:\s*(.+?)\s*$", Path(sys.argv[1]).read_text(), re.M)
-print(" and ".join(n.strip().strip('"') for n in names))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from paper_meta import authors  # noqa: E402
+
+print(" and ".join(a["name"] for a in authors(Path(sys.argv[1]).read_text())))

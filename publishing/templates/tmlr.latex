@@ -8,7 +8,7 @@ $-- instead. The partials called below ($common.latex()$ and friends) resolve
 $-- from pandoc's own data directory, so this stays in step with the default
 $-- template rather than freezing a copy of it.
 $--
-$-- tmlr-mode selects the three faces of the same manuscript:
+$-- venue-face selects the three faces of the same manuscript:
 $--   submission  anonymous, "Under review as submission to TMLR" (the default)
 $--   preprint    de-anonymized, no mention of TMLR — for arXiv or a website
 $--   accepted    camera-ready, needs tmlr-month, tmlr-year and tmlr-openreview
@@ -25,7 +25,7 @@ $common.latex()$
 $-- tmlr.sty sets the page rectangle, the fonts, the running head and natbib's
 $-- citation style. It loads last so that nothing pandoc pulled in overrides
 $-- the geometry TMLR checks for.
-\usepackage$if(tmlr-mode)$$if(tmlr-submission)$$else$[$tmlr-mode$]$endif$$endif${tmlr}
+\usepackage$if(venue-face)$$if(venue-submission)$$else$[$venue-face$]$endif$$endif${tmlr}
 $for(header-includes)$
 $header-includes$
 $endfor$
@@ -42,7 +42,7 @@ $after-header-includes.latex()$
 % and no tables would otherwise fail on an undefined \captionsetup.
 \ifdefined\captionsetup\captionsetup{font=small}\fi
 $hypersetup.latex()$
-$if(tmlr-submission)$
+$if(venue-submission)$
 $-- Double-blind covers the file, not just the page: hyperref writes the author
 $-- into the PDF's own metadata, where `pdfinfo` finds it even though tmlr.sty
 $-- has replaced the title block with "Anonymous authors".
@@ -88,6 +88,11 @@ $-- has replaced the title block with "Anonymous authors".
 \makeatother
 
 \hypersetup{pdfauthor={}}
+$else$
+$-- The named faces write the author list into the file's metadata as well,
+$-- in the same words the title block prints; hyperref's own guess from a
+$-- structured author entry is unusable.
+\hypersetup{pdfauthor={$for(author)$$author.name$$sep$, $endfor$}}
 $endif$
 
 $-- The camera-ready running head is "Published in TMLR (month/year)" and the

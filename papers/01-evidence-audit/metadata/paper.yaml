@@ -9,8 +9,34 @@
 # copy so it renders once rather than twice.
 author:
   - name: Eric Kryski
-    affiliation: Independent researcher
+    affiliation: Independent researcher, Calgary, Alberta, Canada
+    organization: Independent researcher
+    city: Calgary
+    state: Alberta
+    country: Canada
     email: hello@erickryski.com
+    orcid: 0009-0005-7751-9059
+    credit: Conceptualization, Methodology, Investigation, Software, Data curation, Visualization, Writing – original draft, Writing – review & editing
+# the running head, where the full title would not fit
+shorttitle: A survey of oscillator networks in machine learning
+# Elsevier's highlights: three to five, at most 85 characters each including
+# spaces, written for search engines rather than as a summary, and delivered
+# as a file of their own (…-highlights.docx), never inside the manuscript
+highlights:
+  - Survey of eighteen oscillatory neural network systems for machine learning
+  - Coupled oscillator, Kuramoto and reservoir models classified by what is trained
+  - Historical survey of oscillatory dynamics: physics, neuroscience, machine learning
+  - Synchronization physics from Kuramoto to higher-order coupling, mapped to ML systems
+  - Eight research directions: common datasets, methods, controls and coupling laws
+# declarations a journal template prints as unnumbered sections directly
+# before the references; the TMLR template ignores them. The competing-interest
+# sentence is Elsevier's standard one and matches the submission form's
+# "no competing interests" confirmation; the author's research interest in the
+# subject is disclosed in Section 1.5 of the paper, where it belongs.
+competing-interests: The author declares no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+# acknowledgements: printed on the title-page file; omitted means "None."
+funding: This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
+data-availability: No new data were generated. The manuscript source, its bibliography and the tooling that builds and checks it are available at https://github.com/ekryski/oscillator-research.
 # date is filled in at build time from the manuscript's last commit
 keywords:
   - coupled oscillators

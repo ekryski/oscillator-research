@@ -130,7 +130,7 @@
 <line x1="364.5652173913044" y1="144" x2="364.5652173913044" y2="198" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
 <line x1="386.0869565217391" y1="144" x2="386.0869565217391" y2="184" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
 <line x1="522.3913043478261" y1="144" x2="522.3913043478261" y2="184" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
-<line x1="579.7826086956522" y1="144" x2="579.7826086956522" y2="184" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
+<line x1="579.7826086956522" y1="144" x2="579.7826086956522" y2="198" stroke="#C9C7C1" stroke-width="1" stroke-linecap="round"/>
 <rect x="236.6" y="184.6" width="6.8" height="6.8" fill="#24231F" stroke="#24231F" stroke-width="1.2"/>
 <rect x="247.0" y="182" width="57.26315789473685" height="12" fill="#FFFFFF"/>
 <text x="247.0" y="191.5" text-anchor="start" font-size="6.4" fill="#24231F" font-weight="normal" font-style="normal">Zhang et al. 2026</text>
@@ -152,14 +152,14 @@
 <rect x="518.9913043478261" y="184.6" width="6.8" height="6.8" fill="#24231F" stroke="#24231F" stroke-width="1.2"/>
 <rect x="444.65446224256294" y="182" width="70.73684210526316" height="12" fill="#FFFFFF"/>
 <text x="515.3913043478261" y="191.5" text-anchor="end" font-size="6.4" fill="#24231F" font-weight="normal" font-style="normal">Nagerl &amp; Berloff 2025</text>
-<rect x="576.3826086956523" y="184.6" width="6.8" height="6.8" fill="#24231F" stroke="#24231F" stroke-width="1.2"/>
-<rect x="555.9405034324943" y="182" width="16.842105263157894" height="12" fill="#FFFFFF"/>
-<text x="572.7826086956522" y="191.5" text-anchor="end" font-size="6.4" fill="#24231F" font-weight="normal" font-style="normal">AKOrN</text>
+<rect x="576.3826086956523" y="198.6" width="6.8" height="6.8" fill="#24231F" stroke="#24231F" stroke-width="1.2"/>
+<rect x="515.5194508009154" y="196" width="57.26315789473685" height="12" fill="#FFFFFF"/>
+<text x="572.7826086956522" y="205.5" text-anchor="end" font-size="6.4" fill="#24231F" font-weight="normal" font-style="normal">AKOrN · HoloGraph</text>
 <text x="40" y="18" text-anchor="start" font-size="9" fill="#5F5E5A" font-weight="bold" font-style="normal">OSCILLATOR MODELS, IN THE ORDER THEY WERE DERIVED</text>
 <text x="40" y="178" text-anchor="start" font-size="9" fill="#5F5E5A" font-weight="bold" font-style="normal">SURVEYED SYSTEMS BUILT ON THEM</text>
 <circle cx="24" cy="241" r="3.4" fill="#24231F" stroke="#24231F" stroke-width="0"/>
 <text x="34" y="244" text-anchor="start" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">a surveyed system is built on it</text>
 <circle cx="238" cy="241" r="3.4" fill="#FFFFFF" stroke="#24231F" stroke-width="1.2"/>
 <text x="248" y="244" text-anchor="start" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">no surveyed system found using it</text>
-<text x="24" y="259" text-anchor="start" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">coRNN · UnICORNN · RON · LinOSS · D-LinOSS attach to no row above: they carry no coupling term at all.</text>
+<text x="24" y="259" text-anchor="start" font-size="8" fill="#5F5E5A" font-weight="normal" font-style="normal">coRNN · UnICORNN · RON · NWM · LinOSS · D-LinOSS attach to no row: where they couple at all, it is through a weight matrix, not a phase law.</text>
 </svg>

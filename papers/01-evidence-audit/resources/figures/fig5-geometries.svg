@@ -82,7 +82,7 @@
 <circle cx="47.4" cy="70.0" r="6.4" fill="#DEDCD6" stroke="#24231F" stroke-width="1.1"/>
 <circle cx="63.5" cy="53.9" r="6.4" fill="#DEDCD6" stroke="#24231F" stroke-width="1.1"/>
 <text x="85.5" y="166" text-anchor="middle" font-size="8.4" fill="#5F5E5A" font-weight="normal" font-style="normal">every pair coupled, O(N²)</text>
-<text x="85.5" y="181" text-anchor="middle" font-size="8.4" fill="#5F5E5A" font-weight="normal" font-style="italic">Un-0 · AKOrN</text>
+<text x="85.5" y="181" text-anchor="middle" font-size="8.4" fill="#5F5E5A" font-weight="normal" font-style="italic">Un-0</text>
 <rect x="173.0" y="16" width="151.0" height="182" rx="4" fill="#FFFFFF" stroke="#C9C7C1" stroke-width="1"/>
 <text x="248.5" y="34" text-anchor="middle" font-size="9.6" fill="#24231F" font-weight="bold" font-style="normal">(b) Nonlocal ring</text>
 <line x1="248.5" y1="48.0" x2="270.5" y2="53.9" stroke="#9C9A94" stroke-width="0.7" stroke-linecap="round"/>

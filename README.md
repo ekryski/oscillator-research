@@ -8,11 +8,11 @@
 
 A coupled-oscillator network is a population of rhythmic units that pull each other toward phase agreement. Wire them onto a geometric structure with a coupling function and drive them with sound, and the field's collective state becomes a representation of that sound. The physics does the transducing, and what you read out is the network's own response to the input.
 
-The idea is old. It runs from Huygens noticing in 1665 that two pendulum clocks on one beam fall into step, through the Hopf model of the cochlea, reservoir computing, and Mead's case for letting physics do the computing directly. What is new is that three fields have arrived at the same dynamics from different directions. Physics now describes synchronization regimes that exhibit computational properties rather than mere order. Neuroscience has identified the neuron as a complex chemical and physical system with functional oscillatory properties. Machine learning has recently produced oscillator architectures that are effective at classification, image generation and path navigation, with evidence suggesting that oscillatory neural networks can be trained, learn, remember and reason.
+The idea is quite old. It runs from Huygens noticing in 1665 that two pendulum clocks on one beam fall into step, through the Hopf model of the cochlea, reservoir computing, and Mead's case for letting physics do the computing directly. What is new is that three fields have arrived at the same dynamics from different directions. Physics now describes synchronization regimes that exhibit computational properties rather than mere order. Neuroscience has identified the neuron as a complex chemical and physical system with functional oscillatory properties. Machine learning has recently produced oscillator architectures that are effective at classification, image generation and path navigation, with evidence suggesting that oscillatory neural networks can be trained, learn, remember and reason.
 
 That convergence is the motivation here. The working hypothesis is that a substrate whose native operations are resonance and entrainment more closely resembles the biological neurons that evolution refined to sense and learn from signals in the physical world, and that a trainable model built from those dynamics would make questions about learning, forgetting and rhythm disruption addressable in simulation.
 
-Speech is the natural place to press on it, because speech is oscillation at every scale: prosody near 1 Hz, syllable rhythm at 4-8 Hz, phone transitions at 10-40 Hz, pitch and formants from 100 Hz to several kHz. An oscillator field is a frequency-selective medium with intrinsic timescales, locking behaviour and spatial wave modes, which is the representational vocabulary that structure would seem to want.
+Speech is the natural place to explore this idea, because speech is oscillation at every scale: prosody near 1 Hz, syllable rhythm at 4-8 Hz, phone transitions at 10-40 Hz, pitch and formants from 100 Hz to several kHz. An oscillator field is a frequency-selective medium with intrinsic timescales, locking behaviour and spatial wave modes, which is the representational vocabulary that structure would seem to want.
 
 Whether any of that survives contact with controlled measurement is the open question, and it is the question this research addresses. The work is deliberately small-scale and control-heavy: single-variable comparisons, pre-registered decision criteria written before each run, no-dynamics floors under every accuracy, parameter-matched conventional baselines, and randomized twins for every designed structure. Negative results are reported with the same weight as positive ones.
 
@@ -22,7 +22,7 @@ Every experimental paper ships with the code and the raw per-run data that produ
 
 | # | Paper | What it does |
 |---|---|---|
-| 01 | [From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning](papers/01-evidence-audit/from-synchronization-physics-to-trained-dynamics.md) | A critical survey of oscillator networks in machine learning, tracing the idea from Huygens in 1665 to the current revival and drawing on 130 sources across physics, mathematics, neuroscience and neuromorphic computing. It sorts thirteen published systems by what is actually learned, and finds that of the fifty-five control comparisons that would isolate the physics, seven have been run. |
+| 01 | [From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning](papers/01-evidence-audit/from-synchronization-physics-to-trained-dynamics.md) | A critical survey of oscillator networks in machine learning, tracing the idea from Huygens in 1665 to the current revival and drawing on 130 sources across physics, mathematics, neuroscience and neuromorphic computing. It sorts eighteen published systems by what is actually learned, and finds that of the sixty-five control comparisons that would isolate the physics, sixteen have been run, ten of them by three systems. |
 | 02 | [Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields](papers/02-untrained-reservoirs/) | Freezes every physics parameter of a 1,024-oscillator field and measures spoken-digit recognition across 1,940 pre-registered runs. The frozen field beats all five trained conventional networks at the same ~2k parameter budget (GRU, TCN, CNN, tiny transformer, S4D-style SSM) yet clears its own no-dynamics linear floor by only about three points, and neither lattice geometry nor coupling law moves that margin by as much as a point; on a task built so that order-free readouts provably cannot answer it, the same frozen fields read temporal order at 0.97 to 1.00. |
 
 ## Layout
@@ -32,8 +32,10 @@ papers/
 ├── 01-evidence-audit/
 │   ├── README.md
 │   ├── from-synchronization-physics-to-trained-dynamics.md   the manuscript
-│   ├── ….html .epub .docx                                    built beside it
-│   ├── …-tmlr.pdf  …-tmlr.tex  …-arxiv.tar.gz                submission builds
+│   ├── ….html .epub                                          built beside it
+│   ├── ….docx  …-title-page.docx  …-highlights.docx         the Word submission files
+│   ├── …-tmlr.pdf  …-neunet.pdf  …-arxiv.tar.gz              submission builds, one per venue
+│   ├── …-preprint.pdf  …-preprint.tex                       the same paper with the author named
 │   ├── metadata/    front matter, and how to cite this paper
 │   └── references/  the works it cites
 └── 02-untrained-reservoirs/

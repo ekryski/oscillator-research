@@ -161,6 +161,9 @@
  "hizanidis2016": [
   "Hizanidis et al. 2016"
  ],
+ "ho2020": [
+  "Ho, Jain & Abbeel 2020"
+ ],
  "hochreiter1997": [
   "Hochreiter & Schmidhuber 1997"
  ],
@@ -321,6 +324,9 @@
  "pantaleone2002": [
   "Pantaleone 2002"
  ],
+ "peng2023": [
+  "Peng et al. 2023"
+ ],
  "pikovsky2001": [
   "Pikovsky et al. 2001",
   "Pikovsky, Rosenblum & Kurths (2001)"
@@ -369,6 +375,9 @@
  ],
  "skardal2019": [
   "Skardal & Arenas (2019)"
+ ],
+ "sohl-dickstein2015": [
+  "Sohl-Dickstein et al. 2015"
  ],
  "sparsity-study": [
   "sparsity study",

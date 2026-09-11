@@ -6,13 +6,13 @@ A critical survey of oscillator networks in machine learning.
 
 Coupled oscillator networks are drawing sustained attention as machine-learning substrates for the first
 time, and three literatures have converged on them: synchronization physics, neuroscience, and machine
-learning itself. This survey audits what has actually been shown. It organises thirteen load-bearing systems
-on two independent questions, whether gradients reach the oscillator dynamics and whether a conventional
+learning itself. This survey audits what has actually been shown. It organises eighteen load-bearing systems,
+in fifteen lines, on two independent questions, whether gradients reach the oscillator dynamics and whether a conventional
 encoder or decoder is trained around it, and records for each the task, the controls it ran, and how it
 stands against conventional baselines. The comparative picture is parity and niches rather than
 dominance. Five controls would separate a trained system's result from the alternative explanations
-for it; of the fifty-five applicable control comparisons they give across the surveyed systems,
-seven have been run.
+for it; of the sixty-five applicable control comparisons they give across the surveyed systems,
+sixteen have been run, ten of them by three systems.
 
 ## What is here
 
@@ -23,8 +23,12 @@ it carries weight, and uses no unpublished result of ours.
 | path | contents |
 |---|---|
 | [`from-synchronization-physics-to-trained-dynamics.md`](from-synchronization-physics-to-trained-dynamics.md) | the manuscript — the editing surface |
-| [`….html`](from-synchronization-physics-to-trained-dynamics.html) · [`.epub`](from-synchronization-physics-to-trained-dynamics.epub) · [`.docx`](from-synchronization-physics-to-trained-dynamics.docx) | the same paper for reading and sharing |
+| [`….html`](from-synchronization-physics-to-trained-dynamics.html) · [`.epub`](from-synchronization-physics-to-trained-dynamics.epub) | the same paper for reading and sharing |
+| [`….docx`](from-synchronization-physics-to-trained-dynamics.docx) | the Word manuscript in submission form: title block, keywords, appendices, then the declarations before the references |
+| [`…-title-page.docx`](from-synchronization-physics-to-trained-dynamics-title-page.docx) · [`…-highlights.docx`](from-synchronization-physics-to-trained-dynamics-highlights.docx) | the separate title page and highlights files a submission portal asks for |
 | [`…-tmlr.pdf`](from-synchronization-physics-to-trained-dynamics-tmlr.pdf) | the TMLR submission build, anonymous, in the journal's own style |
+| [`…-preprint.pdf`](from-synchronization-physics-to-trained-dynamics-preprint.pdf) | the same build with the author named and no venue mentioned, for a website, Zenodo or arXiv |
+| [`…-neunet.pdf`](from-synchronization-physics-to-trained-dynamics-neunet.pdf) | the Elsevier *Neural Networks* submission build, named, in the journal's own class, with CRediT and the declarations the journal asks for after the appendices; also the SSRN preprint |
 | [`…-arxiv.tar.gz`](from-synchronization-physics-to-trained-dynamics-arxiv.tar.gz) | LaTeX source, style files, bibliography and figures, ready to upload |
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
@@ -41,10 +45,27 @@ where the input enters. It sweeps all four over frozen oscillator fields.
 bash publishing/publish.sh 01
 ```
 
-Regenerates every format above, in place, from the Markdown. The TMLR build has
-three faces — `TMLR_MODE=submission` (anonymous, the default), `preprint`, or
-`accepted` — against the journal's own style file, vendored unmodified. See
+Regenerates every format above, in place, from the Markdown: with no flags the
+named `…-preprint.pdf` in the TMLR style, the reading formats and the arXiv
+bundle. `bash publishing/publish.sh 01 --tmlr` builds the anonymous submission
+as `…-tmlr.pdf` instead, against the journal's own style file, vendored
+unmodified; `--tmlr --accepted` is the camera-ready face; `--neunet` builds
+the Elsevier *Neural Networks* submission as `…-neunet.pdf`; and `--<venue>`
+picks any other template under `publishing/templates/`. Each face has its own
+file name, so building one never overwrites another. See
 [publishing/README.md](../../publishing/README.md).
+
+To deposit the preprint on Zenodo and reserve a DOI, with the record's metadata
+taken from `metadata/paper.yaml` and the manuscript itself:
+
+```bash
+export ZENODO_TOKEN=...   # a personal access token with the deposit:write scope
+python3 publishing/lib/zenodo_deposit.py papers/01-evidence-audit --dry-run   # inspect
+python3 publishing/lib/zenodo_deposit.py papers/01-evidence-audit             # private draft
+```
+
+The draft is published from the Zenodo page, deliberately by hand, because a
+published record cannot be deleted.
 
 <!-- citation:start -->
 ## Citing this paper

@@ -1,0 +1,142 @@
+$-- Pandoc template producing a manuscript in Elsevier's CAS single-column
+$-- class, the format Neural Networks (and the other CAS-workflow Elsevier
+$-- journals) accept at submission.
+$--
+$-- The class files in templates/neunet/ are vendored unmodified from
+$-- Elsevier's els-cas-templates bundle (cas-sc.cls, cas-common.sty,
+$-- cas-model2-names.bst); every adjustment lives here. The partials called
+$-- below ($common.latex()$ and friends) resolve from pandoc's own data
+$-- directory, so the LaTeX pandoc emits (longtable, \tightlist,
+$-- \pandocbounded, natbib) always has what it needs.
+$--
+$-- Faces. Neural Networks is single-anonymized, so every face carries the
+$-- author: `submission` and `preprint` render the same title block, and
+$-- venue-submission is deliberately not mapped to the class's `doubleblind`
+$-- option. A double-anonymized Elsevier journal would add that option under
+$-- $if(venue-submission)$ in the \documentclass line.
+$--
+$-- Front matter the class prints and where it comes from (metadata/paper.yaml):
+$--   author: name, email, orcid, credit, and organization/city/state/country
+$--   shorttitle (the running head the class prints on every page), keywords
+$--   competing-interests, funding, data-availability: unnumbered sections
+$--   printed after the appendices, directly before the references.
+$-- The generative-AI declaration is part of the manuscript itself, as the
+$-- journal requires, and closes its appendix chunk. templates/neunet.yaml
+$-- carries the pandoc-level knobs (indent, natbiboptions) this template
+$-- relies on. The running foot, "Preprint submitted to Elsevier", is the
+$-- class's own wording for any unaccepted manuscript and is not configurable.
+$--
+$-- The affiliation index is fixed at 1: one affiliation shared by every
+$-- author. A multi-affiliation paper edits this block.
+$document-metadata.latex()$
+$passoptions.latex()$
+\documentclass[a4paper,fleqn]{cas-sc}
+$-- Section numbering is the class's own; pandoc's is off, and preprocess.py
+$-- strips the numbers the Markdown headings carry.
+\setcounter{secnumdepth}{$if(secnumdepth)$$secnumdepth$$else$3$endif$}
+$-- fonts.latex() is deliberately not called: it would load lmodern over the
+$-- Charis and STIX faces the class selects.
+$common.latex()$
+$for(header-includes)$
+$header-includes$
+$endfor$
+% Table rows in a survey carry paragraphs, not single words, and pandoc's
+% longtables set them solid. Both knobs are needed: \arraystretch scales the
+% row strut, \extrarowheight lifts the text off the rule above it.
+\renewcommand{\arraystretch}{1.35}
+\setlength{\extrarowheight}{3pt}
+$after-header-includes.latex()$
+\ifdefined\captionsetup\captionsetup{font=small}\fi
+$-- pandoc's hypersetup partial is not used: it would add `hidelinks` and
+$-- undo the coloured links the class sets up.
+\hypersetup{
+  pdftitle={$title-meta$},
+  pdfauthor={$for(author)$$author.name$$sep$, $endfor$},
+$if(lang)$
+  pdflang={$lang$},
+$endif$
+$if(keywords)$
+  pdfkeywords={$for(keywords)$$keywords$$sep$, $endfor$},
+$endif$
+  pdfcreator={LaTeX via pandoc}}
+
+\begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+
+\shorttitle{$if(shorttitle)$$shorttitle$$else$$title$$endif$}
+\shortauthors{$for(author)$$author.name$$sep$, $endfor$}
+\title[mode=title]{$title$}
+
+$for(author)$
+\author[1]{$author.name$}$if(author.orcid)$[orcid=$author.orcid$]$endif$
+\cormark[1]
+$if(author.email)$
+\ead{$author.email$}
+$endif$
+$if(author.credit)$
+\credit{$author.credit$}
+$endif$
+$endfor$
+$for(author/first)$
+\affiliation[1]{organization={$if(author.organization)$$author.organization$$else$$author.affiliation$$endif$}$if(author.city)$,
+            city={$author.city$}$endif$$if(author.state)$,
+            state={$author.state$}$endif$$if(author.country)$,
+            country={$author.country$}$endif$}
+$endfor$
+\cortext[1]{Corresponding author}
+
+$if(abstract)$
+\begin{abstract}
+$abstract$
+\end{abstract}
+$endif$
+
+$-- The highlights are not printed: the journal wants them as a separate file,
+$-- which the docx build writes from the same paper.yaml.
+
+$if(keywords)$
+\begin{keywords}
+$for(keywords)$$keywords$$sep$ \sep $endfor$
+\end{keywords}
+$endif$
+
+\maketitle
+
+$for(include-before)$
+$include-before$
+
+$endfor$
+$body$
+
+$-- Elsevier's end matter: the appendices, then the declarations directly
+$-- before the reference list. The appendix arrives through include-after and
+$-- ends with the generative-AI declaration, which the manuscript keeps after
+$-- its appendices; the other declarations are printed here from paper.yaml.
+$for(include-after)$
+$include-after$
+
+$endfor$
+\printcredits
+$if(competing-interests)$
+\section*{Declaration of competing interest}
+$competing-interests$
+$endif$
+$if(funding)$
+\section*{Funding}
+$funding$
+$endif$
+$if(data-availability)$
+\section*{Data availability}
+$data-availability$
+$endif$
+
+$if(nocite-ids)$
+\nocite{$for(nocite-ids)$$it$$sep$, $endfor$}
+$endif$
+$-- \bibliographystyle comes from pandoc's own partial via biblio-style, which
+$-- publish.sh sets to the .bst it finds in the venue folder. BibTeX takes the
+$-- first \bibliographystyle it sees, so the template must not add another.
+\bibliography{references}
+\end{document}
