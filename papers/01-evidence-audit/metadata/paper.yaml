@@ -18,16 +18,16 @@ author:
     orcid: 0009-0005-7751-9059
     credit: Conceptualization, Methodology, Investigation, Software, Data curation, Visualization, Writing – original draft, Writing – review & editing
 # the running head, where the full title would not fit
-shorttitle: Oscillator networks in machine learning
+shorttitle: A survey of oscillator networks in machine learning
 # Elsevier's highlights: three to five, at most 85 characters each including
 # spaces, written for search engines rather than as a summary, and delivered
 # as a file of their own (…-highlights.docx), never inside the manuscript
 highlights:
   - Survey of eighteen oscillatory neural network systems for machine learning
   - Coupled oscillator, Kuramoto and reservoir models classified by what is trained
-  - Sixteen of sixty-five control comparisons run; the coupling term ablated three times
+  - Historical survey of oscillatory dynamics: physics, neuroscience, machine learning
   - Synchronization physics from Kuramoto to higher-order coupling, mapped to ML systems
-  - Eight research directions, a shared benchmark, a control standard, new coupling laws
+  - Eight research directions: common datasets, methods, controls and coupling laws
 # declarations a journal template prints as unnumbered sections directly
 # before the references; the TMLR template ignores them. The competing-interest
 # sentence is Elsevier's standard one and matches the submission form's
