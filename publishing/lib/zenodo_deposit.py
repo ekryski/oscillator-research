@@ -163,7 +163,7 @@ def main() -> None:
         print(f"\nwould upload {pdf} ({'exists' if pdf.exists() else 'MISSING'})")
         return
     if not pdf.exists():
-        sys.exit(f"no PDF at {pdf}; build it with TMLR_MODE=preprint bash publishing/publish.sh")
+        sys.exit(f"no PDF at {pdf}; build it with: bash publishing/publish.sh {a.paper_dir.name}")
 
     instance = "sandbox" if a.sandbox else "production"
     token = os.environ.get(TOKEN_VARS[instance], "")

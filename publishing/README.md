@@ -13,69 +13,125 @@ next to the source rather than a build instruction.
 ## Build
 
 ```bash
-bash publishing/publish.sh              # every paper, every format
-bash publishing/publish.sh 02           # one paper
-FORMATS="tmlr pdf" bash publishing/publish.sh   # `pdf` and `tex` are off by default: they duplicate the tmlr build
+bash publishing/publish.sh                 # every paper: named, TMLR style, no venue mentioned
+bash publishing/publish.sh 02              # one paper, matched on its folder prefix
+bash publishing/publish.sh 01 --tmlr       # the anonymous TMLR submission
+bash publishing/publish.sh 01 --tmlr --accepted   # TMLR camera-ready
+bash publishing/publish.sh 01 --tmlr --dry-run    # say what would be written, build nothing
+FORMATS="venue pdf" bash publishing/publish.sh 01 # `pdf` and `tex` are off by default: they duplicate the venue build
 ```
 
 | format | for |
 |---|---|
-| `-tmlr.pdf` / `-tmlr.tex` | TMLR submission, via the journal's own style file |
-| `-preprint.pdf` / `-preprint.tex` | the preprint face of the same build (`TMLR_MODE=preprint`): author named, no venue mentioned |
-| `-arxiv.tar.gz` | arXiv upload: `.tex` + style + `references.bib` + figures |
+| `-<venue>.pdf` / `.tex` | the submission to that venue, in its own style file — `-tmlr.pdf` for TMLR |
+| `-preprint.pdf` / `.tex` | the named face of the same build: author on the title page and in the PDF metadata, no venue mentioned |
+| `-<venue>-accepted.pdf` / `.tex` | camera-ready for that venue |
+| `-arxiv.tar.gz` | arXiv upload: `.tex` + style + `references.bib` + figures, always the preprint face in the TMLR style |
 | `.epub` | e-readers |
 | `.html` | a single self-contained file, images embedded and styled |
 | `.docx` | venues that ask for Word |
-| `.pdf` | reading and desk review — **off by default**, duplicates `-tmlr.pdf` |
-| `.tex` | plain LaTeX source — **off by default**, duplicates `-tmlr.tex` |
+| `.pdf` | a plain article-class PDF for reading and desk review — **off by default** |
+| `.tex` | plain LaTeX source — **off by default** |
 
 Requires [pandoc](https://pandoc.org) and a TeX engine — BasicTeX is enough, and
 its default packages cover everything the build needs. TeX binaries install to
-`/Library/TeX/texbin`, which is not always on a non-interactive shell's PATH:
+`/Library/TeX/texbin`, or under `/usr/local/texlive/<year>/bin/<platform>`,
+neither of which is always on a non-interactive shell's PATH; without an engine
+the build skips the venue PDF and says so:
 
 ```bash
 export PATH="/Library/TeX/texbin:$PATH"
 ```
 
-## The TMLR build
+## Venues and faces
 
-[TMLR](https://jmlr.org/tmlr/) requires its own LaTeX style file, and states
-that tweaking it may be grounds for rejection. `templates/tmlr/` therefore holds
-the official files **unmodified**, vendored from
-[JmlrOrg/tmlr-style-file](https://github.com/JmlrOrg/tmlr-style-file); every
-adjustment lives in `templates/tmlr.latex`, the pandoc template that uses them.
+Two flags decide the LaTeX build, and together they read as the decision they
+record.
 
-One manuscript, three faces, selected by `TMLR_MODE`:
+**The venue flag** says which style file to format for. `--tmlr` uses
+[TMLR](https://jmlr.org/tmlr/)'s; `--<name>` uses any other venue that has been
+added as `templates/<name>.latex` with its style files in `templates/<name>/`
+(see below). Naming a venue means formatting *for* it, so the face defaults to
+that venue's submission form. With no venue flag the TMLR style is used anyway,
+because it is vendored, it builds, and its author-year citation format is the
+one these manuscripts are written in.
 
-```bash
-TMLR_MODE=submission bash publishing/publish.sh 01   # anonymous (the default)
-TMLR_MODE=preprint   bash publishing/publish.sh 01   # for arXiv or a website
-TMLR_MODE=accepted   bash publishing/publish.sh 01   # camera-ready
-```
+**The face flag** says who the document is for:
 
-- **submission** — the author block is replaced with "Anonymous authors", and
-  the running head reads "Under review as submission to TMLR". TMLR rejects
-  non-anonymous submissions without review, so the build also blanks the PDF's
-  own `pdfauthor` metadata: double-blind covers the file, not just the page.
-  Neither manuscript names its author or links to a personal repository, so the
-  anonymous build is genuinely anonymous — confirm with
+- `--submission` (also `--anonymous`) — the venue's review copy. For TMLR the
+  author block is replaced with "Anonymous authors", the running head reads
+  "Under review as submission to TMLR", and the build blanks the PDF's own
+  `pdfauthor` metadata, because double-blind covers the file and not just the
+  page. Neither manuscript names its author or links to a personal repository,
+  so the anonymous build is genuinely anonymous — confirm with
   `pdftotext … - | grep -i <surname>` before uploading.
-- **preprint** — de-anonymized, with every mention of TMLR removed. This is the
-  face the arXiv bundle uses.
-- **accepted** — camera-ready. Set `tmlr-month`, `tmlr-year` and
+- `--preprint` — the author named on the title page and in the PDF metadata,
+  and no venue mentioned anywhere. This is the face for a website, Zenodo or
+  arXiv, and **it is the default when no flag is given**: ordinary,
+  non-anonymous publishing in the house style.
+- `--accepted` — camera-ready. For TMLR, set `tmlr-month`, `tmlr-year` and
   `tmlr-openreview` in the paper's `metadata/paper.yaml` first; without them the
   header renders the template's `MM/YYYY` placeholders.
+
+Each combination writes its own file, so building one face never overwrites
+another:
+
+| command | face | writes |
+|---|---|---|
+| `publish.sh 01` | preprint (named) | `…-preprint.pdf`, `…-preprint.tex` |
+| `publish.sh 01 --preprint` | the same, spelled out | `…-preprint.pdf` |
+| `publish.sh 01 --tmlr` | TMLR submission (anonymous) | `…-tmlr.pdf`, `…-tmlr.tex` |
+| `publish.sh 01 --tmlr --preprint` | named, TMLR style | `…-preprint.pdf` |
+| `publish.sh 01 --tmlr --accepted` | TMLR camera-ready | `…-tmlr-accepted.pdf` |
+| `publish.sh 01 --neunet` | that venue's submission | `…-neunet.pdf` |
+
+The venue flag only changes the LaTeX build. The reading formats (`epub`,
+`html`, `docx`, `pdf`) always carry the author, and the arXiv bundle is always
+the preprint face in the TMLR style, whichever venue the PDF was built for.
+`--dry-run` prints the resolved venue, face, formats and output paths and exits
+before pandoc is needed, which is also how `tests/test_publish_cli.py` checks
+the resolution.
 
 TMLR reviews papers whose main body runs past 12 pages on a longer timescale, so
 the build reports the page count of each PDF it produces.
 
-### Why the TMLR PDF is built with pdflatex
+### The TMLR style
+
+TMLR requires its own LaTeX style file, and states that tweaking it may be
+grounds for rejection. `templates/tmlr/` therefore holds the official files
+**unmodified**, vendored from
+[JmlrOrg/tmlr-style-file](https://github.com/JmlrOrg/tmlr-style-file); every
+adjustment lives in `templates/tmlr.latex`, the pandoc template that uses them.
+The template selects the face from two metadata fields the build sets,
+`venue-face` (`submission`, `preprint` or `accepted`) and `venue-submission`
+(true only for the anonymous face), which is what any other venue's template is
+expected to read as well.
+
+### Adding a venue
+
+1. Put the venue's official style files, unmodified, in `templates/<name>/`:
+   every `.sty`, `.cls`, `.bst` and helper `.tex` it ships. The build stages
+   all of them beside the generated `.tex` and passes the `.bst` it finds there
+   to natbib as the bibliography style.
+2. Write `templates/<name>.latex`, a pandoc template that loads that style and
+   reads `venue-face` / `venue-submission` to choose between the anonymous,
+   named and camera-ready title blocks. `templates/tmlr.latex` is the worked
+   example, including the appendix injection after the references and the
+   `pdfauthor` handling for each face.
+3. Build with `bash publishing/publish.sh <paper> --<name>`; the PDF lands as
+   `…-<name>.pdf`. Run `--dry-run` first to see the resolution.
+
+If the venue wants numeric citations, see "A different citation style" below;
+the venue build cites through natbib and the venue's `.bst`, not through `CSL`.
+
+### Why the venue PDF is built with pdflatex
 
 Every other format uses `xelatex`. `tmlr.sty` sets up `lmodern` with `T1`
 encoding and Computer Modern math, which is the pdflatex-native combination;
 under xelatex the fonts are re-resolved through `fontspec` and the Greek in the
-equations drops out of the PDF **without an error**. The build picks `pdflatex`
-for this one format and fails if any character goes missing.
+equations drops out of the PDF **without an error**. Venue style files are
+generally written for pdflatex, so the build picks it for this one format and
+fails if any character goes missing.
 
 ## Figures
 
@@ -456,10 +512,11 @@ Each paper owns the rest:
 
 ```
 papers/<paper>/
-├── <title>-DRAFT.md        the manuscript — the editing surface
-├── <title>-DRAFT-tmlr.pdf  the submission, and -tmlr.tex beside it
-├── <title>-DRAFT.epub …    epub, html and docx for reading and sharing
-├── <title>-DRAFT-arxiv.tar.gz   the posting bundle
+├── <title>.md              the manuscript — the editing surface
+├── <title>-preprint.pdf    the named face, and -preprint.tex beside it
+├── <title>-tmlr.pdf        the anonymous TMLR submission, and -tmlr.tex beside it
+├── <title>.epub …          epub, html and docx for reading and sharing
+├── <title>-arxiv.tar.gz    the posting bundle
 ├── metadata/
 │   ├── paper.yaml          title, authors, abstract, keywords
 │   └── citation.{bib,ris,txt,md}   how to cite this paper

@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 # Build the readable and submittable formats of each manuscript.
 #
-#     bash publishing/publish.sh              # every paper, every format
-#     bash publishing/publish.sh 02           # one paper (match on folder prefix)
-#     FORMATS="tmlr pdf" bash publishing/publish.sh
-#     TMLR_MODE=preprint bash publishing/publish.sh 01
+#     bash publishing/publish.sh                    # every paper: named, TMLR style, no venue named
+#     bash publishing/publish.sh 02                 # one paper (match on folder prefix)
+#     bash publishing/publish.sh 01 --tmlr          # the anonymous TMLR submission
+#     bash publishing/publish.sh 01 --tmlr --accepted   # TMLR camera-ready
+#     bash publishing/publish.sh 01 --preprint      # the default, spelled out
+#     bash publishing/publish.sh 01 --neunet        # any venue with templates/neunet.latex
+#     bash publishing/publish.sh 01 --tmlr --dry-run    # say what would be built, build nothing
+#     FORMATS="venue pdf" bash publishing/publish.sh 01
 #
 # The manuscripts stay plain readable Markdown. Everything a venue wants — a
 # title block, an abstract, real citations, a generated bibliography, a
@@ -13,6 +17,20 @@
 # Markdown, so a reader lands on the folder and finds the PDF next to the
 # source rather than in a build directory.
 #
+# Two flags decide the LaTeX build, and they are the decision as a reader of
+# the command would state it:
+#
+#   venue   --tmlr, or --<name> for any templates/<name>.latex with its style
+#           files in templates/<name>/. Naming a venue means formatting for it,
+#           so the face defaults to that venue's submission form. With no venue
+#           flag the TMLR style is used, because it is known to build and its
+#           citation format is the house preference.
+#   face    --submission (anonymous, the venue's running head; also --anonymous),
+#           --preprint (author named, no venue mentioned), or --accepted
+#           (camera-ready; TMLR needs tmlr-month / tmlr-year / tmlr-openreview
+#           in the paper's metadata). With no face flag and no venue flag the
+#           face is preprint: ordinary non-anonymous publishing.
+#
 # Pipeline per paper:
 #   1. refresh the .bib from the manuscript's own citations (new keys appended,
 #      hand-completed entries preserved)
@@ -20,11 +38,11 @@
 #   3. run pandoc once per output format
 #   4. report which bibliography entries are still incomplete
 #
-# Formats:
-#   tmlr   TMLR-conforming PDF + LaTeX, via the vendored official style file.
-#          TMLR_MODE picks the face: submission (anonymous, the default),
-#          preprint (de-anonymized, no mention of TMLR), accepted (camera-ready,
-#          needs tmlr-month / tmlr-year / tmlr-openreview in metadata).
+# Formats (FORMATS, space separated):
+#   venue  the LaTeX PDF and .tex for the chosen venue and face, named
+#          -<venue> for a submission, -preprint for the preprint face, and
+#          -<venue>-accepted for camera-ready, so no face overwrites another.
+#          `tmlr` is accepted as the old name for this format.
 #   pdf epub html docx   general reading formats, citeproc-rendered
 #   tex arxiv            LaTeX source, and a self-contained arXiv upload bundle
 #
@@ -37,10 +55,52 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 WORK="publishing/.work"
 TEMPLATES="publishing/templates"
-# tmlr is the submission; epub/html/docx are for reading and sharing; arxiv is the
-# posting bundle. The plain `pdf` and `tex` formats are dropped from the default
-# because they duplicate the tmlr ones — pass them explicitly if you want them.
-FORMATS="${FORMATS:-tmlr epub html docx arxiv}"
+#: the style every build falls back to, and the one the arXiv bundle always
+#: uses: it is vendored, it builds, and its citation format is the preferred one
+HOUSE_VENUE="tmlr"
+
+usage() {
+    sed -n '2,/^set -uo/p' "${BASH_SOURCE[0]}" | sed '$d' | sed 's/^# \{0,1\}//'
+}
+
+# --- what to build ----------------------------------------------------------
+VENUE="$HOUSE_VENUE"
+FACE=""
+FILTER=""
+DRY_RUN=0
+venue_named=0
+for arg in "$@"; do
+    case "$arg" in
+        -h|--help) usage; exit 0 ;;
+        --dry-run) DRY_RUN=1 ;;
+        --preprint|--accepted|--submission) FACE="${arg#--}" ;;
+        --anonymous) FACE="submission" ;;
+        --*) VENUE="${arg#--}"; venue_named=1 ;;
+        *) FILTER="$arg" ;;
+    esac
+done
+# naming a venue means formatting for it; naming none means publishing as yourself
+if [ -z "$FACE" ]; then
+    [ "$venue_named" = 1 ] && FACE="submission" || FACE="preprint"
+fi
+[ -f "$TEMPLATES/$VENUE.latex" ] || {
+    echo "no venue template: $TEMPLATES/$VENUE.latex (add one, with its style files in $TEMPLATES/$VENUE/)" >&2
+    exit 1
+}
+# the output name says which face it is, so building one never overwrites another
+case "$FACE" in
+    submission) SUFFIX="$VENUE" ;;
+    preprint)   SUFFIX="preprint" ;;
+    accepted)   SUFFIX="$VENUE-accepted" ;;
+esac
+# the venue's own BibTeX style, by name, for the natbib builds
+VENUE_BST="$(ls "$TEMPLATES/$VENUE"/*.bst 2>/dev/null | head -1)"
+BIBLIO_STYLE="$(basename "${VENUE_BST:-plainnat.bst}" .bst)"
+
+# the venue build is the submission; epub/html/docx are for reading and sharing;
+# arxiv is the posting bundle. The plain `pdf` and `tex` formats are dropped from
+# the default because they duplicate the venue ones — pass them explicitly.
+FORMATS="${FORMATS:-venue epub html docx arxiv}"
 # Citation style for the reading formats. The default is author-year because the
 # manuscripts are written that way ("Fries (2015) develops that observation"):
 # under a numeric style citeproc replaces the name with a bracketed number, the
@@ -50,8 +110,38 @@ FORMATS="${FORMATS:-tmlr epub html docx arxiv}"
 # author-year phrasing and numeric citations are not interchangeable.
 CSL="${CSL:-apa}"
 [ -f "publishing/csl/$CSL.csl" ] || { echo "no such style: publishing/csl/$CSL.csl" >&2; exit 1; }
-TMLR_MODE="${TMLR_MODE:-submission}"
-FILTER="${1:-}"
+
+# the manuscript is the paper's only Markdown file that is not its README.
+# `-DRAFT` was once required in the name and is now merely tolerated, so a
+# paper can drop it once the draft is out the door.
+manuscript_in() {
+    local found
+    found="$(ls "$1"*-DRAFT.md 2>/dev/null | head -1)"
+    [ -z "$found" ] && found="$(ls "$1"*.md 2>/dev/null | grep -v '/README\.md$' | head -1)"
+    echo "$found"
+}
+
+if [ "$DRY_RUN" = 1 ]; then
+    echo "venue: $VENUE"
+    echo "face: $FACE"
+    echo "formats: $FORMATS"
+    for dir in papers/*/; do
+        slug="$(basename "$dir")"
+        [ -n "$FILTER" ] && [[ "$slug" != "$FILTER"* ]] && continue
+        manuscript="$(manuscript_in "$dir")"
+        [ -z "$manuscript" ] && continue
+        name="$(basename "$manuscript" .md)"
+        for fmt in $FORMATS; do
+            case "$fmt" in
+                venue|tmlr) echo "would write $dir$name-$SUFFIX.pdf and .tex" ;;
+                arxiv) echo "would write $dir$name-arxiv.tar.gz (preprint face, $HOUSE_VENUE style)" ;;
+                pdf|epub|html|docx|tex) echo "would write $dir$name.$fmt" ;;
+                *) echo "unknown format '$fmt'" ;;
+            esac
+        done
+    done
+    exit 0
+fi
 
 command -v pandoc >/dev/null || {
     echo "pandoc is required: brew install pandoc" >&2; exit 1
@@ -63,10 +153,10 @@ PDF_ENGINE=""
 for e in xelatex lualatex pdflatex tectonic; do
     command -v "$e" >/dev/null && { PDF_ENGINE="$e"; break; }
 done
-# tmlr.sty sets up lmodern with T1 and Computer Modern math, which is the
-# pdflatex-native combination; under xelatex the fonts are re-resolved through
+# Venue style files are written for pdflatex: tmlr.sty sets up lmodern with T1
+# and Computer Modern math, and under xelatex the fonts are re-resolved through
 # fontspec and the Greek in the equations drops out of the PDF silently.
-TMLR_ENGINE="$(command -v pdflatex >/dev/null && echo pdflatex || echo "$PDF_ENGINE")"
+VENUE_ENGINE="$(command -v pdflatex >/dev/null && echo pdflatex || echo "$PDF_ENGINE")"
 PDF_VIA_HTML=0
 if [ -z "$PDF_ENGINE" ] && command -v weasyprint >/dev/null; then
     PDF_ENGINE="weasyprint"
@@ -83,16 +173,27 @@ check_glyphs() {
     return 1
 }
 
+# Everything a venue's LaTeX build needs beside the .tex: its style files, its
+# BibTeX style, any helper .tex, the BibTeX-compatible bibliography, and the
+# vector figures.
+stage_venue() {  # stage_venue <dir> <paper dir> <bib> <venue>
+    local out="$1" dir="$2" bib="$3" venue="$4"
+    rm -rf "$out"; mkdir -p "$out"
+    find "$TEMPLATES/$venue" -maxdepth 1 \( -name '*.sty' -o -name '*.bst' -o -name '*.tex' -o -name '*.cls' \) \
+        -exec cp {} "$out/" \;
+    python3 publishing/lib/bibtex_compat.py "$bib" --out "$out/references.bib"
+    if [ -d "$dir/resources/figures" ]; then
+        mkdir -p "$out/resources/figures"
+        cp "$dir"/resources/figures/*.pdf "$out/resources/figures/" 2>/dev/null
+    fi
+}
+
 built=0
 missing=0
 for dir in papers/*/; do
     slug="$(basename "$dir")"
     [ -n "$FILTER" ] && [[ "$slug" != "$FILTER"* ]] && continue
-    # the manuscript is the paper's only Markdown file that is not its README.
-    # `-DRAFT` was once required in the name and is now merely tolerated, so a
-    # paper can drop it once the draft is out the door.
-    manuscript="$(ls "$dir"*-DRAFT.md 2>/dev/null | head -1)"
-    [ -z "$manuscript" ] && manuscript="$(ls "$dir"*.md 2>/dev/null | grep -v '/README\.md$' | head -1)"
+    manuscript="$(manuscript_in "$dir")"
     [ -z "$manuscript" ] && { echo "skip $slug: no manuscript Markdown file"; continue; }
 
     bib="$dir/references/bibliography.bib"
@@ -104,7 +205,7 @@ for dir in papers/*/; do
     mkdir -p "$WORK"
 
     echo
-    echo "=== $slug"
+    echo "=== $slug ($VENUE, $FACE)"
     echo "--- refreshing the bibliography"
     inherit=""
     [ "$slug" != "01-evidence-audit" ] && [ -f papers/01-evidence-audit/references/bibliography.bib ] \
@@ -122,8 +223,9 @@ for dir in papers/*/; do
     # they are mapped to math rather than left to vanish
     # Two LaTeX copies. The reading formats take the whole document, appendix
     # and all, because a reader scrolling to the end expects to find it there.
-    # TMLR and arXiv take a split copy, because TMLR places the appendix after
-    # the references and excludes it from the length that risks a longer review.
+    # The venue and arXiv builds take a split copy, because TMLR places the
+    # appendix after the references and excludes it from the length that risks
+    # a longer review.
     tex_full="$WORK/$slug.tex.md"
     tex_body="$WORK/$slug.tex.split.md"
     tex_appx="$WORK/$slug.tex.appendix.md"
@@ -158,16 +260,16 @@ for dir in papers/*/; do
     # number off from the title by a fixed gap that a plain space in the heading
     # text does not reproduce. preprocess.py takes the numbers back off on that
     # path, so the template's secnumdepth is left alone and puts them back.
-    # The reading formats also need a plain author string, because pandoc's stock
-    # template renders our structured author as "true".
     # The manuscript's top level is `##`, because the title and abstract come
     # from metadata rather than being restated in the prose. Without the shift
     # pandoc maps `##` to a subsection and the headings come out a level too deep.
     common+=(--shift-heading-level-by=-1)
-    # a -V variable shadows metadata of the same name inside a template, so the
-    # display string goes only to the formats rendered by pandoc's own
-    # templates. The TMLR template reads the structured list and prints
-    # \name/\email/\addr from it; handed the string instead, it printed nothing.
+    # The reading formats need a plain author string, because pandoc's stock
+    # template renders our structured author as "true". A -V variable shadows
+    # metadata of the same name inside a template, so the string goes only to
+    # the formats rendered by pandoc's own templates: the venue template reads
+    # the structured list and prints \name/\email/\addr from it, and handed the
+    # string instead it printed nothing.
     byline=(--variable=author="$(python3 publishing/lib/byline.py "$meta")")
     # TMLR places the appendix after the references, and its author guide
     # excludes appendices from the length that risks a longer review. The LaTeX
@@ -185,61 +287,52 @@ for dir in papers/*/; do
     fi
 
     # citeproc renders the bibliography itself for the reading formats; the
-    # TMLR path instead hands the .bib to BibTeX so the journal's own .bst runs
-    # Numeric [1] citations for the reading formats. The TMLR path does NOT use
-    # this: its stylefile mandates natbib author-year — "citations within the
+    # venue path instead hands the .bib to BibTeX so the venue's own .bst runs.
+    # Numeric [1] citations for the reading formats. The venue path does NOT use
+    # this: TMLR's stylefile mandates natbib author-year — "citations within the
     # text should ... include the authors' last names and year" — so the two
     # builds cite differently on purpose.
     cite=(--citeproc --bibliography="$bib" --csl="publishing/csl/$CSL.csl")
 
     for fmt in $FORMATS; do
         case "$fmt" in
-            tmlr)
+            venue|tmlr)
                 if [ -z "$PDF_ENGINE" ] || [ "$PDF_VIA_HTML" = 1 ]; then
-                    echo "    (tmlr needs a TeX engine: install BasicTeX or MacTeX)"
+                    echo "    (the $VENUE build needs a TeX engine: install BasicTeX or MacTeX)"
                     continue
                 fi
-                out="$WORK/tmlr-$slug"
-                rm -rf "$out"; mkdir -p "$out"
-                cp "$TEMPLATES"/tmlr/*.sty "$TEMPLATES"/tmlr/math_commands.tex "$out/"
-                cp "$TEMPLATES"/tmlr/tmlr.bst "$out/"
-                python3 publishing/lib/bibtex_compat.py "$bib" --out "$out/references.bib"
-                if [ -d "$dir/resources/figures" ]; then
-                    mkdir -p "$out/resources/figures"
-                    cp "$dir"/resources/figures/*.pdf "$out/resources/figures/" 2>/dev/null
-                fi
+                out="$WORK/$VENUE-$slug"
+                stage_venue "$out" "$dir" "$bib" "$VENUE"
                 # --natbib leaves the citations as \citep/\citet for BibTeX,
-                # which is what tmlr.bst and TMLR's instructions expect
+                # which is what the venue's .bst and its instructions expect.
+                # venue-face and venue-submission are what the template reads
+                # to pick the title block and running head.
                 pandoc "${common[@]}" "${vector[@]}" --to=latex --natbib \
-                    --template="$TEMPLATES/tmlr.latex" \
-                    --metadata=tmlr-mode="$TMLR_MODE" \
-                    --metadata=tmlr-submission="$([ "$TMLR_MODE" = submission ] && echo true)" \
-                    --metadata=biblio-style=tmlr ${appendix_arg[@]+"${appendix_arg[@]}"} \
+                    --template="$TEMPLATES/$VENUE.latex" \
+                    --metadata=venue-face="$FACE" \
+                    --metadata=venue-submission="$([ "$FACE" = submission ] && echo true)" \
+                    --metadata=biblio-style="$BIBLIO_STYLE" ${appendix_arg[@]+"${appendix_arg[@]}"} \
                     --output="$out/$name.tex" "$tex_body" || continue
-                log="$WORK/$slug.tmlr.log"
-                final="$WORK/$slug.tmlr.final.log"
+                log="$WORK/$slug.$VENUE.log"
+                final="$WORK/$slug.$VENUE.final.log"
                 # BibTeX needs the full latex/bibtex/latex/latex cycle to
                 # resolve \citep keys and settle the cross-references. The
                 # first pass has no .bbl yet, so its "undefined citation"
                 # warnings are expected — only the final pass is diagnostic,
                 # and it gets its own log.
                 (cd "$out" \
-                    && "$TMLR_ENGINE" -interaction=nonstopmode "$name.tex" \
+                    && "$VENUE_ENGINE" -interaction=nonstopmode "$name.tex" \
                     && bibtex "$name" \
-                    && "$TMLR_ENGINE" -interaction=nonstopmode "$name.tex") >"$log" 2>&1
-                (cd "$out" && "$TMLR_ENGINE" -interaction=nonstopmode "$name.tex") >"$final" 2>&1
+                    && "$VENUE_ENGINE" -interaction=nonstopmode "$name.tex") >"$log" 2>&1
+                (cd "$out" && "$VENUE_ENGINE" -interaction=nonstopmode "$name.tex") >"$final" 2>&1
                 if [ -f "$out/$name.pdf" ]; then
-                    # the anonymous submission keeps the -tmlr name; the
-                    # de-anonymized preprint face gets its own, so building one
-                    # never overwrites the other
-                    face="tmlr"; [ "$TMLR_MODE" = preprint ] && face="preprint"
-                    cp "$out/$name.pdf" "$dir$name-$face.pdf"
-                    cp "$out/$name.tex" "$dir$name-$face.tex"
+                    cp "$out/$name.pdf" "$dir$name-$SUFFIX.pdf"
+                    cp "$out/$name.tex" "$dir$name-$SUFFIX.tex"
                     # the TeX log hard-wraps at 79 columns, and will happily
                     # split "(14 pages" across two lines
                     pages="$(tr -d '\n' <"$final" | grep -oE "Output written[^)]*" \
                              | grep -oE "[0-9]+ pages" | tail -1)"
-                    echo "    $dir$name-$face.pdf ($TMLR_MODE${pages:+, $pages})"
+                    echo "    $dir$name-$SUFFIX.pdf ($VENUE $FACE${pages:+, $pages})"
                     check_glyphs "$final" || missing=1
                     undefined="$(grep -c "Citation .* undefined" "$final")"
                     [ "$undefined" != 0 ] && {
@@ -247,7 +340,7 @@ for dir in papers/*/; do
                         missing=1
                     }
                 else
-                    echo "    ERROR: the TMLR build failed — see $log" >&2
+                    echo "    ERROR: the $VENUE build failed — see $log" >&2
                     grep -m3 "^!" "$log" >&2
                     missing=1
                 fi
@@ -299,21 +392,17 @@ for dir in papers/*/; do
             arxiv)
                 # arXiv wants LaTeX source plus everything it references, and it
                 # runs BibTeX itself, so ship the .bib rather than a baked-in
-                # bibliography. The preprint face of the TMLR style is the right
-                # one here: de-anonymized, with no mention of the journal.
+                # bibliography. The preprint face of the house style is the right
+                # one here whatever venue the PDF is being built for:
+                # de-anonymized, with no mention of any journal.
                 bundle="$WORK/arxiv-$slug"
-                rm -rf "$bundle"; mkdir -p "$bundle"
+                stage_venue "$bundle" "$dir" "$bib" "$HOUSE_VENUE"
+                house_bst="$(ls "$TEMPLATES/$HOUSE_VENUE"/*.bst | head -1)"
                 pandoc "${common[@]}" "${vector[@]}" --to=latex --natbib \
-                    --template="$TEMPLATES/tmlr.latex" --metadata=tmlr-mode=preprint \
-                    --metadata=biblio-style=tmlr ${appendix_arg[@]+"${appendix_arg[@]}"} \
+                    --template="$TEMPLATES/$HOUSE_VENUE.latex" --metadata=venue-face=preprint \
+                    --metadata=biblio-style="$(basename "$house_bst" .bst)" \
+                    ${appendix_arg[@]+"${appendix_arg[@]}"} \
                     --output="$bundle/$name.tex" "$tex_body" || continue
-                python3 publishing/lib/bibtex_compat.py "$bib" --out "$bundle/references.bib"
-                cp "$TEMPLATES"/tmlr/*.sty "$TEMPLATES"/tmlr/tmlr.bst \
-                   "$TEMPLATES"/tmlr/math_commands.tex "$bundle/"
-                if [ -d "$dir/resources/figures" ]; then
-                    mkdir -p "$bundle/resources/figures"
-                    cp "$dir"/resources/figures/*.pdf "$bundle/resources/figures/" 2>/dev/null
-                fi
                 (cd "$WORK" && tar czf "$ROOT/$dir$name-arxiv.tar.gz" "arxiv-$slug")
                 echo "    $dir$name-arxiv.tar.gz (tex + style + references.bib + figures)"
                 ;;

@@ -42,11 +42,14 @@ where the input enters. It sweeps all four over frozen oscillator fields.
 bash publishing/publish.sh 01
 ```
 
-Regenerates every format above, in place, from the Markdown. The TMLR build has
-three faces — `TMLR_MODE=submission` (anonymous, the default), `preprint`, or
-`accepted` — against the journal's own style file, vendored unmodified; the
-preprint face is written as `…-preprint.pdf` so it never overwrites the
-submission build. See [publishing/README.md](../../publishing/README.md).
+Regenerates every format above, in place, from the Markdown: with no flags the
+named `…-preprint.pdf` in the TMLR style, the reading formats and the arXiv
+bundle. `bash publishing/publish.sh 01 --tmlr` builds the anonymous submission
+as `…-tmlr.pdf` instead, against the journal's own style file, vendored
+unmodified; `--tmlr --accepted` is the camera-ready face, and `--<venue>` picks
+any other template under `publishing/templates/`. Each face has its own file
+name, so building one never overwrites another. See
+[publishing/README.md](../../publishing/README.md).
 
 To deposit the preprint on Zenodo and reserve a DOI, with the record's metadata
 taken from `metadata/paper.yaml` and the manuscript itself:
