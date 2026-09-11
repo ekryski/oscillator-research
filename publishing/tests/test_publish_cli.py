@@ -78,3 +78,10 @@ def test_a_venue_may_ship_metadata_for_pandoc_beside_its_template():
     assert "indent: true" in text and "natbiboptions:" in text
     script = (ROOT / "publishing/publish.sh").read_text()
     assert 'venue_metadata "$VENUE"' in script
+
+
+def test_a_venue_preprint_keeps_its_own_file_name():
+    # the house style's preprint is `…-preprint.pdf`; another venue's preprint
+    # face must not overwrite it, and the house style's must keep its name
+    assert f"would write {PDF}-neunet-preprint.pdf" in plan("--neunet", "--preprint").stdout
+    assert f"would write {PDF}-preprint.pdf" in plan("--tmlr", "--preprint").stdout

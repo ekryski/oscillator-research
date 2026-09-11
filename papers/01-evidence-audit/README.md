@@ -29,6 +29,7 @@ it carries weight, and uses no unpublished result of ours.
 | [`…-tmlr.pdf`](from-synchronization-physics-to-trained-dynamics-tmlr.pdf) | the TMLR submission build, anonymous, in the journal's own style |
 | [`…-preprint.pdf`](from-synchronization-physics-to-trained-dynamics-preprint.pdf) | the same build with the author named and no venue mentioned, for a website, Zenodo or arXiv |
 | [`…-neunet.pdf`](from-synchronization-physics-to-trained-dynamics-neunet.pdf) | the Elsevier *Neural Networks* submission build, named, in the journal's own class, with CRediT and the declarations the journal asks for after the appendices; also the SSRN preprint |
+| [`…-neunet-preprint.pdf`](from-synchronization-physics-to-trained-dynamics-neunet-preprint.pdf) | the same Elsevier build with a neutral running foot, "Preprint" and the date, for SSRN, arXiv or a website |
 | [`…-arxiv.tar.gz`](from-synchronization-physics-to-trained-dynamics-arxiv.tar.gz) | LaTeX source, style files, bibliography and figures, ready to upload |
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
