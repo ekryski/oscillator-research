@@ -163,56 +163,37 @@ architectures}, \xmpquote{literature survey}},
 Oscillator Networks in Machine Learning}
 
 \author{\name Eric Kryski \email hello@erickryski.com \\
-      \addr Independent researcher}
+      \addr Independent researcher, Calgary, Alberta, Canada}
 \date{}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-Coupled oscillator networks are drawing increased attention as
-machine-learning substrates, while at the same time literature from
-physics, neuroscience and neuromorphic computing appears to be
-converging on the same oscillatory dynamics from different directions.
-Physics now describes oscillatory synchronization regimes that exhibit
-computation properties rather than mere order. Neuroscience research has
-identified the neuron as a complex chemical and physical system with
-functional oscillatory properties. The machine learning field has
-recently produced oscillator architectures that demonstrate
-computational effectiveness on certain tasks such as classification,
-image generation and path navigation, even providing evidence to suggest
+Coupled oscillator networks are drawing attention as machine-learning
+substrates while physics, neuroscience and neuromorphic computing
+converge on the same oscillatory dynamics from different directions.
+Physics describes synchronization regimes with computational properties
+rather than mere order; neuroscience finds functional oscillatory
+properties in the neuron; and machine learning has produced oscillator
+architectures that classify, generate images and navigate, with evidence
 that oscillatory neural networks (ONNs) can be trained, learn, remember
-and reason. Such observations across multiple scientific disciplines are
-the motivation for this paper and our overarching hypothesis that an
-oscillatory substrate whose native operations are resonance and
-entrainment more closely resembles the biological neurons refined
-through evolutionary ``training'' to sense and learn from signals in our
-physical world, and that a trainable model built from those dynamics
-would make questions about learning, forgetting and rhythm disruption
-addressable in simulation. We do not aim to test this hypothesis in this
-paper, but use it as motivation to provide a critical survey of the
-current landscape of ONNs. We organize eighteen published systems, in
+and reason. We hypothesize that a substrate whose native operations are
+resonance and entrainment resembles the neurons evolution refined to
+sense physical signals, and that a trainable model built from those
+dynamics would make learning, forgetting and rhythm disruption
+addressable in simulation. This survey does not test that hypothesis; it
+audits the ONN landscape. We organize eighteen published systems, in
 fifteen lines, on two questions: whether gradients reach the oscillator
-dynamics and whether a conventional encoder or decoder is trained around
-it, which separates designed dynamics that are never learned, apparent
-learning via untrained dynamics with a trained readout, and trained
-dynamics with and without a conventional network wrapped around them.
-For each model classification we record the task, the data used, the
-controls, and how it compares against conventional artificial neural
-network (ANN) baselines at comparable parameter budgets, tasks and
-training. The comparative picture is an analysis of parity and niches
-rather than a particular architecture's dominance, as the current body
-of work on ONNs is, in our opinion, too immature to assert such a
-comparison. The evidence surveyed rarely isolates the dynamics: of the
-sixty-five applicable control comparisons the five give across the
-surveyed systems, sixteen have been run, ten of them by three systems;
-the coupling term has been removed as a single variable three times,
-once without a reported number, once on a single dataset, and once only
-as a retrained model; and no report varies coupling range or boundary
-conditions as a single variable. We identify these gaps in greater
-detail and close with eight concrete directions for the field that we
-believe would help the field establish more cross-referential data,
-tasks, training and model architecture parity from which to baseline
-future ONN research efforts with more precise controls.
+dynamics, and whether a conventional encoder or decoder is trained
+around it. For each we record the task, data, controls and comparison
+with conventional networks at comparable budgets; the picture is parity
+and niches, not dominance. The evidence rarely isolates the dynamics: of
+sixty-five applicable control comparisons, sixteen have been run, ten of
+them by three systems; the coupling term has been removed as a single
+variable three times, once without a reported number, once on a single
+dataset, and once only as a retrained model; and no report varies
+coupling range or boundary conditions as a single variable. We close
+with eight directions toward shared data, tasks and controls.
 \end{abstract}
 
 \section{Introduction and background}\label{introduction-and-background}
@@ -357,7 +338,7 @@ directly \citep{bacic2026}. Separately, the oscillator itself was moved
 off the circle: \citet{chandra2019} wrote the units as unit vectors in D
 dimensions with rotation-matrix natural frequencies, and
 \citet{de-aguiar2023} replaced the scalar coupling constant with a
-matrix. Appendix C tabulates the full lineage and what each step's
+matrix. Appendix B tabulates the full lineage and what each step's
 coupling gained over the one before it.
 
 \begin{figure}
@@ -1008,13 +989,13 @@ whose state evolves under oscillator dynamics: phase-only models of the
 Kuramoto and Winfree family, second-order oscillator ODEs, linear
 oscillatory state-space models, amplitude-phase models, and physical
 oscillator hardware. Eighteen load-bearing systems meet that definition
-and are tabulated in Appendix D as fifteen rows, since three pairs share
+and are tabulated in Appendix C as fifteen rows, since three pairs share
 an architecture and a control record: the echo-state network and the
 liquid state machine, LinOSS \citep{rusch2025} and D-LinOSS
 \citep{d-linoss}, and Kuramoto Attention \citep{kuramoto-attention} and
 FSN \citep{nunley2026}. The same words are used differently in physics,
 neuroscience and machine learning, and several of the comparisons below
-depend on which sense is meant; Appendix B is a glossary of the terms as
+depend on which sense is meant; Appendix A is a glossary of the terms as
 this survey uses them.
 
 One adjacent literature is deliberately outside that definition. A
@@ -1186,9 +1167,9 @@ landscape}\label{comparison-of-the-current-landscape}
 \subsubsection{What the systems are built
 from}\label{what-the-systems-are-built-from}
 
-Appendix D records what each system \emph{is}: its oscillator family,
+Appendix C records what each system \emph{is}: its oscillator family,
 the part of a model the dynamics constitutes, what gradients reach, and
-whether the work is peer reviewed. Appendix E records what each system
+whether the work is peer reviewed. Appendix D records what each system
 \emph{reports}: task, data, headline result, parameter count and
 training horizon. Both are inventory. The three things worth reading
 across them are the coupling law, the geometry, and where the input
@@ -1197,7 +1178,7 @@ and the papers make in passing.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={The oscillator dynamics each surveyed system is built on, grouped by how the dynamics is written rather than by when it was published. The first seven forms carry a coupling term between units, whether as a phase difference, a projected vector sum, or, in the coupled second-order recurrences, full or convolutional weight matrices inside the nonlinearity. The last two do not: UnICORNN's units are independent within a layer and LinOSS's state matrices are diagonal, which is why Section 2.3.3 records a coupling ablation for those rows as not applicable rather than as missing. Appendix C places all of them in the wider lineage.}]{resources/figures/fig10-model-lineage.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={The oscillator dynamics each surveyed system is built on, grouped by how the dynamics is written rather than by when it was published. The first seven forms carry a coupling term between units, whether as a phase difference, a projected vector sum, or, in the coupled second-order recurrences, full or convolutional weight matrices inside the nonlinearity. The last two do not: UnICORNN's units are independent within a layer and LinOSS's state matrices are diagonal, which is why Section 2.3.3 records a coupling ablation for those rows as not applicable rather than as missing. Appendix B places all of them in the wider lineage.}]{resources/figures/fig10-model-lineage.pdf}}
 \caption{The oscillator dynamics each surveyed system is built on,
 grouped by how the dynamics is written rather than by when it was
 published. The first seven forms carry a coupling term between units,
@@ -1206,7 +1187,7 @@ coupled second-order recurrences, full or convolutional weight matrices
 inside the nonlinearity. The last two do not: UnICORNN's units are
 independent within a layer and LinOSS's state matrices are diagonal,
 which is why Section 2.3.3 records a coupling ablation for those rows as
-not applicable rather than as missing. Appendix C places all of them in
+not applicable rather than as missing. Appendix B places all of them in
 the wider lineage.}
 \end{figure}
 
@@ -1291,7 +1272,7 @@ itself one of the gaps this survey identifies. Some convergence has
 started: Sudoku is now reported by two independent groups, AKOrN and
 WONN, and CIFAR and ImageNet recur across several systems, though at
 different tasks. The spread is still the point, though. Read down the
-task column of Appendix E: class-conditional image generation scored by
+task column of Appendix D: class-conditional image generation scored by
 FID, ImageNet-1K top-1 classification, maze path finding and Sudoku,
 object discovery, multi-object binding robustness at small scale,
 character-level language modelling, generation on periodic domains,
@@ -1517,7 +1498,7 @@ re-run; we would still prefer the two sides in one paper under one
 protocol, which is what Section 3.2 asks for. Of the sixty-five
 applicable control comparisons these five give across the fourteen rows,
 sixteen have been run, ten of them by three systems, plus three
-near-instances; Appendix F itemizes them.
+near-instances; Appendix E itemizes them.
 
 \subsubsection{How the systems compare with conventional
 architectures}\label{how-the-systems-compare-with-conventional-architectures}
@@ -1977,7 +1958,7 @@ whichever way it came out.
   one, no claim about where these systems are headed can be assessed.
 \end{enumerate}
 
-Appendix G collects the questions these directions leave open.
+Appendix F collects the questions these directions leave open.
 
 \section{Conclusion}\label{conclusion}
 
@@ -2014,7 +1995,7 @@ The remaining six are a no-dynamics baseline and a coupling ablation
 from AKOrN \citep{akorn}, and matched-budget baselines from Kuramoto
 Attention \citep{kuramoto-attention} and FSN \citep{nunley2026}, from
 RON \citep{ceni2024}, and from coRNN \citep{rusch2021} and UnICORNN
-\citep{unicornn} on one supplementary task. Appendix F itemizes them.
+\citep{unicornn} on one supplementary task. Appendix E itemizes them.
 Where a control has been run it has changed what the paper could
 conclude, and in two cases it reversed a headline: at matched parameters
 on a chaotic system both oscillatory recurrences lose to an LSTM, and a
@@ -2057,20 +2038,26 @@ conventions have not yet settled. Whether the alignment between resonant
 substrates and the signals biology evolved to sense buys anything
 measurable is, on the present record, still open.
 
+\section*{Declaration of generative AI and AI-assisted technologies in
+the manuscript preparation
+process}\label{declaration-of-generative-ai-and-ai-assisted-technologies-in-the-manuscript-preparation-process}
+\addcontentsline{toc}{section}{Declaration of generative AI and
+AI-assisted technologies in the manuscript preparation process}
+
+During the preparation of this work the author used Claude (Anthropic)
+in order to search for and surface candidate prior art, to write the
+tooling that produces the manuscript's distributable formats and checks
+its bibliography, and to write the code that draws the figures from data
+and layouts the author specified. After using this tool, the author
+reviewed and edited the content as needed and takes full responsibility
+for the content of the published article. The author wrote the
+manuscript and independently verified every reference and every claim
+attributed to a source.
+
 \bibliography{references}
 \appendix
 \section*{Appendix}\label{appendix}
 \addcontentsline{toc}{section}{Appendix}
-
-\section{Use of AI assistance}\label{use-of-ai-assistance}
-
-Generative AI tools were used in preparing this survey to search for and
-surface candidate prior art, to write the tooling that produces the
-manuscript's distributable formats and checks its bibliography, and to
-generate figures. The author wrote the manuscript and independently
-verified every reference and every claim attributed to a source.
-Responsibility for the content, including any error of attribution,
-rests with the author.
 
 \section{Glossary}\label{glossary}
 
@@ -2395,7 +2382,7 @@ sources, not so that systems can be ranked.
   >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
   >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
 \caption{Reported results for the same systems, in the same order as
-Appendix D. These are as published and are \textbf{not comparable across
+Appendix C. These are as published and are \textbf{not comparable across
 rows}: different tasks, different baselines, different tuning effort
 (Section 2.3.2).}\tabularnewline
 \toprule\noalign{}
@@ -2591,7 +2578,7 @@ error. We record the correction here because it is itself evidence for
 the argument of Section 3.2 that reported controls need a reporting
 standard to be legible.
 
-Table 1 covers fourteen of the fifteen rows in Appendix D. ESN
+Table 1 covers fourteen of the fifteen rows in Appendix C. ESN
 \citep{jaeger2001} and LSM \citep{maass2002} are omitted from it because
 they are the reservoir-computing precedent this survey measures
 oscillator systems against rather than oscillator systems whose dynamics

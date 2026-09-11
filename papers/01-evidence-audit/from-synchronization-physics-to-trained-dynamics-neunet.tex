@@ -3,40 +3,8 @@
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
-\documentclass[10pt]{article}
-\usepackage{xcolor}
-\usepackage{amsmath,amssymb}
+\documentclass[a4paper,fleqn]{cas-sc}
 \setcounter{secnumdepth}{3}
-\usepackage{iftex}
-\ifPDFTeX
-  \usepackage[T1]{fontenc}
-  \usepackage[utf8]{inputenc}
-  \usepackage{textcomp} % provide euro and other symbols
-\else % if luatex or xetex
-  \usepackage{unicode-math} % this also loads fontspec
-  \defaultfontfeatures{Scale=MatchLowercase}
-  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
-\fi
-\usepackage{lmodern}
-\ifPDFTeX\else
-  % xetex/luatex font selection
-\fi
-% Use upquote if available, for straight quotes in verbatim environments
-\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
-\IfFileExists{microtype.sty}{% use microtype if available
-  \usepackage[]{microtype}
-  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
-}{}
-\makeatletter
-\@ifundefined{KOMAClassName}{% if non-KOMA class
-  \IfFileExists{parskip.sty}{%
-    \usepackage{parskip}
-  }{% else
-    \setlength{\parindent}{0pt}
-    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
-}{% if KOMA class
-  \KOMAoptions{parskip=half}}
-\makeatother
 \usepackage{longtable,booktabs,array}
 \usepackage{caption}
 \captionsetup[table]{skip=6pt}
@@ -76,9 +44,9 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-\usepackage[]{natbib}
-\bibliographystyle{tmlr}
-\usepackage[preprint]{tmlr}
+\usepackage[authoryear]{natbib}
+\bibliographystyle{cas-model2-names}
+
 \renewcommand{\arraystretch}{1.35}
 \setlength{\extrarowheight}{3pt}
 % Table rows in a survey carry paragraphs, not single words, and pandoc's
@@ -89,44 +57,37 @@
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
-% Captions are set a step down from the body, matching the HTML build, where a
-% caption is the one block deliberately smaller than the prose around it. The
-% caption package is loaded by pandoc's partial above, and only when the paper
-% has a table, so this is guarded rather than unconditional: a paper of figures
-% and no tables would otherwise fail on an undefined \captionsetup.
 \ifdefined\captionsetup\captionsetup{font=small}\fi
-% fallback for those not using the hyperref driver hyperxmp:
-\makeatletter
-\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
-\makeatother
 \hypersetup{
   pdftitle={From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning},
+  pdfauthor={Eric Kryski},
   pdflang={en-GB},
-  pdfkeywords={\xmpquote{coupled oscillators}, \xmpquote{Kuramoto
-model}, \xmpquote{reservoir
-computing}, \xmpquote{synchronization}, \xmpquote{neural
-architectures}, \xmpquote{literature survey}},
-  colorlinks=true,
-  linkcolor={RoyalBlue},
-  filecolor={Maroon},
-  citecolor={RoyalBlue},
-  urlcolor={RoyalBlue},
+  pdfkeywords={coupled oscillators, Kuramoto model, reservoir
+computing, synchronization, neural architectures, literature survey},
   pdfcreator={LaTeX via pandoc}}
-\hypersetup{pdfauthor={Eric Kryski}}
-
-\def\month{MM}
-\def\year{YYYY}
-\def\openreview{\url{https://openreview.net/forum?id=XXXX}}
-
-\title{From Synchronization Physics to Trained Dynamics: A Survey of
-Oscillator Networks in Machine Learning}
-
-\author{\name Eric Kryski \email hello@erickryski.com \\
-      \addr Independent researcher, Calgary, Alberta, Canada}
-\date{}
 
 \begin{document}
-\maketitle
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+
+\shorttitle{Oscillator networks in machine learning}
+\shortauthors{Eric Kryski}
+\title[mode=title]{From Synchronization Physics to Trained Dynamics: A
+Survey of Oscillator Networks in Machine Learning}
+
+\author[1]{Eric Kryski}[orcid=0009-0005-7751-9059]
+\cormark[1]
+\ead{hello@erickryski.com}
+\credit{Conceptualization, Methodology, Investigation, Software, Data
+curation, Visualization, Writing -- original draft, Writing -- review \&
+editing}
+\affiliation[1]{organization={Independent researcher},
+            city={Calgary},
+            state={Alberta},
+            country={Canada}}
+\cortext[1]{Corresponding author}
+
 \begin{abstract}
 Coupled oscillator networks are drawing attention as machine-learning
 substrates while physics, neuroscience and neuromorphic computing
@@ -154,6 +115,27 @@ dataset, and once only as a retrained model; and no report varies
 coupling range or boundary conditions as a single variable. We close
 with eight directions toward shared data, tasks and controls.
 \end{abstract}
+
+\begin{highlights}
+\item Eighteen oscillator-network systems sorted by what training
+actually reaches
+\item Sixteen of sixty-five controls that would isolate the dynamics
+have been run
+\item The coupling term the field is named for has been ablated only
+three times
+\item Almost every surveyed system uses a coupling law from 1967 to 1992
+physics
+\item Eight directions for a shared benchmark and a reporting standard
+for controls
+\end{highlights}
+
+\begin{keywords}
+coupled oscillators \sep Kuramoto model \sep reservoir
+computing \sep synchronization \sep neural architectures \sep literature
+survey
+\end{keywords}
+
+\maketitle
 
 \section{Introduction and background}\label{introduction-and-background}
 
@@ -2012,6 +1994,19 @@ reviewed and edited the content as needed and takes full responsibility
 for the content of the published article. The author wrote the
 manuscript and independently verified every reference and every claim
 attributed to a source.
+
+\printcredits
+\section*{Declaration of competing interest}
+The author declares no financial competing interests. The author
+conducts experimental work on oscillator substrates, and the gaps this
+survey identifies reflect that interest.
+\section*{Funding}
+This research did not receive any specific grant from funding agencies
+in the public, commercial, or not-for-profit sectors.
+\section*{Data availability}
+No new data were generated. The manuscript source, its bibliography and
+the tooling that builds and checks it are available at
+https://github.com/ekryski/oscillator-research.
 
 \bibliography{references}
 \appendix

@@ -26,6 +26,7 @@ it carries weight, and uses no unpublished result of ours.
 | [`….html`](from-synchronization-physics-to-trained-dynamics.html) · [`.epub`](from-synchronization-physics-to-trained-dynamics.epub) · [`.docx`](from-synchronization-physics-to-trained-dynamics.docx) | the same paper for reading and sharing |
 | [`…-tmlr.pdf`](from-synchronization-physics-to-trained-dynamics-tmlr.pdf) | the TMLR submission build, anonymous, in the journal's own style |
 | [`…-preprint.pdf`](from-synchronization-physics-to-trained-dynamics-preprint.pdf) | the same build with the author named and no venue mentioned, for a website, Zenodo or arXiv |
+| [`…-neunet.pdf`](from-synchronization-physics-to-trained-dynamics-neunet.pdf) | the Elsevier *Neural Networks* submission build, named, in the journal's own class, with highlights, CRediT and the declarations the journal asks for; also the SSRN preprint |
 | [`…-arxiv.tar.gz`](from-synchronization-physics-to-trained-dynamics-arxiv.tar.gz) | LaTeX source, style files, bibliography and figures, ready to upload |
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
@@ -46,9 +47,10 @@ Regenerates every format above, in place, from the Markdown: with no flags the
 named `…-preprint.pdf` in the TMLR style, the reading formats and the arXiv
 bundle. `bash publishing/publish.sh 01 --tmlr` builds the anonymous submission
 as `…-tmlr.pdf` instead, against the journal's own style file, vendored
-unmodified; `--tmlr --accepted` is the camera-ready face, and `--<venue>` picks
-any other template under `publishing/templates/`. Each face has its own file
-name, so building one never overwrites another. See
+unmodified; `--tmlr --accepted` is the camera-ready face; `--neunet` builds
+the Elsevier *Neural Networks* submission as `…-neunet.pdf`; and `--<venue>`
+picks any other template under `publishing/templates/`. Each face has its own
+file name, so building one never overwrites another. See
 [publishing/README.md](../../publishing/README.md).
 
 To deposit the preprint on Zenodo and reserve a DOI, with the record's metadata

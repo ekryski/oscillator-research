@@ -9,9 +9,28 @@
 # copy so it renders once rather than twice.
 author:
   - name: Eric Kryski
-    affiliation: Independent researcher
+    affiliation: Independent researcher, Calgary, Alberta, Canada
+    organization: Independent researcher
+    city: Calgary
+    state: Alberta
+    country: Canada
     email: hello@erickryski.com
     orcid: 0009-0005-7751-9059
+    credit: Conceptualization, Methodology, Investigation, Software, Data curation, Visualization, Writing – original draft, Writing – review & editing
+# the running head, where the full title would not fit
+shorttitle: Oscillator networks in machine learning
+# Elsevier asks for three to five, each at most 85 characters including spaces
+highlights:
+  - Eighteen oscillator-network systems sorted by what training actually reaches
+  - Sixteen of sixty-five controls that would isolate the dynamics have been run
+  - The coupling term the field is named for has been ablated only three times
+  - Almost every surveyed system uses a coupling law from 1967 to 1992 physics
+  - Eight directions for a shared benchmark and a reporting standard for controls
+# declarations a journal template prints as unnumbered sections before the
+# references; the TMLR template ignores them
+competing-interests: The author declares no financial competing interests. The author conducts experimental work on oscillator substrates, and the gaps this survey identifies reflect that interest.
+funding: This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
+data-availability: No new data were generated. The manuscript source, its bibliography and the tooling that builds and checks it are available at https://github.com/ekryski/oscillator-research.
 # date is filled in at build time from the manuscript's last commit
 keywords:
   - coupled oscillators

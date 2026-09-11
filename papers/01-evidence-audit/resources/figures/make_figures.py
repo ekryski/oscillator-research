@@ -215,7 +215,7 @@ def fig_model_lineage():
     circle entirely, coRNN couples its units through full weight matrices inside
     the nonlinearity while UnICORNN and LinOSS couple nothing within a layer.
     Each panel therefore names the systems that use it, and the forms with no
-    system are in Appendix C rather than here.
+    system are in Appendix B rather than here.
     """
     W, H = 660, 625
     b = []
@@ -937,7 +937,7 @@ ADOPTED = {
 
 
 def fig_model_timeline():
-    """The oscillator models of Appendix A, marked by whether anything uses them.
+    """The oscillator models of Appendix B, marked by whether anything uses them.
 
     Section 1.3 claims the machine-learning systems cluster at one end of a
     lineage that runs to 2023. Drawing the lineage with its adopters beneath it
