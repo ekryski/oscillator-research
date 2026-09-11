@@ -84,6 +84,7 @@ another:
 | `publish.sh 01 --tmlr --preprint` | named, TMLR style | `…-preprint.pdf` |
 | `publish.sh 01 --tmlr --accepted` | TMLR camera-ready | `…-tmlr-accepted.pdf` |
 | `publish.sh 01 --neunet` | *Neural Networks* submission (named: the journal is single-blind) | `…-neunet.pdf`, `…-neunet.tex` |
+| `publish.sh 01 --neunet --preprint` | named, Elsevier style, running foot "Preprint" and the date instead of the class's "Preprint submitted to Elsevier" | `…-neunet-preprint.pdf`, `…-neunet-preprint.tex` |
 
 The venue flag only changes the LaTeX build. The reading formats (`epub`,
 `html`, `docx`, `pdf`) always carry the author, and the arXiv bundle is always
@@ -114,9 +115,13 @@ submissions in Elsevier's CAS single-column class. `templates/neunet/` holds
 `cas-sc.cls`, `cas-common.sty` and `cas-model2-names.bst` **unmodified**,
 vendored from Elsevier's `els-cas-templates` bundle (v2.4, with its README and
 manifest); `templates/neunet.latex` is the pandoc template that drives them.
-The journal is single-anonymized, so the submission face carries the author,
-and the same PDF serves as the preprint: the class's own running foot reads
-"Preprint submitted to Elsevier" until its `final` option is set at acceptance.
+The journal is single-anonymized, so the submission face carries the author
+and the class's own running foot, "Preprint submitted to Elsevier", which is
+what the journal expects to see. The preprint face (`--neunet --preprint`,
+written as `…-neunet-preprint.pdf`) is the same page with that foot replaced
+by "Preprint" and the manuscript's date, so it can go to SSRN, arXiv or a
+website without claiming a destination. There is no accepted face: Elsevier
+typesets the final article itself.
 
 The template fills Elsevier's front matter from `metadata/paper.yaml`: the
 structured affiliation (`organization`, `city`, `state`, `country`), `orcid`,

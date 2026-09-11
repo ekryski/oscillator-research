@@ -90,7 +90,8 @@ fi
 # the output name says which face it is, so building one never overwrites another
 case "$FACE" in
     submission) SUFFIX="$VENUE" ;;
-    preprint)   SUFFIX="preprint" ;;
+    # the house style owns the plain name; another venue's preprint face keeps its own
+    preprint)   [ "$VENUE" = "$HOUSE_VENUE" ] && SUFFIX="preprint" || SUFFIX="$VENUE-preprint" ;;
     accepted)   SUFFIX="$VENUE-accepted" ;;
 esac
 # the venue's own BibTeX style, by name, for the natbib builds

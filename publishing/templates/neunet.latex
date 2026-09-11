@@ -13,7 +13,13 @@ $-- Faces. Neural Networks is single-anonymized, so every face carries the
 $-- author: `submission` and `preprint` render the same title block, and
 $-- venue-submission is deliberately not mapped to the class's `doubleblind`
 $-- option. A double-anonymized Elsevier journal would add that option under
-$-- $if(venue-submission)$ in the \documentclass line.
+$-- $if(venue-submission)$ in the \documentclass line. The faces differ in
+$-- the running foot only: the submission face keeps the class's "Preprint
+$-- submitted to Elsevier", which is what the journal expects to see; the
+$-- preprint face says "Preprint" and the manuscript's date, so the same PDF
+$-- can go to any server without claiming a destination (see the override
+$-- before \begin{document}). There is no accepted face: Elsevier typesets
+$-- the final article itself.
 $--
 $-- Front matter the class prints and where it comes from (metadata/paper.yaml):
 $--   author: name, email, orcid, credit, and organization/city/state/country
@@ -59,6 +65,29 @@ $if(keywords)$
   pdfkeywords={$for(keywords)$$keywords$$sep$, $endfor$},
 $endif$
   pdfcreator={LaTeX via pandoc}}
+
+$-- The class hard-codes its running foot inside an expl3 function. On the
+$-- preprint face that function is redefined, body for body, with the venue
+$-- claim replaced by the word "Preprint" and the manuscript's date. The
+$-- comparison runs in expl3 too, because the redefinition has to be read
+$-- with expl3's catcodes and a wrapper macro would tokenize it too early.
+\ExplSyntaxOn
+\str_if_eq:nnT { $if(venue-face)$$venue-face$$endif$ } { preprint }
+{
+  \cs_set:Npn \__first_footerline:
+  {
+    \group_begin:
+    \small
+    \sffamily
+    \ifnum\theblind>0\relax
+    \else
+      \__short_authors: :~
+    \fi
+    { \rmfamily \itshape Preprint$if(date)$,~$date$$endif$ }
+    \group_end:
+  }
+}
+\ExplSyntaxOff
 
 \begin{document}
 \let\WriteBookmarks\relax
