@@ -411,23 +411,28 @@ for dir in papers/*/; do
                 # cannot render, with a paragraph each.
                 docx_body="$WORK/$slug.docx.md"
                 python3 publishing/lib/front_matter.py "$meta" docx-body --body "$body" >"$docx_body"
+                # every Word output takes its styles from one reference document:
+                # pandoc's own, with the links in a darker blue
+                docx_ref="$WORK/reference.docx"
+                python3 publishing/lib/reference_docx.py "$docx_ref" || { missing=1; continue; }
                 docx_authors=()
                 while IFS= read -r line; do docx_authors+=(--metadata=author="$line"); done \
                     < <(python3 publishing/lib/front_matter.py "$meta" author-lines)
                 pandoc "${common[@]}" "${docx_authors[@]}" "${cite[@]}" "${raster[@]}" --to=docx \
-                    --output="$dir$name.docx" "$docx_body" && echo "    $dir$name.docx (Word manuscript, submission form)"
+                    --reference-doc="$docx_ref" --output="$dir$name.docx" "$docx_body" \
+                    && echo "    $dir$name.docx (Word manuscript, submission form)"
                 # The two files a submission portal asks for beside the
                 # manuscript: the title page with the author details, and the
                 # highlights, which Elsevier wants in a file of their own with
                 # "highlights" in its name and which front_matter.py checks
                 # against the journal's count and length limits.
                 python3 publishing/lib/front_matter.py "$meta" title-page \
-                    | pandoc --from=markdown --to=docx --metadata-file="$title_yaml" \
+                    | pandoc --from=markdown --to=docx --metadata-file="$title_yaml" --reference-doc="$docx_ref" \
                         --output="$dir$name-title-page.docx" && echo "    $dir$name-title-page.docx"
                 highlights_md="$WORK/$slug.highlights.md"
                 if python3 publishing/lib/front_matter.py "$meta" highlights >"$highlights_md"; then
                     if [ -s "$highlights_md" ]; then
-                        pandoc --from=markdown --to=docx --metadata-file="$title_yaml" \
+                        pandoc --from=markdown --to=docx --metadata-file="$title_yaml" --reference-doc="$docx_ref" \
                             --output="$dir$name-highlights.docx" "$highlights_md" \
                             && echo "    $dir$name-highlights.docx"
                     fi

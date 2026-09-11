@@ -167,6 +167,11 @@ never drift:
   when there are fewer than three or more than five, or one runs over 85
   characters; a paper without highlights gets no file.
 
+All three take their styles from one reference document, pandoc's own with a
+single change: links in a darker blue (`LINK_COLOR` in
+`lib/reference_docx.py`), because the stock theme blue reads faint. The
+document is generated into `.work/` at build time, so no binary lives here.
+
 ### Adding a venue
 
 1. Put the venue's official style files, unmodified, in `templates/<name>/`:
