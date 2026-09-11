@@ -83,7 +83,7 @@ another:
 | `publish.sh 01 --tmlr` | TMLR submission (anonymous) | `…-tmlr.pdf`, `…-tmlr.tex` |
 | `publish.sh 01 --tmlr --preprint` | named, TMLR style | `…-preprint.pdf` |
 | `publish.sh 01 --tmlr --accepted` | TMLR camera-ready | `…-tmlr-accepted.pdf` |
-| `publish.sh 01 --neunet` | that venue's submission | `…-neunet.pdf` |
+| `publish.sh 01 --neunet` | *Neural Networks* submission (named: the journal is single-blind) | `…-neunet.pdf`, `…-neunet.tex` |
 
 The venue flag only changes the LaTeX build. The reading formats (`epub`,
 `html`, `docx`, `pdf`) always carry the author, and the arXiv bundle is always
@@ -107,6 +107,42 @@ The template selects the face from two metadata fields the build sets,
 (true only for the anonymous face), which is what any other venue's template is
 expected to read as well.
 
+### The Neural Networks style
+
+`--neunet` formats for Elsevier's *Neural Networks*, which takes LaTeX
+submissions in Elsevier's CAS single-column class. `templates/neunet/` holds
+`cas-sc.cls`, `cas-common.sty` and `cas-model2-names.bst` **unmodified**,
+vendored from Elsevier's `els-cas-templates` bundle (v2.4, with its README and
+manifest); `templates/neunet.latex` is the pandoc template that drives them.
+The journal is single-anonymized, so the submission face carries the author,
+and the same PDF serves as the preprint: the class's own running foot reads
+"Preprint submitted to Elsevier" until its `final` option is set at acceptance.
+
+The template fills Elsevier's front matter from `metadata/paper.yaml`: the
+structured affiliation (`organization`, `city`, `state`, `country`), `orcid`,
+`credit` (the CRediT roles, which `\printcredits` prints as their own section),
+`shorttitle` for the running head, `highlights` (three to five, at most 85
+characters each; the class prints them on a page of their own, which is also
+the text the journal's separate highlights file wants) and `keywords`.
+`competing-interests`, `funding` and `data-availability` become the unnumbered
+declaration sections after the body. The generative-AI declaration the journal
+requires is part of the manuscript itself, the last section before the
+`<!-- appendix -->` marker, so every format carries it.
+
+`templates/neunet.yaml` sets two pandoc-level knobs no template can set for
+itself: `indent: true`, so pandoc does not load `parskip` over the class's
+paragraph shape, and `natbiboptions: authoryear`, the citation form the
+journal's APA-style references call for.
+
+The class needs packages BasicTeX does not ship. Once, per machine:
+
+```bash
+tlmgr init-usertree; tlmgr --usermode install stix inconsolata footmisc xstring moreverb makecell sttools wrapfig multirow
+```
+
+Without `stix` the class silently falls back to Computer Modern and says so in
+the TeX log (`publishing/.work/<paper>.neunet.final.log`).
+
 ### Adding a venue
 
 1. Put the venue's official style files, unmodified, in `templates/<name>/`:
@@ -116,9 +152,15 @@ expected to read as well.
 2. Write `templates/<name>.latex`, a pandoc template that loads that style and
    reads `venue-face` / `venue-submission` to choose between the anonymous,
    named and camera-ready title blocks. `templates/tmlr.latex` is the worked
-   example, including the appendix injection after the references and the
-   `pdfauthor` handling for each face.
-3. Build with `bash publishing/publish.sh <paper> --<name>`; the PDF lands as
+   example for a double-blind venue, including the appendix injection after
+   the references and the `pdfauthor` handling for each face;
+   `templates/neunet.latex` is the one for a single-blind journal class with
+   its own front matter (highlights, keywords, CRediT, declarations).
+3. If the template needs metadata that pandoc's own LaTeX partials read
+   (`indent`, `natbiboptions`, `colorlinks`, …), put it in
+   `templates/<name>.yaml`. The build passes that file after the paper's own
+   metadata, so the venue's values win.
+4. Build with `bash publishing/publish.sh <paper> --<name>`; the PDF lands as
    `…-<name>.pdf`. Run `--dry-run` first to see the resolution.
 
 If the venue wants numeric citations, see "A different citation style" below;

@@ -176,11 +176,24 @@ check_glyphs() {
 # Everything a venue's LaTeX build needs beside the .tex: its style files, its
 # BibTeX style, any helper .tex, the BibTeX-compatible bibliography, and the
 # vector figures.
+# A venue's template can need metadata pandoc's own partials read (paragraph
+# indentation, natbib options) that no template can set for itself. Those live
+# in templates/<venue>.yaml, when the venue has one, and are passed after the
+# paper's metadata so the venue's values win.
+venue_metadata() {  # venue_metadata <venue> -> a --metadata-file flag, or nothing
+    [ -f "$TEMPLATES/$1.yaml" ] && echo "--metadata-file=$TEMPLATES/$1.yaml"
+    return 0
+}
+
 stage_venue() {  # stage_venue <dir> <paper dir> <bib> <venue>
     local out="$1" dir="$2" bib="$3" venue="$4"
     rm -rf "$out"; mkdir -p "$out"
     find "$TEMPLATES/$venue" -maxdepth 1 \( -name '*.sty' -o -name '*.bst' -o -name '*.tex' -o -name '*.cls' \) \
         -exec cp {} "$out/" \;
+    # a class may load assets by a path relative to itself (Elsevier's CAS
+    # class draws its email icon from thumbnails/); any folder beside the
+    # style files goes along with them
+    find "$TEMPLATES/$venue" -mindepth 1 -maxdepth 1 -type d -exec cp -R {} "$out/" \;
     python3 publishing/lib/bibtex_compat.py "$bib" --out "$out/references.bib"
     if [ -d "$dir/resources/figures" ]; then
         mkdir -p "$out/resources/figures"
@@ -303,12 +316,13 @@ for dir in papers/*/; do
                 fi
                 out="$WORK/$VENUE-$slug"
                 stage_venue "$out" "$dir" "$bib" "$VENUE"
+                venue_meta=($(venue_metadata "$VENUE"))
                 # --natbib leaves the citations as \citep/\citet for BibTeX,
                 # which is what the venue's .bst and its instructions expect.
                 # venue-face and venue-submission are what the template reads
                 # to pick the title block and running head.
-                pandoc "${common[@]}" "${vector[@]}" --to=latex --natbib \
-                    --template="$TEMPLATES/$VENUE.latex" \
+                pandoc "${common[@]}" "${vector[@]}" ${venue_meta[@]+"${venue_meta[@]}"} \
+                    --to=latex --natbib --template="$TEMPLATES/$VENUE.latex" \
                     --metadata=venue-face="$FACE" \
                     --metadata=venue-submission="$([ "$FACE" = submission ] && echo true)" \
                     --metadata=biblio-style="$BIBLIO_STYLE" ${appendix_arg[@]+"${appendix_arg[@]}"} \
@@ -325,6 +339,12 @@ for dir in papers/*/; do
                     && bibtex "$name" \
                     && "$VENUE_ENGINE" -interaction=nonstopmode "$name.tex") >"$log" 2>&1
                 (cd "$out" && "$VENUE_ENGINE" -interaction=nonstopmode "$name.tex") >"$final" 2>&1
+                # a class with a long front matter (Elsevier's prints the
+                # highlights on a page of their own) can leave the labels one
+                # pass short; the log says when, and one more pass settles it
+                if grep -a -q "Rerun to get" "$final"; then
+                    (cd "$out" && "$VENUE_ENGINE" -interaction=nonstopmode "$name.tex") >"$final" 2>&1
+                fi
                 if [ -f "$out/$name.pdf" ]; then
                     cp "$out/$name.pdf" "$dir$name-$SUFFIX.pdf"
                     cp "$out/$name.tex" "$dir$name-$SUFFIX.tex"
@@ -398,8 +418,10 @@ for dir in papers/*/; do
                 bundle="$WORK/arxiv-$slug"
                 stage_venue "$bundle" "$dir" "$bib" "$HOUSE_VENUE"
                 house_bst="$(ls "$TEMPLATES/$HOUSE_VENUE"/*.bst | head -1)"
-                pandoc "${common[@]}" "${vector[@]}" --to=latex --natbib \
-                    --template="$TEMPLATES/$HOUSE_VENUE.latex" --metadata=venue-face=preprint \
+                house_meta=($(venue_metadata "$HOUSE_VENUE"))
+                pandoc "${common[@]}" "${vector[@]}" ${house_meta[@]+"${house_meta[@]}"} \
+                    --to=latex --natbib --template="$TEMPLATES/$HOUSE_VENUE.latex" \
+                    --metadata=venue-face=preprint \
                     --metadata=biblio-style="$(basename "$house_bst" .bst)" \
                     ${appendix_arg[@]+"${appendix_arg[@]}"} \
                     --output="$bundle/$name.tex" "$tex_body" || continue

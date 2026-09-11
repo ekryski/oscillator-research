@@ -1,0 +1,8 @@
+# Metadata the neunet build hands pandoc on top of the paper's own. These are
+# knobs pandoc's LaTeX partials read, which a template cannot set for itself.
+# indent keeps the class's paragraph shape: without it pandoc loads parskip,
+# which zeroes the indent and spaces the paragraphs, and the page stops
+# looking like Elsevier's. natbib gets the author-year form the journal's
+# APA-style references call for; the class loads no natbib of its own.
+indent: true
+natbiboptions: authoryear

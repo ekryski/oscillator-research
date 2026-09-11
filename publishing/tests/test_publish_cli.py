@@ -58,3 +58,23 @@ def test_help_prints_the_usage_from_the_script_header():
                             cwd=ROOT, capture_output=True, text=True)
     assert result.returncode == 0
     assert "--tmlr" in result.stdout and "--preprint" in result.stdout
+
+
+def test_the_neural_networks_venue_resolves_to_its_own_named_submission_file():
+    # Neural Networks is single-anonymized: the submission face keeps the
+    # author, so nothing in the plan may claim otherwise
+    out = plan("--neunet").stdout
+    assert "venue: neunet" in out
+    assert "face: submission" in out
+    assert f"would write {PDF}-neunet.pdf" in out
+
+
+def test_a_venue_may_ship_metadata_for_pandoc_beside_its_template():
+    # the knobs pandoc's partials read (paragraph indent, natbib options) are
+    # the venue's to set, and the build must find them where the README says
+    venue_yaml = ROOT / "publishing/templates/neunet.yaml"
+    assert venue_yaml.exists()
+    text = venue_yaml.read_text()
+    assert "indent: true" in text and "natbiboptions:" in text
+    script = (ROOT / "publishing/publish.sh").read_text()
+    assert 'venue_metadata "$VENUE"' in script
