@@ -181,19 +181,18 @@ and reason. We hypothesize that a substrate whose native operations are
 resonance and entrainment resembles the neurons evolution refined to
 sense physical signals, and that a trainable model built from those
 dynamics would make learning, forgetting and rhythm disruption
-addressable in simulation. This survey does not test that hypothesis; it
-audits the ONN landscape. We organize eighteen published systems, in
-fifteen lines, on two questions: whether gradients reach the oscillator
-dynamics, and whether a conventional encoder or decoder is trained
-around it. For each we record the task, data, controls and comparison
-with conventional networks at comparable budgets; the picture is parity
-and niches, not dominance. The evidence rarely isolates the dynamics: of
-sixty-five applicable control comparisons, sixteen have been run, ten of
-them by three systems; the coupling term has been removed as a single
-variable three times, once without a reported number, once on a single
-dataset, and once only as a retrained model; and no report varies
-coupling range or boundary conditions as a single variable. We close
-with eight directions toward shared data, tasks and controls.
+addressable in simulation. This survey does not test that hypothesis,
+but uses it for motivation to audit the ONN landscape. We organize
+eighteen published systems, on two primary questions: whether gradients
+reach the oscillator dynamics, and whether a conventional encoder or
+decoder is trained around it. We record the task, data, controls and
+comparison with conventional networks at comparable budgets; identifying
+notable findings and methodology gaps. We found the dynamics were rarely
+isolated; the coupling term has only been removed as a single variable
+three times, once without a reported number, once on a single dataset,
+and once only as a retrained model; and no report varies coupling range
+or boundary conditions as a single variable. We close with eight
+directions toward shared data, model evaluations and improved controls.
 \end{abstract}
 
 \section{Introduction and background}\label{introduction-and-background}
@@ -2038,22 +2037,6 @@ conventions have not yet settled. Whether the alignment between resonant
 substrates and the signals biology evolved to sense buys anything
 measurable is, on the present record, still open.
 
-\section*{Declaration of generative AI and AI-assisted technologies in
-the manuscript preparation
-process}\label{declaration-of-generative-ai-and-ai-assisted-technologies-in-the-manuscript-preparation-process}
-\addcontentsline{toc}{section}{Declaration of generative AI and
-AI-assisted technologies in the manuscript preparation process}
-
-During the preparation of this work the author used Claude (Anthropic)
-in order to search for and surface candidate prior art, to write the
-tooling that produces the manuscript's distributable formats and checks
-its bibliography, and to write the code that draws the figures from data
-and layouts the author specified. After using this tool, the author
-reviewed and edited the content as needed and takes full responsibility
-for the content of the published article. The author wrote the
-manuscript and independently verified every reference and every claim
-attributed to a source.
-
 \bibliography{references}
 \appendix
 \section*{Appendix}\label{appendix}
@@ -2644,5 +2627,21 @@ Section 3.1 and each with a note on what evidence would close it.
   methodology, for a trained oscillator system doing a real task,
   against a conventional baseline at matched accuracy.
 \end{enumerate}
+
+\section*{Declaration of generative AI and AI-assisted technologies in
+the manuscript preparation
+process}\label{declaration-of-generative-ai-and-ai-assisted-technologies-in-the-manuscript-preparation-process}
+\addcontentsline{toc}{section}{Declaration of generative AI and
+AI-assisted technologies in the manuscript preparation process}
+
+During the preparation of this work the author used Claude (Anthropic)
+in order to search for and surface candidate prior art, to write the
+tooling that produces the manuscript's distributable formats and checks
+its bibliography, and to write the code that draws the figures from data
+and layouts the author specified. After using this tool, the author
+reviewed and edited the content as needed and takes full responsibility
+for the content of the published article. The author wrote the
+manuscript and independently verified every reference and every claim
+attributed to a source.
 
 \end{document}

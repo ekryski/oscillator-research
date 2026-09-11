@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc 3.11" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2026-09-01" />
+  <meta name="dcterms.date" content="2026-09-11" />
   <meta name="keywords" content="coupled oscillators, Kuramoto
 model, reservoir computing, synchronization, neural
 architectures, literature survey" />
@@ -679,7 +679,7 @@ box-shadow: none;
 <h1 class="title">From Synchronization Physics to Trained Dynamics: A
 Survey of Oscillator Networks in Machine Learning</h1>
 <p class="author">Eric Kryski</p>
-<p class="date">2026-09-01</p>
+<p class="date">2026-09-11</p>
 <div class="abstract">
 <div class="abstract-title">Abstract</div>
 <p>Coupled oscillator networks are drawing attention as machine-learning
@@ -694,19 +694,19 @@ and reason. We hypothesize that a substrate whose native operations are
 resonance and entrainment resembles the neurons evolution refined to
 sense physical signals, and that a trainable model built from those
 dynamics would make learning, forgetting and rhythm disruption
-addressable in simulation. This survey does not test that hypothesis; it
-audits the ONN landscape. We organize eighteen published systems, in
-fifteen lines, on two questions: whether gradients reach the oscillator
-dynamics, and whether a conventional encoder or decoder is trained
-around it. For each we record the task, data, controls and comparison
-with conventional networks at comparable budgets; the picture is parity
-and niches, not dominance. The evidence rarely isolates the dynamics: of
-sixty-five applicable control comparisons, sixteen have been run, ten of
-them by three systems; the coupling term has been removed as a single
-variable three times, once without a reported number, once on a single
-dataset, and once only as a retrained model; and no report varies
-coupling range or boundary conditions as a single variable. We close
-with eight directions toward shared data, tasks and controls.</p>
+addressable in simulation. This survey does not test that hypothesis,
+but uses it for motivation to audit the ONN landscape. We organize
+eighteen published systems, on two primary questions: whether gradients
+reach the oscillator dynamics, and whether a conventional encoder or
+decoder is trained around it. We record the task, data, controls and
+comparison with conventional networks at comparable budgets; identifying
+notable findings and methodology gaps. We found the dynamics were rarely
+isolated; the coupling term has only been removed as a single variable
+three times, once without a reported number, once on a single dataset,
+and once only as a retrained model; and no report varies coupling range
+or boundary conditions as a single variable. We close with eight
+directions toward shared data, model evaluations and improved
+controls.</p>
 </div>
 </header>
 <nav id="TOC" role="doc-toc">
@@ -782,9 +782,6 @@ protocol</a></li>
 directions</a></li>
 </ul></li>
 <li><a href="#conclusion" id="toc-conclusion">4 Conclusion</a></li>
-<li><a href="#declaration-of-generative-ai-and-ai-assisted-technologies-in-the-manuscript-preparation-process" id="toc-declaration-of-generative-ai-and-ai-assisted-technologies-in-the-manuscript-preparation-process">Declaration
-of generative AI and AI-assisted technologies in the manuscript
-preparation process</a></li>
 <li><a href="#appendix" id="toc-appendix">Appendix</a></li>
 <li><a href="#a-glossary" id="toc-a-glossary">A Glossary</a></li>
 <li><a href="#b-oscillator-physics-models" id="toc-b-oscillator-physics-models">B Oscillator physics
@@ -797,6 +794,9 @@ reported results</a></li>
 are derived</a></li>
 <li><a href="#f-questions-the-record-leaves-open" id="toc-f-questions-the-record-leaves-open">F Questions the record
 leaves open</a></li>
+<li><a href="#declaration-of-generative-ai-and-ai-assisted-technologies-in-the-manuscript-preparation-process" id="toc-declaration-of-generative-ai-and-ai-assisted-technologies-in-the-manuscript-preparation-process">Declaration
+of generative AI and AI-assisted technologies in the manuscript
+preparation process</a></li>
 </ul>
 </nav>
 <h1 id="introduction-and-background">1 Introduction and background</h1>
@@ -2585,18 +2585,6 @@ still novel and rapidly evolving, and as a result its evidentiary
 conventions have not yet settled. Whether the alignment between resonant
 substrates and the signals biology evolved to sense buys anything
 measurable is, on the present record, still open.</p>
-<h1 class="unnumbered" id="declaration-of-generative-ai-and-ai-assisted-technologies-in-the-manuscript-preparation-process">Declaration
-of generative AI and AI-assisted technologies in the manuscript
-preparation process</h1>
-<p>During the preparation of this work the author used Claude
-(Anthropic) in order to search for and surface candidate prior art, to
-write the tooling that produces the manuscript’s distributable formats
-and checks its bibliography, and to write the code that draws the
-figures from data and layouts the author specified. After using this
-tool, the author reviewed and edited the content as needed and takes
-full responsibility for the content of the published article. The author
-wrote the manuscript and independently verified every reference and
-every claim attributed to a source.</p>
 <!-- appendix -->
 <h1 class="unnumbered" id="appendix">Appendix</h1>
 <h1 id="a-glossary">A Glossary</h1>
@@ -3366,6 +3354,18 @@ per inference measured on hardware under the established neuromorphic
 methodology, for a trained oscillator system doing a real task, against
 a conventional baseline at matched accuracy.</li>
 </ol>
+<h1 class="unnumbered" id="declaration-of-generative-ai-and-ai-assisted-technologies-in-the-manuscript-preparation-process">Declaration
+of generative AI and AI-assisted technologies in the manuscript
+preparation process</h1>
+<p>During the preparation of this work the author used Claude
+(Anthropic) in order to search for and surface candidate prior art, to
+write the tooling that produces the manuscript’s distributable formats
+and checks its bibliography, and to write the code that draws the
+figures from data and layouts the author specified. After using this
+tool, the author reviewed and edited the content as needed and takes
+full responsibility for the content of the published article. The author
+wrote the manuscript and independently verified every reference and
+every claim attributed to a source.</p>
 <p>References</p>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
 <div id="ref-abrams2004" class="csl-entry" role="listitem">

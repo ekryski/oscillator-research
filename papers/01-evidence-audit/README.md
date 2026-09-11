@@ -23,10 +23,12 @@ it carries weight, and uses no unpublished result of ours.
 | path | contents |
 |---|---|
 | [`from-synchronization-physics-to-trained-dynamics.md`](from-synchronization-physics-to-trained-dynamics.md) | the manuscript — the editing surface |
-| [`….html`](from-synchronization-physics-to-trained-dynamics.html) · [`.epub`](from-synchronization-physics-to-trained-dynamics.epub) · [`.docx`](from-synchronization-physics-to-trained-dynamics.docx) | the same paper for reading and sharing |
+| [`….html`](from-synchronization-physics-to-trained-dynamics.html) · [`.epub`](from-synchronization-physics-to-trained-dynamics.epub) | the same paper for reading and sharing |
+| [`….docx`](from-synchronization-physics-to-trained-dynamics.docx) | the Word manuscript in submission form: title block, keywords, appendices, then the declarations before the references |
+| [`…-title-page.docx`](from-synchronization-physics-to-trained-dynamics-title-page.docx) · [`…-highlights.docx`](from-synchronization-physics-to-trained-dynamics-highlights.docx) | the separate title page and highlights files a submission portal asks for |
 | [`…-tmlr.pdf`](from-synchronization-physics-to-trained-dynamics-tmlr.pdf) | the TMLR submission build, anonymous, in the journal's own style |
 | [`…-preprint.pdf`](from-synchronization-physics-to-trained-dynamics-preprint.pdf) | the same build with the author named and no venue mentioned, for a website, Zenodo or arXiv |
-| [`…-neunet.pdf`](from-synchronization-physics-to-trained-dynamics-neunet.pdf) | the Elsevier *Neural Networks* submission build, named, in the journal's own class, with highlights, CRediT and the declarations the journal asks for; also the SSRN preprint |
+| [`…-neunet.pdf`](from-synchronization-physics-to-trained-dynamics-neunet.pdf) | the Elsevier *Neural Networks* submission build, named, in the journal's own class, with CRediT and the declarations the journal asks for after the appendices; also the SSRN preprint |
 | [`…-arxiv.tar.gz`](from-synchronization-physics-to-trained-dynamics-arxiv.tar.gz) | LaTeX source, style files, bibliography and figures, ready to upload |
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
