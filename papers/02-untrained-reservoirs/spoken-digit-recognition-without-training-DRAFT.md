@@ -2,20 +2,7 @@
 
 ## Abstract
 
-Recent work has revived coupled-oscillator networks as a computational substrate, with several lines
-reporting that oscillator dynamics carry useful task structure even without training. We test that
-proposition for speech at a deliberately small, fully controlled scale. We freeze every physics parameter of
-a 1,024-oscillator field (~2k parameters) and measure spoken-digit recognition (AudioMNIST, speaker-
-disjoint) across a full factorial of six coupling laws, six lattice geometries, three natural-frequency
-structures, pinning, spectral clamp, and three drive pathways, at three noise and gain conditions, against
-five trained conventional baselines at exact parameter parity, a no-dynamics linear floor, and published
-oscillator-reservoir anchors. Untrained fields sit at a statics plateau roughly three points above a linear
-ridge on band statistics at every condition tested, above every trained conventional baseline at the same
-parameter budget, yet never far above what their own input representation supports linearly, and no design
-axis we varied moved that margin, with one exception: phase-referenced drive is not
-merely worse untrained but unreadable. On an order-discrimination task built so that order-free readouts provably
-cannot answer it, the same frozen fields read temporal order at 0.97 to 1.00, and a severed-coupling control
-attributes that memory predominantly to per-oscillator phase integration.
+Coupled-oscillator networks are being revived as a machine-learning substrate, often on the premise that oscillator physics transduces signals into useful structure before any training. We test that premise for speech, under controls, at small scale. Every physics parameter of a 1,024-oscillator field (about 2k parameters) is frozen, and spoken-digit recognition (AudioMNIST, speaker-disjoint) is measured across a pre-registered factorial of six coupling laws, six lattice geometries, three natural-frequency structures, pinning, spectral clamping and three drive pathways, at three noise and gain conditions, against five trained conventional networks at exact parameter parity, a no-dynamics linear floor and published oscillator-reservoir anchors. Untrained fields reach a plateau about three points above a linear ridge on band statistics at every condition, above every trained baseline at the same budget, yet never far above what their own input representation supports linearly, and no design axis moved that margin: geometry, tonotopic frequency design and coupling law each stayed below their pre-registered thresholds. The one exception is the drive pathway: phase-referenced drive is not merely worse untrained but unreadable, and a locking-range analysis explains why the same pathway trains healthily. On an order-discrimination task built so that order-free readouts provably sit at chance, the same frozen fields read temporal order at 0.97 to 1.00, matching a trained GRU under the identical readout, and a severed-coupling control attributes that memory predominantly to per-oscillator phase integration. The evaluation frame (floors, parameter parity, calibrated drive and pre-registered bars) ships with the paper for trained-dynamics studies to reuse.
 
 ## 1 Introduction
 
@@ -26,7 +13,10 @@ speech-adjacent benchmarks ([Rusch 2021](https://openreview.net/forum?id=F3s69Xz
 ([unconv.ai 2026](https://unconv.ai/blog/introducing-un-0-generating-images-with-coupled-oscillators/)) and function as computational primitives for vision and reasoning
 ([Miyato 2025](https://openreview.net/forum?id=nwDRD4AMoN)). Much of this literature carries, implicitly or explicitly, a reservoir
 premise: that oscillator physics *by itself*, before any training, transduces signals
-into computationally useful structure.
+into computationally useful structure. A survey of eighteen published oscillator systems
+finds that the coupling term has been removed as a single variable only three times
+across that record, and that no report varies coupling range or boundary conditions as a
+single variable ([Kryski 2026](https://doi.org/10.2139/ssrn.7445198)); the controls below are built against that gap.
 
 This paper tests that premise for speech, under controls, at small scale. Our overarching
 hypothesis, stated so it can fail: **untrained oscillator fields possess reservoir
