@@ -57,7 +57,24 @@ def load_metadata(path: Path) -> dict:
     if block := re.search(r"^keywords:\n((?:\s{2}-\s.*\n)+)", text, re.M):
         out["keywords"] = [line.strip()[2:].strip()
                            for line in block.group(1).splitlines() if line.strip()]
+    # a posted preprint has a DOI and a server; until then a citation points at
+    # the manuscript's folder in the repository
+    if m := re.search(r'^doi:\s*"?(\S+?)"?\s*$', text, re.M):
+        out["doi"] = m.group(1)
+    if m := re.search(r'^preprint-server:\s*"?(.+?)"?\s*$', text, re.M):
+        out["preprint_server"] = m.group(1)
     return out
+
+
+def locator(meta: dict, slug: str) -> str:
+    """Where a citation sends the reader: the preprint's DOI once it has one,
+    the manuscript's folder in the repository until then."""
+    return f"https://doi.org/{meta['doi']}" if meta.get("doi") else f"{REPO_URL}/blob/main/papers/{slug}/"
+
+
+def venue(meta: dict) -> str:
+    """How the citation names the version: "SSRN preprint" once posted, "Preprint" before."""
+    return f"{meta['preprint_server']} preprint" if meta.get("preprint_server") else "Preprint"
 
 
 def full_title(meta: dict) -> str:
@@ -95,6 +112,20 @@ def citekey(meta: dict, slug: str) -> str:
 
 def bibtex(meta: dict, slug: str) -> str:
     authors = " and ".join(a["name"] for a in meta["authors"])
+    if meta.get("doi"):
+        # a posted preprint is @misc with its server and DOI, the form reference
+        # managers and ORCID's BibTeX import both read cleanly
+        return "\n".join([
+            f"@misc{{{citekey(meta, slug)},",
+            f"  author       = {{{authors}}},",
+            f"  title        = {{{full_title(meta)}}},",
+            f"  year         = {{{year()}}},",
+            f"  howpublished = {{{venue(meta)}}},",
+            f"  doi          = {{{meta['doi']}}},",
+            f"  url          = {{{locator(meta, slug)}}},",
+            f"  keywords     = {{{', '.join(meta['keywords'])}}},",
+            "}",
+        ])
     return "\n".join([
         f"@techreport{{{citekey(meta, slug)},",
         f"  author      = {{{authors}}},",
@@ -102,7 +133,7 @@ def bibtex(meta: dict, slug: str) -> str:
         f"  year        = {{{year()}}},",
         "  institution = {Independent research},",
         "  type        = {Preprint},",
-        f"  url         = {{{REPO_URL}/blob/main/papers/{slug}/}},",
+        f"  url         = {{{locator(meta, slug)}}},",
         f"  keywords    = {{{', '.join(meta['keywords'])}}},",
         "}",
     ])
@@ -111,8 +142,9 @@ def bibtex(meta: dict, slug: str) -> str:
 def ris(meta: dict, slug: str) -> str:
     lines = ["TY  - RPRT"]
     lines += [f"AU  - {surname(a['name'])}, {initials(a['name'])}" for a in meta["authors"]]
-    lines += [f"TI  - {full_title(meta)}", f"PY  - {year()}",
-              f"UR  - {REPO_URL}/blob/main/papers/{slug}/"]
+    lines += [f"TI  - {full_title(meta)}", f"PY  - {year()}", f"UR  - {locator(meta, slug)}"]
+    if meta.get("doi"):
+        lines.append(f"DO  - {meta['doi']}")
     lines += [f"KW  - {k}" for k in meta["keywords"]]
     if meta.get("abstract"):
         lines.append(f"AB  - {meta['abstract']}")
@@ -121,18 +153,20 @@ def ris(meta: dict, slug: str) -> str:
 
 
 def styles(meta: dict, slug: str) -> dict[str, str]:
-    y, url = year(), f"{REPO_URL}/blob/main/papers/{slug}/"
+    y, url, where = year(), locator(meta, slug), venue(meta)
     names = [a["name"] for a in meta["authors"]]
     apa_names = ", ".join(f"{surname(n)}, {initials(n)}" for n in names)
     mla_names = " and ".join(f"{surname(n)}, {' '.join(n.split()[:-1])}" for n in names)
     ieee_names = ", ".join(f"{initials(n)} {surname(n)}" for n in names)
     title = full_title(meta)
+    # APA 7 cites a preprint as "Title [Preprint]. Server. https://doi.org/..."
+    server = f" {meta['preprint_server']}." if meta.get("preprint_server") else ""
     return {
-        "apa": f"{apa_names} ({y}). {title} [Preprint]. {url}",
-        "mla": f'{mla_names}. "{title}." {y}, {url}.',
-        "chicago": f'{apa_names.rstrip(".")}. {y}. "{title}." Preprint. {url}.',
-        "ieee": f'{ieee_names}, "{title}," preprint, {y}. [Online]. Available: {url}',
-        "harvard": f"{apa_names} ({y}) '{title}'. Preprint. Available at: {url}",
+        "apa": f"{apa_names} ({y}). {title} [Preprint].{server} {url}",
+        "mla": f'{mla_names}. "{title}." {where}, {y}, {url}.',
+        "chicago": f'{apa_names.rstrip(".")}. {y}. "{title}." {where}. {url}.',
+        "ieee": f'{ieee_names}, "{title}," {where}, {y}. [Online]. Available: {url}',
+        "harvard": f"{apa_names} ({y}) '{title}'. {where}. Available at: {url}",
     }
 
 
@@ -178,7 +212,8 @@ def citation_cff(papers: list[tuple[str, dict]]) -> str:
         f"  - type: report\n"
         f"    title: \"{full_title(m)}\"\n"
         f"    year: {year()}\n"
-        f"    url: \"{REPO_URL}/blob/main/papers/{slug}/\""
+        + (f"    doi: \"{m['doi']}\"\n" if m.get("doi") else "")
+        + f"    url: \"{locator(m, slug)}\""
         for slug, m in papers)
     keywords = sorted({k for _, m in papers for k in m["keywords"]})
     return f"""# Citation metadata for this repository.

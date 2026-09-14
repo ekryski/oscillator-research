@@ -71,17 +71,17 @@ published record cannot be deleted.
 <!-- citation:start -->
 ## Citing this paper
 
-Kryski, E. (2026). From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning [Preprint]. https://github.com/ekryski/oscillator-research/blob/main/papers/01-evidence-audit/
+Kryski, E. (2026). From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning [Preprint]. SSRN. https://doi.org/10.2139/ssrn.7445198
 
 ```bibtex
-@techreport{kryski2026synchronization,
-  author      = {Eric Kryski},
-  title       = {From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning},
-  year        = {2026},
-  institution = {Independent research},
-  type        = {Preprint},
-  url         = {https://github.com/ekryski/oscillator-research/blob/main/papers/01-evidence-audit/},
-  keywords    = {coupled oscillators, Kuramoto model, reservoir computing, synchronization, neural architectures, literature survey},
+@misc{kryski2026synchronization,
+  author       = {Eric Kryski},
+  title        = {From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning},
+  year         = {2026},
+  howpublished = {SSRN preprint},
+  doi          = {10.2139/ssrn.7445198},
+  url          = {https://doi.org/10.2139/ssrn.7445198},
+  keywords     = {coupled oscillators, Kuramoto model, reservoir computing, synchronization, neural architectures, literature survey},
 }
 ```
 
