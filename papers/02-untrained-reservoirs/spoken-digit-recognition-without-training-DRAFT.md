@@ -585,3 +585,15 @@ matrices, gates, floors, and controls are regenerable from the committed scripts
 Same-seed replication is bit-identical (verified cross-run and cross-run); cross-seed
 spreads are reported wherever claims rest on them. Both registered predictions that their
 own tests refuted (§5.5, §5.6) are reported in full above rather than dropped.
+
+## AI use statement {-}
+
+This work was carried out by the author working with an AI coding agent, Claude (Anthropic), throughout. The disclosure covers both the uses ICLR requires to be disclosed and those it recommends.
+
+**Implementing methods and running experiments.** Under the author's direction the agent wrote most of the experiment harness, the sweep driver, the scoring code and the test suite, launched and scored runs, and kept the dated experiment logs from which this paper's numbers are drawn.
+
+**Designing experiments and interpreting results.** The author set the research questions and directed the work. The agent contributed to the design of controls, flagged flaws in experimental designs, and wrote first-draft interpretations of results, which the author reviewed and accepted, revised or rejected.
+
+**Writing.** The agent drafted sections of this paper, including the abstract, from the experiment logs, and edited the text for readability; it also helped find and check related literature and built the tooling that produces the paper's formats and checks its bibliography.
+
+**Verification.** Decision criteria were recorded before each run, and every verdict in the paper is regenerated from the committed record by a scoring script rather than transcribed. The harness carries contract tests for each mechanism the paper relies on, and same-seed runs are bit-identical. The author takes responsibility for the final content of this work.
