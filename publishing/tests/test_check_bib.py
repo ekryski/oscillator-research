@@ -31,3 +31,26 @@ def test_a_preprint_needs_no_venue():
 def test_an_online_source_needs_no_venue_or_year():
     assert problems("online", {"author": "Someone", "title": "Un-0",
                                "url": "https://example.org"}) == []
+
+
+STUB = {"author": "Saadatmand et al.", "title": "VERIFY: title not stated in the manuscript",
+        "year": "2026", "eprint": "2605.27406"}
+
+
+def test_a_stub_left_by_extract_bib_is_incomplete_however_many_words_its_title_has():
+    # the placeholder title is a full sentence and the stub has an identifier,
+    # so without these checks it counted as complete and would have printed
+    found = problems("misc", STUB)
+    assert any("placeholder" in p for p in found)
+    assert any("citation label" in p for p in found)
+
+
+def test_finishing_the_stub_makes_it_complete():
+    done = {**STUB, "author": "Saadatmand, Hassan and Webb, Geoffrey I.",
+            "title": "A Simple State Space Model Excels at Multivariate Time Series Classification"}
+    assert problems("misc", done) == []
+
+
+def test_a_real_title_that_merely_mentions_verification_is_not_a_placeholder():
+    ok = {**TECHREPORT, "title": "How to VERIFY a reservoir"}
+    assert problems("techreport", ok) == []
