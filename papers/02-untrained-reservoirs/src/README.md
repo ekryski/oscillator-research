@@ -244,7 +244,19 @@ check the arithmetic rather than take the verdict on trust. The bars were
 registered before the runs they score and live at the top of
 `measurement/score.py`. `--figures` regenerates
 `resources/figures/g9-readability-vs-coherence.png`; the other three figures
-are authored SVGs.
+are authored SVGs. After editing one, render its PDF and PNG from the
+repository root:
+
+```bash
+uv run --with svglib --with reportlab python3 publishing/lib/svg_render.py \
+    papers/02-untrained-reservoirs/resources/figures
+```
+
+Write math the natural way, with Unicode subscripts and superscripts such as
+θᵢ and Φᵀ: the renderer sets them as positioned runs in a temporary copy, so
+the result does not depend on any font carrying those letters. It refuses what
+it cannot render faithfully and says why. A combining accent is the usual
+case, so write dθ/dt where you would have written θ̇.
 
 ## Determinism
 
