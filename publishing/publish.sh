@@ -321,12 +321,16 @@ for dir in papers/*/; do
                 # --natbib leaves the citations as \citep/\citet for BibTeX,
                 # which is what the venue's .bst and its instructions expect.
                 # venue-face and venue-submission are what the template reads
-                # to pick the title block and running head.
+                # to pick the title block and running head. The style name goes
+                # in as a variable, not as metadata: pandoc escapes metadata for
+                # LaTeX, so iclr2027_conference became iclr2027\_conference,
+                # BibTeX found no such style, and every citation came out
+                # undefined. A variable is inserted as written.
                 pandoc "${common[@]}" "${vector[@]}" ${venue_meta[@]+"${venue_meta[@]}"} \
                     --to=latex --natbib --template="$TEMPLATES/$VENUE.latex" \
                     --metadata=venue-face="$FACE" \
                     --metadata=venue-submission="$([ "$FACE" = submission ] && echo true)" \
-                    --metadata=biblio-style="$BIBLIO_STYLE" ${appendix_arg[@]+"${appendix_arg[@]}"} \
+                    --variable=biblio-style="$BIBLIO_STYLE" ${appendix_arg[@]+"${appendix_arg[@]}"} \
                     --output="$out/$name.tex" "$tex_body" || continue
                 log="$WORK/$slug.$VENUE.log"
                 final="$WORK/$slug.$VENUE.final.log"
@@ -355,9 +359,20 @@ for dir in papers/*/; do
                              | grep -oE "[0-9]+ pages" | tail -1)"
                     echo "    $dir$name-$SUFFIX.pdf ($VENUE $FACE${pages:+, $pages})"
                     check_glyphs "$final" || missing=1
-                    undefined="$(grep -c "Citation .* undefined" "$final")"
+                    # -a: a TeX log can carry stray bytes, and grep then takes
+                    # it for a binary file and reports nothing at all
+                    undefined="$(grep -a -c "Citation .* undefined" "$final")"
                     [ "$undefined" != 0 ] && {
                         echo "    ERROR: $undefined citation(s) did not resolve — see $final" >&2
+                        missing=1
+                    }
+                    # pdflatex recovers from most errors and still writes a PDF,
+                    # so a PDF existing proves nothing: a given name cut in half
+                    # by BibTeX printed a broken initial for a week unnoticed
+                    latex_errors="$(grep -a -c '^!' "$final")"
+                    [ "$latex_errors" != 0 ] && {
+                        echo "    ERROR: $latex_errors LaTeX error(s) in the final pass — see $final" >&2
+                        grep -a -m2 -A6 '^!' "$final" | grep -a -E '^!|^l\.[0-9]+' >&2
                         missing=1
                     }
                 else
@@ -460,7 +475,7 @@ for dir in papers/*/; do
                 pandoc "${common[@]}" "${vector[@]}" ${house_meta[@]+"${house_meta[@]}"} \
                     --to=latex --natbib --template="$TEMPLATES/$HOUSE_VENUE.latex" \
                     --metadata=venue-face=preprint \
-                    --metadata=biblio-style="$(basename "$house_bst" .bst)" \
+                    --variable=biblio-style="$(basename "$house_bst" .bst)" \
                     ${appendix_arg[@]+"${appendix_arg[@]}"} \
                     --output="$bundle/$name.tex" "$tex_body" || continue
                 (cd "$WORK" && tar czf "$ROOT/$dir$name-arxiv.tar.gz" "arxiv-$slug")
