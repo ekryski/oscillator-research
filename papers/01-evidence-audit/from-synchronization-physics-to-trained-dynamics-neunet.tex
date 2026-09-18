@@ -66,6 +66,24 @@
 computing, synchronization, neural architectures, literature survey},
   pdfcreator={LaTeX via pandoc}}
 
+\ExplSyntaxOn
+\str_if_eq:nnT { submission } { preprint }
+{
+  \cs_set:Npn \__first_footerline:
+  {
+    \group_begin:
+    \small
+    \sffamily
+    \ifnum\theblind>0\relax
+    \else
+      \__short_authors: :~
+    \fi
+    { \rmfamily \itshape Preprint,~2026-09-11 }
+    \group_end:
+  }
+}
+\ExplSyntaxOff
+
 \begin{document}
 \let\WriteBookmarks\relax
 \def\floatpagepagefraction{1}
