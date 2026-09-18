@@ -27,6 +27,8 @@ frozen fields read temporal order at 0.97-1.00.
 | [`spoken-digit-recognition-without-training-DRAFT.md`](spoken-digit-recognition-without-training-DRAFT.md) | the manuscript — the editing surface |
 | [`…-DRAFT.pdf`](spoken-digit-recognition-without-training-DRAFT.pdf) · [`.html`](spoken-digit-recognition-without-training-DRAFT.html) · [`.epub`](spoken-digit-recognition-without-training-DRAFT.epub) · [`.docx`](spoken-digit-recognition-without-training-DRAFT.docx) | the same paper to read or download |
 | [`…-DRAFT-tmlr.pdf`](spoken-digit-recognition-without-training-DRAFT-tmlr.pdf) | the TMLR submission build, anonymous, in the journal's own style |
+| [`…-DRAFT-iclr.pdf`](spoken-digit-recognition-without-training-DRAFT-iclr.pdf) | the ICLR 2027 submission build, anonymous and line-numbered, in ICLR's own style |
+| [`…-DRAFT-iclr-preprint.pdf`](spoken-digit-recognition-without-training-DRAFT-iclr-preprint.pdf) | the same build with the author named and no venue claimed |
 | [`…-DRAFT-arxiv.tar.gz`](spoken-digit-recognition-without-training-DRAFT-arxiv.tar.gz) | LaTeX source, style files, bibliography and figures, ready to upload |
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
