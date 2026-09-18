@@ -106,7 +106,7 @@ def report_baselines() -> None:
 
     head("No-dynamics floors (ridge on the frontend features, field bypassed)")
     if not floors:
-        print("  floors.json absent — run scripts/00_baselines.sh to compute it")
+        print("  floors.json absent — run scripts/make_assets.sh to compute it (needs the digit bank)")
     for key in sorted(floors):
         e = floors[key]
         print(f"  {key:20s} standard {fmt(100 * e['standard'])}   "
@@ -515,8 +515,8 @@ def report_across_drives() -> None:
 
     head("Phase-referenced (quadrature) drive against its magnitude twin")
     env = {(c.physics, c.cfg["boundary"], c.omega, c.cfg["damping"], c.cfg["clamp"],
-            *c.condition): c for c in matrix if c.family == "envelope"}
-    d = [mean(c) - env[k].mean() for c in matrix if c.family == "quadrature"
+            *c.condition): c for c in matrix if c.drive == "envelope"}
+    d = [mean(c) - mean(env[k]) for c in matrix if c.drive == "quadrature"
          and (k := (c.physics, c.cfg["boundary"], c.omega, c.cfg["damping"],
                     c.cfg["clamp"], *c.condition)) in env]
     if d:
