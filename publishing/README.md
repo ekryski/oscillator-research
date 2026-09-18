@@ -85,6 +85,8 @@ another:
 | `publish.sh 01 --tmlr --accepted` | TMLR camera-ready | `…-tmlr-accepted.pdf` |
 | `publish.sh 01 --neunet` | *Neural Networks* submission (named: the journal is single-blind) | `…-neunet.pdf`, `…-neunet.tex` |
 | `publish.sh 01 --neunet --preprint` | named, Elsevier style, running foot "Preprint" and the date instead of the class's "Preprint submitted to Elsevier" | `…-neunet-preprint.pdf`, `…-neunet-preprint.tex` |
+| `publish.sh 02 --iclr` | ICLR submission (anonymous, line-numbered, "Under review" running head) | `…-iclr.pdf`, `…-iclr.tex` |
+| `publish.sh 02 --iclr --preprint` | named, ICLR style, no venue claimed | `…-iclr-preprint.pdf` |
 
 The venue flag only changes the LaTeX build. The reading formats (`epub`,
 `html`, `docx`, `pdf`) always carry the author, and the arXiv bundle is always
@@ -176,6 +178,43 @@ All three take their styles from one reference document, pandoc's own with a
 single change: links in a darker blue (`LINK_COLOR` in
 `lib/reference_docx.py`), because the stock theme blue reads faint. The
 document is generated into `.work/` at build time, so no binary lives here.
+
+### The ICLR style
+
+`--iclr` formats for ICLR, which is double-blind: naming the venue gives the
+anonymous face, with "Anonymous authors", line numbers and the running head
+"Under review as a conference paper at ICLR". `templates/iclr/` holds ICLR's
+own 2027 style files **unmodified** (see its README for the source), and
+`templates/iclr.latex` drives them. `--iclr --preprint` names the author
+through the style's camera-ready switch and clears the running head it would
+print, because a preprint is not an ICLR paper; `--iclr --accepted` keeps it.
+
+ICLR allows nine pages of main text at submission. References, appendices and
+the AI-use, ethics and reproducibility statements do not count, and the
+appendix goes after the references. The build reports total pages, so check
+which page the reference list starts on.
+
+The anonymous face blanks the PDF's author metadata, but it cannot anonymize
+the prose. A third-person citation of your own preprint is the form ICLR
+permits; a repository URL or an acknowledgement is not. Check the file:
+
+```bash
+pdftotext …-iclr.pdf - | grep -n -i -E "<surname>|github|<your domain>"
+```
+
+The style needs font metrics BasicTeX does not ship. Once, per machine:
+
+```bash
+tlmgr init-usertree; tlmgr --usermode install helvetic times courier
+```
+
+Two traps this venue exposed, both now handled in the build and both worth
+knowing for the next one. A template that skips pandoc's fonts partial, to keep
+the venue's own typeface, must load `iftex` itself, because the common partial
+tests `\ifLuaTeX`. And the bibliography style reaches pandoc as a template
+variable, not as metadata: pandoc escapes metadata for LaTeX, so
+`iclr2027_conference` became `iclr2027\_conference`, BibTeX found no such
+style, and every citation came out undefined with no LaTeX error at all.
 
 ### Adding a venue
 
