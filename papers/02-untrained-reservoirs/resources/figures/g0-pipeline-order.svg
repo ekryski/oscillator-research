@@ -35,10 +35,10 @@
 
 <rect x="80" y="450" width="520" height="118" rx="4" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
 <text x="340" y="471" text-anchor="middle" font-size="13" font-weight="bold" fill="#085041">6 &#183; field integration (explicit Euler, dt = 0.1, T steps)</text>
-<text x="340" y="493" text-anchor="middle" font-size="13" fill="#085041" font-style="italic">&#952;&#775;&#7522; = &#969;&#7522; + coupling&#7522;(&#952;; K) + drive&#7522; &#8722; &#955;&#183;sin &#952;&#7522;</text>
-<text x="340" y="513" text-anchor="middle" font-size="12" fill="#0F6E56">coupling evaluated spectrally: K&#770; = FFT(K) under the boundary geometry&#8217;s wrap</text>
+<text x="340" y="493" text-anchor="middle" font-size="13" fill="#085041" font-style="italic">d&#952;&#7522;/dt = &#969;&#7522; + coupling&#7522;(&#952;; K) + drive&#7522; &#8722; &#955;&#183;sin &#952;&#7522;</text>
+<text x="340" y="513" text-anchor="middle" font-size="12" fill="#0F6E56">coupling evaluated spectrally, as FFT(K) under the boundary geometry&#8217;s wrap</text>
 <text x="340" y="529" text-anchor="middle" font-size="12" fill="#0F6E56">(torus / cylinder / sheet / helix / cube / sphere &#8212; the shape factor lives here)</text>
-<text x="340" y="549" text-anchor="middle" font-size="12" fill="#0F6E56">spectral clamp caps |K&#770;| &#183; coupling law per physics family &#183; SL adds amplitude ODE</text>
+<text x="340" y="549" text-anchor="middle" font-size="12" fill="#0F6E56">spectral clamp caps |FFT(K)| &#183; coupling law per physics family &#183; SL adds amplitude ODE</text>
 <path d="M340 568 L340 586" fill="none" stroke="#5F5E5A" stroke-width="1" marker-end="url(#ar)"/>
 
 <rect x="100" y="588" width="480" height="60" rx="4" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.75"/>

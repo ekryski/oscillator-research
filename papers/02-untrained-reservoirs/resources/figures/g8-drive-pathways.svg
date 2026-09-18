@@ -19,7 +19,7 @@
 <text x="130" y="206" text-anchor="middle" font-size="12" fill="#534AB7">&#8595; affine (v+10)/10, clamp &#8805; 0</text>
 <text x="130" y="228" text-anchor="middle" font-size="12" font-weight="bold" fill="#3C3489">rows A&#7523;(t) at 62.5 fps</text>
 <text x="130" y="244" text-anchor="middle" font-size="12" fill="#534AB7">carrier discarded</text>
-<text x="130" y="268" text-anchor="middle" font-size="12" font-style="italic" fill="#3C3489">drive: &#952;&#775;&#7522; += g&#183;A&#7523;(t)</text>
+<text x="130" y="268" text-anchor="middle" font-size="12" font-style="italic" fill="#3C3489">drive: d&#952;&#7522;/dt += g&#183;A&#7523;(t)</text>
 <text x="130" y="286" text-anchor="middle" font-size="12" fill="#534AB7">additive, state-independent</text>
 </g>
 
@@ -31,7 +31,7 @@
 <text x="340" y="206" text-anchor="middle" font-size="12" fill="#993C1D">&#8595; baseband phase &#966;&#7523;(t)</text>
 <text x="340" y="228" text-anchor="middle" font-size="12" font-weight="bold" fill="#712B13">(A&#7523;, &#966;&#7523;) at 62.5 fps</text>
 <text x="340" y="244" text-anchor="middle" font-size="12" fill="#993C1D">phase &#8712; &#177;31 Hz baseband</text>
-<text x="340" y="268" text-anchor="middle" font-size="11" font-style="italic" fill="#712B13">drive: &#952;&#775;&#7522; += g&#183;A&#7523;&#183;sin(&#966;&#7523; &#8722; &#952;&#7522;)</text>
+<text x="340" y="268" text-anchor="middle" font-size="11" font-style="italic" fill="#712B13">drive: d&#952;&#7522;/dt += g&#183;A&#7523;&#183;sin(&#966;&#7523; &#8722; &#952;&#7522;)</text>
 <text x="340" y="286" text-anchor="middle" font-size="12" fill="#993C1D">Adler, reference-relative</text>
 </g>
 
@@ -43,7 +43,7 @@
 <text x="550" y="206" text-anchor="middle" font-size="12" fill="#0F6E56">no transcoding, no rate change</text>
 <text x="550" y="228" text-anchor="middle" font-size="12" font-weight="bold" fill="#085041">rows x&#7523;(t) at 16 kHz</text>
 <text x="550" y="244" text-anchor="middle" font-size="12" fill="#0F6E56">carrier kept (&#177; waveform)</text>
-<text x="550" y="268" text-anchor="middle" font-size="12" font-style="italic" fill="#085041">drive: &#952;&#775;&#7522; += g&#183;x&#7523;(t)</text>
+<text x="550" y="268" text-anchor="middle" font-size="12" font-style="italic" fill="#085041">drive: d&#952;&#7522;/dt += g&#183;x&#7523;(t)</text>
 <text x="550" y="286" text-anchor="middle" font-size="12" fill="#0F6E56">additive, oscillatory</text>
 </g>
 
