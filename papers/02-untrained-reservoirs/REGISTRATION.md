@@ -12,6 +12,7 @@ The exploratory phase also showed four things the design below exists to correct
 
 - The field was read with 16,384 features and its no-dynamics floor with 192, so the ridge had 163,840 coefficients for one and 1,920 for the other. The one width-matched read in that record put the field below its floor in 936 of 936 runs.
 - The arms were not featurized alike. The conventional networks' features included their last hidden state, which carries temporal order directly; the field's and the floor's did not.
+- The floor was not read over the same frames as the arms. Every arm dropped a 16-frame warm-up and masked the padding after each clip; the floor did neither, so it saw the digit's onset, which the arms never read directly, and pooled over padding, which dilutes its statistics by clip length.
 - The 1,800-run factorial was run at one seed.
 - The floors were printed to a terminal and never written to the record.
 
@@ -51,7 +52,7 @@ Every arm sits in the same slot: front end, then the arm, then the shared readou
 | leaky bank B | the same, matched to the field in exposed signals | 2,048 | 4,096 |
 | GRU, TCN, CNN, transformer, S4D | trained conventional networks | | about 2,000 trained |
 
-**The leaky bank.** Each unit follows x ← (1 − a)·x + a·tanh(g_in·u). It has one leak rate a and one input gain g_in, both frozen and seed-pinned, and no coupling, oscillation, bias or learned weight. Band r drives the units of row r, the routing the field uses. *Proposed:* leak rates log-spaced so that time constants run from one hop frame (16 ms) to the clip length (about 1 s); input gains drawn as the field's are. The schedule is fixed here and is not tuned: this is a falsification control, not a claim that the design is optimal.
+**The leaky bank.** Each unit follows x ← (1 − a)·x + a·tanh(g_in·u). It has one leak rate a and one input gain g_in, both frozen and seed-pinned, and no coupling, oscillation, bias or learned weight. Band r drives the units of row r, the routing the field uses. *Proposed:* one fixed log-spaced schedule of time constants from one hop frame (16 ms) to the clip length (1 s), laid out so that every band is read at every time scale; input gains drawn N(1, 0.1²), the distribution the field draws its natural frequencies from. Only the gains vary with the seed, so this arm's seed-to-seed spread is small by construction. The schedule is fixed here and is not tuned: this is a falsification control, not a claim that the design is optimal.
 
 Two banks are registered because the field exposes two signals per state, sin θ and cos θ, and a leaky unit exposes one. Bank A matches the field's states and parameters and is half as wide at native width. Bank B matches its native width and has twice the parameters. Reported side by side.
 
@@ -67,6 +68,8 @@ One function reads every arm. Over the span, or over each of four windows, it co
 | field, severed field | sin θ and cos θ per oscillator |
 | leaky banks | the unit states |
 | conventional networks | the hidden trajectory |
+
+**Every arm is read over the same frames.** Padding after a clip ends is masked for every arm, the floor included. Arms are read from the end of the 16-frame warm-up to the end of the clip. *Proposed:* the floor is recorded over two spans, the arms' span and the whole clip from its first frame, and **the whole-clip floor is the primary control**, because it is the harder one: it is given everything the field was driven with, including the onset the field can carry only as memory.
 
 **No statistic may depend on an endpoint.** That excludes the last state. It also excludes the signed mean of a first difference, which for a linear state telescopes to the last value minus the first and is the same leak by another route.
 
@@ -149,6 +152,7 @@ The exploratory coherence bar, a Spearman correlation of −0.3 or below in two 
 5. The widths and the training sizes in section 6.
 6. How much of Tier 3 to run, and whether to run Tier 4.
 7. Whether the paper names the first order-task design that failed its blindness check. The gate in section 7 is written on the assumption that it does.
+8. Which floor span is primary, section 5: the whole clip, as proposed, or the arms' own span.
 
 ## Change log
 
