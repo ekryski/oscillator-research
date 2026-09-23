@@ -79,29 +79,62 @@ DIGIT_REPS = 20                    # reps 0..19 per speaker per digit (determini
 DIGIT_TRIM_FRAC = 0.01             # trim below 1% of clip peak |x|
 
 
+def load_clip(path: Path) -> torch.Tensor:
+    """One AudioMNIST recording, processed exactly as every bank processes it:
+    48 kHz -> 16 kHz, peak-normalized to 0.5, energy-trimmed below 1% of the
+    peak, capped at 1 s, stored as int16. Shared by the exploratory bank and
+    the confirmatory one, so a recording in both is bit-identical in both."""
+    import torchaudio
+    x, sr = read_wav(path)
+    x = torchaudio.functional.resample(x[None], sr, DIGIT_SR)[0]
+    peak = x.abs().max().clamp_min(1e-8)
+    x = 0.5 * x / peak
+    keep = (x.abs() > DIGIT_TRIM_FRAC * 0.5).nonzero()
+    if len(keep):
+        x = x[keep[0, 0]:keep[-1, 0] + 1]
+    x = x[:DIGIT_MAX_SAMPLES]
+    return torch.round(x * 32767).to(torch.int16)
+
+
+#: the only format AudioMNIST ships: mono, 16-bit, uncompressed PCM
+WAV_CHANNELS, WAV_SAMPLE_BYTES = 1, 2
+#: int16 full scale, the divisor torchaudio's loader used to map PCM to [-1, 1)
+PCM16_SCALE = 32768.0
+
+
+def read_wav(path: Path) -> tuple[torch.Tensor, int]:
+    """A 16-bit PCM WAV as float32 in [-1, 1), and its sample rate.
+
+    The standard-library reader, because torchaudio's own loader now needs a
+    separate decoding package. The scaling is torchaudio's: int16 over 32768,
+    so the samples are the ones the exploratory bank was built from.
+    """
+    import wave
+    with wave.open(str(path), "rb") as w:
+        if (w.getnchannels(), w.getsampwidth(), w.getcomptype()) != (WAV_CHANNELS, WAV_SAMPLE_BYTES, "NONE"):
+            raise ValueError(f"{path}: expected mono 16-bit PCM, got {w.getnchannels()} channel(s), "
+                             f"{8 * w.getsampwidth()}-bit, {w.getcomptype()}")
+        pcm = w.readframes(w.getnframes())
+        rate = w.getframerate()
+    x = torch.frombuffer(bytearray(pcm), dtype=torch.int16).to(torch.float32) / PCM16_SCALE
+    return x, rate
+
+
+def clip_path(root: Path, speaker: int, digit: int, rep: int) -> Path:
+    return root / f"{speaker:02d}" / f"{digit}_{speaker:02d}_{rep}.wav"
+
+
 def build_digit_bank(root: Path = AUDIOMNIST_DIR,
                      out_path: Path = DIGIT_BANK_PATH) -> dict:
     """AudioMNIST -> bank: 48 kHz -> 16 kHz, peak-normalized to 0.5,
     energy-trimmed, TRUE LENGTHS stored (length-masked features depend on
     them), int16 storage. Deterministic file selection (reps 0..19)."""
-    import torchaudio
     entries = {"train": [], "test": []}
     for spk in sorted(DIGIT_TRAIN_SPEAKERS + DIGIT_TEST_SPEAKERS):
         pool = "train" if spk in DIGIT_TRAIN_SPEAKERS else "test"
-        d = root / f"{spk:02d}"
         for digit in range(10):
             for rep in range(DIGIT_REPS):
-                f = d / f"{digit}_{spk:02d}_{rep}.wav"
-                x, sr = torchaudio.load(str(f))
-                x = torchaudio.functional.resample(x, sr, DIGIT_SR)[0]
-                peak = x.abs().max().clamp_min(1e-8)
-                x = 0.5 * x / peak
-                keep = (x.abs() > DIGIT_TRIM_FRAC * 0.5).nonzero()
-                if len(keep):
-                    x = x[keep[0, 0]:keep[-1, 0] + 1]
-                x = x[:DIGIT_MAX_SAMPLES]
-                entries[pool].append((torch.round(x * 32767).to(torch.int16),
-                                      digit, spk))
+                entries[pool].append((load_clip(clip_path(root, spk, digit, rep)), digit, spk))
     bank = {"sr": DIGIT_SR, "max_samples": DIGIT_MAX_SAMPLES,
             "trim_frac": DIGIT_TRIM_FRAC, "reps": DIGIT_REPS,
             "train_speakers": DIGIT_TRAIN_SPEAKERS,

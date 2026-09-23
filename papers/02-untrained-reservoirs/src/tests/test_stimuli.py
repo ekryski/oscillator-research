@@ -154,7 +154,8 @@ def test_digitpair_clips_contract():
     assert (lens > 16000).all() and (lens <= PAIR_MAX_SAMPLES).all()
     # floor-blindness AFTER the warmup cut (the audit-matched window): the
     # leader absorbs the cut, so [A;B] vs [B;A] stay near-identical
-    from harness import PAIR_LEADER_SAMPLES, WARMUP_FRAMES
+    from harness.stimuli.digits import PAIR_LEADER_SAMPLES
+    from harness.utils.constants import WARMUP_FRAMES
     from harness.stimuli.frontend import hop_rows
     wa = bank["train"]["waves"][0].to(torch.float32) / 32767.0
     wb = bank["train"]["waves"][1].to(torch.float32) / 32767.0
