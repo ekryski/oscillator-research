@@ -221,8 +221,9 @@ def pending(specs: list[rn.Spec]) -> list[rn.Spec]:
     return sorted((s for s in specs if s.run_id() not in done[s.group()]), key=cost, reverse=True)
 
 
-def drive(names: list[str], workers: int, threads: int, device: str, dry_run: bool) -> None:
-    specs = planned(names)
+def drive(names: list[str], workers: int, threads: int, device: str, dry_run: bool,
+          task: str | None = None) -> None:
+    specs = [s for s in planned(names) if task is None or s.task == task]
     todo = pending(specs)
     print(f"=== {' + '.join(names)}: {len(specs)} runs planned, {len(specs) - len(todo)} recorded, "
           f"{len(todo)} to run on {workers} worker(s) x {threads} thread(s), device {device}")
@@ -267,11 +268,13 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--threads", type=int, default=2)
     r.add_argument("--device", default="cpu")
     r.add_argument("--dry-run", action="store_true")
+    r.add_argument("--task", choices=("recognition", "order"),
+                   help="run only this task's specs, so two machines can split a tier without sharing a file")
     a = ap.parse_args(argv)
     if a.command == "prepare":
         prepare(a.workers)
     else:
-        drive(a.tiers, a.workers, a.threads, a.device, a.dry_run)
+        drive(a.tiers, a.workers, a.threads, a.device, a.dry_run, a.task)
 
 
 if __name__ == "__main__":

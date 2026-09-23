@@ -38,8 +38,9 @@ WIDTHS = (192, 1024, 4096)
 #: the size every verdict is read at
 PRIMARY_SIZE = 2048
 PRIMARY_STAT = {"recognition": "windowed", "order": "pooled"}
-#: clips per batch, by task and drive; the carrier runs at 16 kHz, so its batches are small
-BATCH = {"recognition": 512, "order": 256, "carrier": 8}
+#: clips per batch, by task and drive; the carrier runs at 16 kHz, so its batches
+#: are small, and a GPU holds four times as many of its 16,000-frame trajectories
+BATCH = {"recognition": 512, "order": 256, "carrier": 8, "carrier-cuda": 32}
 #: the carrier path drives the field at the audio sample rate
 CARRIER_RATE_HZ = 16000.0
 
@@ -202,9 +203,10 @@ def assemble(spec: Spec, bank: dict) -> Clips:
                  labels, layout, am.N_CLASSES)
 
 
-def batches(spec: Spec, clips: Clips) -> Iterator[tuple[torch.Tensor, torch.Tensor, slice]]:
+def batches(spec: Spec, clips: Clips, device: str = "cpu") -> Iterator[tuple[torch.Tensor, torch.Tensor, slice]]:
     """(rows, valid frames, rows' place in the readout order), block by block."""
-    size = BATCH["carrier"] if spec.drive == "carrier" else BATCH[spec.task]
+    carrier = "carrier-cuda" if device.startswith("cuda") else "carrier"
+    size = BATCH[carrier] if spec.drive == "carrier" else BATCH[spec.task]
     at = 0
     for make, n in zip(clips.blocks, clips.sizes):
         for a in range(0, n, size):
@@ -266,7 +268,7 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
         model = am.build_frozen(arm, spec.gain if spec.gain is not None else 0.0, spec.seed, device, rate)
         t1 = time.perf_counter()
         with torch.no_grad():
-            for rows, tvalid, where in batches(spec, clips):
+            for rows, tvalid, where in batches(spec, clips, device):
                 sig = am.frozen_signals(arm, model, rows.to(device))
                 _store(buffers, am.frozen_features(arm, sig, tvalid.to(device), spec.task, spec.span),
                        where, total)
