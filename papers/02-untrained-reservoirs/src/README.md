@@ -3,6 +3,13 @@
 Everything needed to rerun the paper and check its numbers. One command plans
 and drives a sweep; one module scores it.
 
+There are two harnesses here. `harness/confirm/` runs the **confirmatory
+study** registered in [`../REGISTRATION.md`](../REGISTRATION.md), frozen before
+its first run; its record is `../results/confirmatory/`. The rest of `harness/`
+is the exploratory harness that produced the August record in `../results/`,
+kept runnable so that record can be checked, which the confirmatory study's
+legacy gate does. Start with [the confirmatory run](#the-confirmatory-run).
+
 ## Quick start
 
 ```bash
@@ -138,6 +145,41 @@ envelope pathway in phase alone, and that the sweep grids still describe the
 committed record exactly.
 
 Three tests skip without the digit bank; the rest run on synthetic stimuli.
+
+## The confirmatory run
+
+Every arm (the front end alone, the field, its severed twin, two leaky-integrator
+banks, five trained networks) is read by one contract: the same three
+statistics over the same fixed window for every clip, standardized with the
+training set's own statistics, projected to a common width, and classified by
+the same ridge. The design, the bars and the reasons are in the registration.
+
+```bash
+uv run python -m harness.confirm.protocol --build-bank   # the 50-repetition bank
+uv run python -m harness.confirm.plan prepare            # front-end rows, once per drive and noise level
+uv run python -m harness.confirm.gates legacy            # the exploratory record reproduces
+uv run python -m harness.confirm.plan run gate tier1 --workers 3 --threads 2
+uv run python -m harness.confirm.gates check             # every zero-drive cell reads chance
+uv run python -m harness.confirm.plan run tier2 becker tier3 tier4 --workers 6 --threads 1
+uv run python -m harness.confirm.score                   # every verdict, and verdicts.json
+```
+
+`plan run <tier> --dry-run` prints what would run. Every run is recorded by an
+identity derived from its specification, so a sweep stopped at any point
+restarts where it left off, and `--task order` or `--task recognition` lets two
+machines split a tier without sharing a file. The carrier tier integrates at
+16 kHz and wants a GPU; `scripts/pod_run.sh <AudioMNIST checkout> carrier` runs
+it, or any tier, on a RunPod pod from the pushed branch.
+
+| module | what it owns |
+|---|---|
+| `confirm/protocol.py` | the bank, Protocols A and B, the order task, per-clip noise, row caches |
+| `confirm/arms.py` | the arms, and the reads each one records |
+| `confirm/readout.py` | standardize, project, ridge, per-clip correctness |
+| `confirm/run.py` | one run, and the record it writes |
+| `confirm/plan.py` | the registered tiers, and the parallel driver |
+| `confirm/gates.py` | the legacy-reproduction and zero-drive gates |
+| `confirm/score.py` | the verdicts against the registered bars |
 
 ## Reproducing the paper
 
