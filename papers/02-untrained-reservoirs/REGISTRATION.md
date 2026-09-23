@@ -1,6 +1,6 @@
 # Registration: confirmatory run for Paper 02
 
-**Status: DRAFT. Not frozen. No registered run may start until this is frozen.**
+**Status: FROZEN at 2026-09-23 03:53 MDT, in the commit that wrote this line. No registered run started before it.**
 
 Freezing means one commit that changes the status line above to FROZEN, made and pushed before any registered run starts, so that the hosting service's timestamp corroborates the local one. After freezing, the body is not edited: deviations go in the change log at the end, dated, with the reason.
 
@@ -74,7 +74,7 @@ One function reads every arm: over a window, or over each of four equal windows,
 
 ## 6. The readout, and the two ablations on it
 
-For each training size, an arm's native features are standardized with that training set's own statistics (a feature constant over the training set gets weight zero), brought to each common width by one fixed seeded Gaussian projection, and classified by a closed-form ridge, one hyperplane per class, with its penalty chosen from {0.001, 0.01, 0.1, 1} (scaled by the number of fitted clips) on the last eighth of the training set, or on the validation fold under Protocol B. The ridge is the exploratory one, solved in whichever of its two equivalent forms is smaller; it is tested to make the same penalty choice and the same prediction on every clip as the exploratory code.
+For each training size, an arm's native features are standardized with that training set's own statistics (a feature constant over the training set gets weight zero), brought to each common width by one fixed seeded Gaussian projection (each narrower width is the leading columns of the widest, so a wide read contains the narrow one), and classified by a closed-form ridge, one hyperplane per class, with its penalty chosen from {0.001, 0.01, 0.1, 1} (scaled by the number of fitted clips) on the last eighth of the training set, or on the validation fold under Protocol B. The ridge is the exploratory one, solved in whichever of its two equivalent forms is smaller; it is tested to make the same penalty choice and the same prediction on every clip as the exploratory code.
 
 **Width.** 192, 1,024 and 4,096, plus native. 192 is the floor's native width under the envelope drive. An arm is never read wider than its native width; at or above it, it is read unprojected.
 
