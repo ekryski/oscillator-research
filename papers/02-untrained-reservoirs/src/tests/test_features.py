@@ -14,7 +14,7 @@ def test_the_three_statistics_are_what_they_say():
     x = torch.tensor([[[1.0], [3.0], [2.0], [6.0]]])
     mean, std, change = ft.pooled(x)[0].tolist()
     assert mean == pytest.approx(3.0)
-    assert std == pytest.approx(torch.tensor([1.0, 3.0, 2.0, 6.0]).std().item())
+    assert std == pytest.approx(torch.tensor([1.0, 3.0, 2.0, 6.0]).std().item(), rel=1e-6)
     assert change == pytest.approx((2 + 1 + 4) / 3)
 
 
@@ -132,3 +132,23 @@ def test_the_projection_is_fixed_so_every_arm_and_machine_gets_the_same_one():
     ft._PROJECTIONS.clear()                       # a fresh process draws the same matrix
     assert first.shape == (4, 72) and torch.equal(ft.project(f, 72), first)
     assert not torch.allclose(ft.project(f, 96)[:, :72], first)
+
+
+def test_a_constant_signal_has_a_finite_gradient_through_its_spread():
+    # the trained networks backpropagate through these statistics, and a dead
+    # unit's zero variance would otherwise make the loss NaN
+    x = torch.ones(2, 10, 3, requires_grad=True)
+    ft.pooled(x).sum().backward()
+    assert torch.isfinite(x.grad).all()
+
+
+def test_the_fixed_window_fast_path_equals_the_masked_path():
+    # with no per-clip end, every clip is read over the same frames, by slicing
+    x = trajectory(4, 61, 6, seed=9)
+    full = torch.full((4,), 61)
+    for windows, lo in ((4, 16), (1, 16), (1, 0), (3, 5)):
+        assert torch.allclose(ft.windowed(x, windows, lo=lo), ft.windowed(x, windows, lo=lo, hi=full), atol=1e-6)
+    theta = torch.randn(4, 61, 5, generator=torch.Generator().manual_seed(1)).cumsum(1)
+    sc = torch.cat((theta.sin(), theta.cos()), 2)
+    for windows, lo in ((4, 16), (1, 16)):
+        assert torch.allclose(ft.rotation_rate(sc, windows, lo=lo), ft.rotation_rate(sc, windows, lo=lo, hi=full), atol=1e-6)

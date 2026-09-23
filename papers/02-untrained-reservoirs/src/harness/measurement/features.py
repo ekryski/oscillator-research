@@ -38,6 +38,10 @@ import torch
 STATS_PER_SIGNAL = 3
 #: a window needs two frames for a spread and a change to exist
 MIN_FRAMES_PER_WINDOW = 2
+#: inside the square root of the spread: a constant signal has zero variance,
+#: and the root's gradient there is infinite, which turns a trained network's
+#: loss into NaN. It moves a spread of 1 by 5e-9 and a zero spread to 1e-4.
+VARIANCE_EPS = 1e-8
 #: the projection is drawn once per (native width, target width) from this seed,
 #: so it is identical across arms, runs, processes and machines
 PROJECTION_SEED = 4242
@@ -77,7 +81,22 @@ def _masked_stats(x: torch.Tensor, inside: torch.Tensor) -> torch.Tensor:
     # a change belongs to the span only when both of its frames do
     pair = (inside[:, 1:] & inside[:, :-1])[:, :, None].to(x.dtype)
     change = ((x[:, 1:] - x[:, :-1]).abs() * pair).sum(dim=1) / pair.sum(dim=1).clamp_min(1.0)
-    return torch.cat((mean, var.clamp_min(0.0).sqrt(), change), dim=1)
+    return torch.cat((mean, (var.clamp_min(0.0) + VARIANCE_EPS).sqrt(), change), dim=1)
+
+
+def _fixed_edges(frames: int, lo: int, windows: int) -> list[int]:
+    """Window edges when every clip is read over the same frames [lo, frames)."""
+    if lo + MIN_FRAMES_PER_WINDOW * windows > frames:
+        raise ValueError(f"{frames} frames cannot hold {windows} window(s) after frame {lo}")
+    return [lo + (frames - lo) * j // windows for j in range(windows + 1)]
+
+
+def _slice_stats(x: torch.Tensor) -> torch.Tensor:
+    """mean, std and mean |change| over every frame of x [B, n, D]: the unmasked case."""
+    mean = x.mean(dim=1)
+    var = x.var(dim=1, unbiased=True)
+    change = (x[:, 1:] - x[:, :-1]).abs().mean(dim=1)
+    return torch.cat((mean, (var.clamp_min(0.0) + VARIANCE_EPS).sqrt(), change), dim=1)
 
 
 def windowed(signals: torch.Tensor, windows: int = 1, lo: int = 0,
@@ -87,9 +106,14 @@ def windowed(signals: torch.Tensor, windows: int = 1, lo: int = 0,
     Each clip's own span [lo, hi) is cut into `windows` equal parts. With one
     window this is the whole-span read, which is order-free: mean and spread
     are functions of the multiset of frames, and the mean absolute change is
-    too except at the one junction where two halves of a sequence meet.
+    too except at the one junction where two halves of a sequence meet. With
+    no `hi`, every clip is read over the same frames, and the windows are
+    plain slices.
     """
     b, t, _ = signals.shape
+    if hi is None:
+        e = _fixed_edges(t, lo, windows)
+        return torch.cat([_slice_stats(signals[:, e[j]:e[j + 1]]) for j in range(windows)], dim=1)
     lo_t, hi_t = span(t, lo, hi, windows, b, signals.device)
     edges = _window_edges(lo_t, hi_t, windows)
     frame = torch.arange(t, device=signals.device)[None, :]
@@ -117,6 +141,12 @@ def rotation_rate(sincos: torch.Tensor, windows: int = 1, lo: int = 0,
     s, c = sincos[..., :n], sincos[..., n:]
     cos_d = c[:, 1:] * c[:, :-1] + s[:, 1:] * s[:, :-1]
     sin_d = s[:, 1:] * c[:, :-1] - c[:, 1:] * s[:, :-1]
+    if hi is None:
+        # pair k joins frames k and k + 1; window j holds the pairs whose frames are both inside it
+        e = _fixed_edges(t, lo, windows)
+        return torch.cat([torch.cat((cos_d[:, e[j]:e[j + 1] - 1].mean(dim=1),
+                                     sin_d[:, e[j]:e[j + 1] - 1].mean(dim=1)), dim=1)
+                          for j in range(windows)], dim=1)
     lo_t, hi_t = span(t, lo, hi, windows, b, sincos.device)
     edges = _window_edges(lo_t, hi_t, windows)
     frame = torch.arange(1, t, device=sincos.device)[None, :]   # the later frame of each pair
@@ -126,6 +156,19 @@ def rotation_rate(sincos: torch.Tensor, windows: int = 1, lo: int = 0,
         count = inside.sum(dim=1).clamp_min(1.0)
         out += [(cos_d * inside).sum(dim=1) / count, (sin_d * inside).sum(dim=1) / count]
     return torch.cat(out, dim=1)
+
+
+def projection_matrix(native: int, width: int) -> torch.Tensor:
+    """The fixed [native, width] random projection, drawn once per shape and cached.
+
+    Drawn from one seed for every shape, so every arm, run, process and machine
+    that projects a given native width to a given width uses the same matrix.
+    """
+    key = (native, width)
+    if key not in _PROJECTIONS:
+        gen = torch.Generator().manual_seed(PROJECTION_SEED)
+        _PROJECTIONS[key] = torch.randn(native, width, generator=gen) / math.sqrt(native)
+    return _PROJECTIONS[key]
 
 
 def project(features: torch.Tensor, width: int) -> torch.Tensor:
@@ -139,8 +182,4 @@ def project(features: torch.Tensor, width: int) -> torch.Tensor:
     native = features.shape[1]
     if native <= width:
         return features
-    key = (native, width)
-    if key not in _PROJECTIONS:
-        gen = torch.Generator().manual_seed(PROJECTION_SEED)
-        _PROJECTIONS[key] = torch.randn(native, width, generator=gen) / math.sqrt(native)
-    return features @ _PROJECTIONS[key].to(device=features.device, dtype=features.dtype)
+    return features @ projection_matrix(native, width).to(device=features.device, dtype=features.dtype)
