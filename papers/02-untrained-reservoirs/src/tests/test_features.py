@@ -131,7 +131,13 @@ def test_the_projection_is_fixed_so_every_arm_and_machine_gets_the_same_one():
     first = ft.project(f, 72)
     ft._PROJECTIONS.clear()                       # a fresh process draws the same matrix
     assert first.shape == (4, 72) and torch.equal(ft.project(f, 72), first)
-    assert not torch.allclose(ft.project(f, 96)[:, :72], first)
+
+
+def test_a_narrow_read_is_exactly_the_leading_columns_of_a_wide_one():
+    f = torch.randn(4, 500, generator=torch.Generator().manual_seed(0))
+    assert torch.allclose(ft.project(f, 96)[:, :72], ft.project(f, 72), atol=1e-6)
+    with pytest.raises(ValueError, match="exceeds"):
+        ft.projection_matrix(500, ft.MAX_WIDTH + 1)
 
 
 def test_a_constant_signal_has_a_finite_gradient_through_its_spread():

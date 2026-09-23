@@ -42,10 +42,13 @@ MIN_FRAMES_PER_WINDOW = 2
 #: and the root's gradient there is infinite, which turns a trained network's
 #: loss into NaN. It moves a spread of 1 by 5e-9 and a zero spread to 1e-4.
 VARIANCE_EPS = 1e-8
-#: the projection is drawn once per (native width, target width) from this seed,
-#: so it is identical across arms, runs, processes and machines
+#: the projection is drawn once per native width from this seed, so it is
+#: identical across arms, runs, processes and machines
 PROJECTION_SEED = 4242
-_PROJECTIONS: dict[tuple[int, int], torch.Tensor] = {}
+#: every common width is the leading columns of one projection this wide, so a
+#: narrow read is exactly the first columns of a wide one
+MAX_WIDTH = 4096
+_PROJECTIONS: dict[int, torch.Tensor] = {}
 
 
 def span(frames: int, lo: int, hi: torch.Tensor | None, windows: int,
@@ -159,16 +162,20 @@ def rotation_rate(sincos: torch.Tensor, windows: int = 1, lo: int = 0,
 
 
 def projection_matrix(native: int, width: int) -> torch.Tensor:
-    """The fixed [native, width] random projection, drawn once per shape and cached.
+    """The fixed [native, width] random projection: the leading `width` columns of one draw.
 
-    Drawn from one seed for every shape, so every arm, run, process and machine
-    that projects a given native width to a given width uses the same matrix.
+    One [native, MAX_WIDTH] Gaussian matrix is drawn per native width, from one
+    seed, and cached; every width takes its leading columns. Columns of a
+    Gaussian matrix are independent, so each width is a projection in its own
+    right, and a wide read contains the narrow one: any accuracy the wide read
+    adds comes from the added features alone.
     """
-    key = (native, width)
-    if key not in _PROJECTIONS:
+    if width > MAX_WIDTH:
+        raise ValueError(f"width {width} exceeds the {MAX_WIDTH}-column projection")
+    if native not in _PROJECTIONS:
         gen = torch.Generator().manual_seed(PROJECTION_SEED)
-        _PROJECTIONS[key] = torch.randn(native, width, generator=gen) / math.sqrt(native)
-    return _PROJECTIONS[key]
+        _PROJECTIONS[native] = torch.randn(native, MAX_WIDTH, generator=gen) / math.sqrt(native)
+    return _PROJECTIONS[native][:, :width]
 
 
 def project(features: torch.Tensor, width: int) -> torch.Tensor:

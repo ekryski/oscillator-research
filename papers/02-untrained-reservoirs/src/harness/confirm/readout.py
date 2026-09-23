@@ -115,16 +115,28 @@ def _predict(x: torch.Tensor, mean, sd, w: torch.Tensor) -> torch.Tensor:
                       for i in range(0, x.shape[0], CHUNK)])
 
 
+def _spd_solve(m: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+    """Solve a symmetric positive-definite system: Cholesky, about twice as fast as LU here.
+
+    Every system the ridge solves is a Gram matrix plus a positive penalty, so
+    it is positive definite; if rounding ever says otherwise, LU still answers.
+    """
+    factor, info = torch.linalg.cholesky_ex(m)
+    if int(info) == 0:
+        return torch.cholesky_solve(b, factor)
+    return torch.linalg.solve(m, b)
+
+
 def _solve_primal(a: torch.Tensor, b: torch.Tensor, lam: float, n: int) -> torch.Tensor:
     reg = a.clone()
     reg.diagonal().add_(lam * n)
-    return torch.linalg.solve(reg, b)
+    return _spd_solve(reg, b)
 
 
 def _solve_dual(z: torch.Tensor, k: torch.Tensor, y1h: torch.Tensor, lam: float) -> torch.Tensor:
     reg = k.clone()
     reg.diagonal().add_(lam * z.shape[0])
-    return z.T @ torch.linalg.solve(reg, y1h)
+    return z.T @ _spd_solve(reg, y1h)
 
 
 def ridge(x_tr: torch.Tensor, y_tr: torch.Tensor, x_te: torch.Tensor, y_te: torch.Tensor,
@@ -235,6 +247,13 @@ def read_cells(reads: dict[str, list[torch.Tensor]], labels: torch.Tensor, layou
             wanted = [(w, min(w, native)) for w in widths]
             if n in native_sizes:
                 wanted.append(("native", native))
+            # project once, to the widest width below native; narrower widths are its leading columns
+            below = [e for _, e in wanted if e < native]
+            if below:
+                top = max(below)
+                p_tr = _projected(blocks, rows_tr, mean, sd, top)
+                p_te = _projected(blocks, layout.test, mean, sd, top)
+                p_val = _projected(blocks, layout.val, mean, sd, top) if layout.n_val else None
             done: dict[int, dict] = {}
             for requested, effective in wanted:
                 if effective not in done:
@@ -243,9 +262,8 @@ def read_cells(reads: dict[str, list[torch.Tensor]], labels: torch.Tensor, layou
                         x_tr, x_te = get(rows_tr), get(layout.test)
                         x_val = get(layout.val) if layout.n_val else None
                     else:
-                        x_tr = _projected(blocks, rows_tr, mean, sd, effective)
-                        x_te = _projected(blocks, layout.test, mean, sd, effective)
-                        x_val = _projected(blocks, layout.val, mean, sd, effective) if layout.n_val else None
+                        x_tr, x_te = p_tr[:, :effective], p_te[:, :effective]
+                        x_val = p_val[:, :effective] if layout.n_val else None
                     done[effective] = ridge(x_tr, labels[rows_tr], x_te, y_te, n_classes,
                                             x_val=x_val, y_val=y_val)
                 r = done[effective]
