@@ -71,3 +71,9 @@ def test_verdicts_name_all_three_outcomes():
 
 def test_an_arm_that_was_not_run_is_not_run_rather_than_refuted(recorded):
     assert sc.hypotheses_h1_to_h3(sc.load())["H3"]["verdict"] == "not run"
+
+
+def test_the_whole_score_runs_before_every_tier_is_in(recorded):
+    out = sc.score()
+    assert out["H1-H3"]["H1"]["verdict"] == "supported"
+    assert out["H4"] == {} and out["H4/drives"]["quadrature"]["cells"] == {}

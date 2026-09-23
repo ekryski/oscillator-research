@@ -265,6 +265,8 @@ def hypothesis_h4(cells: list[Cell]) -> dict:
     out = {}
     for factor in factors:
         levels = sorted({c.arm[factor] for c in prim}, key=str)
+        if not levels:                               # tier 2 not run yet
+            continue
         ref = REFERENCE.get(factor, levels[0])
         refs = _index([c for c in prim if c.arm[factor] == ref], lambda c: key(c, factor))
         bar = {"boundary": BARS["shape"], "omega": BARS["omega"], "physics": BARS["family"]}.get(factor)
