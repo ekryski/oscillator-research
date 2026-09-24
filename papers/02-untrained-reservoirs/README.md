@@ -4,21 +4,9 @@ Geometry, coupling, and drive effects in frozen oscillator fields.
 
 **[Read the paper →](spoken-digit-recognition-without-training-DRAFT.md)**
 
-Freeze every physics parameter of a 1,024-oscillator field (~2k parameters) and
-measure spoken-digit recognition (AudioMNIST, speaker-disjoint) across a full
-factorial of six coupling laws x six lattice geometries x three natural-frequency
-structures x pinning x spectral clamp x three drive pathways, at three
-noise/gain conditions — against five trained conventional baselines at exact
-parameter parity, a no-dynamics floor, and published oscillator-reservoir
-anchors.
+An untrained coupled oscillator network (1,024 oscillators, 2,048 parameters) is read by a linear readout on spoken-digit recognition (AudioMNIST, speaker-disjoint) and compared with a spectrogram-only baseline, an uncoupled oscillator network, two leaky-integrator banks and five trained baselines of about the same size, every arm read the same way. A registered confirmatory run varies the coupling function, lattice geometry, natural frequencies, restoring strength, coupling ceiling, input pathway, input gain, noise level, readout width and training-set size, on recognition and on a temporal-order task.
 
-The short version: untrained fields sit about three points above a linear ridge
-on band statistics at every condition tested — above every trained conventional
-baseline at the same budget, yet never far above what their own input
-representation already supports linearly — and no design axis moved that margin,
-except the drive pathway, where phase-referenced input is unreadable untrained.
-On a task built so that order-free readouts provably cannot answer it, the same
-frozen fields read temporal order at 0.97-1.00.
+What each tier runs is in [TIERS.md](TIERS.md), the registered design in [REGISTRATION.md](REGISTRATION.md), and the results, as the tiers finish, in `results/confirmatory/summary.md`. The paper is being rewritten from those results, so this page states none yet; the terms are defined in the paper's glossary (Appendix A).
 
 ## What is here
 
@@ -33,19 +21,23 @@ frozen fields read temporal order at 0.97-1.00.
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
 | [`src/`](src/) | the experiment harness, the sweep driver, and the tests — [start here](src/README.md) |
-| `results/` | the record: 1,940 experiment runs, grouped one file per drive variant and coupling law |
+| [`TIERS.md`](TIERS.md) · [`REGISTRATION.md`](REGISTRATION.md) | what each tier of the confirmatory run tests, and its registered design |
+| `results/confirmatory/` | the confirmatory record, one file per tier, task and input pathway, with `summary.md` |
+| `results/` | the exploratory record: 1,940 runs, grouped one file per drive variant and coupling law |
 | `resources/figures/` | the paper's figures |
 | `resources/audio/` | noise-calibration and order-task audio examples |
 
 ## Checking the numbers
 
-No corpus needed — the committed results are enough:
+No corpus needed; the committed results are enough:
 
 ```bash
-cd src && uv sync && uv run python -m harness.measurement.score all
+cd src && uv sync && uv run python -m harness.confirm.summary
 ```
 
-Every verdict prints beside the pre-registered bar it was scored against.
+Every accuracy and paired difference prints with its spread over seeds and a
+95% interval over test clips. `uv run python -m harness.measurement.score all`
+does the same for the exploratory record, against its bars.
 [`src/README.md`](src/README.md) covers getting the data, the code layout, the
 tests, and re-running the experiments from scratch.
 
