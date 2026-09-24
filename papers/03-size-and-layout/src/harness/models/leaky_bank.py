@@ -1,6 +1,6 @@
 """The non-oscillating control: a bank of independent leaky integrators.
 
-The oscillator field is a large frozen bank of units with memory, read by a
+The oscillator network is a large untrained bank of units with memory, read by a
 linear readout. So is this. What it lacks is the thing under test: nothing
 here rotates and nothing is coupled. Each unit relaxes toward its own input at
 its own speed,
@@ -12,7 +12,7 @@ from being a bank of temporal filters and not from being oscillators.
 
 It is matched to the field the way the field is built. The same routing: band r
 of the front end drives every unit of lattice row r, across all channels and
-columns. The same count: two frozen tensors of shape [channels, grid, grid],
+columns. The same count: two fixed tensors of shape [channels, grid, grid],
 2,048 stored parameters at 4 channels, against the field's coupling kernel and
 natural frequencies. The input gains are drawn as the field draws its natural
 frequencies, N(1, 0.1^2), seed-pinned. The leak rates are not drawn at all: one
@@ -46,7 +46,7 @@ GAIN_MEAN, GAIN_STD = 1.0, 0.1
 
 
 class LeakyBank(nn.Module):
-    """Independent leaky integrators, frozen, with the field's routing and count."""
+    """Independent leaky integrators, untrained, with the network's routing and count."""
 
     def __init__(self, channels: int = 4, grid: int = 16, gain: float = 2.0, seed: int = 0,
                  rate_hz: float = HOP_RATE_HZ, tau_min_s: float = TAU_MIN_S,
@@ -60,7 +60,7 @@ class LeakyBank(nn.Module):
         per_row = channels * grid
         tau_row = torch.logspace(math.log10(tau_min_s), math.log10(tau_max_s), per_row)
         tau = tau_row.view(channels, 1, grid).expand(channels, grid, grid).contiguous()
-        # frozen, but kept as parameters so they are counted the way the field's are
+        # untrained, but kept as parameters so they are counted the way the network's are
         self.input_gain = nn.Parameter(input_gain, requires_grad=False)
         self.tau_s = nn.Parameter(tau, requires_grad=False)
 

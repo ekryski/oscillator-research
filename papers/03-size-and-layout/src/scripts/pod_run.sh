@@ -6,7 +6,7 @@
 #
 # First, always: clone or update the repository, sync the environment, run
 # the test suite, and run the benchmark (`plan benchmark`), which times one
-# batch of every lattice and channel count on the GPU, on the band-energy and
+# batch of every lattice and channel count on the GPU, on the spectrogram and
 # carrier pathways, with every coupling function and geometry, and
 # extrapolates every run and tier. Its report lands in
 # papers/03-size-and-layout/results/benchmark/; nothing else runs unless tiers

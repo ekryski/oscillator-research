@@ -1,4 +1,4 @@
-"""The non-oscillating control: matched to the field, and missing exactly what is under test."""
+"""The non-oscillating control: matched to the network, and missing exactly what is under test."""
 
 import pytest
 import torch
@@ -23,7 +23,7 @@ def test_bank_a_matches_the_field_in_states_and_in_stored_parameters():
 
 
 def test_bank_b_matches_the_field_in_exposed_signals_at_twice_the_parameters():
-    # the field exposes sin and cos per oscillator, a leaky unit exposes one state
+    # the network exposes sin and cos per oscillator, a leaky unit exposes one state
     field = OscillatorField(channels=4, grid=16)
     bank = LeakyBank(channels=8, grid=16)
     with torch.no_grad():

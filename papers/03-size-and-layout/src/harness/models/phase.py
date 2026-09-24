@@ -222,7 +222,7 @@ class PhaseCore(nn.Module):
                  kernel_scaling: str = "exact"):
         super().__init__()
         if blocks != 1:
-            raise ValueError("paper 03 runs one block; stacked blocks were paper 02's exploratory arm")
+            raise ValueError("paper 03 runs one block of coupled oscillators")
         self.channels, self.grid, self.substeps = channels, grid, substeps
         self.boundary = boundary
         self.blocks = nn.ModuleList([PhaseBlock(channels, grid, dt, coupling, damping, spectral_clamp,

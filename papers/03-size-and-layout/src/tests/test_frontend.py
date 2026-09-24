@@ -2,7 +2,7 @@
 
 The front end is fixed and parameter-free, so it cannot carry the result.
 These tests pin the exact frame count, the band-to-row order, that the
-quadrature pathway differs from the band-energy pathway in phase alone, and
+quadrature pathway differs from the spectrogram pathway in phase alone, and
 paper 03's additions: up to 32 bands the front end is paper 02's exactly, and
 at 64 and 128 bands the zero-padded transform leaves no filter empty and keeps
 paper 02's frames.
@@ -32,7 +32,7 @@ TWO_PI = 2 * math.pi
 
 
 def test_hop_frontend_contract():
-    # gate build 1: shape math, determinism, tonotopic ordering, silence
+    # shape math, determinism, tonotopic ordering, silence
     from harness.stimuli.frontend import HOP_LENGTH, HOP_N_FFT, hop_num_frames, hop_rows
     sr, dur = 16000, 16000  # 1 s
     t_expect = (dur - HOP_N_FFT) // HOP_LENGTH + 1
@@ -51,7 +51,7 @@ def test_hop_frontend_contract():
 
 
 def test_hop_quad_frontend_contract():
-    # gate 1b: quadrature-baseband rows — magnitude parity with the
+    # quadrature-baseband rows — magnitude parity with the
     # magnitude path, and the demodulation property (the physics): a tone AT
     # a band center has ~static baseband phase; a tone OFFSET by df advances
     # phase at 2*pi*df per second.
@@ -115,7 +115,7 @@ def test_frontends_are_deterministic_and_batch_independent():
 
 
 def _paper02_rows(waves: torch.Tensor, bands: int) -> torch.Tensor:
-    """Paper 02's band-energy front end, restated from its source: a 512-point transform at every band count."""
+    """Paper 02's spectrogram front end, restated from its source: a 512-point transform at every band count."""
     mel = torchaudio.transforms.MelSpectrogram(sample_rate=16000, n_fft=512, hop_length=256, n_mels=bands,
                                                center=False, power=2.0)
     return torch.clamp((torch.log(mel(waves) + 1e-5).transpose(1, 2) + HOP_OFFSET) / HOP_SCALE, min=0.0)

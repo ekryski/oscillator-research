@@ -1,14 +1,10 @@
 """One readout contract for every arm.
 
-The exploratory phase read its arms three different ways. The field got four
-whole-span means per oscillator, the conventional networks got mean, spread,
-change and their LAST hidden state, and the no-dynamics floor got three
-statistics over every frame, padding included, where every other arm dropped a
-warm-up and masked the padding. A difference between two arms could then be a
-difference between two featurizers, and the last hidden state carries temporal
-order directly, which an order-free read must not.
-
-Here an arm only says which signals it exposes, as a trajectory [B, T, D]. One
+If arms were read different ways (a network by its whole-span means, a trained
+network by its last hidden state, the spectrogram by statistics over padded
+frames), a difference between two arms could be a difference between two
+featurizers, and a last hidden state carries temporal order directly, which an
+order-free read must not. So an arm only says which signals it exposes, as a trajectory [B, T, D]. One
 function turns any trajectory into features, over a span the caller names:
 
     pooled     mean, standard deviation, mean |frame-to-frame change|
@@ -21,11 +17,11 @@ difference does not telescope.
 
 `rotation_rate` is the one arm-specific extra, kept as a secondary read: the
 signed mean rotation of each oscillator, its natural observable. No other arm
-has an analogue, so a read that includes it is labelled as favouring the field.
+has an analogue, so a read that includes it is labelled as favouring the network.
 
 `project` brings any arm's features to a common width, because a ridge's
-capacity grows with the number of features it is handed: the field exposed
-16,384 and its floor 192, an 85-fold difference in fitted coefficients.
+capacity grows with the number of features it is handed: paper 02's network
+has 24,576 windowed features and its spectrogram-only baseline 192.
 """
 
 from __future__ import annotations
@@ -72,8 +68,8 @@ def span(frames: int, lo: int, hi: torch.Tensor | None, windows: int,
 
     `hi` is each clip's count of valid frames, or None for the whole clip. A
     clip shorter than two frames per window is read a little way into its
-    trailing frames, to exactly the minimum, the rule the exploratory harness
-    used; every arm gets the same widening, so it cannot favour one.
+    trailing frames, to exactly the minimum, as paper 02 reads it; every arm gets
+    the same widening, so it cannot favour one.
     """
     lo_t = torch.full((batch,), lo, dtype=torch.long, device=device)
     hi_t = (torch.full((batch,), frames, dtype=torch.long, device=device) if hi is None
@@ -146,7 +142,7 @@ def pooled(signals: torch.Tensor, lo: int = 0, hi: torch.Tensor | None = None) -
 
 def rotation_rate(sincos: torch.Tensor, windows: int = 1, lo: int = 0,
                   hi: torch.Tensor | None = None) -> torch.Tensor:
-    """The field's signed mean rotation: [B, T, 2N] -> [B, windows * 2N].
+    """A network's signed mean rotation: [B, T, 2N] -> [B, windows * 2N].
 
     `sincos` holds sin θ for every oscillator, then cos θ. Per oscillator and
     per window this is the mean of cos Δθ and of sin Δθ between consecutive

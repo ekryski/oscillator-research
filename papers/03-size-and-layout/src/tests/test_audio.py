@@ -5,7 +5,7 @@ must be exact, because every length mask downstream is computed from it rather
 than measured. And nothing may depend on having seen the whole clip: an
 utterance-level statistic is unknowable mid-stream, so a frontend that used one
 would quietly make the pipeline non-streaming and would let the bookend do work
-the field is being credited for.
+the network is being credited for.
 """
 
 import sys

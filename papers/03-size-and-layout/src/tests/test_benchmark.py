@@ -59,8 +59,8 @@ def test_a_run_is_extrapolated_from_its_clips_frames_reads_and_passes(pathway):
 
 def test_the_baselines_and_untimed_arms_are_modelled():
     m = {"cells": {}, "designs": {}, "front_end": {}, "throughput": FAST}
-    floor = rn.Spec("size", "recognition", "spectrogram", 0.0, None, 0, Arm("baseline", grid=8))
-    assert bm.run_seconds(floor, m) == (plan.seconds(floor, "mps"), False)
+    base = rn.Spec("size", "recognition", "spectrogram", 0.0, None, 0, Arm("baseline", grid=8))
+    assert bm.run_seconds(base, m) == (plan.seconds(base, "mps"), False)
     net = plan._net("size", "spectrogram", 0.0, 1.0, 0, Arm("network", grid=64))
     assert bm.run_seconds(net, m) == (plan.seconds(net, "mps"), False)
 

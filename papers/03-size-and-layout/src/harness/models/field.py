@@ -5,10 +5,9 @@ exactly as paper 02 built it, in the same order of random draws, so a seed
 gives the same coupling kernels and natural frequencies in both papers: the
 kernels are drawn first, then the natural frequencies, from the global
 generator the caller seeds; the initial phases come from a generator of their
-own. Paper 02's exploratory extras (the random-graph core, the input-as-omega
-encoder, stacked blocks, the frozen probe and its featurizers) are not carried
-over: nothing in paper 03 uses them, and none of them drew from the global
-generator before the kernels.
+own. Model options paper 03 does not run (a random-graph core, an input-as-omega
+encoder, stacked blocks, a trained probe and its featurizers) are not carried
+over, and none of them drew from the global generator before the kernels.
 
 Channels are parallel copies, like the heads of one attention layer: every
 channel gets the same input, has its own kernel and natural frequencies, and

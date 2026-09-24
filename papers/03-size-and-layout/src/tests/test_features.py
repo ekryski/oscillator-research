@@ -26,7 +26,7 @@ def test_width_is_three_per_signal_per_window():
 
 def test_frames_outside_the_span_cannot_touch_the_read():
     # padding after a clip ends, and a warm-up before it starts, must be invisible:
-    # the exploratory floor pooled over both and every other arm over neither
+    # a read that pooled over both would hand an arm the clip's length
     x = trajectory()
     hi = torch.tensor([12, 15, 9])
     clean = ft.windowed(x, 2, lo=4, hi=hi)

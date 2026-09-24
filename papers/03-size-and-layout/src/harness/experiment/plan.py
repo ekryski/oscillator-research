@@ -560,7 +560,7 @@ def planned(names: list[str], grids=(), channels=()) -> list[rn.Spec]:
 def pending(specs: list[rn.Spec]) -> list[rn.Spec]:
     """Specs not yet recorded here, and not recorded completely by paper 02. A reused spec whose paper 02
     run is missing (a paper 02 tier that has not run) or lacks the seeded projection is run here
-    instead, and that run is the one reported; its fixed cells equal paper 02's (the reuse gate)."""
+    instead, and that run is the one reported; its fixed cells equal paper 02's (the reuse check)."""
     done = {g: rn.recorded_ids(g) for g in {s.group() for s in specs}}
     return sorted((s for s in specs if s.run_id() not in done[s.group()] and not paper02_complete(s, paper02_run(s))),
                   key=seconds, reverse=True)

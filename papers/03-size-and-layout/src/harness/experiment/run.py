@@ -41,7 +41,7 @@ from harness.utils.paths import results_root
 
 #: paper 02's common widths; an arm is never read wider than its native width
 WIDTHS = (192, 1024, 4096)
-#: the size every verdict is read at
+#: the training size of the primary cell
 PRIMARY_SIZE = 2048
 PRIMARY_STAT = am.PRIMARY_READ
 #: clips per batch, by task and pathway; the carrier runs at 16 kHz, so its batches
@@ -233,7 +233,7 @@ def assemble(spec: Spec, bank: dict) -> Clips:
     train_pool, test_pool = pr.protocol_a(bank)
     if spec.task in ("order", "sequence"):
         if spec.pathway != "spectrogram":
-            raise ValueError("the memory tasks run on the band-energy pathway")
+            raise ValueError("the memory tasks run on the spectrogram pathway")
         block, n_tr, n_te = ((_order_block, pr.ORDER_TRAIN, pr.ORDER_TEST) if spec.task == "order"
                              else (_sequence_block, pr.SEQUENCE_TRAIN, pr.SEQUENCE_TEST))
         tr, y_tr = block(bank, spec, train_pool, n_tr, spec.seed + 1)

@@ -165,7 +165,7 @@ def add_noise(waves: torch.Tensor, lens: torch.Tensor, clip_ids: torch.Tensor,
 
 def front_end(waves: torch.Tensor, pathway: str, grid: int = 16, window: int = HOP_N_FFT) -> torch.Tensor:
     """The fixed, parameter-free front end of each input pathway, at `grid` bands and an analysis
-    window of `window` samples (the band-energy and quadrature pathways; the carrier has no window)."""
+    window of `window` samples (the spectrogram and quadrature pathways; the carrier has no window)."""
     if pathway == "spectrogram":
         return hop_rows(waves, grid, window=window)
     if pathway == "quadrature":

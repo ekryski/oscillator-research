@@ -1,4 +1,4 @@
-"""The shared readout: the exploratory ridge at any size, and every arm read the same way."""
+"""The shared readout: paper 02's ridge at any size, and every arm read the same way."""
 
 import pytest
 import torch

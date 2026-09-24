@@ -1,6 +1,6 @@
 """Hop-frame front ends: fixed log-mel rows at 62.5 frames per second.
 
-The band-energy pathway: rows are log-energy trajectories per mel band,
+The spectrogram pathway: rows are log-energy trajectories per mel band,
 non-negative, slow and in frequency order (mel band b drives row b). Fixed:
 no trained parameters and no per-utterance statistics. Every band count uses
 paper 02's frames: a 512-sample (32 ms) Hann window every 256 samples.
@@ -104,7 +104,7 @@ _QUAD: dict[tuple[int, int, int], tuple[torch.Tensor, torch.Tensor]] = {}
 
 
 def _quad_maps(grid: int, sample_rate: int, window: int = HOP_N_FFT) -> tuple[torch.Tensor, torch.Tensor]:
-    """(band -> peak bin index [grid], that bin's frequency in Hz [grid]), from the band-energy filters."""
+    """(band -> peak bin index [grid], that bin's frequency in Hz [grid]), from the mel filters."""
     key = (grid, sample_rate, window)
     if key not in _QUAD:
         fb = _mel(grid, sample_rate, window=window).mel.mel_scale.fb   # [n_freqs, n_mels], the CPU copy
@@ -119,7 +119,7 @@ def hop_rows_quad(waves: torch.Tensor, grid: int = HOP_N_ROWS, sample_rate: int 
                   window: int = HOP_N_FFT) -> torch.Tensor:
     """waves [B, L] -> [B, T, grid, 2]: per band (A cos phi_bb, A sin phi_bb).
 
-    A is the band-energy row (the same envelope as the band-energy pathway, so
+    A is the band energy row (the same envelope as the spectrogram pathway, so
     the pathway differs in phase alone); phi_bb is the peak bin's phase,
     demodulated by the bin frequency and referenced to the start of each
     transform frame, which for a zero-padded transform gives paper 02's phase

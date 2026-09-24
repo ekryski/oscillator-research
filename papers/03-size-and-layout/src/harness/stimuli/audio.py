@@ -1,4 +1,4 @@
-"""The log-mel front end behind the band-energy pathway."""
+"""The log-mel front end behind the spectrogram pathway."""
 
 from __future__ import annotations
 
