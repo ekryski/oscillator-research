@@ -1,4 +1,4 @@
-"""Every accuracy and every comparison in the confirmatory record, with its spread.
+"""Every accuracy and every comparison in the record, with its spread.
 
     uv run python -m harness.confirm.summary      # write summary.json and summary.md
 
@@ -12,9 +12,8 @@ per-clip differences are averaged; folds and order-task pairs each have their
 own test clips, so theirs are concatenated. Whether a difference is a gain is
 left to the reader.
 
-The registered bars are still scored by `harness.confirm.score`. Reporting
-without them was decided after Tier 1 had been seen, and is logged in
-DESIGN.md's decision log.
+Nothing decides whether a result passes; DESIGN.md's decision log records
+when the design's first pass/fail bars were dropped.
 """
 
 from __future__ import annotations
@@ -27,11 +26,11 @@ from collections import defaultdict
 import numpy as np
 
 from harness.confirm import plan, terms
+from harness.confirm import record as rec
 from harness.confirm import run as rn
-from harness.confirm import score as sc
-from harness.confirm.score import Cell
+from harness.confirm.record import Cell
 
-FIELD = sc.FIELD_LABEL
+FIELD = rec.FIELD_LABEL
 SEVERED = FIELD.replace("field-", "severed-", 1)
 READ = {"recognition": "windowed", "order": "pooled"}
 #: the reference level of each design factor: the Tier 1 network's own
@@ -54,10 +53,10 @@ def spread(values: dict[str, float]) -> dict:
 
 def interval(per_clip: np.ndarray) -> list[float]:
     """The 95% interval of the mean from resampling clips, in points."""
-    rng = np.random.default_rng(sc.BOOT_SEED)
+    rng = np.random.default_rng(rec.BOOT_SEED)
     boots = np.concatenate([per_clip[rng.integers(0, len(per_clip), (CHUNK, len(per_clip)))].mean(axis=1)
-                            for _ in range(sc.BOOTSTRAP // CHUNK)])
-    lo, hi = np.quantile(boots, [(1 - sc.CONFIDENCE) / 2, (1 + sc.CONFIDENCE) / 2])
+                            for _ in range(rec.BOOTSTRAP // CHUNK)])
+    lo, hi = np.quantile(boots, [(1 - rec.CONFIDENCE) / 2, (1 + rec.CONFIDENCE) / 2])
     return [100 * float(lo), 100 * float(hi)]
 
 
@@ -75,7 +74,7 @@ def paired(pairs: list[tuple[Cell, Cell]]) -> dict:
     if all(a.bits and b.bits for a, b in pairs):
         by_set = defaultdict(list)
         for a, b in pairs:
-            by_set[(a.fold, a.pair)].append(sc._bits(a) - sc._bits(b))
+            by_set[(a.fold, a.pair)].append(rec.bits(a) - rec.bits(b))
         out["ci95"] = interval(np.concatenate([np.mean(v, axis=0) for _, v in sorted(by_set.items())]))
     return out
 
@@ -234,11 +233,11 @@ def projections(cells: list[Cell]) -> list[dict]:
 
 
 def summary(cells: list[Cell] | None = None) -> dict:
-    cells = sc.load() if cells is None else cells
+    cells = rec.load() if cells is None else cells
     return {"accuracy": accuracies(cells),
             "comparisons": (tier1(cells) + _against_network(cells, "becker", "recognition") + design(cells)
                             + drives(cells) + projections(cells)),
-            "order_floor_at_chance": sc.order_gate(cells)}
+            "order_baseline_at_chance": rec.baseline_at_chance(cells)}
 
 
 # ---------------------------------------------------------------------------
@@ -332,7 +331,7 @@ def progress() -> dict[str, tuple[int, int]]:
 
 def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
     acc, cmp = s["accuracy"], s["comparisons"]
-    w, n = sc.PRIMARY_WIDTH, sc.PRIMARY_SIZE
+    w, n = rec.PRIMARY_WIDTH, rec.PRIMARY_SIZE
 
     def prim_acc(tier, task, n_train=n):
         return sorted((r for r in acc if r["tier"] == tier and r["task"] == task and r["width"] == w
@@ -374,11 +373,11 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
     lines += ["", "## Tier 1, order task: differences, pooled over the five pairs", ""]
     lines += _grid([r for r in prim_cmp("tier1") if r["task"] == "order"], by_gain,
                    _by_noise, _diff)
-    gate = s["order_floor_at_chance"]
-    off = [k for k, v in gate.items() if not v["valid"]]
-    lines += ["", "Order task, spectrogram-only baseline at chance (its 95% interval contains 50%): "
-              f"{len(gate) - len(off)} of "
-              f"{len(gate)} pair and noise cells" + (f"; not at chance: {', '.join(off)}." if off else "."), ""]
+    at = s["order_baseline_at_chance"]
+    off = [k for k, v in at.items() if not all(r["contains_chance"] for r in v.values())]
+    lines += ["", "Order task, the spectrogram-only baseline's 95% interval contains chance (50%) in "
+              f"{len(at) - len(off)} of {len(at)} pair and noise cells"
+              + (f"; it does not in: {', '.join(off)}." if off else "."), ""]
     lines += ["## Tier 2, design: each level minus its reference, over matched pairs", ""]
     lines += _grid(prim_cmp("tier2"), lambda r: r["comparison"], _by_condition, _diff)
     proj = [r for r in acc if r["tier"] == "projection" and r["width"] == w and r["n_train"] == n]

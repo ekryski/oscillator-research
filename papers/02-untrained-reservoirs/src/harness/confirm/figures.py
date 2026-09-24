@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import argparse
 
-from harness.confirm import score as sc
+from harness.confirm import record as rec
 from harness.confirm import summary as sm
 from harness.confirm import terms
 from harness.utils.paths import FIGURES_DIR
@@ -55,9 +55,9 @@ FIGURES = (("c1-recognition-gain1", (1.0,)), ("c2-recognition-gain2", (2.0,)),
 
 def recognition_cells() -> dict[tuple, dict]:
     """(arm, read, gain, noise) -> the accuracy record at the primary cell."""
-    cells = sc.load(["tier1-recognition-envelope"])
+    cells = rec.load(["tier1-recognition-envelope"])
     return {(r["arm"], r["read"], r["gain"], r["noise"]): r for r in sm.accuracies(cells)
-            if r["width"] == sc.PRIMARY_WIDTH and r["n_train"] == sc.PRIMARY_SIZE}
+            if r["width"] == rec.PRIMARY_WIDTH and r["n_train"] == rec.PRIMARY_SIZE}
 
 
 def recognition_table(acc: dict[tuple, dict], gains: tuple[float, ...]) -> str:
@@ -118,13 +118,13 @@ def trained_table(acc: dict[tuple, dict]) -> str:
     from harness.confirm import run as rn
     record = json.loads((rn.record_root() / "tier1-recognition-envelope.json").read_text())["runs"]
     params, failed, total = {}, Counter(), Counter()
-    for run_id, rec in record.items():
+    for run_id, entry in record.items():
         label = run_id.split("/")[-2]
         if label in TRAINED:
-            params[label] = rec["arm_meta"]["trained_params"]
-            if rec["spec"]["noise_db"] is not None:
+            params[label] = entry["arm_meta"]["trained_params"]
+            if entry["spec"]["noise_db"] is not None:
                 total[label] += 1
-                failed[label] += not rec["health"]["healthy"]
+                failed[label] += not entry["health"]["healthy"]
     lines = ["| trained baseline | parameters | " + " | ".join(h for _, h in NOISES)
              + " | failed runs with noise |", "|---" * (len(NOISES) + 3) + "|"]
     for label in TRAINED:

@@ -62,7 +62,7 @@ class Layout:
 
 
 def pack(correct: torch.Tensor) -> str:
-    """Per-clip correctness as base64 bits, so a verdict can be bootstrapped later."""
+    """Per-clip correctness as base64 bits, so a comparison can be bootstrapped later."""
     return base64.b64encode(np.packbits(correct.cpu().numpy().astype(np.uint8)).tobytes()).decode()
 
 

@@ -35,7 +35,7 @@ from harness.utils.paths import RESULTS_DIR
 
 #: the registered common widths; an arm is never read wider than its native width
 WIDTHS = (192, 1024, 4096)
-#: the size every verdict is read at
+#: the training size of the primary cell
 PRIMARY_SIZE = 2048
 PRIMARY_STAT = {"recognition": "windowed", "order": "pooled"}
 #: clips per batch, by task and drive; the carrier runs at 16 kHz, so its batches

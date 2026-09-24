@@ -26,7 +26,7 @@ from harness.confirm import run as rn
 from harness.confirm.arms import Arm
 
 NOISES = (None, 0.0, 5.0)
-DESIGN_NOISES = (0.0, 5.0)          # no design verdict is read from clean audio, where the task saturates
+DESIGN_NOISES = (0.0, 5.0)          # clean audio is left out of the design tiers, where the task saturates
 GAINS = (1.0, 2.0)
 SEEDS = (0, 1, 2)
 ANN_ARCHS = ("gru", "tcn", "cnn", "transformer", "s4d")

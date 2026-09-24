@@ -7,7 +7,7 @@ import pytest
 import torch
 
 from harness.confirm import readout as ro
-from harness.confirm import score as sc
+from harness.confirm import record as rec
 from harness.confirm import summary as sm
 
 N_TEST = 400
@@ -38,7 +38,7 @@ def recorded(tmp_path, monkeypatch):
             runs[f"A/{noise:g}db/s{seed}/floor"] = run(FLOOR, noise, None, seed, 0.70, "windowed@wholeclip")
             for gain in (1.0, 2.0):
                 acc = 0.78 + 0.01 * seed
-                runs[f"A/{noise:g}db/g{gain:g}/s{seed}/{sc.FIELD_LABEL}"] = run(FIELD, noise, gain, seed, acc,
+                runs[f"A/{noise:g}db/g{gain:g}/s{seed}/{rec.FIELD_LABEL}"] = run(FIELD, noise, gain, seed, acc,
                                                                                   "windowed")
     root = tmp_path / "confirmatory"
     root.mkdir(parents=True)
@@ -53,7 +53,7 @@ def test_an_accuracy_is_its_mean_spread_and_every_replicate_in_points():
 
 
 def test_the_network_is_compared_with_the_gainless_baseline_at_every_gain(recorded):
-    rows = [r for r in sm.tier1(sc.load())
+    rows = [r for r in sm.tier1(rec.load())
             if r["comparison"] == "coupled oscillator network minus the spectrogram-only baseline, whole clip"]
     assert {(r["noise"], r["gain"]) for r in rows} == {(0.0, 1.0), (0.0, 2.0), (5.0, 1.0), (5.0, 2.0)}
     for r in rows:
@@ -63,9 +63,9 @@ def test_the_network_is_compared_with_the_gainless_baseline_at_every_gain(record
 
 
 def test_folds_are_replicates_and_their_test_clips_are_pooled_not_averaged():
-    a = [sc.Cell("becker", "recognition", "envelope", None, 1.0, 0, FIELD, "f", (), "windowed", 192, 18000,
+    a = [rec.Cell("becker", "recognition", "envelope", None, 1.0, 0, FIELD, "f", (), "windowed", 192, 18000,
                  acc, bits(acc, f), N_TEST, f) for f, acc in enumerate((0.80, 0.90))]
-    b = [sc.Cell("becker", "recognition", "envelope", None, None, 0, FLOOR, "floor", (), "windowed", 192, 18000,
+    b = [rec.Cell("becker", "recognition", "envelope", None, None, 0, FLOOR, "floor", (), "windowed", 192, 18000,
                  0.75, bits(0.75, 10 + f), N_TEST, f) for f in range(2)]
     r = sm.paired(list(zip(a, b, strict=True)))
     assert r["values"] == pytest.approx({"fold0": 5.0, "fold1": 15.0}) and r["mean"] == pytest.approx(10.0)
@@ -76,4 +76,4 @@ def test_the_summary_runs_before_every_tier_is_in_and_the_record_ignores_it(reco
     sm.main([])
     text = (recorded / "summary.md").read_text()
     assert "(not run yet)" in text and "+9.00 ± 1.00" in text
-    assert len(sc.load()) == 18                  # summary.json sits beside the record but is not read as one
+    assert len(rec.load()) == 18                  # summary.json sits beside the record but is not read as one
