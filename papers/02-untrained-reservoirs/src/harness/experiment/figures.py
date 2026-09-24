@@ -170,6 +170,53 @@ def design_figure(rows: list[dict], stem: str = "c4-design-differences") -> None
     print(f"wrote {path}.{{pdf,png}}")
 
 
+#: the training-size figure's arms: (arm, read, gain, legend, colour); the reservoirs at gain 1
+SIZE_ARMS = (("baseline", "windowed@wholeclip", None, "spectrogram-only baseline, whole clip", "#8C8C8C"),
+             (sm.COUPLED, "windowed", 1.0, "coupled oscillator network", "#534AB7"),
+             (sm.UNCOUPLED, "windowed", 1.0, "uncoupled oscillator network", "#A9A4DB"),
+             ("bank-state", "windowed", 1.0, "leaky-integrator bank, state-matched", "#D85A30"),
+             ("trained-transformer", "windowed", None, "transformer", "#0F6E56"),
+             ("trained-s4d", "windowed", None, "S4D", "#5DB39A"),
+             ("trained-gru", "windowed", None, "GRU", "#A7D8C8"))
+
+
+def size_figure(stem: str = "c5-training-size") -> None:
+    """Accuracy against training-set size at widths 192 (solid) and 4,096 (dashed), per noise level."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    cells = rec.load(["tier1-recognition-spectrogram"])
+    acc = {(r["arm"], r["read"], r["gain"], r["noise"], r["width"], r["n_train"]): r for r in sm.accuracies(cells)}
+    sizes = sorted({k[5] for k in acc})
+    fig, axes = plt.subplots(1, 2, figsize=(9.0, 4.2), sharey=True)
+    for ax, noise, title in ((axes[0], 0.0, "0 dB"), (axes[1], 5.0, "+5 dB")):
+        for arm, read, gain, legend, colour in SIZE_ARMS:
+            for width, style in ((192, "-"), (4096, "--")):
+                rows = [acc.get((arm, read, gain, noise, width, n)) for n in sizes]
+                if any(r is None for r in rows) or (width == 4096 and arm in ("baseline",) + TRAINED):
+                    continue
+                ax.errorbar(sizes, [r["mean"] for r in rows], yerr=[r["sd"] for r in rows], color=colour,
+                            linestyle=style, marker="o", markersize=3.5, capsize=2, linewidth=1.2,
+                            label=legend if width == 192 else None)
+        ax.set_xscale("log")
+        ax.set_xticks(sizes, [f"{n:,}" for n in sizes])
+        ax.minorticks_off()
+        ax.set_title(title, fontsize=10)
+        ax.set_xlabel("training clips")
+        ax.spines[["top", "right"]].set_visible(False)
+    axes[0].set_ylabel("test accuracy (%)")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, frameon=False, fontsize=8, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.08))
+    fig.tight_layout()
+    path = FIGURES_DIR / stem
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 200})):
+        fig.savefig(path.with_suffix(suffix), bbox_inches="tight", **kwargs)
+    plt.close(fig)
+    print(f"wrote {path}.{{pdf,png}}")
+
+
 TRAINED = ("trained-gru", "trained-tcn", "trained-cnn", "trained-transformer", "trained-s4d")
 
 
@@ -206,6 +253,7 @@ def main(argv: list[str] | None = None) -> None:
     for gains in ((1.0,), (2.0,)):
         print(f"\ngain {gains[0]:g}\n" + recognition_table(acc, gains))
     print("\ntrained baselines\n" + trained_table(acc))
+    size_figure()
     rows = design_differences()
     if rows:
         design_figure(rows)
