@@ -162,6 +162,7 @@ uv run python -m harness.confirm.plan run gate tier1 --workers 3 --threads 2
 uv run python -m harness.confirm.gates check             # every zero-drive cell reads chance
 uv run python -m harness.confirm.plan run tier2 becker tier3 tier4 --workers 6 --threads 1
 uv run python -m harness.confirm.summary                 # every accuracy and difference with its spread
+uv run python -m harness.confirm.figures                 # the paper's confirmatory figures and their tables
 uv run python -m harness.confirm.score                   # the registered bars' verdicts, for the record
 ```
 
@@ -181,6 +182,7 @@ it, or any tier, on a RunPod pod from the pushed branch.
 | `confirm/plan.py` | the registered tiers, and the parallel driver |
 | `confirm/gates.py` | the legacy-reproduction and zero-drive gates |
 | `confirm/summary.py` | every accuracy and paired difference, with its spread: `summary.json` and `summary.md` |
+| `confirm/figures.py` | the paper's confirmatory figures, and the tables printed beside them |
 | `confirm/score.py` | the verdicts against the registered bars, kept for the record |
 
 ## Reproducing the paper
