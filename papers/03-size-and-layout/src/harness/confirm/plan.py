@@ -4,6 +4,7 @@
     uv run python -m harness.confirm.plan prepare                         # the row caches, once
     uv run python -m harness.confirm.plan run size --grids 8 16 32 --dry-run
     uv run python -m harness.confirm.plan run gate size trained --grids 8 16 32 --workers 6
+    uv run python -m harness.confirm.plan benchmark --device cuda --out ../results/benchmark/cuda.json
 
 Every tier is a list of specs; nothing here is a free choice at run time.
 `--grids` and `--channels` select a stage of a tier (its lattices and channel
@@ -27,6 +28,7 @@ from collections import defaultdict
 from collections.abc import Iterator
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import get_context
+from pathlib import Path
 
 from harness.confirm import arms as am
 from harness.confirm import protocol as pr
@@ -713,11 +715,24 @@ def main(argv: list[str] | None = None) -> None:
                    help="auto: CUDA if present, else Apple Silicon's GPU (mps), else the CPU; only cpu is "
                         "bit-identical to paper 02")
     r.add_argument("--dry-run", action="store_true")
+    b = sub.add_parser("benchmark", help="time one batch of each network on a device, and extrapolate every tier")
+    b.add_argument("--device", default="auto", choices=DEVICES)
+    b.add_argument("--grids", type=int, nargs="+", default=list(GRIDS))
+    b.add_argument("--channels", type=int, nargs="+", default=list(CHANNELS))
+    b.add_argument("--pathways", nargs="+", default=["envelope", "carrier"],
+                   choices=["envelope", "quadrature", "carrier"])
+    b.add_argument("--no-designs", action="store_true", help="skip timing the other coupling functions and geometries")
+    b.add_argument("--max-clips", type=int, default=512, help="clips per timed batch at most")
+    b.add_argument("--out", type=Path, help="the JSON report")
     a = ap.parse_args(argv)
     if a.command == "estimate":
         _print_estimate(estimate(a.tiers or None))
     elif a.command == "prepare":
         prepare(a.workers, tuple(a.grids))
+    elif a.command == "benchmark":
+        from harness.confirm.benchmark import benchmark
+        benchmark(a.device, tuple(a.grids), tuple(a.channels), tuple(a.pathways), not a.no_designs, a.max_clips,
+                  a.out)
     else:
         drive(a.tiers, a.workers, a.threads, a.device, a.dry_run, tuple(a.grids), tuple(a.channels))
 
