@@ -111,8 +111,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument("--core", choices=("phase", "sl", "sl-fixedamp", "randgraph"), default="phase",
                     help="phase core, Stuart-Landau (sl), amplitude-clamped SL "
                          "(sl-fixedamp), or the random-graph connectivity control")
-    ap.add_argument("--boundary", choices=("torus", "cylinder", "sheet", "helix", "cube", "sphere",
-                                           "moebius", "klein", "diamond"),
+    ap.add_argument("--boundary", choices=("torus", "cylinder", "sheet", "helix", "cube", "sphere"),
                     default="torus",
                     help="field geometry — only the lattice wrap rule differs; "
                          "per-shape tonotopy is pre-declared in harness/models/phase.py; "

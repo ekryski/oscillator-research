@@ -20,7 +20,6 @@ from harness.models.geometries import (
     GEOMETRIES,
     build_geometry,
     cube_dims,
-    diamond_dims,
     drive_map,
     sphere_cos_weights,
     sphere_latitudes,
@@ -99,15 +98,10 @@ def test_drive_map_rejects_unknown_boundaries():
         drive_map("hyperboloid", 16)
 
 
-def test_cube_and_diamond_require_the_grids_their_layouts_assume():
+def test_the_cube_requires_the_grid_its_layout_assumes():
     assert cube_dims(16) == (16, 4, 4)
-    assert diamond_dims(16) == (8, 4, 4)
     with pytest.raises(ValueError, match="perfect-square"):
         cube_dims(12)
-    with pytest.raises(ValueError, match="perfect-square"):
-        diamond_dims(12)
-    with pytest.raises(ValueError, match="perfect-square"):
-        diamond_dims(9)  # odd: no A/B sublattice split
 
 
 def test_sphere_latitudes_span_the_globe_with_open_poles():
@@ -130,7 +124,7 @@ def test_periodic_shapes_wrap_and_open_shapes_do_not():
     axis and reaches nothing on one with an open row edge."""
     grid = 8
     reach = {}
-    for boundary in ("torus", "cylinder", "sheet", "klein"):
+    for boundary in ("torus", "cylinder", "sheet"):
         blk = PhaseBlock(channels=1, grid=grid, dt=1.0, coupling="forced", damping=0.0,
                          spectral_clamp=0.0, coupling_impl="matmul", boundary=boundary)
         with torch.no_grad():
@@ -143,7 +137,7 @@ def test_periodic_shapes_wrap_and_open_shapes_do_not():
         out = blk.step(theta, torch.zeros_like(theta), coup, substeps=1)
         reach[boundary] = out[0, 0, 0].abs().max().item()
     # float32 FFT round-trip leaves ~1e-8 of noise, so compare magnitudes
-    assert min(reach["torus"], reach["klein"]) > 1e-3, f"periodic rows wrap: {reach}"
+    assert reach["torus"] > 1e-3, f"periodic rows wrap: {reach}"
     assert max(reach["cylinder"], reach["sheet"]) < 1e-5, f"open rows do not: {reach}"
 
 
@@ -203,14 +197,9 @@ def test_every_coupling_law_runs_on_every_venue(coupling):
         assert torch.isfinite(feats).all(), f"{boundary} x {coupling}"
 
 
-def test_only_the_twisted_venues_correct_their_spectral_clamp():
-    """The mirrored double-cover extension has operator norm sqrt(2), so
-    moebius and klein must cap lower to keep the clamp a true bound. Every
-    other venue's max |K-hat| already bounds its operator."""
+def test_every_geometry_bounds_its_operator_without_a_correction():
     for name in BOUNDARIES:
-        geom = build_geometry(name, 16)
-        expected = math.sqrt(2.0) if name in ("moebius", "klein") else 1.0
-        assert geom.clamp_factor == pytest.approx(expected), name
+        assert build_geometry(name, 16).clamp_factor == pytest.approx(1.0), name
 
 
 def test_geometry_registry_is_complete_and_self_describing():

@@ -1,9 +1,9 @@
 """The geometry interface every different oscillator model lattice geometry implements.
 
-A geometry is a "seating chart" of how the oscillator's lattice is arranged, 
-not a different model: all nine geometries reuse the same [C, G, G] kernel 
-and state storage, so the parameter budget is matched by construction and a 
-geometry comparison is a genuine single-factor experiment. What changes is 
+A geometry is a "seating chart" of how the oscillator's lattice is arranged,
+not a different model: all six geometries reuse the same [C, G, G] kernel
+and state storage, so the parameter budget is matched by construction and a
+geometry comparison is a genuine single-factor experiment. What changes is
 only how the lattice's edges are glued, which shows up in exactly four places:
 
     embed_kernel     open axes need the kernel at signed offsets in a padded
@@ -52,7 +52,7 @@ class Geometry(ABC):
         """Raise if this geometry cannot be built at `self.grid`.
 
         Most geometries work at any grid size; the ones with derived cell dimensions
-        (cube, diamond) override this to reject grids their layout cannot
+        (the cube) override this to reject grids their layout cannot
         express, so the failure lands at construction rather than mid-sweep.
         """
 
@@ -60,8 +60,8 @@ class Geometry(ABC):
     def clamp_factor(self) -> float:
         """Divisor applied to the spectral clamp so the cap stays a TRUE
         operator-norm bound. 1.0 wherever max |K-hat| already bounds the
-        operator; the twisted geometries override it because their mirrored
-        double-cover extension carries norm sqrt(2)."""
+        operator, which it does for every geometry here; one whose extension
+        is not norm-preserving would override it."""
         return 1.0
 
     # --- kernel side ------------------------------------------------------
@@ -140,7 +140,7 @@ class Geometry(ABC):
 
 class PlanarGeometry(Geometry):
     """Shared machinery for the geometries that stay a 2-D row/column grid:
-    torus, cylinder, sheet, sphere, and the twisted pair. They differ only in
+    torus, cylinder, sheet and sphere. They differ only in
     which axes are padded open and how the field is prepared before the
     transform, so the kernel side is identical for all of them."""
 

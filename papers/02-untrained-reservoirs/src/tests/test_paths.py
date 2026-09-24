@@ -56,6 +56,6 @@ def test_the_committed_results_tree_is_where_the_paper_points():
 def test_data_directory_is_not_committed():
     """The corpus and the derived bank are rebuilt, never shipped."""
     keep = {p.name for p in Path(paths.DATA_DIR).glob("*")} if paths.DATA_DIR.is_dir() else set()
-    assert not (keep - {"README.md", ".gitignore", "AudioMNIST", "cache"}), (
+    assert not (keep - {"README.md", ".gitignore", "AudioMNIST", "cache", "logs"}), (
         "src/data/ should hold only its README, its .gitignore, and untracked data")
     assert (paths.DATA_DIR / ".gitignore").is_file()

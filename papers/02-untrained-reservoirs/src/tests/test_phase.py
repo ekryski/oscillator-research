@@ -138,8 +138,6 @@ def test_multiblock_forward_and_grad():
 # ---------------------------------------------------------------------------
 
 NEW_BOUNDARIES = ("sheet", "helix", "cube", "sphere")
-# geometry expansion: the orientability pair + Parzival's diamond lattice
-F069_BOUNDARIES = ("moebius", "klein", "diamond")
 
 
 def _delta_core(boundary: str, grid: int, impl: str, taps: dict[tuple[int, int], float]) -> PhaseCore:
@@ -257,7 +255,7 @@ def test_sphere_open_poles_cos_weights_periodic_longitude():
 
 
 def test_new_boundaries_fft_equals_matmul():
-    for boundary in NEW_BOUNDARIES + F069_BOUNDARIES:
+    for boundary in NEW_BOUNDARIES:
         torch.manual_seed(3)
         theta = torch.rand(2, 1, 2, 16, 16) * TWO_PI
         drive = torch.randn(2, 2, 16, 16) * 0.1
@@ -276,14 +274,11 @@ def test_new_boundaries_fft_equals_matmul():
 def test_boundary_clamp_is_true_operator_norm_bound():
     # The dense matmul operator IS the coupling operator: its spectral norm may
     # never exceed the clamp, under any padding/embedding (cylinder/sheet/
-    # sphere), reshaping (helix/cube), twisted double cover (moebius/klein —
-    # whose cap is clamp/sqrt(2), the mirrored-copy extension carrying norm
-    # sqrt(2)), or bipartite blocking (diamond). For the exact-norm shapes the
-    # clamp is TIGHT (max |K-hat| is the operator norm — diamond included:
-    # block-antidiagonal singular values are the block spectra), so a binding
-    # clamp lands the norm right at the cap.
+    # sphere) or reshaping (helix/cube). For the exact-norm shapes the clamp
+    # is TIGHT (max |K-hat| is the operator norm), so a binding clamp lands the
+    # norm right at the cap.
     clamp = 0.7
-    for boundary in ("torus", "cylinder") + NEW_BOUNDARIES + F069_BOUNDARIES:
+    for boundary in ("torus", "cylinder") + NEW_BOUNDARIES:
         torch.manual_seed(0)
         core = PhaseCore(channels=2, grid=16, blocks=1, spectral_clamp=clamp,
                          coupling_impl="matmul", boundary=boundary)
@@ -291,7 +286,7 @@ def test_boundary_clamp_is_true_operator_norm_bound():
             core.blocks[0].kernel.mul_(10.0)  # make the clamp bind hard
         norms = torch.linalg.matrix_norm(core.prepare_couplings()[0], ord=2)
         assert (norms <= clamp + 1e-3).all(), (boundary, norms)
-        if boundary in ("torus", "helix", "cube", "diamond"):
+        if boundary in ("torus", "helix", "cube"):
             assert (norms >= clamp - 1e-2).all(), (boundary, norms)
         # non-vacuous: without the clamp the same kernel exceeds the cap
         torch.manual_seed(0)
@@ -304,7 +299,7 @@ def test_boundary_clamp_is_true_operator_norm_bound():
 
 
 def test_new_boundaries_long_scan_stays_finite():
-    for boundary in NEW_BOUNDARIES + F069_BOUNDARIES:
+    for boundary in NEW_BOUNDARIES:
         torch.manual_seed(0)
         core = PhaseCore(channels=1, grid=16, blocks=1, substeps=2, boundary=boundary)
         drives = torch.randn(1, 1000, 1, 16, 16)
@@ -315,7 +310,7 @@ def test_new_boundaries_long_scan_stays_finite():
 
 
 def test_new_boundaries_grad_reaches_kernel_and_drive():
-    for boundary in NEW_BOUNDARIES + F069_BOUNDARIES:
+    for boundary in NEW_BOUNDARIES:
         torch.manual_seed(0)
         core = PhaseCore(channels=2, grid=16, blocks=1, substeps=2, boundary=boundary)
         drives = torch.randn(1, 25, 2, 16, 16, requires_grad=True)
@@ -359,7 +354,7 @@ def test_drive_map_matches_preregistered_tonotopy():
     from harness import drive_map, rows_to_drive
     g = 16
     row_ids = torch.arange(g * g).view(g, g)
-    for boundary in ("torus", "cylinder") + NEW_BOUNDARIES + F069_BOUNDARIES:
+    for boundary in ("torus", "cylinder") + NEW_BOUNDARIES:
         m = drive_map(boundary, g)
         assert m.shape == (g, g) and m.dtype == torch.long
         # every pre-registered mapping lands on storage row b (chosen layouts)
@@ -369,16 +364,12 @@ def test_drive_map_matches_preregistered_tonotopy():
     assert torch.equal(drive_map("helix", g)[3], torch.arange(48, 64))
     # cube: band b = the whole 4x4 z-slice b
     assert torch.equal(drive_map("cube", g)[5].view(4, 4), torch.arange(80, 96).view(4, 4))
-    # diamond: band b = crystal layer b along a1 (odd b = the B sublattice of
-    # run-plane b//2) — the 16 sites of one sublattice's 4x4 v-w sheet
-    assert torch.equal(drive_map("diamond", g)[5].view(4, 4), torch.arange(80, 96).view(4, 4))
     # the harness broadcast puts a one-hot band EXACTLY on drive_map's sites
     rows = torch.zeros(1, 1, g)
     rows[0, 0, 5] = 1.0
     drive = rows_to_drive(rows, channels=2, gain=2.0)[0, 0, 0].flatten()
     assert torch.equal(drive.nonzero().flatten(), drive_map("sphere", g)[5])
-    for bad in (lambda: drive_map("ring", g), lambda: drive_map("cube", 8),
-                lambda: drive_map("diamond", 8)):
+    for bad in (lambda: drive_map("ring", g), lambda: drive_map("cube", 8)):
         try:
             bad()
             raise AssertionError("expected ValueError")
@@ -394,7 +385,7 @@ def test_sphere_impl_attribute_records_lattice_approximation():
 
 
 def test_cube_requires_perfect_square_grid():
-    for boundary in ("cube", "diamond"):
+    for boundary in ("cube",):
         try:
             _core(boundary=boundary)  # default grid=8: cell dims undefined
             raise AssertionError("expected ValueError")
@@ -403,15 +394,14 @@ def test_cube_requires_perfect_square_grid():
 
 
 def test_kernel_support_rejected_on_nongrid_boundaries():
-    for boundary, grid in (("helix", 8), ("cube", 16), ("sphere", 8), ("diamond", 16)):
+    for boundary, grid in (("helix", 8), ("cube", 16), ("sphere", 8)):
         try:
             _core(boundary=boundary, grid=grid, kernel_support=1)
             raise AssertionError("expected ValueError")
         except ValueError:
             pass
-    # 2D signed offsets: mask valid (twisted pair included — keeps the
-    # cylinder<->moebius / torus<->klein comparisons single-variable)
-    for boundary in ("sheet", "moebius", "klein"):
+    # 2D signed offsets: the mask is valid
+    for boundary in ("sheet",):
         _core(boundary=boundary, kernel_support=1)
 
 
@@ -449,163 +439,6 @@ def test_multiblock_new_boundary_forward_and_grad():
     assert state.shape == (2, 2, 4, 8, 8) and torch.isfinite(feats).all()
     feats.sum().backward()
     assert core.blocks[1].kernel.grad is not None
-
-
-# ---------------------------------------------------------------------------
-# geometry expansion: moebius / klein (the orientability pair) + diamond
-# (Parzival's lattice). Pre-registered spec:
-#
-# ---------------------------------------------------------------------------
-
-
-def test_moebius_seam_mirrors_frequency_axis():
-    # The cylinder<->moebius single-variable pair: identical interior physics;
-    # a pulse crossing the twisted column seam returns at the MIRRORED row —
-    # the open/frequency axis flips, the non-orientability signature.
-    g = 8
-    for impl in ("fft", "matmul"):
-        for boundary, dst_row in (("cylinder", 2), ("moebius", g - 1 - 2)):
-            core = _delta_core(boundary, g, impl, {(0, 1): 1.0})  # column offset +1
-            theta = torch.zeros(1, 1, 1, g, g)
-            theta[0, 0, 0, 2, g - 1] = 1.0  # pulse at the seam column
-            out = _one_step(core, theta)[0, 0]
-            assert abs(out[dst_row, 0].item() - math.sin(1.0)) < 1e-5, (impl, boundary)
-            out[dst_row, 0] = 0.0
-            assert out.abs().max() < 1e-6, (impl, boundary)  # nowhere else
-        # interior propagation identical between the pair members
-        outs = {}
-        for boundary in ("cylinder", "moebius"):
-            core = _delta_core(boundary, g, impl, {(0, 1): 1.0})
-            theta = torch.zeros(1, 1, 1, g, g)
-            theta[0, 0, 0, 2, 3] = 1.0
-            outs[boundary] = _one_step(core, theta)[0, 0]
-        assert torch.allclose(outs["cylinder"], outs["moebius"], atol=1e-6), impl
-
-
-def test_klein_row_seam_flips_columns_column_seam_plain():
-    # The torus<->klein pair: a pulse crossing the ROW (frequency-axis) seam
-    # returns at the MIRRORED column; the column seam stays an untwisted wrap.
-    g = 8
-    for impl in ("fft", "matmul"):
-        for boundary, dst_col in (("torus", 5), ("klein", g - 1 - 5)):
-            core = _delta_core(boundary, g, impl, {(1, 0): 1.0})  # row offset +1
-            theta = torch.zeros(1, 1, 1, g, g)
-            theta[0, 0, 0, g - 1, 5] = 1.0  # pulse in the last row
-            out = _one_step(core, theta)[0, 0]
-            assert abs(out[0, dst_col].item() - math.sin(1.0)) < 1e-5, (impl, boundary)
-            out[0, dst_col] = 0.0
-            assert out.abs().max() < 1e-6, (impl, boundary)
-        # column wrap: untwisted (the flip acts on columns only when the ROW
-        # seam is crossed) — and interior propagation matches the torus
-        core = _delta_core("klein", g, impl, {(0, 1): 1.0})
-        theta = torch.zeros(1, 1, 1, g, g)
-        theta[0, 0, 0, 3, g - 1] = 1.0
-        out = _one_step(core, theta)[0, 0]
-        assert abs(out[3, 0].item() - math.sin(1.0)) < 1e-5, impl
-        out[3, 0] = 0.0
-        assert out.abs().max() < 1e-6, impl
-        outs = {}
-        for boundary in ("torus", "klein"):
-            core = _delta_core(boundary, g, impl, {(1, 0): 1.0})
-            theta = torch.zeros(1, 1, 1, g, g)
-            theta[0, 0, 0, 3, 5] = 1.0
-            outs[boundary] = _one_step(core, theta)[0, 0]
-        assert torch.allclose(outs["torus"], outs["klein"], atol=1e-6), impl
-
-
-def test_moebius_klein_twisted_translation_equivariance():
-    # The twisted shapes' surviving symmetry: translation along the periodic
-    # axis WITH the deck rule — entries that wrap the seam arrive mirrored.
-    # It commutes only for kernels symmetric in the flipped axis's signed
-    # offsets (a non-orientable venue has no global orientation for the
-    # antisymmetric part — chart note in the core docstring): moebius rows are
-    # symmetrized with the unpaired -G/2 offset zeroed (the open axis has no
-    # +G/2 partner); klein columns are symmetrized (-G/2 = +G/2 mod G is
-    # self-paired). omega made constant, as in the other equivariance tests.
-    g = 16
-
-    def troll_moebius(t: torch.Tensor, shift: int) -> torch.Tensor:
-        r = torch.roll(t, shift, dims=-1).clone()
-        r[..., :, :shift] = r[..., :, :shift].flip(-2)  # wrapped cols: row-mirrored
-        return r
-
-    def troll_klein(t: torch.Tensor, shift: int) -> torch.Tensor:
-        r = torch.roll(t, shift, dims=-2).clone()
-        r[..., :shift, :] = r[..., :shift, :].flip(-1)  # wrapped rows: col-mirrored
-        return r
-
-    conj = (-torch.arange(g)) % g
-    for boundary, roll_fn in (("moebius", troll_moebius), ("klein", troll_klein)):
-        torch.manual_seed(4)
-        core = PhaseCore(channels=1, grid=g, blocks=1, substeps=1, boundary=boundary)
-        with torch.no_grad():
-            k = core.blocks[0].kernel
-            if boundary == "moebius":
-                k.copy_(0.5 * (k + k[:, conj, :]))
-                k[:, g // 2, :] = 0.0
-            else:
-                k.copy_(0.5 * (k + k[:, :, conj]))
-            core.blocks[0].natural_freqs.fill_(0.7)
-        theta = torch.rand(1, 1, 1, g, g) * TWO_PI
-        drive = torch.randn(1, 1, g, g)
-        out, _ = core.step_frame(theta, drive)
-        out_r, _ = core.step_frame(roll_fn(theta, 5), roll_fn(drive, 5))
-        assert torch.allclose(roll_fn(out, 5), out_r, atol=1e-5), boundary
-
-
-def test_diamond_tetrahedral_neighbors_and_bipartite():
-    # Parzival's lattice: the four A<-B nearest-neighbor taps (bond vectors
-    # tau, tau-a1, tau-a2, tau-a3 = kernel slots [0,0], [2,0], [0,4], [0,1])
-    # land a B pulse on exactly its 4 tetrahedral A neighbors — adjacent
-    # crystal layers only, u-axis wrap exercised. And the coupling is strictly
-    # bipartite: with ANY kernel, an A-only pulse produces zero on A sites.
-    g, s, nu = 16, 4, 8
-    nn_taps = {(0, 0): 1.0, (2, 0): 1.0, (0, 4): 1.0, (0, 1): 1.0}
-    u0, v0, w0 = 7, 1, 2  # u0 = 7 exercises the u-axis wrap (7+1 -> 0)
-    expected = {(2 * ((u0 + du) % nu), ((v0 + dv) % s) * s + ((w0 + dw) % s))
-                for du, dv, dw in ((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))}
-    for impl in ("fft", "matmul"):
-        core = _delta_core("diamond", g, impl, nn_taps)
-        theta = torch.zeros(1, 1, 1, g, g)
-        theta[0, 0, 0, 2 * u0 + 1, v0 * s + w0] = 1.0  # pulse on B(7, 1, 2)
-        out = _one_step(core, theta)[0, 0]
-        for r, c in expected:
-            assert abs(out[r, c].item() - math.sin(1.0)) < 1e-5, (impl, r, c)
-            out[r, c] = 0.0
-        assert out.abs().max() < 1e-6, impl  # nowhere else: 4-coordination exactly
-        # bipartite deadness: A-only pulse -> all-A silence, B response live
-        core = _delta_core("diamond", g, impl, {})
-        with torch.no_grad():
-            torch.manual_seed(5)
-            core.blocks[0].kernel.normal_()
-        theta = torch.zeros(1, 1, 1, g, g)
-        theta[0, 0, 0, 6, 9] = 1.0  # an A site (even layer)
-        out = _one_step(core, theta)[0, 0]
-        assert out[0::2].abs().max() < 1e-6, impl  # A hears nothing from A
-        assert out[1::2].abs().sum() > 0.1, impl   # B hears A
-
-
-def test_diamond_cell_translation_equivariance():
-    # Rolling the storage by whole primitive-run steps commutes with the
-    # coupling: +2 rows = +1 run along a1 (layer l -> l+2, sublattice kept);
-    # +4 flat columns = +1 run along a2 (v -> v+1); +1 within each 4-column
-    # slab = +1 run along a3 (w -> w+1).
-    torch.manual_seed(2)
-    core = PhaseCore(channels=1, grid=16, blocks=1, substeps=1, boundary="diamond")
-    with torch.no_grad():
-        core.blocks[0].natural_freqs.fill_(0.7)
-    theta = torch.rand(1, 1, 1, 16, 16) * TWO_PI
-    drive = torch.randn(1, 1, 16, 16)
-    rolls = (
-        lambda t: torch.roll(t, 2, dims=-2),
-        lambda t: torch.roll(t, 4, dims=-1),
-        lambda t: torch.roll(t.reshape(*t.shape[:-2], 16, 4, 4), 1, dims=-1
-                             ).reshape(t.shape),
-    )
-    out, _ = core.step_frame(theta, drive)
-    for roll_fn in rolls:
-        out_r, _ = core.step_frame(roll_fn(theta), roll_fn(drive))
-        assert torch.allclose(roll_fn(out), out_r, atol=1e-5)
 
 
 # ---------------------------------------------------------------------------

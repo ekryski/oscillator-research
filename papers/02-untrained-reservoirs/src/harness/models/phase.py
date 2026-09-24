@@ -51,8 +51,7 @@ controls depend on that.
 Spectral clamp. The clamp rescales each channel so max |K-hat| stays under the
 cap. For the fully periodic venues that IS the operator's exact 2-norm; for the
 padded and weighted ones, pad/crop/weighting all have norm <= 1, so it remains
-a true bound. The twisted pair needs a correction and supplies its own
-`clamp_factor` — see `geometries/twisted.py`.
+a true bound.
 """
 
 from __future__ import annotations
