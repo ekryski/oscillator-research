@@ -278,80 +278,128 @@ def paper02_run(spec: rn.Spec) -> dict | None:
 # Cost and memory, for ordering and for the estimate
 # ---------------------------------------------------------------------------
 #
-# Measured on one thread of an Apple M-series CPU (2026-09-23, while other
-# work held the remaining cores; tests/ and the scratch probes in the commit
-# that added this). Milliseconds per clip for ONE channel of the reference
-# network (Kuramoto, torus, band-energy): simulating 61 frames, and computing
-# the windowed statistics. Paper 02's tier 2 measured 16 x 16 x 4 at about
-# 5 ms a clip, which these reproduce.
+# Milliseconds per clip for ONE channel of the reference network (Kuramoto,
+# torus, band-energy pathway): simulating 61 frames, and computing the windowed
+# statistics, on each device, with the coupling implementation `auto` picks
+# there (models/phase.py). Measured on this project's Mac, an M1 Max with 64 GB:
+#
+#   cpu  one thread, 2026-09-23, while paper 02's runs held the other cores;
+#        paper 02's tier 2 measured 16 x 16 x 4 at about 5 ms a clip, which
+#        these reproduce.
+#   mps  its 32-core GPU, 2026-09-24, same load on the CPU, batches of 512
+#        clips (8, 16), 256 (32), 64 (64) and 32 (128), after warm-up. The
+#        statistics were measured at 16, 64 and 128 and the 8 and 32 values
+#        interpolated in proportion to G * G; the bank's likewise.
+#
+# CUDA was not measured, and the estimate does not cover it.
 
-SIM_MS = {8: 0.29, 16: 0.97, 32: 2.1, 64: 7.3, 128: 38.5}
-FEAT_MS = {8: 0.3, 16: 0.5, 32: 2.4, 64: 7.5, 128: 27.0}
-#: relative simulation cost at 64 x 64, one channel
-SHAPE_COST = {"torus": 1.0, "cylinder": 1.9, "sheet": 2.4, "helix": 0.74, "cube": 1.66, "sphere": 1.19}
-FAMILY_COST = {"kuramoto": 1.0, "sakaguchi": 1.2, "harmonic2": 2.6, "winfree": 2.2, "sl": 1.7,
-               "sl-fixedamp": 0.9}
-#: the bank simulates about a third as fast as the network, and has half its signals
-BANK_SIM, BANK_FEAT = 0.35, 0.5
-QUADRATURE_COST = 1.3
-CARRIER_STEPS = 16000 / 61              # the carrier integrates at the sample rate
-PROJECT_FLOPS = 150e9                   # single-thread matmul throughput measured for the projection
-RANDN_PER_S = 48e6                      # single-thread Gaussian draws per second (the projection matrix)
-RIDGE_S = 10.0                          # one read's ridge fits at every width, 2,048 clips
-#: trained baselines, minutes to train on one thread at 2,048 clips and 30 epochs, measured at three budgets
-ANN_MIN = {"gru": (0.6, 0.5, 3.8), "tcn": (0.2, 3.1, 22.7), "cnn": (0.3, 3.4, 22.7),
-           "transformer": (0.7, 0.9, 2.0), "s4d": (0.5, 16.2, 154.2)}
+SIM_MS = {"cpu": {8: 0.29, 16: 0.97, 32: 2.1, 64: 7.3, 128: 38.5},
+          "mps": {8: 0.031, 16: 0.03, 32: 0.14, 64: 0.90, 128: 5.5}}
+FEAT_MS = {"cpu": {8: 0.3, 16: 0.5, 32: 2.4, 64: 7.5, 128: 27.0},
+           "mps": {8: 0.01, 16: 0.034, 32: 0.14, 64: 0.57, 128: 2.05}}
+#: relative simulation cost of each geometry and coupling function. CPU: measured at 64 x 64 (FFT). MPS:
+#: the dense operator (up to 64 x 64) does not depend on the geometry, and the second harmonic couples
+#: four fields instead of two; at 128 x 128 (FFT) the factors measured with FFT at 64 x 64.
+SHAPE_COST = {"cpu": {"torus": 1.0, "cylinder": 1.9, "sheet": 2.4, "helix": 0.74, "cube": 1.66, "sphere": 1.19},
+              "mps-fft": {"torus": 1.0, "cylinder": 1.06, "sheet": 1.66, "helix": 0.21, "cube": 2.43,
+                          "sphere": 1.08}}
+FAMILY_COST = {"cpu": {"kuramoto": 1.0, "sakaguchi": 1.2, "harmonic2": 2.6, "winfree": 2.2},
+               "mps": {"kuramoto": 1.0, "sakaguchi": 1.0, "harmonic2": 2.0, "winfree": 1.0},
+               "mps-fft": {"kuramoto": 1.0, "sakaguchi": 0.93, "harmonic2": 1.08, "winfree": 0.81}}
+#: the Stuart-Landau cores: relative to the reference on the CPU (FFT, as in paper 02), and measured
+#: outright on MPS (ms per channel and clip; dense up to 64 x 64, FFT at 128; 8 taken from 16, and 32
+#: the geometric mean of its neighbours; the fixed-amplitude core assumed the same)
+SL_COST = {"cpu": {"sl": 1.7, "sl-fixedamp": 0.9}}
+SL_MS_MPS = {8: 0.063, 16: 0.063, 32: 0.31, 64: 1.51, 128: 5.04}
+#: the bank, relative to the reference network (CPU), or measured (MPS; 8 and 32 interpolated)
+BANK_SIM = {"cpu": 0.35}
+BANK_MS_MPS = {8: 0.004, 16: 0.014, 32: 0.05, 64: 0.21, 128: 0.51}
+BANK_FEAT = 0.5                         # the bank has one signal per state, the network two
+QUADRATURE_COST = 1.3                   # measured on the CPU, assumed on MPS
+CARRIER_STEPS = 16000 / 61              # the carrier integrates at the sample rate (extrapolated, both devices)
+PROJECT_FLOPS = {"cpu": 150e9, "mps": 1.5e12}   # the projection's matrix products, measured
+RANDN_PER_S = 48e6                      # Gaussian draws per second on one CPU thread (the matrices, every device)
+TWO_THREADS = 1.65                      # measured speed-up drawing a channel's two matrices in two threads
+RIDGE_S = 10.0                          # one read's ridge fits at every width under one projection, CPU float64
+#: trained baselines, minutes to train at 2,048 clips and 30 epochs, measured per step at three budgets
+ANN_MIN = {"cpu": {"gru": (0.6, 0.5, 3.8), "tcn": (0.2, 3.1, 22.7), "cnn": (0.3, 3.4, 22.7),
+                   "transformer": (0.7, 0.9, 2.0), "s4d": (0.5, 16.2, 154.2)},
+           "mps": {"gru": (0.98, 1.12, 1.09), "tcn": (0.28, 0.81, 0.25), "cnn": (0.17, 0.16, 0.19),
+                   "transformer": (0.23, 0.29, 0.46), "s4d": (0.61, 0.97, 6.9)}}
 ANN_BUDGETS = (2048, 65536, 524288)
 CLIPS = rn.PRIMARY_SIZE + 6000
+COST_DEVICES = ("cpu", "mps")
 
 
-def _ann_minutes(arch: str, budget: int) -> float:
+def _ann_minutes(arch: str, budget: int, device: str) -> float:
     """Log-log interpolation between the measured budgets (flat below the smallest)."""
-    xs, ys = [math.log(b) for b in ANN_BUDGETS], [math.log(m) for m in ANN_MIN[arch]]
+    xs, ys = [math.log(b) for b in ANN_BUDGETS], [math.log(m) for m in ANN_MIN[device][arch]]
     x = math.log(max(budget, ANN_BUDGETS[0]))
     i = 0 if x <= xs[1] else 1
     return math.exp(ys[i] + (ys[i + 1] - ys[i]) * (x - xs[i]) / (xs[i + 1] - xs[i]))
 
 
-def seconds(spec: rn.Spec) -> float:
-    """Estimated single-thread CPU seconds for one run."""
-    a = spec.arm
-    if a.kind == "ann":
-        return 60 * _ann_minutes(a.arch, a.budget) + RIDGE_S
-    if a.kind == "floor":
-        return 2.0 + RIDGE_S * len(spec.reads or (1, 1))
-    grid = a.grid
-    sim, feat = SIM_MS[grid], FEAT_MS[grid]
+def _sim_feat_ms(spec: rn.Spec, device: str) -> tuple[float, float]:
+    """Simulation and statistics, ms per channel and clip, for the arm and pathway on a device."""
+    a, grid = spec.arm, spec.arm.grid
+    sim, feat = SIM_MS[device][grid], FEAT_MS[device][grid]
     if a.kind == "bank":
-        sim, feat = sim * BANK_SIM, feat * BANK_FEAT
+        sim = sim * BANK_SIM["cpu"] if device == "cpu" else BANK_MS_MPS[grid]
+        feat *= BANK_FEAT
+    elif a.physics in ("sl", "sl-fixedamp"):
+        sim = sim * SL_COST["cpu"][a.physics] if device == "cpu" else SL_MS_MPS[grid]
+    elif device == "cpu":
+        sim *= SHAPE_COST["cpu"][a.boundary] * FAMILY_COST["cpu"][a.physics]
+    elif grid > 64:                                      # FFT on MPS
+        sim *= SHAPE_COST["mps-fft"][a.boundary] * FAMILY_COST["mps-fft"][a.physics]
     else:
-        sim *= SHAPE_COST[a.boundary] * FAMILY_COST[a.physics]
+        sim *= FAMILY_COST["mps"][a.physics]
     if spec.drive == "quadrature":
         sim *= QUADRATURE_COST
     if spec.drive == "carrier":
         sim, feat = sim * CARRIER_STEPS, feat * CARRIER_STEPS
-    per_channel_features = (24 if a.kind == "field" else 12) * grid * grid
+    return sim, feat
+
+
+def seconds(spec: rn.Spec, device: str = "cpu") -> float:
+    """Estimated seconds for one run: on one CPU thread (`cpu`) or on the M1 Max's GPU (`mps`).
+
+    Both include what runs on the CPU either way: drawing the two projection
+    matrices, and the ridge readout under each projection.
+    """
+    a = spec.arm
+    reads = len(spec.reads or (1, 1))
+    ridge = RIDGE_S * reads * 2                      # the fixed and the seeded projection
+    if a.kind == "ann":
+        return 60 * _ann_minutes(a.arch, a.budget, device) + ridge
+    if a.kind == "floor":
+        return 2.0 + ridge
+    sim, feat = _sim_feat_ms(spec, device)
+    per_channel_features = (24 if a.kind == "field" else 12) * a.grid * a.grid
     native = per_channel_features * a.channels
     top = min(4096, native)
-    project_ms = 1e3 * 2 * per_channel_features * top / PROJECT_FLOPS
-    draw_s = native * 4096 / RANDN_PER_S if native > 4096 else 0.0
-    return a.channels * CLIPS * (sim + feat + project_ms) / 1e3 + draw_s + RIDGE_S
+    project_ms = 2 * 1e3 * 2 * per_channel_features * top / PROJECT_FLOPS[device]
+    draws = 2 * native * 4096 / RANDN_PER_S if native > 4096 else 0.0
+    if spec.streamed:
+        draws /= TWO_THREADS                         # a channel's two matrices are drawn in two threads
+    return a.channels * CLIPS * (sim + feat + project_ms) / 1e3 + draws + ridge
 
 
 def memory_gb(spec: rn.Spec) -> float:
-    """Rough peak memory of one run: the held features and projection matrix (in memory), or one
-    channel's training features and matrix rows (streamed), plus a batch of trajectories."""
+    """Rough peak memory of one run: the held features and the two projection matrices (in memory), or
+    one channel's training features and its rows of both matrices (streamed), plus a batch of
+    trajectories. On MPS this is the unified memory the CPU and GPU share."""
     a = spec.arm
     if a.kind in ("floor", "ann"):
         return 1.0
     signals = (2 if a.kind == "field" else 1) * a.grid * a.grid
     frames = 16000 if spec.drive == "carrier" else 61
     if spec.streamed:
-        held = (rn.PRIMARY_SIZE + 4096) * 12 * signals * 4
+        held = (rn.PRIMARY_SIZE + 2 * 4096) * 12 * signals * 4
         batch = rn.batch_size(spec, states=a.grid * a.grid) * frames * signals * 4
     else:
         native = 12 * signals * a.channels
-        held = CLIPS * native * 4 + native * 4096 * 4 * (native > 4096)
+        held = CLIPS * native * 4 + 2 * native * 4096 * 4 * (native > 4096)
         batch = rn.batch_size(spec) * frames * signals * a.channels * 4
     return (held + batch) / 1e9 + 0.5
 
@@ -390,7 +438,8 @@ def pending(specs: list[rn.Spec]) -> list[rn.Spec]:
 
 
 def estimate(names: list[str] | None = None) -> list[dict]:
-    """Per tier and lattice: runs, runs reused from paper 02, CPU-hours on one thread, largest memory."""
+    """Per tier and lattice: runs, runs reused from paper 02, hours on one CPU thread and on the M1 Max's
+    GPU, the longest run on each, and the largest memory."""
     rows = []
     for name in names or list(TIERS):
         by = defaultdict(list)
@@ -398,30 +447,35 @@ def estimate(names: list[str] | None = None) -> list[dict]:
             by[s.arm.grid].append(s)
         for grid in sorted(by):
             specs = by[grid]
-            rows.append({"tier": name, "grid": grid, "runs": len(specs), "reused": sum(map(reused, specs)),
-                         "cpu_hours": sum(seconds(s) for s in specs if not reused(s)) / 3600,
-                         "largest_run_hours": max(seconds(s) for s in specs) / 3600,
-                         "peak_gb": max(memory_gb(s) for s in specs),
-                         "streamed": sum(s.streamed for s in specs)})
+            todo = [s for s in specs if not reused(s)]
+            row = {"tier": name, "grid": grid, "runs": len(specs), "reused": len(specs) - len(todo),
+                   "peak_gb": max(memory_gb(s) for s in specs), "streamed": sum(s.streamed for s in specs)}
+            for device in COST_DEVICES:
+                row[f"{device}_hours"] = sum(seconds(s, device) for s in todo) / 3600
+                row[f"{device}_longest_hours"] = max(seconds(s, device) for s in specs) / 3600
+            rows.append(row)
     return rows
 
 
 def _print_estimate(rows: list[dict]) -> None:
     print(f"{'tier':18s} {'grid':>5s} {'runs':>6s} {'reused':>6s} {'streamed':>8s} {'CPU-h':>9s} "
-          f"{'largest h':>9s} {'peak GB':>8s}")
-    totals = defaultdict(lambda: [0, 0, 0.0])
+          f"{'MPS-h':>8s} {'longest CPU':>11s} {'longest MPS':>11s} {'peak GB':>8s}")
+    totals = defaultdict(lambda: [0, 0, 0.0, 0.0])
     for r in rows:
         print(f"{r['tier']:18s} {r['grid']:5d} {r['runs']:6d} {r['reused']:6d} {r['streamed']:8d} "
-              f"{r['cpu_hours']:9.1f} {r['largest_run_hours']:9.2f} {r['peak_gb']:8.1f}")
+              f"{r['cpu_hours']:9.1f} {r['mps_hours']:8.1f} {r['cpu_longest_hours']:10.2f}h "
+              f"{r['mps_longest_hours']:10.2f}h {r['peak_gb']:8.1f}")
         t = totals[r["tier"]]
         t[0] += r["runs"]
         t[1] += r["reused"]
         t[2] += r["cpu_hours"]
+        t[3] += r["mps_hours"]
     print()
-    for tier, (runs, re, hours) in totals.items():
-        print(f"{tier:18s} {runs:6d} runs, {re:4d} from paper 02, {hours:9.0f} CPU-hours")
-    print(f"{'all':18s} {sum(t[0] for t in totals.values()):6d} runs, "
-          f"{sum(t[1] for t in totals.values()):4d} from paper 02, {sum(t[2] for t in totals.values()):9.0f} CPU-hours")
+    for tier, (runs, re, cpu, mps) in totals.items():
+        print(f"{tier:18s} {runs:6d} runs, {re:4d} from paper 02, {cpu:8.0f} CPU-hours, {mps:7.1f} MPS-hours")
+    print(f"{'all':18s} {sum(t[0] for t in totals.values()):6d} runs, {sum(t[1] for t in totals.values()):4d} "
+          f"from paper 02, {sum(t[2] for t in totals.values()):8.0f} CPU-hours, "
+          f"{sum(t[3] for t in totals.values()):7.1f} MPS-hours")
 
 
 def prepare(workers: int, grids=GRIDS) -> None:
@@ -454,12 +508,14 @@ def drive(names: list[str], workers: int, threads: int, device: str, dry_run: bo
     specs = planned(names, grids, channels)
     todo = pending(specs)
     n_reused = sum(paper02_complete(run) for run in map(paper02_run, specs))
+    cost = "mps" if device == "mps" else "cpu"
+    hours = sum(seconds(s, cost) for s in todo) / 3600
     print(f"=== {' + '.join(names)}: {len(specs)} runs planned, {n_reused} from paper 02, "
           f"{len(specs) - len(todo) - n_reused} recorded, {len(todo)} to run on {workers} worker(s) x "
-          f"{threads} thread(s), device {device}; ~{sum(map(seconds, todo)) / 3600:.0f} CPU-hours")
+          f"{threads} thread(s), device {device}; ~{hours:.0f} {cost.upper()}-hours")
     if dry_run:
         for s in todo[:12]:
-            print(f"    {s.group()}/{s.run_id()}  ~{seconds(s) / 60:.1f} min, ~{memory_gb(s):.1f} GB"
+            print(f"    {s.group()}/{s.run_id()}  ~{seconds(s, cost) / 60:.1f} min, ~{memory_gb(s):.1f} GB"
                   + ("  (streamed)" if s.streamed else ""))
         if len(todo) > 12:
             print(f"    ... and {len(todo) - 12} more")
