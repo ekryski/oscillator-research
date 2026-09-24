@@ -26,3 +26,8 @@ def test_the_data_override_is_read_at_import_and_the_results_override_per_call(m
 
 def test_the_data_directory_is_not_committed():
     assert (paths.SRC_ROOT / "data" / ".gitignore").is_file()
+
+
+def test_the_paper_has_exactly_one_manuscript():
+    drafts = list(paths.PAPER_ROOT.glob("*-DRAFT.md"))
+    assert [d.name for d in drafts] == ["size-and-channel-layout-DRAFT.md"]
