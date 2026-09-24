@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import argparse
 
+import torch
+
 from harness.experiment import record as rec
 from harness.experiment import summary as sm
 from harness.experiment import terms
@@ -254,6 +256,93 @@ def gain_figure(stem: str = "c6-gain-sweep") -> None:
     axes[0].set_ylabel("test accuracy (%)")
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, frameon=False, fontsize=8, loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.1))
+    fig.tight_layout()
+    path = FIGURES_DIR / stem
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 200})):
+        fig.savefig(path.with_suffix(suffix), bbox_inches="tight", **kwargs)
+    plt.close(fig)
+    print(f"wrote {path}.{{pdf,png}}")
+
+
+def one_way_f(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+    """One-way ANOVA F per feature: [n, ...] features, [n] labels -> [...] between-class over within-class
+    variance, each over its degrees of freedom. A feature constant within every class reads 0."""
+    classes = y.unique()
+    n, k = len(y), len(classes)
+    grand = x.mean(0)
+    between = sum((y == c).sum() * (x[y == c].mean(0) - grand) ** 2 for c in classes) / (k - 1)
+    within = sum(((x[y == c] - x[y == c].mean(0)) ** 2).sum(0) for c in classes) / (n - k)
+    return torch.nan_to_num(between / within, nan=0.0, posinf=0.0)
+
+
+def anova_maps(windows: int = 16, noise: float = 0.0, gain: float = 1.0, seed: int = 0,
+               n: int = 2048) -> dict[str, torch.Tensor]:
+    """[windows, bands] maps of the mean F over each band's signals, per arm, on Protocol A training clips.
+
+    Each signal is averaged over each of `windows` equal spans of the whole padded clip (frames 0 to 61,
+    warm-up included, so the input's onset shows), and each window mean is tested for a difference between
+    the ten digits. Descriptive only: where an arm carries class information, not whether it reads better.
+    """
+    from harness.experiment import arms as am
+    from harness.experiment import protocol as pr
+    from harness.experiment import run as rn
+    from harness.experiment.arms import Arm
+    bank = pr.load_bank()
+    out = {}
+    for key, arm in (("baseline", Arm("baseline")), ("kuramoto", Arm("network")),
+                     ("stuart-landau", Arm("network", coupling="stuart-landau")), ("bank", Arm("bank"))):
+        spec = rn.Spec("tier1", "recognition", "spectrogram", noise, gain if arm.uses_gain else None, seed, arm,
+                       sizes=(n,), native_sizes=())
+        clips = rn.assemble(spec, bank)
+        model = am.build_untrained(arm, gain, seed)
+        feats = []
+        with torch.no_grad():
+            for rows, _, where in rn.batches(spec, clips):
+                if where.start >= n:
+                    break
+                sig = am.untrained_signals(arm, model, rows)                      # [B, T, D]
+                spans = torch.tensor_split(torch.arange(sig.shape[1]), windows)
+                feats.append(torch.stack([sig[:, s].mean(1) for s in spans], 1))  # [B, W, D]
+        f = one_way_f(torch.cat(feats)[:n].double(), clips.labels[:n])            # [W, D]
+        g = am.GRID
+        if arm.kind == "baseline":
+            out[key] = f
+        elif arm.kind == "network":                                                # sin then cos, [C, G, G] each
+            out[key] = f.view(windows, 2, -1, g, g).mean((1, 2, 4))
+        else:                                                                      # [C, G, G]
+            out[key] = f.view(windows, -1, g, g).mean((1, 3))
+    return out
+
+
+def anova_figure(maps: dict[str, torch.Tensor] | None = None, stem: str = "c7-anova-f") -> None:
+    """Heat maps of the mean F per mel band and time window, one per arm, and the mean F per band."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    maps = anova_maps() if maps is None else maps
+    names = {"baseline": "spectrogram (the input)", "kuramoto": "coupled network, Kuramoto",
+             "stuart-landau": "coupled network, Stuart–Landau", "bank": "leaky-integrator bank, state-matched"}
+    colours = {"baseline": "#8C8C8C", "kuramoto": "#534AB7", "stuart-landau": "#D85A30", "bank": "#0F6E56"}
+    fig, axes = plt.subplots(1, len(maps) + 1, figsize=(3.0 * (len(maps) + 1), 3.2))
+    for ax, (key, m) in zip(axes, maps.items(), strict=False):
+        im = ax.imshow(m.T.numpy(), origin="lower", aspect="auto", cmap="magma")
+        ax.axvline(16 / 62 * m.shape[0] - 0.5, color="white", linewidth=0.8, linestyle=":")
+        ax.set_title(names[key], fontsize=8)
+        ax.set_xlabel("time window (1/16 of the clip)", fontsize=7)
+        ax.set_ylabel("mel band", fontsize=7)
+        ax.tick_params(labelsize=6)
+        fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03).ax.tick_params(labelsize=6)
+    ax = axes[-1]
+    for key, m in maps.items():
+        ax.plot(range(m.shape[1]), m.mean(0).numpy(), marker="o", markersize=2.5, color=colours[key],
+                label=names[key])
+    ax.set_xlabel("mel band", fontsize=7)
+    ax.set_ylabel("mean F over time windows", fontsize=7)
+    ax.tick_params(labelsize=6)
+    ax.legend(frameon=False, fontsize=6)
+    ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
     path = FIGURES_DIR / stem
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
