@@ -1,9 +1,9 @@
 {
- "group": "cochlea-recognition-spectrogram",
+ "group": "cochlea-recognition",
  "runs": {
   "A/0db/g1/s0/coupled-kuramoto-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -222,7 +222,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -441,7 +441,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -660,7 +660,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -879,7 +879,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1098,7 +1098,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1317,7 +1317,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1536,7 +1536,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1755,7 +1755,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1974,7 +1974,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-sakaguchi-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2193,7 +2193,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-sakaguchi-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2412,7 +2412,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-sakaguchi-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2631,7 +2631,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-sakaguchi-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2850,7 +2850,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-sakaguchi-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3069,7 +3069,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-sakaguchi-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3288,7 +3288,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-sakaguchi-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3507,7 +3507,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-sakaguchi-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3726,7 +3726,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-sakaguchi-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3945,7 +3945,7 @@
   },
   "A/0db/g1/s0/coupled-second-harmonic-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4164,7 +4164,7 @@
   },
   "A/0db/g1/s0/coupled-second-harmonic-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4383,7 +4383,7 @@
   },
   "A/0db/g1/s0/coupled-second-harmonic-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4602,7 +4602,7 @@
   },
   "A/0db/g1/s0/coupled-second-harmonic-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4821,7 +4821,7 @@
   },
   "A/0db/g1/s0/coupled-second-harmonic-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5040,7 +5040,7 @@
   },
   "A/0db/g1/s0/coupled-second-harmonic-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5259,7 +5259,7 @@
   },
   "A/0db/g1/s0/coupled-second-harmonic-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5478,7 +5478,7 @@
   },
   "A/0db/g1/s0/coupled-second-harmonic-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5697,7 +5697,7 @@
   },
   "A/0db/g1/s0/coupled-second-harmonic-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5916,7 +5916,7 @@
   },
   "A/0db/g1/s0/coupled-winfree-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -6135,7 +6135,7 @@
   },
   "A/0db/g1/s0/coupled-winfree-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -6354,7 +6354,7 @@
   },
   "A/0db/g1/s0/coupled-winfree-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -6573,7 +6573,7 @@
   },
   "A/0db/g1/s0/coupled-winfree-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -6792,7 +6792,7 @@
   },
   "A/0db/g1/s0/coupled-winfree-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -7011,7 +7011,7 @@
   },
   "A/0db/g1/s0/coupled-winfree-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -7230,7 +7230,7 @@
   },
   "A/0db/g1/s0/coupled-winfree-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -7449,7 +7449,7 @@
   },
   "A/0db/g1/s0/coupled-winfree-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -7668,7 +7668,7 @@
   },
   "A/0db/g1/s0/coupled-winfree-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -7887,7 +7887,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -8106,7 +8106,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -8325,7 +8325,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -8544,7 +8544,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -8763,7 +8763,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -8982,7 +8982,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -9201,7 +9201,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -9420,7 +9420,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -9639,7 +9639,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -9858,7 +9858,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-sakaguchi-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -10077,7 +10077,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-sakaguchi-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -10296,7 +10296,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-sakaguchi-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -10515,7 +10515,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-sakaguchi-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -10734,7 +10734,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-sakaguchi-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -10953,7 +10953,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-sakaguchi-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -11172,7 +11172,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-sakaguchi-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -11391,7 +11391,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-sakaguchi-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -11610,7 +11610,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-sakaguchi-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -11829,7 +11829,7 @@
   },
   "A/0db/g1/s1/coupled-second-harmonic-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -12048,7 +12048,7 @@
   },
   "A/0db/g1/s1/coupled-second-harmonic-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -12267,7 +12267,7 @@
   },
   "A/0db/g1/s1/coupled-second-harmonic-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -12486,7 +12486,7 @@
   },
   "A/0db/g1/s1/coupled-second-harmonic-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -12705,7 +12705,7 @@
   },
   "A/0db/g1/s1/coupled-second-harmonic-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -12924,7 +12924,7 @@
   },
   "A/0db/g1/s1/coupled-second-harmonic-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -13143,7 +13143,7 @@
   },
   "A/0db/g1/s1/coupled-second-harmonic-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -13362,7 +13362,7 @@
   },
   "A/0db/g1/s1/coupled-second-harmonic-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -13581,7 +13581,7 @@
   },
   "A/0db/g1/s1/coupled-second-harmonic-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -13800,7 +13800,7 @@
   },
   "A/0db/g1/s1/coupled-winfree-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -14019,7 +14019,7 @@
   },
   "A/0db/g1/s1/coupled-winfree-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -14238,7 +14238,7 @@
   },
   "A/0db/g1/s1/coupled-winfree-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -14457,7 +14457,7 @@
   },
   "A/0db/g1/s1/coupled-winfree-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -14676,7 +14676,7 @@
   },
   "A/0db/g1/s1/coupled-winfree-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -14895,7 +14895,7 @@
   },
   "A/0db/g1/s1/coupled-winfree-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -15114,7 +15114,7 @@
   },
   "A/0db/g1/s1/coupled-winfree-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -15333,7 +15333,7 @@
   },
   "A/0db/g1/s1/coupled-winfree-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -15552,7 +15552,7 @@
   },
   "A/0db/g1/s1/coupled-winfree-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -15771,7 +15771,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -15990,7 +15990,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -16209,7 +16209,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -16428,7 +16428,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -16647,7 +16647,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -16866,7 +16866,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -17085,7 +17085,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -17304,7 +17304,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -17523,7 +17523,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -17742,7 +17742,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-sakaguchi-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -17961,7 +17961,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-sakaguchi-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -18180,7 +18180,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-sakaguchi-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -18399,7 +18399,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-sakaguchi-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -18618,7 +18618,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-sakaguchi-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -18837,7 +18837,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-sakaguchi-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -19056,7 +19056,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-sakaguchi-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -19275,7 +19275,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-sakaguchi-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -19494,7 +19494,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-sakaguchi-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -19713,7 +19713,7 @@
   },
   "A/0db/g1/s2/coupled-second-harmonic-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -19932,7 +19932,7 @@
   },
   "A/0db/g1/s2/coupled-second-harmonic-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -20151,7 +20151,7 @@
   },
   "A/0db/g1/s2/coupled-second-harmonic-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -20370,7 +20370,7 @@
   },
   "A/0db/g1/s2/coupled-second-harmonic-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -20589,7 +20589,7 @@
   },
   "A/0db/g1/s2/coupled-second-harmonic-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -20808,7 +20808,7 @@
   },
   "A/0db/g1/s2/coupled-second-harmonic-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -21027,7 +21027,7 @@
   },
   "A/0db/g1/s2/coupled-second-harmonic-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -21246,7 +21246,7 @@
   },
   "A/0db/g1/s2/coupled-second-harmonic-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -21465,7 +21465,7 @@
   },
   "A/0db/g1/s2/coupled-second-harmonic-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -21684,7 +21684,7 @@
   },
   "A/0db/g1/s2/coupled-winfree-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -21903,7 +21903,7 @@
   },
   "A/0db/g1/s2/coupled-winfree-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -22122,7 +22122,7 @@
   },
   "A/0db/g1/s2/coupled-winfree-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -22341,7 +22341,7 @@
   },
   "A/0db/g1/s2/coupled-winfree-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -22560,7 +22560,7 @@
   },
   "A/0db/g1/s2/coupled-winfree-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -22779,7 +22779,7 @@
   },
   "A/0db/g1/s2/coupled-winfree-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -22998,7 +22998,7 @@
   },
   "A/0db/g1/s2/coupled-winfree-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -23217,7 +23217,7 @@
   },
   "A/0db/g1/s2/coupled-winfree-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -23436,7 +23436,7 @@
   },
   "A/0db/g1/s2/coupled-winfree-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -23655,7 +23655,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -23874,7 +23874,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -24093,7 +24093,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -24312,7 +24312,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -24531,7 +24531,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -24750,7 +24750,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -24969,7 +24969,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -25188,7 +25188,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -25407,7 +25407,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -25626,7 +25626,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-sakaguchi-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -25845,7 +25845,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-sakaguchi-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -26064,7 +26064,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-sakaguchi-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -26283,7 +26283,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-sakaguchi-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -26502,7 +26502,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-sakaguchi-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -26721,7 +26721,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-sakaguchi-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -26940,7 +26940,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-sakaguchi-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -27159,7 +27159,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-sakaguchi-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -27378,7 +27378,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-sakaguchi-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -27597,7 +27597,7 @@
   },
   "A/0db/g2/s0/coupled-second-harmonic-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -27816,7 +27816,7 @@
   },
   "A/0db/g2/s0/coupled-second-harmonic-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -28035,7 +28035,7 @@
   },
   "A/0db/g2/s0/coupled-second-harmonic-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -28254,7 +28254,7 @@
   },
   "A/0db/g2/s0/coupled-second-harmonic-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -28473,7 +28473,7 @@
   },
   "A/0db/g2/s0/coupled-second-harmonic-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -28692,7 +28692,7 @@
   },
   "A/0db/g2/s0/coupled-second-harmonic-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -28911,7 +28911,7 @@
   },
   "A/0db/g2/s0/coupled-second-harmonic-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -29130,7 +29130,7 @@
   },
   "A/0db/g2/s0/coupled-second-harmonic-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -29349,7 +29349,7 @@
   },
   "A/0db/g2/s0/coupled-second-harmonic-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -29568,7 +29568,7 @@
   },
   "A/0db/g2/s0/coupled-winfree-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -29787,7 +29787,7 @@
   },
   "A/0db/g2/s0/coupled-winfree-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -30006,7 +30006,7 @@
   },
   "A/0db/g2/s0/coupled-winfree-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -30225,7 +30225,7 @@
   },
   "A/0db/g2/s0/coupled-winfree-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -30444,7 +30444,7 @@
   },
   "A/0db/g2/s0/coupled-winfree-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -30663,7 +30663,7 @@
   },
   "A/0db/g2/s0/coupled-winfree-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -30882,7 +30882,7 @@
   },
   "A/0db/g2/s0/coupled-winfree-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -31101,7 +31101,7 @@
   },
   "A/0db/g2/s0/coupled-winfree-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -31320,7 +31320,7 @@
   },
   "A/0db/g2/s0/coupled-winfree-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -31539,7 +31539,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -31758,7 +31758,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -31977,7 +31977,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -32196,7 +32196,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -32415,7 +32415,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -32634,7 +32634,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -32853,7 +32853,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33072,7 +33072,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33291,7 +33291,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33510,7 +33510,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-sakaguchi-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33729,7 +33729,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-sakaguchi-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33948,7 +33948,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-sakaguchi-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34167,7 +34167,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-sakaguchi-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34386,7 +34386,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-sakaguchi-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34605,7 +34605,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-sakaguchi-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34824,7 +34824,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-sakaguchi-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35043,7 +35043,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-sakaguchi-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35262,7 +35262,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-sakaguchi-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35481,7 +35481,7 @@
   },
   "A/0db/g2/s1/coupled-second-harmonic-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35700,7 +35700,7 @@
   },
   "A/0db/g2/s1/coupled-second-harmonic-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35919,7 +35919,7 @@
   },
   "A/0db/g2/s1/coupled-second-harmonic-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36138,7 +36138,7 @@
   },
   "A/0db/g2/s1/coupled-second-harmonic-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36357,7 +36357,7 @@
   },
   "A/0db/g2/s1/coupled-second-harmonic-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36576,7 +36576,7 @@
   },
   "A/0db/g2/s1/coupled-second-harmonic-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36795,7 +36795,7 @@
   },
   "A/0db/g2/s1/coupled-second-harmonic-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37014,7 +37014,7 @@
   },
   "A/0db/g2/s1/coupled-second-harmonic-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37233,7 +37233,7 @@
   },
   "A/0db/g2/s1/coupled-second-harmonic-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37452,7 +37452,7 @@
   },
   "A/0db/g2/s1/coupled-winfree-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37671,7 +37671,7 @@
   },
   "A/0db/g2/s1/coupled-winfree-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37890,7 +37890,7 @@
   },
   "A/0db/g2/s1/coupled-winfree-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -38109,7 +38109,7 @@
   },
   "A/0db/g2/s1/coupled-winfree-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -38328,7 +38328,7 @@
   },
   "A/0db/g2/s1/coupled-winfree-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -38547,7 +38547,7 @@
   },
   "A/0db/g2/s1/coupled-winfree-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -38766,7 +38766,7 @@
   },
   "A/0db/g2/s1/coupled-winfree-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -38985,7 +38985,7 @@
   },
   "A/0db/g2/s1/coupled-winfree-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -39204,7 +39204,7 @@
   },
   "A/0db/g2/s1/coupled-winfree-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -39423,7 +39423,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -39642,7 +39642,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -39861,7 +39861,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -40080,7 +40080,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -40299,7 +40299,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -40518,7 +40518,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -40737,7 +40737,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -40956,7 +40956,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -41175,7 +41175,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -41394,7 +41394,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-sakaguchi-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -41613,7 +41613,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-sakaguchi-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -41832,7 +41832,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-sakaguchi-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -42051,7 +42051,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-sakaguchi-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -42270,7 +42270,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-sakaguchi-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -42489,7 +42489,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-sakaguchi-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -42708,7 +42708,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-sakaguchi-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -42927,7 +42927,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-sakaguchi-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -43146,7 +43146,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-sakaguchi-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -43365,7 +43365,7 @@
   },
   "A/0db/g2/s2/coupled-second-harmonic-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -43584,7 +43584,7 @@
   },
   "A/0db/g2/s2/coupled-second-harmonic-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -43803,7 +43803,7 @@
   },
   "A/0db/g2/s2/coupled-second-harmonic-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -44022,7 +44022,7 @@
   },
   "A/0db/g2/s2/coupled-second-harmonic-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -44241,7 +44241,7 @@
   },
   "A/0db/g2/s2/coupled-second-harmonic-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -44460,7 +44460,7 @@
   },
   "A/0db/g2/s2/coupled-second-harmonic-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -44679,7 +44679,7 @@
   },
   "A/0db/g2/s2/coupled-second-harmonic-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -44898,7 +44898,7 @@
   },
   "A/0db/g2/s2/coupled-second-harmonic-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -45117,7 +45117,7 @@
   },
   "A/0db/g2/s2/coupled-second-harmonic-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -45336,7 +45336,7 @@
   },
   "A/0db/g2/s2/coupled-winfree-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -45555,7 +45555,7 @@
   },
   "A/0db/g2/s2/coupled-winfree-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -45774,7 +45774,7 @@
   },
   "A/0db/g2/s2/coupled-winfree-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -45993,7 +45993,7 @@
   },
   "A/0db/g2/s2/coupled-winfree-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -46212,7 +46212,7 @@
   },
   "A/0db/g2/s2/coupled-winfree-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -46431,7 +46431,7 @@
   },
   "A/0db/g2/s2/coupled-winfree-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -46650,7 +46650,7 @@
   },
   "A/0db/g2/s2/coupled-winfree-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -46869,7 +46869,7 @@
   },
   "A/0db/g2/s2/coupled-winfree-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -47088,7 +47088,7 @@
   },
   "A/0db/g2/s2/coupled-winfree-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -47307,7 +47307,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -47526,7 +47526,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -47745,7 +47745,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -47964,7 +47964,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -48183,7 +48183,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -48402,7 +48402,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -48621,7 +48621,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -48840,7 +48840,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -49059,7 +49059,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -49278,7 +49278,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-sakaguchi-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -49497,7 +49497,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-sakaguchi-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -49716,7 +49716,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-sakaguchi-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -49935,7 +49935,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-sakaguchi-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -50154,7 +50154,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-sakaguchi-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -50373,7 +50373,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-sakaguchi-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -50592,7 +50592,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-sakaguchi-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -50811,7 +50811,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-sakaguchi-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -51030,7 +51030,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-sakaguchi-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -51249,7 +51249,7 @@
   },
   "A/5db/g1/s0/coupled-second-harmonic-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -51468,7 +51468,7 @@
   },
   "A/5db/g1/s0/coupled-second-harmonic-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -51687,7 +51687,7 @@
   },
   "A/5db/g1/s0/coupled-second-harmonic-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -51906,7 +51906,7 @@
   },
   "A/5db/g1/s0/coupled-second-harmonic-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -52125,7 +52125,7 @@
   },
   "A/5db/g1/s0/coupled-second-harmonic-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -52344,7 +52344,7 @@
   },
   "A/5db/g1/s0/coupled-second-harmonic-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -52563,7 +52563,7 @@
   },
   "A/5db/g1/s0/coupled-second-harmonic-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -52782,7 +52782,7 @@
   },
   "A/5db/g1/s0/coupled-second-harmonic-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -53001,7 +53001,7 @@
   },
   "A/5db/g1/s0/coupled-second-harmonic-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -53220,7 +53220,7 @@
   },
   "A/5db/g1/s0/coupled-winfree-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -53439,7 +53439,7 @@
   },
   "A/5db/g1/s0/coupled-winfree-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -53658,7 +53658,7 @@
   },
   "A/5db/g1/s0/coupled-winfree-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -53877,7 +53877,7 @@
   },
   "A/5db/g1/s0/coupled-winfree-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -54096,7 +54096,7 @@
   },
   "A/5db/g1/s0/coupled-winfree-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -54315,7 +54315,7 @@
   },
   "A/5db/g1/s0/coupled-winfree-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -54534,7 +54534,7 @@
   },
   "A/5db/g1/s0/coupled-winfree-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -54753,7 +54753,7 @@
   },
   "A/5db/g1/s0/coupled-winfree-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -54972,7 +54972,7 @@
   },
   "A/5db/g1/s0/coupled-winfree-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -55191,7 +55191,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -55410,7 +55410,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -55629,7 +55629,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -55848,7 +55848,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -56067,7 +56067,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -56286,7 +56286,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -56505,7 +56505,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -56724,7 +56724,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -56943,7 +56943,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -57162,7 +57162,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-sakaguchi-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -57381,7 +57381,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-sakaguchi-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -57600,7 +57600,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-sakaguchi-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -57819,7 +57819,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-sakaguchi-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -58038,7 +58038,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-sakaguchi-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -58257,7 +58257,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-sakaguchi-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -58476,7 +58476,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-sakaguchi-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -58695,7 +58695,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-sakaguchi-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -58914,7 +58914,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-sakaguchi-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -59133,7 +59133,7 @@
   },
   "A/5db/g1/s1/coupled-second-harmonic-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -59352,7 +59352,7 @@
   },
   "A/5db/g1/s1/coupled-second-harmonic-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -59571,7 +59571,7 @@
   },
   "A/5db/g1/s1/coupled-second-harmonic-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -59790,7 +59790,7 @@
   },
   "A/5db/g1/s1/coupled-second-harmonic-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -60009,7 +60009,7 @@
   },
   "A/5db/g1/s1/coupled-second-harmonic-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -60228,7 +60228,7 @@
   },
   "A/5db/g1/s1/coupled-second-harmonic-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -60447,7 +60447,7 @@
   },
   "A/5db/g1/s1/coupled-second-harmonic-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -60666,7 +60666,7 @@
   },
   "A/5db/g1/s1/coupled-second-harmonic-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -60885,7 +60885,7 @@
   },
   "A/5db/g1/s1/coupled-second-harmonic-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -61104,7 +61104,7 @@
   },
   "A/5db/g1/s1/coupled-winfree-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -61323,7 +61323,7 @@
   },
   "A/5db/g1/s1/coupled-winfree-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -61542,7 +61542,7 @@
   },
   "A/5db/g1/s1/coupled-winfree-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -61761,7 +61761,7 @@
   },
   "A/5db/g1/s1/coupled-winfree-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -61980,7 +61980,7 @@
   },
   "A/5db/g1/s1/coupled-winfree-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -62199,7 +62199,7 @@
   },
   "A/5db/g1/s1/coupled-winfree-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -62418,7 +62418,7 @@
   },
   "A/5db/g1/s1/coupled-winfree-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -62637,7 +62637,7 @@
   },
   "A/5db/g1/s1/coupled-winfree-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -62856,7 +62856,7 @@
   },
   "A/5db/g1/s1/coupled-winfree-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -63075,7 +63075,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -63294,7 +63294,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -63513,7 +63513,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -63732,7 +63732,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -63951,7 +63951,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -64170,7 +64170,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -64389,7 +64389,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -64608,7 +64608,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -64827,7 +64827,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -65046,7 +65046,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-sakaguchi-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -65265,7 +65265,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-sakaguchi-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -65484,7 +65484,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-sakaguchi-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -65703,7 +65703,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-sakaguchi-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -65922,7 +65922,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-sakaguchi-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -66141,7 +66141,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-sakaguchi-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -66360,7 +66360,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-sakaguchi-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -66579,7 +66579,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-sakaguchi-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -66798,7 +66798,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-sakaguchi-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -67017,7 +67017,7 @@
   },
   "A/5db/g1/s2/coupled-second-harmonic-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -67236,7 +67236,7 @@
   },
   "A/5db/g1/s2/coupled-second-harmonic-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -67455,7 +67455,7 @@
   },
   "A/5db/g1/s2/coupled-second-harmonic-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -67674,7 +67674,7 @@
   },
   "A/5db/g1/s2/coupled-second-harmonic-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -67893,7 +67893,7 @@
   },
   "A/5db/g1/s2/coupled-second-harmonic-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -68112,7 +68112,7 @@
   },
   "A/5db/g1/s2/coupled-second-harmonic-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -68331,7 +68331,7 @@
   },
   "A/5db/g1/s2/coupled-second-harmonic-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -68550,7 +68550,7 @@
   },
   "A/5db/g1/s2/coupled-second-harmonic-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -68769,7 +68769,7 @@
   },
   "A/5db/g1/s2/coupled-second-harmonic-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -68988,7 +68988,7 @@
   },
   "A/5db/g1/s2/coupled-winfree-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -69207,7 +69207,7 @@
   },
   "A/5db/g1/s2/coupled-winfree-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -69426,7 +69426,7 @@
   },
   "A/5db/g1/s2/coupled-winfree-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -69645,7 +69645,7 @@
   },
   "A/5db/g1/s2/coupled-winfree-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -69864,7 +69864,7 @@
   },
   "A/5db/g1/s2/coupled-winfree-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -70083,7 +70083,7 @@
   },
   "A/5db/g1/s2/coupled-winfree-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -70302,7 +70302,7 @@
   },
   "A/5db/g1/s2/coupled-winfree-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -70521,7 +70521,7 @@
   },
   "A/5db/g1/s2/coupled-winfree-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -70740,7 +70740,7 @@
   },
   "A/5db/g1/s2/coupled-winfree-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -70959,7 +70959,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -71178,7 +71178,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -71397,7 +71397,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -71616,7 +71616,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -71835,7 +71835,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -72054,7 +72054,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -72273,7 +72273,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -72492,7 +72492,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -72711,7 +72711,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -72930,7 +72930,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-sakaguchi-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -73149,7 +73149,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-sakaguchi-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -73368,7 +73368,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-sakaguchi-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -73587,7 +73587,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-sakaguchi-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -73806,7 +73806,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-sakaguchi-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -74025,7 +74025,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-sakaguchi-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -74244,7 +74244,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-sakaguchi-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -74463,7 +74463,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-sakaguchi-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -74682,7 +74682,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-sakaguchi-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -74901,7 +74901,7 @@
   },
   "A/5db/g2/s0/coupled-second-harmonic-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -75120,7 +75120,7 @@
   },
   "A/5db/g2/s0/coupled-second-harmonic-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -75339,7 +75339,7 @@
   },
   "A/5db/g2/s0/coupled-second-harmonic-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -75558,7 +75558,7 @@
   },
   "A/5db/g2/s0/coupled-second-harmonic-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -75777,7 +75777,7 @@
   },
   "A/5db/g2/s0/coupled-second-harmonic-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -75996,7 +75996,7 @@
   },
   "A/5db/g2/s0/coupled-second-harmonic-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -76215,7 +76215,7 @@
   },
   "A/5db/g2/s0/coupled-second-harmonic-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -76434,7 +76434,7 @@
   },
   "A/5db/g2/s0/coupled-second-harmonic-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -76653,7 +76653,7 @@
   },
   "A/5db/g2/s0/coupled-second-harmonic-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -76872,7 +76872,7 @@
   },
   "A/5db/g2/s0/coupled-winfree-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -77091,7 +77091,7 @@
   },
   "A/5db/g2/s0/coupled-winfree-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -77310,7 +77310,7 @@
   },
   "A/5db/g2/s0/coupled-winfree-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -77529,7 +77529,7 @@
   },
   "A/5db/g2/s0/coupled-winfree-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -77748,7 +77748,7 @@
   },
   "A/5db/g2/s0/coupled-winfree-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -77967,7 +77967,7 @@
   },
   "A/5db/g2/s0/coupled-winfree-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -78186,7 +78186,7 @@
   },
   "A/5db/g2/s0/coupled-winfree-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -78405,7 +78405,7 @@
   },
   "A/5db/g2/s0/coupled-winfree-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -78624,7 +78624,7 @@
   },
   "A/5db/g2/s0/coupled-winfree-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -78843,7 +78843,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -79062,7 +79062,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -79281,7 +79281,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -79500,7 +79500,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -79719,7 +79719,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -79938,7 +79938,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -80157,7 +80157,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -80376,7 +80376,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -80595,7 +80595,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -80814,7 +80814,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-sakaguchi-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -81033,7 +81033,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-sakaguchi-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -81252,7 +81252,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-sakaguchi-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -81471,7 +81471,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-sakaguchi-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -81690,7 +81690,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-sakaguchi-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -81909,7 +81909,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-sakaguchi-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -82128,7 +82128,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-sakaguchi-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -82347,7 +82347,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-sakaguchi-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -82566,7 +82566,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-sakaguchi-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -82785,7 +82785,7 @@
   },
   "A/5db/g2/s1/coupled-second-harmonic-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -83004,7 +83004,7 @@
   },
   "A/5db/g2/s1/coupled-second-harmonic-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -83223,7 +83223,7 @@
   },
   "A/5db/g2/s1/coupled-second-harmonic-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -83442,7 +83442,7 @@
   },
   "A/5db/g2/s1/coupled-second-harmonic-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -83661,7 +83661,7 @@
   },
   "A/5db/g2/s1/coupled-second-harmonic-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -83880,7 +83880,7 @@
   },
   "A/5db/g2/s1/coupled-second-harmonic-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -84099,7 +84099,7 @@
   },
   "A/5db/g2/s1/coupled-second-harmonic-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -84318,7 +84318,7 @@
   },
   "A/5db/g2/s1/coupled-second-harmonic-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -84537,7 +84537,7 @@
   },
   "A/5db/g2/s1/coupled-second-harmonic-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -84756,7 +84756,7 @@
   },
   "A/5db/g2/s1/coupled-winfree-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -84975,7 +84975,7 @@
   },
   "A/5db/g2/s1/coupled-winfree-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -85194,7 +85194,7 @@
   },
   "A/5db/g2/s1/coupled-winfree-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -85413,7 +85413,7 @@
   },
   "A/5db/g2/s1/coupled-winfree-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -85632,7 +85632,7 @@
   },
   "A/5db/g2/s1/coupled-winfree-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -85851,7 +85851,7 @@
   },
   "A/5db/g2/s1/coupled-winfree-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -86070,7 +86070,7 @@
   },
   "A/5db/g2/s1/coupled-winfree-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -86289,7 +86289,7 @@
   },
   "A/5db/g2/s1/coupled-winfree-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -86508,7 +86508,7 @@
   },
   "A/5db/g2/s1/coupled-winfree-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -86727,7 +86727,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -86946,7 +86946,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -87165,7 +87165,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -87384,7 +87384,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -87603,7 +87603,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -87822,7 +87822,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -88041,7 +88041,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -88260,7 +88260,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -88479,7 +88479,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -88698,7 +88698,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-sakaguchi-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -88917,7 +88917,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-sakaguchi-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -89136,7 +89136,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-sakaguchi-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -89355,7 +89355,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-sakaguchi-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -89574,7 +89574,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-sakaguchi-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -89793,7 +89793,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-sakaguchi-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -90012,7 +90012,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-sakaguchi-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -90231,7 +90231,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-sakaguchi-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -90450,7 +90450,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-sakaguchi-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -90669,7 +90669,7 @@
   },
   "A/5db/g2/s2/coupled-second-harmonic-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -90888,7 +90888,7 @@
   },
   "A/5db/g2/s2/coupled-second-harmonic-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -91107,7 +91107,7 @@
   },
   "A/5db/g2/s2/coupled-second-harmonic-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -91326,7 +91326,7 @@
   },
   "A/5db/g2/s2/coupled-second-harmonic-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -91545,7 +91545,7 @@
   },
   "A/5db/g2/s2/coupled-second-harmonic-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -91764,7 +91764,7 @@
   },
   "A/5db/g2/s2/coupled-second-harmonic-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -91983,7 +91983,7 @@
   },
   "A/5db/g2/s2/coupled-second-harmonic-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -92202,7 +92202,7 @@
   },
   "A/5db/g2/s2/coupled-second-harmonic-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -92421,7 +92421,7 @@
   },
   "A/5db/g2/s2/coupled-second-harmonic-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -92640,7 +92640,7 @@
   },
   "A/5db/g2/s2/coupled-winfree-cochlea-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -92859,7 +92859,7 @@
   },
   "A/5db/g2/s2/coupled-winfree-cochlea-matched-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -93078,7 +93078,7 @@
   },
   "A/5db/g2/s2/coupled-winfree-cochlea-matched-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -93297,7 +93297,7 @@
   },
   "A/5db/g2/s2/coupled-winfree-cochlea-matched-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -93516,7 +93516,7 @@
   },
   "A/5db/g2/s2/coupled-winfree-cochlea-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -93735,7 +93735,7 @@
   },
   "A/5db/g2/s2/coupled-winfree-cochlea-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -93954,7 +93954,7 @@
   },
   "A/5db/g2/s2/coupled-winfree-coil-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -94173,7 +94173,7 @@
   },
   "A/5db/g2/s2/coupled-winfree-coil-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -94392,7 +94392,7 @@
   },
   "A/5db/g2/s2/coupled-winfree-coil-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "cochlea",
+    "experiment": "cochlea",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,

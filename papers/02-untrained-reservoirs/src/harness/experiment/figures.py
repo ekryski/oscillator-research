@@ -19,7 +19,7 @@ from harness.utils.paths import FIGURES_DIR
 
 NOISES = tuple((n, sm.snr(n)) for n in (None, 0.0, 5.0))
 
-#: Tier 1 recognition arms: (arm, read, table label, legend label, colour); gain is set per figure
+#: the controls experiment's recognition arms: (arm, read, table label, legend label, colour); gain is set per figure
 BASELINE = ("baseline", "windowed@wholeclip",
          "**Spectrogram-only baseline**: the readout reads the 16 mel band energies directly; no reservoir",
          "Spectrogram-only baseline: no reservoir", "#8C8C8C")
@@ -57,7 +57,7 @@ FIGURES = (("c1-recognition-gain1", (1.0,)), ("c2-recognition-gain2", (2.0,)),
 
 def recognition_cells() -> dict[tuple, dict]:
     """(arm, read, gain, noise) -> the accuracy record at the primary cell."""
-    cells = rec.load(["tier1-recognition-spectrogram"])
+    cells = rec.load(["controls-recognition"])
     return {(r["arm"], r["read"], r["gain"], r["noise"]): r for r in sm.accuracies(cells)
             if r["width"] == rec.PRIMARY_WIDTH and r["n_train"] == rec.PRIMARY_SIZE}
 
@@ -109,13 +109,13 @@ def recognition_figure(acc: dict[tuple, dict], stem: str, gains: tuple[float, ..
     print(f"wrote {path}.{{pdf,png}}")
 
 
-#: Tier 2's conditions, in plotting order: (noise, gain, legend, colour, marker)
+#: the design experiment's conditions, in plotting order: (noise, gain, legend, colour, marker)
 CONDITIONS = tuple((n, g, f"{sm.snr(n)}, gain = {g:g}", colour, marker) for n, g, colour, marker in (
     (0.0, 1.0, "#534AB7", "o"), (0.0, 2.0, "#A9A4DB", "o"), (5.0, 1.0, "#D85A30", "s"), (5.0, 2.0, "#EFA98F", "s")))
 
 
 def design_differences() -> list[dict]:
-    """Tier 2's level-minus-reference differences at the primary cell, in the summary's order."""
+    """The design experiment's level-minus-reference differences at the primary cell, in the summary's order."""
     cells = rec.load(None)
     return [r for r in sm.design(cells) if r["width"] == rec.PRIMARY_WIDTH and r["n_train"] == rec.PRIMARY_SIZE
             and "ci95" in r and "baseline" not in r["comparison"]]
@@ -188,7 +188,7 @@ def size_figure(stem: str = "c5-training-size") -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    cells = rec.load(["tier1-recognition-spectrogram"])
+    cells = rec.load(["controls-recognition"])
     acc = {(r["arm"], r["read"], r["gain"], r["noise"], r["width"], r["n_train"]): r for r in sm.accuracies(cells)}
     sizes = sorted({k[5] for k in acc})
     fig, axes = plt.subplots(1, 2, figsize=(9.0, 4.2), sharey=True)
@@ -225,16 +225,16 @@ GAIN_COUPLINGS = (("kuramoto", "#534AB7"), ("kuramoto-sakaguchi", "#8C7FD6"), ("
 
 
 def gain_figure(stem: str = "c6-gain-sweep") -> None:
-    """Accuracy against input gain for every coupling function at the reference configuration: Tier 2's
-    gains 1 and 2 with the sweep's 3 to 12, per noise level."""
+    """Accuracy against input gain for every coupling function at the reference configuration: the
+    design experiment's gains 1 and 2 with the sweep's 3 to 12, per noise level."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
     from harness.experiment import plan
     from harness.experiment.arms import Arm
-    groups = [f"tier2-recognition-spectrogram-{c}" for c, _ in GAIN_COUPLINGS]
-    groups += [f"sweep-recognition-spectrogram-{c}" for c, _ in GAIN_COUPLINGS]
+    groups = [f"design-recognition-{c}" for c, _ in GAIN_COUPLINGS]
+    groups += [f"sweep-recognition-{c}" for c, _ in GAIN_COUPLINGS]
     acc = {(r["arm"], r["noise"], r["gain"]): r for r in sm.accuracies(rec.load(groups))
            if r["width"] == rec.PRIMARY_WIDTH and r["n_train"] == rec.PRIMARY_SIZE and r["read"] == "windowed"}
     gains = (1.0, 2.0) + plan.SWEEP_GAINS
@@ -292,7 +292,7 @@ def anova_maps(windows: int = 16, noise: float = 0.0, gain: float = 1.0, seed: i
     out = {}
     for key, arm in (("baseline", Arm("baseline")), ("kuramoto", Arm("network")),
                      ("stuart-landau", Arm("network", coupling="stuart-landau")), ("bank", Arm("bank"))):
-        spec = rn.Spec("tier1", "recognition", "spectrogram", noise, gain if arm.uses_gain else None, seed, arm,
+        spec = rn.Spec("controls", "recognition", "spectrogram", noise, gain if arm.uses_gain else None, seed, arm,
                        sizes=(n,), native_sizes=())
         clips = rn.assemble(spec, bank)
         model = am.build_untrained(arm, gain, seed)
@@ -361,7 +361,7 @@ def trained_table(acc: dict[tuple, dict]) -> str:
     from collections import Counter
 
     from harness.experiment import run as rn
-    record = json.loads((rn.record_root() / "tier1-recognition-spectrogram.json").read_text())["runs"]
+    record = json.loads((rn.record_root() / "controls-recognition.json").read_text())["runs"]
     params, failed, total = {}, Counter(), Counter()
     for run_id, entry in record.items():
         label = run_id.split("/")[-2]

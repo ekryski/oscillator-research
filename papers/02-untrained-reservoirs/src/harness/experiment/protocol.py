@@ -2,11 +2,11 @@
 
 Every clip is a fixed object. Its recording comes from the 50-repetition bank,
 and its noise from a generator seeded by the clip's own identity and the noise
-level, so a clip is the same clip in every arm, seed, tier and process. A seed
+level, so a clip is the same clip in every arm, seed, experiment and process. A seed
 chooses which training clips a readout is fitted on and an arm's own random
 draws; it never changes what a clip sounds like.
 
-Protocol A, for every tier but B: speakers 1-48 train (24,000 clips), speakers
+Protocol A, for every experiment but the Becker folds: speakers 1-48 train (24,000 clips), speakers
 49-60 test (6,000). The test set is the whole test pool, in one fixed order. A
 seed permutes the training pool, and training sets of 2,048, 8,192 and 24,000
 clips are prefixes of that permutation, so each contains the one before it.

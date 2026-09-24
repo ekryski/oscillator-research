@@ -7,7 +7,7 @@
 | `models`       | the arms: the oscillator networks and their cores, the leaky-integrator |
 |                | banks and the trained baselines; geometries get a subpackage            |
 | `measurement`  | the shared statistics and projection, and the drive's phase             |
-| `confirm`      | the study: its data protocol, arms, read, runs, tiers and summary       |
+| `experiment`   | the study: its data protocol, arms, read, runs, experiments and summary |
 """
 
 from harness.measurement import *  # noqa: F401,F403

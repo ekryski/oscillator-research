@@ -37,7 +37,7 @@ LEVELS = {
 #: the input pathways
 PATHWAYS = {"spectrogram": "spectrogram", "quadrature": "quadrature"}
 
-#: the Tier 1 reference configuration of the coupled network
+#: the reference configuration of the coupled network
 REFERENCE = {"coupling": "kuramoto", "geometry": "torus", "frequencies": "random", "restoring": 0.3, "ceiling": 1.0}
 
 _NETWORK = re.compile(r"^(coupled|uncoupled)-"
@@ -54,7 +54,7 @@ def level(value) -> str:
 def arm(label: str) -> str:
     """The paper's name for a record label.
 
-    The Tier 1 configuration of the oscillator networks is named plainly; any
+    The reference configuration of the oscillator networks is named plainly; any
     other configuration names only the factors where it departs from it.
     """
     if label in ARMS:

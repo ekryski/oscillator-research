@@ -1,9 +1,9 @@
 {
- "group": "tier2-recognition-spectrogram-stuart-landau",
+ "group": "design-recognition-stuart-landau",
  "runs": {
   "A/0db/g1/s0/coupled-stuart-landau-torus-identical-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -155,7 +155,7 @@
   },
   "A/0db/g1/s0/coupled-stuart-landau-torus-identical-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -307,7 +307,7 @@
   },
   "A/0db/g1/s0/coupled-stuart-landau-torus-identical-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -459,7 +459,7 @@
   },
   "A/0db/g1/s0/coupled-stuart-landau-torus-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -611,7 +611,7 @@
   },
   "A/0db/g1/s0/coupled-stuart-landau-torus-random-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -763,7 +763,7 @@
   },
   "A/0db/g1/s0/coupled-stuart-landau-torus-random-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -915,7 +915,7 @@
   },
   "A/0db/g1/s0/coupled-stuart-landau-torus-random-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1067,7 +1067,7 @@
   },
   "A/0db/g1/s0/coupled-stuart-landau-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1219,7 +1219,7 @@
   },
   "A/0db/g1/s0/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1371,7 +1371,7 @@
   },
   "A/0db/g1/s0/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1523,7 +1523,7 @@
   },
   "A/0db/g1/s0/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1675,7 +1675,7 @@
   },
   "A/0db/g1/s0/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1827,7 +1827,7 @@
   },
   "A/0db/g1/s1/coupled-stuart-landau-torus-identical-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1979,7 +1979,7 @@
   },
   "A/0db/g1/s1/coupled-stuart-landau-torus-identical-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2131,7 +2131,7 @@
   },
   "A/0db/g1/s1/coupled-stuart-landau-torus-identical-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2283,7 +2283,7 @@
   },
   "A/0db/g1/s1/coupled-stuart-landau-torus-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2435,7 +2435,7 @@
   },
   "A/0db/g1/s1/coupled-stuart-landau-torus-random-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2587,7 +2587,7 @@
   },
   "A/0db/g1/s1/coupled-stuart-landau-torus-random-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2739,7 +2739,7 @@
   },
   "A/0db/g1/s1/coupled-stuart-landau-torus-random-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2891,7 +2891,7 @@
   },
   "A/0db/g1/s1/coupled-stuart-landau-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3043,7 +3043,7 @@
   },
   "A/0db/g1/s1/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3195,7 +3195,7 @@
   },
   "A/0db/g1/s1/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3347,7 +3347,7 @@
   },
   "A/0db/g1/s1/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3499,7 +3499,7 @@
   },
   "A/0db/g1/s1/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3651,7 +3651,7 @@
   },
   "A/0db/g1/s2/coupled-stuart-landau-torus-identical-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3803,7 +3803,7 @@
   },
   "A/0db/g1/s2/coupled-stuart-landau-torus-identical-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3955,7 +3955,7 @@
   },
   "A/0db/g1/s2/coupled-stuart-landau-torus-identical-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4107,7 +4107,7 @@
   },
   "A/0db/g1/s2/coupled-stuart-landau-torus-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4259,7 +4259,7 @@
   },
   "A/0db/g1/s2/coupled-stuart-landau-torus-random-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4411,7 +4411,7 @@
   },
   "A/0db/g1/s2/coupled-stuart-landau-torus-random-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4563,7 +4563,7 @@
   },
   "A/0db/g1/s2/coupled-stuart-landau-torus-random-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4715,7 +4715,7 @@
   },
   "A/0db/g1/s2/coupled-stuart-landau-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4867,7 +4867,7 @@
   },
   "A/0db/g1/s2/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5019,7 +5019,7 @@
   },
   "A/0db/g1/s2/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5171,7 +5171,7 @@
   },
   "A/0db/g1/s2/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5323,7 +5323,7 @@
   },
   "A/0db/g1/s2/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5475,7 +5475,7 @@
   },
   "A/0db/g2/s0/coupled-stuart-landau-torus-identical-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5627,7 +5627,7 @@
   },
   "A/0db/g2/s0/coupled-stuart-landau-torus-identical-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5779,7 +5779,7 @@
   },
   "A/0db/g2/s0/coupled-stuart-landau-torus-identical-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5931,7 +5931,7 @@
   },
   "A/0db/g2/s0/coupled-stuart-landau-torus-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -6083,7 +6083,7 @@
   },
   "A/0db/g2/s0/coupled-stuart-landau-torus-random-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -6235,7 +6235,7 @@
   },
   "A/0db/g2/s0/coupled-stuart-landau-torus-random-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -6387,7 +6387,7 @@
   },
   "A/0db/g2/s0/coupled-stuart-landau-torus-random-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -6539,7 +6539,7 @@
   },
   "A/0db/g2/s0/coupled-stuart-landau-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -6691,7 +6691,7 @@
   },
   "A/0db/g2/s0/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -6843,7 +6843,7 @@
   },
   "A/0db/g2/s0/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -6995,7 +6995,7 @@
   },
   "A/0db/g2/s0/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -7147,7 +7147,7 @@
   },
   "A/0db/g2/s0/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -7299,7 +7299,7 @@
   },
   "A/0db/g2/s1/coupled-stuart-landau-torus-identical-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -7451,7 +7451,7 @@
   },
   "A/0db/g2/s1/coupled-stuart-landau-torus-identical-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -7603,7 +7603,7 @@
   },
   "A/0db/g2/s1/coupled-stuart-landau-torus-identical-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -7755,7 +7755,7 @@
   },
   "A/0db/g2/s1/coupled-stuart-landau-torus-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -7907,7 +7907,7 @@
   },
   "A/0db/g2/s1/coupled-stuart-landau-torus-random-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -8059,7 +8059,7 @@
   },
   "A/0db/g2/s1/coupled-stuart-landau-torus-random-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -8211,7 +8211,7 @@
   },
   "A/0db/g2/s1/coupled-stuart-landau-torus-random-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -8363,7 +8363,7 @@
   },
   "A/0db/g2/s1/coupled-stuart-landau-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -8515,7 +8515,7 @@
   },
   "A/0db/g2/s1/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -8667,7 +8667,7 @@
   },
   "A/0db/g2/s1/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -8819,7 +8819,7 @@
   },
   "A/0db/g2/s1/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -8971,7 +8971,7 @@
   },
   "A/0db/g2/s1/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -9123,7 +9123,7 @@
   },
   "A/0db/g2/s2/coupled-stuart-landau-torus-identical-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -9275,7 +9275,7 @@
   },
   "A/0db/g2/s2/coupled-stuart-landau-torus-identical-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -9427,7 +9427,7 @@
   },
   "A/0db/g2/s2/coupled-stuart-landau-torus-identical-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -9579,7 +9579,7 @@
   },
   "A/0db/g2/s2/coupled-stuart-landau-torus-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -9731,7 +9731,7 @@
   },
   "A/0db/g2/s2/coupled-stuart-landau-torus-random-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -9883,7 +9883,7 @@
   },
   "A/0db/g2/s2/coupled-stuart-landau-torus-random-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -10035,7 +10035,7 @@
   },
   "A/0db/g2/s2/coupled-stuart-landau-torus-random-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -10187,7 +10187,7 @@
   },
   "A/0db/g2/s2/coupled-stuart-landau-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -10339,7 +10339,7 @@
   },
   "A/0db/g2/s2/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -10491,7 +10491,7 @@
   },
   "A/0db/g2/s2/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -10643,7 +10643,7 @@
   },
   "A/0db/g2/s2/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -10795,7 +10795,7 @@
   },
   "A/0db/g2/s2/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -10947,7 +10947,7 @@
   },
   "A/5db/g1/s0/coupled-stuart-landau-torus-identical-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -11099,7 +11099,7 @@
   },
   "A/5db/g1/s0/coupled-stuart-landau-torus-identical-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -11251,7 +11251,7 @@
   },
   "A/5db/g1/s0/coupled-stuart-landau-torus-identical-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -11403,7 +11403,7 @@
   },
   "A/5db/g1/s0/coupled-stuart-landau-torus-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -11555,7 +11555,7 @@
   },
   "A/5db/g1/s0/coupled-stuart-landau-torus-random-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -11707,7 +11707,7 @@
   },
   "A/5db/g1/s0/coupled-stuart-landau-torus-random-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -11859,7 +11859,7 @@
   },
   "A/5db/g1/s0/coupled-stuart-landau-torus-random-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -12011,7 +12011,7 @@
   },
   "A/5db/g1/s0/coupled-stuart-landau-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -12163,7 +12163,7 @@
   },
   "A/5db/g1/s0/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -12315,7 +12315,7 @@
   },
   "A/5db/g1/s0/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -12467,7 +12467,7 @@
   },
   "A/5db/g1/s0/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -12619,7 +12619,7 @@
   },
   "A/5db/g1/s0/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -12771,7 +12771,7 @@
   },
   "A/5db/g1/s1/coupled-stuart-landau-torus-identical-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -12923,7 +12923,7 @@
   },
   "A/5db/g1/s1/coupled-stuart-landau-torus-identical-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -13075,7 +13075,7 @@
   },
   "A/5db/g1/s1/coupled-stuart-landau-torus-identical-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -13227,7 +13227,7 @@
   },
   "A/5db/g1/s1/coupled-stuart-landau-torus-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -13379,7 +13379,7 @@
   },
   "A/5db/g1/s1/coupled-stuart-landau-torus-random-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -13531,7 +13531,7 @@
   },
   "A/5db/g1/s1/coupled-stuart-landau-torus-random-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -13683,7 +13683,7 @@
   },
   "A/5db/g1/s1/coupled-stuart-landau-torus-random-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -13835,7 +13835,7 @@
   },
   "A/5db/g1/s1/coupled-stuart-landau-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -13987,7 +13987,7 @@
   },
   "A/5db/g1/s1/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -14139,7 +14139,7 @@
   },
   "A/5db/g1/s1/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -14291,7 +14291,7 @@
   },
   "A/5db/g1/s1/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -14443,7 +14443,7 @@
   },
   "A/5db/g1/s1/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -14595,7 +14595,7 @@
   },
   "A/5db/g1/s2/coupled-stuart-landau-torus-identical-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -14747,7 +14747,7 @@
   },
   "A/5db/g1/s2/coupled-stuart-landau-torus-identical-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -14899,7 +14899,7 @@
   },
   "A/5db/g1/s2/coupled-stuart-landau-torus-identical-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -15051,7 +15051,7 @@
   },
   "A/5db/g1/s2/coupled-stuart-landau-torus-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -15203,7 +15203,7 @@
   },
   "A/5db/g1/s2/coupled-stuart-landau-torus-random-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -15355,7 +15355,7 @@
   },
   "A/5db/g1/s2/coupled-stuart-landau-torus-random-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -15507,7 +15507,7 @@
   },
   "A/5db/g1/s2/coupled-stuart-landau-torus-random-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -15659,7 +15659,7 @@
   },
   "A/5db/g1/s2/coupled-stuart-landau-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -15811,7 +15811,7 @@
   },
   "A/5db/g1/s2/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -15963,7 +15963,7 @@
   },
   "A/5db/g1/s2/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -16115,7 +16115,7 @@
   },
   "A/5db/g1/s2/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -16267,7 +16267,7 @@
   },
   "A/5db/g1/s2/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -16419,7 +16419,7 @@
   },
   "A/5db/g2/s0/coupled-stuart-landau-torus-identical-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -16571,7 +16571,7 @@
   },
   "A/5db/g2/s0/coupled-stuart-landau-torus-identical-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -16723,7 +16723,7 @@
   },
   "A/5db/g2/s0/coupled-stuart-landau-torus-identical-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -16875,7 +16875,7 @@
   },
   "A/5db/g2/s0/coupled-stuart-landau-torus-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -17027,7 +17027,7 @@
   },
   "A/5db/g2/s0/coupled-stuart-landau-torus-random-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -17179,7 +17179,7 @@
   },
   "A/5db/g2/s0/coupled-stuart-landau-torus-random-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -17331,7 +17331,7 @@
   },
   "A/5db/g2/s0/coupled-stuart-landau-torus-random-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -17483,7 +17483,7 @@
   },
   "A/5db/g2/s0/coupled-stuart-landau-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -17635,7 +17635,7 @@
   },
   "A/5db/g2/s0/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -17787,7 +17787,7 @@
   },
   "A/5db/g2/s0/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -17939,7 +17939,7 @@
   },
   "A/5db/g2/s0/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -18091,7 +18091,7 @@
   },
   "A/5db/g2/s0/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -18243,7 +18243,7 @@
   },
   "A/5db/g2/s1/coupled-stuart-landau-torus-identical-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -18395,7 +18395,7 @@
   },
   "A/5db/g2/s1/coupled-stuart-landau-torus-identical-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -18547,7 +18547,7 @@
   },
   "A/5db/g2/s1/coupled-stuart-landau-torus-identical-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -18699,7 +18699,7 @@
   },
   "A/5db/g2/s1/coupled-stuart-landau-torus-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -18851,7 +18851,7 @@
   },
   "A/5db/g2/s1/coupled-stuart-landau-torus-random-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -19003,7 +19003,7 @@
   },
   "A/5db/g2/s1/coupled-stuart-landau-torus-random-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -19155,7 +19155,7 @@
   },
   "A/5db/g2/s1/coupled-stuart-landau-torus-random-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -19307,7 +19307,7 @@
   },
   "A/5db/g2/s1/coupled-stuart-landau-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -19459,7 +19459,7 @@
   },
   "A/5db/g2/s1/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -19611,7 +19611,7 @@
   },
   "A/5db/g2/s1/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -19763,7 +19763,7 @@
   },
   "A/5db/g2/s1/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -19915,7 +19915,7 @@
   },
   "A/5db/g2/s1/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -20067,7 +20067,7 @@
   },
   "A/5db/g2/s2/coupled-stuart-landau-torus-identical-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -20219,7 +20219,7 @@
   },
   "A/5db/g2/s2/coupled-stuart-landau-torus-identical-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -20371,7 +20371,7 @@
   },
   "A/5db/g2/s2/coupled-stuart-landau-torus-identical-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -20523,7 +20523,7 @@
   },
   "A/5db/g2/s2/coupled-stuart-landau-torus-identical-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -20675,7 +20675,7 @@
   },
   "A/5db/g2/s2/coupled-stuart-landau-torus-random-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -20827,7 +20827,7 @@
   },
   "A/5db/g2/s2/coupled-stuart-landau-torus-random-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -20979,7 +20979,7 @@
   },
   "A/5db/g2/s2/coupled-stuart-landau-torus-random-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -21131,7 +21131,7 @@
   },
   "A/5db/g2/s2/coupled-stuart-landau-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -21283,7 +21283,7 @@
   },
   "A/5db/g2/s2/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -21435,7 +21435,7 @@
   },
   "A/5db/g2/s2/coupled-stuart-landau-torus-tonotopic-restoring0.1-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -21587,7 +21587,7 @@
   },
   "A/5db/g2/s2/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling0.5": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -21739,7 +21739,7 @@
   },
   "A/5db/g2/s2/coupled-stuart-landau-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier2",
+    "experiment": "design",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": 5.0,

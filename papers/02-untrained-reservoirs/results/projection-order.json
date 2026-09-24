@@ -1,9 +1,9 @@
 {
- "group": "projection-order-spectrogram",
+ "group": "projection-order",
  "runs": {
   "A/pair06/0db/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -131,7 +131,7 @@
   },
   "A/pair06/0db/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -271,7 +271,7 @@
   },
   "A/pair06/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -445,7 +445,7 @@
   },
   "A/pair06/0db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -620,7 +620,7 @@
   },
   "A/pair06/0db/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -748,7 +748,7 @@
   },
   "A/pair06/0db/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -888,7 +888,7 @@
   },
   "A/pair06/0db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1062,7 +1062,7 @@
   },
   "A/pair06/0db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1237,7 +1237,7 @@
   },
   "A/pair06/0db/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1365,7 +1365,7 @@
   },
   "A/pair06/0db/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1505,7 +1505,7 @@
   },
   "A/pair06/0db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1679,7 +1679,7 @@
   },
   "A/pair06/0db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1854,7 +1854,7 @@
   },
   "A/pair06/0db/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1982,7 +1982,7 @@
   },
   "A/pair06/0db/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2122,7 +2122,7 @@
   },
   "A/pair06/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2296,7 +2296,7 @@
   },
   "A/pair06/0db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2471,7 +2471,7 @@
   },
   "A/pair06/0db/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2599,7 +2599,7 @@
   },
   "A/pair06/0db/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2739,7 +2739,7 @@
   },
   "A/pair06/0db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2913,7 +2913,7 @@
   },
   "A/pair06/0db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3088,7 +3088,7 @@
   },
   "A/pair06/0db/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3216,7 +3216,7 @@
   },
   "A/pair06/0db/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3356,7 +3356,7 @@
   },
   "A/pair06/0db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3530,7 +3530,7 @@
   },
   "A/pair06/0db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3705,7 +3705,7 @@
   },
   "A/pair06/5db/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -3833,7 +3833,7 @@
   },
   "A/pair06/5db/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -3973,7 +3973,7 @@
   },
   "A/pair06/5db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -4147,7 +4147,7 @@
   },
   "A/pair06/5db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -4322,7 +4322,7 @@
   },
   "A/pair06/5db/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -4450,7 +4450,7 @@
   },
   "A/pair06/5db/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -4590,7 +4590,7 @@
   },
   "A/pair06/5db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -4764,7 +4764,7 @@
   },
   "A/pair06/5db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -4939,7 +4939,7 @@
   },
   "A/pair06/5db/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -5067,7 +5067,7 @@
   },
   "A/pair06/5db/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -5207,7 +5207,7 @@
   },
   "A/pair06/5db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -5381,7 +5381,7 @@
   },
   "A/pair06/5db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -5556,7 +5556,7 @@
   },
   "A/pair06/5db/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -5684,7 +5684,7 @@
   },
   "A/pair06/5db/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -5824,7 +5824,7 @@
   },
   "A/pair06/5db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -5998,7 +5998,7 @@
   },
   "A/pair06/5db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6173,7 +6173,7 @@
   },
   "A/pair06/5db/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6301,7 +6301,7 @@
   },
   "A/pair06/5db/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6441,7 +6441,7 @@
   },
   "A/pair06/5db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6615,7 +6615,7 @@
   },
   "A/pair06/5db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6790,7 +6790,7 @@
   },
   "A/pair06/5db/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6918,7 +6918,7 @@
   },
   "A/pair06/5db/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -7058,7 +7058,7 @@
   },
   "A/pair06/5db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -7232,7 +7232,7 @@
   },
   "A/pair06/5db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -7407,7 +7407,7 @@
   },
   "A/pair06/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -7535,7 +7535,7 @@
   },
   "A/pair06/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -7675,7 +7675,7 @@
   },
   "A/pair06/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -7849,7 +7849,7 @@
   },
   "A/pair06/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -8024,7 +8024,7 @@
   },
   "A/pair06/clean/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -8152,7 +8152,7 @@
   },
   "A/pair06/clean/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -8292,7 +8292,7 @@
   },
   "A/pair06/clean/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -8466,7 +8466,7 @@
   },
   "A/pair06/clean/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -8641,7 +8641,7 @@
   },
   "A/pair06/clean/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -8769,7 +8769,7 @@
   },
   "A/pair06/clean/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -8909,7 +8909,7 @@
   },
   "A/pair06/clean/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -9083,7 +9083,7 @@
   },
   "A/pair06/clean/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -9258,7 +9258,7 @@
   },
   "A/pair06/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -9386,7 +9386,7 @@
   },
   "A/pair06/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -9526,7 +9526,7 @@
   },
   "A/pair06/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -9700,7 +9700,7 @@
   },
   "A/pair06/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -9875,7 +9875,7 @@
   },
   "A/pair06/clean/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -10003,7 +10003,7 @@
   },
   "A/pair06/clean/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -10143,7 +10143,7 @@
   },
   "A/pair06/clean/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -10317,7 +10317,7 @@
   },
   "A/pair06/clean/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -10492,7 +10492,7 @@
   },
   "A/pair06/clean/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -10620,7 +10620,7 @@
   },
   "A/pair06/clean/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -10760,7 +10760,7 @@
   },
   "A/pair06/clean/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -10934,7 +10934,7 @@
   },
   "A/pair06/clean/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11109,7 +11109,7 @@
   },
   "A/pair18/0db/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -11237,7 +11237,7 @@
   },
   "A/pair18/0db/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -11377,7 +11377,7 @@
   },
   "A/pair18/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -11551,7 +11551,7 @@
   },
   "A/pair18/0db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -11726,7 +11726,7 @@
   },
   "A/pair18/0db/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -11854,7 +11854,7 @@
   },
   "A/pair18/0db/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -11994,7 +11994,7 @@
   },
   "A/pair18/0db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -12168,7 +12168,7 @@
   },
   "A/pair18/0db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -12343,7 +12343,7 @@
   },
   "A/pair18/0db/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -12471,7 +12471,7 @@
   },
   "A/pair18/0db/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -12611,7 +12611,7 @@
   },
   "A/pair18/0db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -12785,7 +12785,7 @@
   },
   "A/pair18/0db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -12960,7 +12960,7 @@
   },
   "A/pair18/0db/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -13088,7 +13088,7 @@
   },
   "A/pair18/0db/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -13228,7 +13228,7 @@
   },
   "A/pair18/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -13402,7 +13402,7 @@
   },
   "A/pair18/0db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -13577,7 +13577,7 @@
   },
   "A/pair18/0db/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -13705,7 +13705,7 @@
   },
   "A/pair18/0db/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -13845,7 +13845,7 @@
   },
   "A/pair18/0db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -14019,7 +14019,7 @@
   },
   "A/pair18/0db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -14194,7 +14194,7 @@
   },
   "A/pair18/0db/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -14322,7 +14322,7 @@
   },
   "A/pair18/0db/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -14462,7 +14462,7 @@
   },
   "A/pair18/0db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -14636,7 +14636,7 @@
   },
   "A/pair18/0db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -14811,7 +14811,7 @@
   },
   "A/pair18/5db/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -14939,7 +14939,7 @@
   },
   "A/pair18/5db/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -15079,7 +15079,7 @@
   },
   "A/pair18/5db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -15253,7 +15253,7 @@
   },
   "A/pair18/5db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -15428,7 +15428,7 @@
   },
   "A/pair18/5db/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -15556,7 +15556,7 @@
   },
   "A/pair18/5db/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -15696,7 +15696,7 @@
   },
   "A/pair18/5db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -15870,7 +15870,7 @@
   },
   "A/pair18/5db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -16045,7 +16045,7 @@
   },
   "A/pair18/5db/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -16173,7 +16173,7 @@
   },
   "A/pair18/5db/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -16313,7 +16313,7 @@
   },
   "A/pair18/5db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -16487,7 +16487,7 @@
   },
   "A/pair18/5db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -16662,7 +16662,7 @@
   },
   "A/pair18/5db/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -16790,7 +16790,7 @@
   },
   "A/pair18/5db/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -16930,7 +16930,7 @@
   },
   "A/pair18/5db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -17104,7 +17104,7 @@
   },
   "A/pair18/5db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -17279,7 +17279,7 @@
   },
   "A/pair18/5db/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -17407,7 +17407,7 @@
   },
   "A/pair18/5db/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -17547,7 +17547,7 @@
   },
   "A/pair18/5db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -17721,7 +17721,7 @@
   },
   "A/pair18/5db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -17896,7 +17896,7 @@
   },
   "A/pair18/5db/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -18024,7 +18024,7 @@
   },
   "A/pair18/5db/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -18164,7 +18164,7 @@
   },
   "A/pair18/5db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -18338,7 +18338,7 @@
   },
   "A/pair18/5db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -18513,7 +18513,7 @@
   },
   "A/pair18/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -18641,7 +18641,7 @@
   },
   "A/pair18/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -18781,7 +18781,7 @@
   },
   "A/pair18/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -18955,7 +18955,7 @@
   },
   "A/pair18/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -19130,7 +19130,7 @@
   },
   "A/pair18/clean/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -19258,7 +19258,7 @@
   },
   "A/pair18/clean/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -19398,7 +19398,7 @@
   },
   "A/pair18/clean/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -19572,7 +19572,7 @@
   },
   "A/pair18/clean/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -19747,7 +19747,7 @@
   },
   "A/pair18/clean/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -19875,7 +19875,7 @@
   },
   "A/pair18/clean/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -20015,7 +20015,7 @@
   },
   "A/pair18/clean/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -20189,7 +20189,7 @@
   },
   "A/pair18/clean/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -20364,7 +20364,7 @@
   },
   "A/pair18/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -20492,7 +20492,7 @@
   },
   "A/pair18/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -20632,7 +20632,7 @@
   },
   "A/pair18/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -20806,7 +20806,7 @@
   },
   "A/pair18/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -20981,7 +20981,7 @@
   },
   "A/pair18/clean/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -21109,7 +21109,7 @@
   },
   "A/pair18/clean/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -21249,7 +21249,7 @@
   },
   "A/pair18/clean/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -21423,7 +21423,7 @@
   },
   "A/pair18/clean/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -21598,7 +21598,7 @@
   },
   "A/pair18/clean/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -21726,7 +21726,7 @@
   },
   "A/pair18/clean/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -21866,7 +21866,7 @@
   },
   "A/pair18/clean/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -22040,7 +22040,7 @@
   },
   "A/pair18/clean/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -22215,7 +22215,7 @@
   },
   "A/pair25/0db/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -22343,7 +22343,7 @@
   },
   "A/pair25/0db/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -22483,7 +22483,7 @@
   },
   "A/pair25/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -22657,7 +22657,7 @@
   },
   "A/pair25/0db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -22832,7 +22832,7 @@
   },
   "A/pair25/0db/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -22960,7 +22960,7 @@
   },
   "A/pair25/0db/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -23100,7 +23100,7 @@
   },
   "A/pair25/0db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -23274,7 +23274,7 @@
   },
   "A/pair25/0db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -23449,7 +23449,7 @@
   },
   "A/pair25/0db/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -23577,7 +23577,7 @@
   },
   "A/pair25/0db/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -23717,7 +23717,7 @@
   },
   "A/pair25/0db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -23891,7 +23891,7 @@
   },
   "A/pair25/0db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -24066,7 +24066,7 @@
   },
   "A/pair25/0db/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -24194,7 +24194,7 @@
   },
   "A/pair25/0db/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -24334,7 +24334,7 @@
   },
   "A/pair25/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -24508,7 +24508,7 @@
   },
   "A/pair25/0db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -24683,7 +24683,7 @@
   },
   "A/pair25/0db/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -24811,7 +24811,7 @@
   },
   "A/pair25/0db/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -24951,7 +24951,7 @@
   },
   "A/pair25/0db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -25125,7 +25125,7 @@
   },
   "A/pair25/0db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -25300,7 +25300,7 @@
   },
   "A/pair25/0db/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -25428,7 +25428,7 @@
   },
   "A/pair25/0db/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -25568,7 +25568,7 @@
   },
   "A/pair25/0db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -25742,7 +25742,7 @@
   },
   "A/pair25/0db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -25917,7 +25917,7 @@
   },
   "A/pair25/5db/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26045,7 +26045,7 @@
   },
   "A/pair25/5db/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26185,7 +26185,7 @@
   },
   "A/pair25/5db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26359,7 +26359,7 @@
   },
   "A/pair25/5db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26534,7 +26534,7 @@
   },
   "A/pair25/5db/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26662,7 +26662,7 @@
   },
   "A/pair25/5db/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26802,7 +26802,7 @@
   },
   "A/pair25/5db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26976,7 +26976,7 @@
   },
   "A/pair25/5db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -27151,7 +27151,7 @@
   },
   "A/pair25/5db/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -27279,7 +27279,7 @@
   },
   "A/pair25/5db/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -27419,7 +27419,7 @@
   },
   "A/pair25/5db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -27593,7 +27593,7 @@
   },
   "A/pair25/5db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -27768,7 +27768,7 @@
   },
   "A/pair25/5db/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -27896,7 +27896,7 @@
   },
   "A/pair25/5db/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -28036,7 +28036,7 @@
   },
   "A/pair25/5db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -28210,7 +28210,7 @@
   },
   "A/pair25/5db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -28385,7 +28385,7 @@
   },
   "A/pair25/5db/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -28513,7 +28513,7 @@
   },
   "A/pair25/5db/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -28653,7 +28653,7 @@
   },
   "A/pair25/5db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -28827,7 +28827,7 @@
   },
   "A/pair25/5db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -29002,7 +29002,7 @@
   },
   "A/pair25/5db/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -29130,7 +29130,7 @@
   },
   "A/pair25/5db/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -29270,7 +29270,7 @@
   },
   "A/pair25/5db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -29444,7 +29444,7 @@
   },
   "A/pair25/5db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -29619,7 +29619,7 @@
   },
   "A/pair25/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -29747,7 +29747,7 @@
   },
   "A/pair25/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -29887,7 +29887,7 @@
   },
   "A/pair25/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30061,7 +30061,7 @@
   },
   "A/pair25/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30236,7 +30236,7 @@
   },
   "A/pair25/clean/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30364,7 +30364,7 @@
   },
   "A/pair25/clean/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30504,7 +30504,7 @@
   },
   "A/pair25/clean/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30678,7 +30678,7 @@
   },
   "A/pair25/clean/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30853,7 +30853,7 @@
   },
   "A/pair25/clean/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30981,7 +30981,7 @@
   },
   "A/pair25/clean/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31121,7 +31121,7 @@
   },
   "A/pair25/clean/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31295,7 +31295,7 @@
   },
   "A/pair25/clean/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31470,7 +31470,7 @@
   },
   "A/pair25/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31598,7 +31598,7 @@
   },
   "A/pair25/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31738,7 +31738,7 @@
   },
   "A/pair25/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31912,7 +31912,7 @@
   },
   "A/pair25/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32087,7 +32087,7 @@
   },
   "A/pair25/clean/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32215,7 +32215,7 @@
   },
   "A/pair25/clean/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32355,7 +32355,7 @@
   },
   "A/pair25/clean/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32529,7 +32529,7 @@
   },
   "A/pair25/clean/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32704,7 +32704,7 @@
   },
   "A/pair25/clean/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32832,7 +32832,7 @@
   },
   "A/pair25/clean/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32972,7 +32972,7 @@
   },
   "A/pair25/clean/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -33146,7 +33146,7 @@
   },
   "A/pair25/clean/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -33321,7 +33321,7 @@
   },
   "A/pair37/0db/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33449,7 +33449,7 @@
   },
   "A/pair37/0db/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33589,7 +33589,7 @@
   },
   "A/pair37/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33763,7 +33763,7 @@
   },
   "A/pair37/0db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33938,7 +33938,7 @@
   },
   "A/pair37/0db/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34066,7 +34066,7 @@
   },
   "A/pair37/0db/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34206,7 +34206,7 @@
   },
   "A/pair37/0db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34380,7 +34380,7 @@
   },
   "A/pair37/0db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34555,7 +34555,7 @@
   },
   "A/pair37/0db/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34683,7 +34683,7 @@
   },
   "A/pair37/0db/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34823,7 +34823,7 @@
   },
   "A/pair37/0db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34997,7 +34997,7 @@
   },
   "A/pair37/0db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35172,7 +35172,7 @@
   },
   "A/pair37/0db/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35300,7 +35300,7 @@
   },
   "A/pair37/0db/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35440,7 +35440,7 @@
   },
   "A/pair37/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35614,7 +35614,7 @@
   },
   "A/pair37/0db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35789,7 +35789,7 @@
   },
   "A/pair37/0db/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35917,7 +35917,7 @@
   },
   "A/pair37/0db/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36057,7 +36057,7 @@
   },
   "A/pair37/0db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36231,7 +36231,7 @@
   },
   "A/pair37/0db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36406,7 +36406,7 @@
   },
   "A/pair37/0db/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36534,7 +36534,7 @@
   },
   "A/pair37/0db/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36674,7 +36674,7 @@
   },
   "A/pair37/0db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36848,7 +36848,7 @@
   },
   "A/pair37/0db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37023,7 +37023,7 @@
   },
   "A/pair37/5db/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -37151,7 +37151,7 @@
   },
   "A/pair37/5db/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -37291,7 +37291,7 @@
   },
   "A/pair37/5db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -37465,7 +37465,7 @@
   },
   "A/pair37/5db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -37640,7 +37640,7 @@
   },
   "A/pair37/5db/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -37768,7 +37768,7 @@
   },
   "A/pair37/5db/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -37908,7 +37908,7 @@
   },
   "A/pair37/5db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -38082,7 +38082,7 @@
   },
   "A/pair37/5db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -38257,7 +38257,7 @@
   },
   "A/pair37/5db/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -38385,7 +38385,7 @@
   },
   "A/pair37/5db/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -38525,7 +38525,7 @@
   },
   "A/pair37/5db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -38699,7 +38699,7 @@
   },
   "A/pair37/5db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -38874,7 +38874,7 @@
   },
   "A/pair37/5db/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39002,7 +39002,7 @@
   },
   "A/pair37/5db/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39142,7 +39142,7 @@
   },
   "A/pair37/5db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39316,7 +39316,7 @@
   },
   "A/pair37/5db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39491,7 +39491,7 @@
   },
   "A/pair37/5db/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39619,7 +39619,7 @@
   },
   "A/pair37/5db/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39759,7 +39759,7 @@
   },
   "A/pair37/5db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39933,7 +39933,7 @@
   },
   "A/pair37/5db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -40108,7 +40108,7 @@
   },
   "A/pair37/5db/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -40236,7 +40236,7 @@
   },
   "A/pair37/5db/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -40376,7 +40376,7 @@
   },
   "A/pair37/5db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -40550,7 +40550,7 @@
   },
   "A/pair37/5db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -40725,7 +40725,7 @@
   },
   "A/pair37/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -40853,7 +40853,7 @@
   },
   "A/pair37/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -40993,7 +40993,7 @@
   },
   "A/pair37/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -41167,7 +41167,7 @@
   },
   "A/pair37/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -41342,7 +41342,7 @@
   },
   "A/pair37/clean/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -41470,7 +41470,7 @@
   },
   "A/pair37/clean/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -41610,7 +41610,7 @@
   },
   "A/pair37/clean/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -41784,7 +41784,7 @@
   },
   "A/pair37/clean/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -41959,7 +41959,7 @@
   },
   "A/pair37/clean/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -42087,7 +42087,7 @@
   },
   "A/pair37/clean/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -42227,7 +42227,7 @@
   },
   "A/pair37/clean/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -42401,7 +42401,7 @@
   },
   "A/pair37/clean/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -42576,7 +42576,7 @@
   },
   "A/pair37/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -42704,7 +42704,7 @@
   },
   "A/pair37/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -42844,7 +42844,7 @@
   },
   "A/pair37/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -43018,7 +43018,7 @@
   },
   "A/pair37/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -43193,7 +43193,7 @@
   },
   "A/pair37/clean/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -43321,7 +43321,7 @@
   },
   "A/pair37/clean/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -43461,7 +43461,7 @@
   },
   "A/pair37/clean/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -43635,7 +43635,7 @@
   },
   "A/pair37/clean/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -43810,7 +43810,7 @@
   },
   "A/pair37/clean/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -43938,7 +43938,7 @@
   },
   "A/pair37/clean/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -44078,7 +44078,7 @@
   },
   "A/pair37/clean/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -44252,7 +44252,7 @@
   },
   "A/pair37/clean/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -44427,7 +44427,7 @@
   },
   "A/pair49/0db/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -44555,7 +44555,7 @@
   },
   "A/pair49/0db/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -44695,7 +44695,7 @@
   },
   "A/pair49/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -44869,7 +44869,7 @@
   },
   "A/pair49/0db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -45044,7 +45044,7 @@
   },
   "A/pair49/0db/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -45172,7 +45172,7 @@
   },
   "A/pair49/0db/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -45312,7 +45312,7 @@
   },
   "A/pair49/0db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -45486,7 +45486,7 @@
   },
   "A/pair49/0db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -45661,7 +45661,7 @@
   },
   "A/pair49/0db/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -45789,7 +45789,7 @@
   },
   "A/pair49/0db/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -45929,7 +45929,7 @@
   },
   "A/pair49/0db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -46103,7 +46103,7 @@
   },
   "A/pair49/0db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -46278,7 +46278,7 @@
   },
   "A/pair49/0db/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -46406,7 +46406,7 @@
   },
   "A/pair49/0db/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -46546,7 +46546,7 @@
   },
   "A/pair49/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -46720,7 +46720,7 @@
   },
   "A/pair49/0db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -46895,7 +46895,7 @@
   },
   "A/pair49/0db/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -47023,7 +47023,7 @@
   },
   "A/pair49/0db/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -47163,7 +47163,7 @@
   },
   "A/pair49/0db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -47337,7 +47337,7 @@
   },
   "A/pair49/0db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -47512,7 +47512,7 @@
   },
   "A/pair49/0db/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -47640,7 +47640,7 @@
   },
   "A/pair49/0db/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -47780,7 +47780,7 @@
   },
   "A/pair49/0db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -47954,7 +47954,7 @@
   },
   "A/pair49/0db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -48129,7 +48129,7 @@
   },
   "A/pair49/5db/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -48257,7 +48257,7 @@
   },
   "A/pair49/5db/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -48397,7 +48397,7 @@
   },
   "A/pair49/5db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -48571,7 +48571,7 @@
   },
   "A/pair49/5db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -48746,7 +48746,7 @@
   },
   "A/pair49/5db/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -48874,7 +48874,7 @@
   },
   "A/pair49/5db/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -49014,7 +49014,7 @@
   },
   "A/pair49/5db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -49188,7 +49188,7 @@
   },
   "A/pair49/5db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -49363,7 +49363,7 @@
   },
   "A/pair49/5db/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -49491,7 +49491,7 @@
   },
   "A/pair49/5db/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -49631,7 +49631,7 @@
   },
   "A/pair49/5db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -49805,7 +49805,7 @@
   },
   "A/pair49/5db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -49980,7 +49980,7 @@
   },
   "A/pair49/5db/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -50108,7 +50108,7 @@
   },
   "A/pair49/5db/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -50248,7 +50248,7 @@
   },
   "A/pair49/5db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -50422,7 +50422,7 @@
   },
   "A/pair49/5db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -50597,7 +50597,7 @@
   },
   "A/pair49/5db/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -50725,7 +50725,7 @@
   },
   "A/pair49/5db/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -50865,7 +50865,7 @@
   },
   "A/pair49/5db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -51039,7 +51039,7 @@
   },
   "A/pair49/5db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -51214,7 +51214,7 @@
   },
   "A/pair49/5db/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -51342,7 +51342,7 @@
   },
   "A/pair49/5db/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -51482,7 +51482,7 @@
   },
   "A/pair49/5db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -51656,7 +51656,7 @@
   },
   "A/pair49/5db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -51831,7 +51831,7 @@
   },
   "A/pair49/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -51959,7 +51959,7 @@
   },
   "A/pair49/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -52099,7 +52099,7 @@
   },
   "A/pair49/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -52273,7 +52273,7 @@
   },
   "A/pair49/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -52448,7 +52448,7 @@
   },
   "A/pair49/clean/g1/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -52576,7 +52576,7 @@
   },
   "A/pair49/clean/g1/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -52716,7 +52716,7 @@
   },
   "A/pair49/clean/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -52890,7 +52890,7 @@
   },
   "A/pair49/clean/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -53065,7 +53065,7 @@
   },
   "A/pair49/clean/g1/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -53193,7 +53193,7 @@
   },
   "A/pair49/clean/g1/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -53333,7 +53333,7 @@
   },
   "A/pair49/clean/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -53507,7 +53507,7 @@
   },
   "A/pair49/clean/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -53682,7 +53682,7 @@
   },
   "A/pair49/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -53810,7 +53810,7 @@
   },
   "A/pair49/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -53950,7 +53950,7 @@
   },
   "A/pair49/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -54124,7 +54124,7 @@
   },
   "A/pair49/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -54299,7 +54299,7 @@
   },
   "A/pair49/clean/g2/s1/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -54427,7 +54427,7 @@
   },
   "A/pair49/clean/g2/s1/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -54567,7 +54567,7 @@
   },
   "A/pair49/clean/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -54741,7 +54741,7 @@
   },
   "A/pair49/clean/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -54916,7 +54916,7 @@
   },
   "A/pair49/clean/g2/s2/bank-state": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -55044,7 +55044,7 @@
   },
   "A/pair49/clean/g2/s2/bank-width": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -55184,7 +55184,7 @@
   },
   "A/pair49/clean/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -55358,7 +55358,7 @@
   },
   "A/pair49/clean/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "projection",
+    "experiment": "projection",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,

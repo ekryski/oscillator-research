@@ -45,7 +45,7 @@ SIZES = (128, 256)
 
 
 def spec(arm, **kw):
-    base = dict(tier="tier1", task="recognition", pathway="spectrogram", noise_db=0.0,
+    base = dict(experiment="controls", task="recognition", pathway="spectrogram", noise_db=0.0,
                 gain=2.0 if arm.uses_gain else None, seed=0, arm=arm, sizes=SIZES,
                 widths=(64, 256), native_sizes=(128,))
     return rn.Spec(**{**base, **kw})
@@ -53,11 +53,11 @@ def spec(arm, **kw):
 
 def test_a_run_is_named_by_what_decides_its_numbers():
     a = spec(COUPLED)
-    assert a.group() == "tier1-recognition-spectrogram"
+    assert a.group() == "controls-recognition"
     assert a.run_id() == "A/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1"
     assert spec(am.Arm("baseline")).run_id() == "A/0db/s0/baseline"           # the baseline has no gain
     assert spec(am.Arm("trained", arch="gru"), sizes=(128,)).run_id().endswith("trained-gru/n128")
-    assert spec(COUPLED, tier="tier2").group() == "tier2-recognition-spectrogram-kuramoto"
+    assert spec(COUPLED, experiment="design").group() == "design-recognition-kuramoto"
     assert spec(COUPLED, noise_db=None).run_id().startswith("A/clean/")
     ids = {spec(COUPLED, seed=s, gain=g).run_id() for s in (0, 1) for g in (1.0, 2.0)}
     assert len(ids) == 4
@@ -120,9 +120,9 @@ def test_a_trained_network_is_read_at_its_own_training_size(bank):
 
 
 def test_a_smaller_run_reproduces_the_same_cell_of_a_larger_one(bank):
-    # the tier 2 cell of a configuration must equal its tier 1 cell: same clips, same order
+    # the design experiment's cell of a configuration must equal its controls cell: same clips, same order
     big = rn.execute(spec(am.Arm("baseline")), bank=bank)
-    small = rn.execute(spec(am.Arm("baseline"), tier="tier2", sizes=(128,)), bank=bank)
+    small = rn.execute(spec(am.Arm("baseline"), experiment="design", sizes=(128,)), bank=bank)
     key = lambda c: (c["read"], c["n_train"], c["width"])  # noqa: E731
     big_cells = {key(c): c for c in big["cells"]}
     for c in small["cells"]:

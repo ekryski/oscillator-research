@@ -1,9 +1,9 @@
 {
- "group": "tier3-recognition-quadrature",
+ "group": "quadrature-recognition",
  "runs": {
   "A/0db/g1/s0/coupled-kuramoto-helix-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -301,7 +301,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-helix-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -599,7 +599,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-sakaguchi-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -897,7 +897,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-sakaguchi-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -1195,7 +1195,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -1493,7 +1493,7 @@
   },
   "A/0db/g1/s0/coupled-kuramoto-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -1791,7 +1791,7 @@
   },
   "A/0db/g1/s0/coupled-second-harmonic-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -2089,7 +2089,7 @@
   },
   "A/0db/g1/s0/coupled-second-harmonic-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -2387,7 +2387,7 @@
   },
   "A/0db/g1/s0/coupled-winfree-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -2685,7 +2685,7 @@
   },
   "A/0db/g1/s0/coupled-winfree-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -2983,7 +2983,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-helix-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -3281,7 +3281,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-helix-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -3579,7 +3579,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-sakaguchi-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -3877,7 +3877,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-sakaguchi-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -4175,7 +4175,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -4473,7 +4473,7 @@
   },
   "A/0db/g1/s1/coupled-kuramoto-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -4771,7 +4771,7 @@
   },
   "A/0db/g1/s1/coupled-second-harmonic-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -5069,7 +5069,7 @@
   },
   "A/0db/g1/s1/coupled-second-harmonic-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -5367,7 +5367,7 @@
   },
   "A/0db/g1/s1/coupled-winfree-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -5665,7 +5665,7 @@
   },
   "A/0db/g1/s1/coupled-winfree-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -5963,7 +5963,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-helix-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -6261,7 +6261,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-helix-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -6559,7 +6559,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-sakaguchi-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -6857,7 +6857,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-sakaguchi-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -7155,7 +7155,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -7453,7 +7453,7 @@
   },
   "A/0db/g1/s2/coupled-kuramoto-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -7751,7 +7751,7 @@
   },
   "A/0db/g1/s2/coupled-second-harmonic-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -8049,7 +8049,7 @@
   },
   "A/0db/g1/s2/coupled-second-harmonic-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -8347,7 +8347,7 @@
   },
   "A/0db/g1/s2/coupled-winfree-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -8645,7 +8645,7 @@
   },
   "A/0db/g1/s2/coupled-winfree-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -8943,7 +8943,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-helix-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -9241,7 +9241,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-helix-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -9539,7 +9539,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-sakaguchi-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -9837,7 +9837,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-sakaguchi-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -10135,7 +10135,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -10433,7 +10433,7 @@
   },
   "A/0db/g2/s0/coupled-kuramoto-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -10731,7 +10731,7 @@
   },
   "A/0db/g2/s0/coupled-second-harmonic-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -11029,7 +11029,7 @@
   },
   "A/0db/g2/s0/coupled-second-harmonic-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -11327,7 +11327,7 @@
   },
   "A/0db/g2/s0/coupled-winfree-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -11625,7 +11625,7 @@
   },
   "A/0db/g2/s0/coupled-winfree-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -11923,7 +11923,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-helix-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -12221,7 +12221,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-helix-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -12519,7 +12519,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-sakaguchi-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -12817,7 +12817,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-sakaguchi-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -13115,7 +13115,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -13413,7 +13413,7 @@
   },
   "A/0db/g2/s1/coupled-kuramoto-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -13711,7 +13711,7 @@
   },
   "A/0db/g2/s1/coupled-second-harmonic-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -14009,7 +14009,7 @@
   },
   "A/0db/g2/s1/coupled-second-harmonic-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -14307,7 +14307,7 @@
   },
   "A/0db/g2/s1/coupled-winfree-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -14605,7 +14605,7 @@
   },
   "A/0db/g2/s1/coupled-winfree-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -14903,7 +14903,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-helix-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -15201,7 +15201,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-helix-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -15499,7 +15499,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-sakaguchi-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -15797,7 +15797,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-sakaguchi-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -16095,7 +16095,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -16393,7 +16393,7 @@
   },
   "A/0db/g2/s2/coupled-kuramoto-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -16691,7 +16691,7 @@
   },
   "A/0db/g2/s2/coupled-second-harmonic-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -16989,7 +16989,7 @@
   },
   "A/0db/g2/s2/coupled-second-harmonic-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -17287,7 +17287,7 @@
   },
   "A/0db/g2/s2/coupled-winfree-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -17585,7 +17585,7 @@
   },
   "A/0db/g2/s2/coupled-winfree-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -17883,7 +17883,7 @@
   },
   "A/0db/s0/baseline": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -18119,7 +18119,7 @@
   },
   "A/0db/s1/baseline": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -18355,7 +18355,7 @@
   },
   "A/0db/s2/baseline": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 0.0,
@@ -18591,7 +18591,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-helix-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -18889,7 +18889,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-helix-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -19187,7 +19187,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-sakaguchi-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -19485,7 +19485,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-sakaguchi-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -19783,7 +19783,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -20081,7 +20081,7 @@
   },
   "A/5db/g1/s0/coupled-kuramoto-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -20379,7 +20379,7 @@
   },
   "A/5db/g1/s0/coupled-second-harmonic-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -20677,7 +20677,7 @@
   },
   "A/5db/g1/s0/coupled-second-harmonic-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -20975,7 +20975,7 @@
   },
   "A/5db/g1/s0/coupled-winfree-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -21273,7 +21273,7 @@
   },
   "A/5db/g1/s0/coupled-winfree-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -21571,7 +21571,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-helix-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -21869,7 +21869,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-helix-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -22167,7 +22167,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-sakaguchi-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -22465,7 +22465,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-sakaguchi-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -22763,7 +22763,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -23061,7 +23061,7 @@
   },
   "A/5db/g1/s1/coupled-kuramoto-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -23359,7 +23359,7 @@
   },
   "A/5db/g1/s1/coupled-second-harmonic-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -23657,7 +23657,7 @@
   },
   "A/5db/g1/s1/coupled-second-harmonic-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -23955,7 +23955,7 @@
   },
   "A/5db/g1/s1/coupled-winfree-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -24253,7 +24253,7 @@
   },
   "A/5db/g1/s1/coupled-winfree-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -24551,7 +24551,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-helix-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -24849,7 +24849,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-helix-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -25147,7 +25147,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-sakaguchi-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -25445,7 +25445,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-sakaguchi-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -25743,7 +25743,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -26041,7 +26041,7 @@
   },
   "A/5db/g1/s2/coupled-kuramoto-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -26339,7 +26339,7 @@
   },
   "A/5db/g1/s2/coupled-second-harmonic-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -26637,7 +26637,7 @@
   },
   "A/5db/g1/s2/coupled-second-harmonic-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -26935,7 +26935,7 @@
   },
   "A/5db/g1/s2/coupled-winfree-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -27233,7 +27233,7 @@
   },
   "A/5db/g1/s2/coupled-winfree-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -27531,7 +27531,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-helix-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -27829,7 +27829,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-helix-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -28127,7 +28127,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-sakaguchi-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -28425,7 +28425,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-sakaguchi-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -28723,7 +28723,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -29021,7 +29021,7 @@
   },
   "A/5db/g2/s0/coupled-kuramoto-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -29319,7 +29319,7 @@
   },
   "A/5db/g2/s0/coupled-second-harmonic-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -29617,7 +29617,7 @@
   },
   "A/5db/g2/s0/coupled-second-harmonic-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -29915,7 +29915,7 @@
   },
   "A/5db/g2/s0/coupled-winfree-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -30213,7 +30213,7 @@
   },
   "A/5db/g2/s0/coupled-winfree-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -30511,7 +30511,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-helix-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -30809,7 +30809,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-helix-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -31107,7 +31107,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-sakaguchi-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -31405,7 +31405,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-sakaguchi-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -31703,7 +31703,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -32001,7 +32001,7 @@
   },
   "A/5db/g2/s1/coupled-kuramoto-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -32299,7 +32299,7 @@
   },
   "A/5db/g2/s1/coupled-second-harmonic-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -32597,7 +32597,7 @@
   },
   "A/5db/g2/s1/coupled-second-harmonic-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -32895,7 +32895,7 @@
   },
   "A/5db/g2/s1/coupled-winfree-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -33193,7 +33193,7 @@
   },
   "A/5db/g2/s1/coupled-winfree-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -33491,7 +33491,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-helix-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -33789,7 +33789,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-helix-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -34087,7 +34087,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-sakaguchi-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -34385,7 +34385,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-sakaguchi-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -34683,7 +34683,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -34981,7 +34981,7 @@
   },
   "A/5db/g2/s2/coupled-kuramoto-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -35279,7 +35279,7 @@
   },
   "A/5db/g2/s2/coupled-second-harmonic-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -35577,7 +35577,7 @@
   },
   "A/5db/g2/s2/coupled-second-harmonic-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -35875,7 +35875,7 @@
   },
   "A/5db/g2/s2/coupled-winfree-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -36173,7 +36173,7 @@
   },
   "A/5db/g2/s2/coupled-winfree-torus-tonotopic-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -36471,7 +36471,7 @@
   },
   "A/5db/s0/baseline": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -36707,7 +36707,7 @@
   },
   "A/5db/s1/baseline": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,
@@ -36943,7 +36943,7 @@
   },
   "A/5db/s2/baseline": {
    "spec": {
-    "tier": "tier3",
+    "experiment": "quadrature",
     "task": "recognition",
     "pathway": "quadrature",
     "noise_db": 5.0,

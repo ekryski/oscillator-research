@@ -4,10 +4,10 @@ A run streams its clips through the arm in batches, keeps each feature block
 once, hands them to the shared readout, and records every cell with its
 per-clip correctness where the spec asks for it. The training block
 and the test block are batched separately, so a test clip's features are
-computed in the same batch in every tier that uses it.
+computed in the same batch in every experiment that uses it.
 
-The record lives under results/, one file per tier, task and input pathway.
-A run's identity is
+The record lives under results/, one file per experiment and task (and per
+coupling function in the design and sweep experiments). A run's identity is
 derived from its specification alone, so a sweep can be stopped and restarted
 and each run lands in the same place exactly once.
 """
@@ -31,7 +31,7 @@ import torch
 from harness.experiment import arms as am
 from harness.experiment import protocol as pr
 from harness.experiment import readout as ro
-from harness.utils.paths import RESULTS_DIR
+from harness.utils.paths import CACHE_DIR, RESULTS_DIR
 
 #: the common widths; an arm is never read wider than its native width
 WIDTHS = (192, 1024, 4096)
@@ -45,7 +45,7 @@ BATCH = {"recognition": 512, "order": 256}
 @dataclass(frozen=True)
 class Spec:
     """Everything that decides a run's numbers, and nothing else."""
-    tier: str
+    experiment: str
     task: str                      # recognition | order
     pathway: str                   # spectrogram | quadrature
     noise_db: float | None         # None is clean audio
@@ -65,8 +65,8 @@ class Spec:
                                    # fixed, seeded, or none where the read is not projected)
 
     def group(self) -> str:
-        name = f"{self.tier}-{self.task}-{self.pathway}"
-        return f"{name}-{self.arm.coupling}" if self.tier in ("tier2", "sweep") else name
+        name = f"{self.experiment}-{self.task}"
+        return f"{name}-{self.arm.coupling}" if self.experiment in ("design", "sweep") else name
 
     def run_id(self) -> str:
         parts = [f"B{self.fold}" if self.protocol == "B" else "A"]
@@ -114,7 +114,9 @@ def write(spec: Spec, record: dict) -> None:
     """Merge one run into its group file: exclusive lock, merge, atomic swap."""
     path = group_path(spec.group())
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path.with_suffix(".json.lock"), "w") as lock:
+    locks = CACHE_DIR / "locks"                          # beside the caches, so results/ holds only the record
+    locks.mkdir(parents=True, exist_ok=True)
+    with open(locks / f"{spec.group()}.lock", "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         try:
             data = load_group(spec.group())

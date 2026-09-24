@@ -1,8 +1,6 @@
 # Experiment code
 
-Everything needed to rerun the study and check its numbers. The study is designed in [`../DESIGN.md`](../DESIGN.md), with its decision log; what each tier runs is in [`../TIERS.md`](../TIERS.md); its record is [`../results/`](../results/). Every number in the paper comes from that record, and nothing else is in it.
-
-The code that ran the earlier pilot lives on the `ek/paper-02-pilot` branch, and geometries and stimuli kept for future work (twisted and diamond lattices, synthetic stimuli) on `ek/future-geometries`. Neither is used here.
+Everything needed to rerun the study and check its numbers. Its record is [`../results/`](../results/), whose [README](../results/README.md) says what each experiment ran and which file holds it. Every number in the paper comes from that record, and nothing else is in it.
 
 ## Quick start
 
@@ -33,14 +31,13 @@ Every arm (the spectrogram-only baseline, the coupled and uncoupled oscillator n
 ```bash
 uv run python -m harness.experiment.protocol --build-bank   # the 50-repetition bank
 uv run python -m harness.experiment.plan prepare            # front-end rows, once per pathway and noise level
-uv run python -m harness.experiment.plan run gate tier1 --workers 3 --threads 2
-uv run python -m harness.experiment.gates check             # every zero-gain cell reads chance
-uv run python -m harness.experiment.plan run tier2 becker tier3 projection --workers 6 --threads 1
-uv run python -m harness.experiment.summary                 # every accuracy and difference with its spread
+uv run python -m harness.experiment.plan run leak-check controls --workers 3 --threads 2
+uv run python -m harness.experiment.plan run design becker-folds quadrature projection sweep cochlea --workers 6 --threads 1
+uv run python -m harness.experiment.summary                 # every accuracy and difference with its spread, and the leak check
 uv run python -m harness.experiment.figures                 # the paper's figures and their tables
 ```
 
-`plan run <tier> --dry-run` prints what would run. Every run is recorded under an identity derived from its specification, so a sweep stopped at any point restarts where it left off, and `--task order` or `--task recognition` lets two machines split a tier without sharing a file. `--device mps` or `--device cuda` simulates the untrained arms on a GPU; the readout is closed-form and runs on the CPU, and the trained baselines always train on the CPU. A GPU rounds differently from the CPU, so its cells can differ from the CPU's by a test clip or two. `scripts/pod_run.sh <AudioMNIST checkout> [tier ...]` runs any tier on a RunPod pod from the pushed branch. Set `OSC_RESULTS_DIR` to write a reproduction into a fresh folder instead of the committed record.
+`plan run <experiment> --dry-run` prints what would run. Every run is recorded under an identity derived from its specification, so a sweep stopped at any point restarts where it left off, and `--task order` or `--task recognition` lets two machines split an experiment without sharing a file. `--device mps` or `--device cuda` simulates the untrained arms on a GPU; the readout is closed-form and runs on the CPU, and the trained baselines always train on the CPU. A GPU rounds differently from the CPU, so its cells can differ from the CPU's by a test clip or two. `scripts/pod_run.sh <AudioMNIST checkout> [experiment ...]` runs any experiment on a RunPod pod from the pushed branch. Set `OSC_RESULTS_DIR` to write a reproduction into a fresh folder instead of the committed record.
 
 | module | what it owns |
 |---|---|
@@ -48,10 +45,9 @@ uv run python -m harness.experiment.figures                 # the paper's figure
 | `experiment/arms.py` | the arms, the reads each one records, and the coherence instruments |
 | `experiment/readout.py` | standardize, project, ridge, per-clip correctness |
 | `experiment/run.py` | one run, and the record it writes |
-| `experiment/plan.py` | the tiers, and the parallel driver |
-| `experiment/gates.py` | the zero-gain integrity check |
+| `experiment/plan.py` | the experiments, and the parallel driver |
 | `experiment/record.py` | the record read back, one cell at a time |
-| `experiment/summary.py` | every accuracy and paired difference, with its spread: `summary.json` and `summary.md` |
+| `experiment/summary.py` | every accuracy and paired difference, with its spread, and the zero-input leak check: `summary.json` and `summary.md` |
 | `experiment/figures.py` | the paper's figures, and the tables printed beside them |
 | `experiment/terms.py` | the paper's names for the record's labels, used by every table, figure and report |
 | `stimuli/` | the log-mel front end, the hop-rate and quadrature rows, the digit clips |

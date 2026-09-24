@@ -11,9 +11,6 @@ interval from resampling test clips. Seeds share one test set, so their
 per-clip differences are averaged; folds and order-task pairs each have their
 own test clips, so theirs are concatenated. Whether a difference is a gain is
 left to the reader.
-
-Nothing decides whether a result passes; DESIGN.md's decision log records
-when the design's first pass/fail bars were dropped.
 """
 
 from __future__ import annotations
@@ -34,7 +31,7 @@ from harness.experiment.record import Cell
 COUPLED = rec.COUPLED_LABEL
 UNCOUPLED = COUPLED.replace("coupled-", "uncoupled-", 1)
 READ = {"recognition": "windowed", "order": "pooled"}
-#: the reference level of each design factor: the Tier 1 network's own
+#: the reference level of each design factor: the reference network's own
 REFERENCE = terms.REFERENCE
 #: bootstrap resamples drawn per batch, bounding memory on Protocol B's 30,000 test clips
 CHUNK = 100
@@ -88,9 +85,9 @@ def accuracies(cells: list[Cell]) -> list[dict]:
     """One record per arm, read, condition, width and size, over its replicates."""
     groups = defaultdict(dict)
     for c in cells:
-        key = (c.tier, c.task, c.pathway, c.label, c.read, c.noise, c.gain, c.pair, c.width, c.n_train, c.projection)
+        key = (c.experiment, c.task, c.pathway, c.label, c.read, c.noise, c.gain, c.pair, c.width, c.n_train, c.projection)
         groups[key][replicate(c)] = c.acc
-    fields = ("tier", "task", "pathway", "arm", "read", "noise", "gain", "pair", "width", "n_train", "projection")
+    fields = ("experiment", "task", "pathway", "arm", "read", "noise", "gain", "pair", "width", "n_train", "projection")
     return [{**dict(zip(fields, k, strict=True)), "name": terms.arm(k[3]),
              "pair": list(k[7]) or None, **spread(v)} for k, v in sorted(groups.items(), key=str)]
 
@@ -119,12 +116,12 @@ def matched(a_cells: list[Cell], b_cells: list[Cell], widths: tuple | None = Non
     return groups
 
 
-def versus(cells: list[Cell], name: str, a: tuple[str, str], b: tuple[str, str], *, tier: str, task: str,
+def versus(cells: list[Cell], name: str, a: tuple[str, str], b: tuple[str, str], *, experiment: str, task: str,
            pathway: str = "spectrogram", widths: tuple | None = None, projection: str = "fixed") -> list[dict]:
-    """a minus b, each an (arm, read), in one tier and under one projection."""
-    mine = [c for c in cells if c.tier == tier and c.task == task and c.pathway == pathway and c.projection == projection]
+    """a minus b, each an (arm, read), in one experiment and under one projection."""
+    mine = [c for c in cells if c.experiment == experiment and c.task == task and c.pathway == pathway and c.projection == projection]
     groups = matched([c for c in mine if (c.label, c.read) == a], [c for c in mine if (c.label, c.read) == b], widths)
-    return [{"comparison": name, "a": " ".join(a), "b": " ".join(b), "tier": tier, "task": task, "pathway": pathway,
+    return [{"comparison": name, "a": " ".join(a), "b": " ".join(b), "experiment": experiment, "task": task, "pathway": pathway,
              "noise": k[0], "gain": k[1], "width": k[2], "b_width": widths[1] if widths else k[2],
              "n_train": k[3], "projection": projection, **paired(v)} for k, v in sorted(groups.items(), key=str)]
 
@@ -134,7 +131,7 @@ BASELINE_16 = "the spectrogram-only baseline, from frame 16"
 NETWORK = terms.arm(COUPLED)
 
 
-def _against_network(cells: list[Cell], tier: str, task: str) -> list[dict]:
+def _against_network(cells: list[Cell], experiment: str, task: str) -> list[dict]:
     r = READ[task]
     others = [(BASELINE_WHOLE, ("baseline", r + "@wholeclip")), (BASELINE_16, ("baseline", r)),
               ("the " + terms.arm(UNCOUPLED), (UNCOUPLED, r)), ("the " + terms.arm("bank-state"), ("bank-state", r)),
@@ -142,29 +139,29 @@ def _against_network(cells: list[Cell], tier: str, task: str) -> list[dict]:
     others += [(f"the {terms.arm('trained-' + arch)}", (f"trained-{arch}", r)) for arch in plan.TRAINED_ARCHS]
     out = []
     for name, b in others:
-        out += versus(cells, f"{NETWORK} minus {name}", (COUPLED, r), b, tier=tier, task=task)
+        out += versus(cells, f"{NETWORK} minus {name}", (COUPLED, r), b, experiment=experiment, task=task)
     return out
 
 
-def tier1(cells: list[Cell]) -> list[dict]:
+def controls(cells: list[Cell]) -> list[dict]:
     """The coupled network against every other arm, rotation rates, and width 4,096 against 192 per arm."""
     out = []
     for task in ("recognition", "order"):
         r = READ[task]
-        out += _against_network(cells, "tier1", task)
+        out += _against_network(cells, "controls", task)
         out += versus(cells, f"{NETWORK}, with rotation rates minus without", (COUPLED, r + "+rate"), (COUPLED, r),
-                      tier="tier1", task=task)
-        for label in sorted({c.label for c in cells if c.tier == "tier1" and c.task == task}):
+                      experiment="controls", task=task)
+        for label in sorted({c.label for c in cells if c.experiment == "controls" and c.task == task}):
             read = r + "@wholeclip" if label == "baseline" else r
             name = terms.arm(label) + (", whole clip" if label == "baseline" else "")
             out += versus(cells, f"{name}: width 4,096 minus 192", (label, read), (label, read),
-                          tier="tier1", task=task, widths=(4096, 192))
+                          experiment="controls", task=task, widths=(4096, 192))
     return out
 
 
 def design(cells: list[Cell]) -> list[dict]:
-    """Each Tier 2 factor level minus its reference, over matched pairs identical in every other factor."""
-    prim = [c for c in cells if c.tier == "tier2" and c.read == "windowed"]
+    """Each design factor level minus its reference, over matched pairs identical in every other factor."""
+    prim = [c for c in cells if c.experiment == "design" and c.read == "windowed"]
     out = []
     for factor, ref in REFERENCE.items():
         def match(c: Cell, factor: str = factor) -> tuple:
@@ -177,28 +174,28 @@ def design(cells: list[Cell]) -> list[dict]:
                 if c.arm[factor] == level and match(c) in refs:
                     groups[(c.noise, c.gain, c.width, c.n_train)].append((c, refs[match(c)]))
             name = f"{terms.FACTORS[factor]}: {terms.level(level)} minus {terms.level(ref)}"
-            out += [{"comparison": name, "tier": "tier2", "task": "recognition",
+            out += [{"comparison": name, "experiment": "design", "task": "recognition",
                      "pathway": "spectrogram", "noise": k[0], "gain": k[1], "width": k[2], "b_width": k[2],
                      "n_train": k[3], **paired(v)} for k, v in sorted(groups.items(), key=str)]
-    # each coupling function at the reference configuration against the whole-clip baseline; Tier 2's
-    # cells share Tier 1's test clips and training draws, so they pair with Tier 1's baseline
-    base = [c for c in cells if c.tier == "tier1" and c.task == "recognition" and c.label == "baseline"
+    # each coupling function at the reference configuration against the whole-clip baseline; the design
+    # experiment's cells share the controls experiment's test clips and training draws, so they pair with its baseline
+    base = [c for c in cells if c.experiment == "controls" and c.task == "recognition" and c.label == "baseline"
             and c.read == "windowed@wholeclip"]
     for coupling in plan.PHASE_COUPLINGS + plan.AMPLITUDE_COUPLINGS:
         label = Arm("network", coupling=coupling).label()
         groups = matched([c for c in prim if c.label == label], base)
-        out += [{"comparison": f"{terms.arm(label)} minus {BASELINE_WHOLE}", "tier": "tier2", "task": "recognition",
+        out += [{"comparison": f"{terms.arm(label)} minus {BASELINE_WHOLE}", "experiment": "design", "task": "recognition",
                  "pathway": "spectrogram", "noise": k[0], "gain": k[1], "width": k[2], "b_width": k[2],
                  "n_train": k[3], **paired(v)} for k, v in sorted(groups.items(), key=str)]
     # rotation rates, over every design configuration
     idx = {(c.label, c.noise, c.gain, c.width, c.n_train, replicate(c)): c for c in prim}
     groups = defaultdict(list)
     for c in cells:
-        if c.tier == "tier2" and c.read == "windowed+rate":
+        if c.experiment == "design" and c.read == "windowed+rate":
             other = idx.get((c.label, c.noise, c.gain, c.width, c.n_train, replicate(c)))
             if other is not None:
                 groups[(c.noise, c.gain, c.width, c.n_train)].append((c, other))
-    out += [{"comparison": "with rotation rates minus without, every design configuration", "tier": "tier2",
+    out += [{"comparison": "with rotation rates minus without, every design configuration", "experiment": "design",
              "task": "recognition",
              "pathway": "spectrogram", "noise": k[0], "gain": k[1], "width": k[2], "b_width": k[2], "n_train": k[3],
              **paired(v)} for k, v in sorted(groups.items(), key=str)]
@@ -209,17 +206,17 @@ def pathways(cells: list[Cell]) -> list[dict]:
     """Every arm on the quadrature pathway, minus that pathway's own baseline."""
     out = []
     for pathway in ("quadrature",):
-        for label in sorted({c.label for c in cells if c.tier == "tier3" and c.pathway == pathway} - {"baseline"}):
+        for label in sorted({c.label for c in cells if c.experiment == "quadrature" and c.pathway == pathway} - {"baseline"}):
             for name, read in ((BASELINE_WHOLE, "windowed@wholeclip"), (BASELINE_16, "windowed")):
                 out += versus(cells, f"{terms.arm(label)} minus {name}", (label, "windowed"), ("baseline", read),
-                              tier="tier3", task="recognition", pathway=pathway)
-    # the same network on the quadrature pathway against the spectrogram pathway: Tier 2 ran every Tier 3
-    # configuration with the same seeds, conditions and test clips
-    spectrogram = [c for c in cells if c.tier == "tier2" and c.read == "windowed"]
-    quadrature = [c for c in cells if c.tier == "tier3" and c.pathway == "quadrature" and c.read == "windowed"]
+                              experiment="quadrature", task="recognition", pathway=pathway)
+    # the same network on the quadrature pathway against the spectrogram pathway: the design experiment ran
+    # every quadrature configuration with the same seeds, conditions and test clips
+    spectrogram = [c for c in cells if c.experiment == "design" and c.read == "windowed"]
+    quadrature = [c for c in cells if c.experiment == "quadrature" and c.pathway == "quadrature" and c.read == "windowed"]
     for label in sorted({c.label for c in quadrature} - {"baseline"}):
         groups = matched([c for c in quadrature if c.label == label], [c for c in spectrogram if c.label == label])
-        out += [{"comparison": f"{terms.arm(label)}: quadrature minus spectrogram pathway", "tier": "tier3",
+        out += [{"comparison": f"{terms.arm(label)}: quadrature minus spectrogram pathway", "experiment": "quadrature",
                  "task": "recognition", "pathway": "quadrature", "noise": k[0], "gain": k[1], "width": k[2],
                  "b_width": k[2], "n_train": k[3], **paired(v)} for k, v in sorted(groups.items(), key=str)]
     return out
@@ -236,21 +233,21 @@ def _pair_by(a_cells: list[Cell], b_cells: list[Cell], key) -> dict[tuple, list]
     return groups
 
 
-def _rows(name: str, tier: str, groups: dict[tuple, list]) -> list[dict]:
-    return [{"comparison": name, "tier": tier, "task": "recognition", "pathway": "spectrogram", "noise": k[0],
+def _rows(name: str, experiment: str, groups: dict[tuple, list]) -> list[dict]:
+    return [{"comparison": name, "experiment": experiment, "task": "recognition", "pathway": "spectrogram", "noise": k[0],
              "gain": k[1], "width": k[2], "b_width": k[2], "n_train": k[3], **paired(v)}
             for k, v in sorted(groups.items(), key=str)]
 
 
 def sweep(cells: list[Cell]) -> list[dict]:
-    """The sweep tier against Tier 2's reference cells: each restoring strength minus 0.3, each ceiling minus
+    """The sweep experiment against the design experiment's reference cells: each restoring strength minus 0.3, each ceiling minus
     1, and each gain minus gain 1, per coupling function, at the reference configuration."""
-    tier2 = [c for c in cells if c.tier == "tier2" and c.read == "windowed"]
-    swept = [c for c in cells if c.tier == "sweep" and c.read == "windowed"]
+    design_cells = [c for c in cells if c.experiment == "design" and c.read == "windowed"]
+    swept = [c for c in cells if c.experiment == "sweep" and c.read == "windowed"]
     out = []
     for coupling in plan.PHASE_COUPLINGS + plan.AMPLITUDE_COUPLINGS:
         reference = Arm("network", coupling=coupling)
-        base = [c for c in tier2 if c.label == reference.label()]
+        base = [c for c in design_cells if c.label == reference.label()]
         same = lambda c: (c.noise, c.gain, c.width, c.n_train, replicate(c))  # noqa: E731
         name = terms.level(coupling)
         for restoring in plan.SWEEP_RESTORINGS:
@@ -268,10 +265,10 @@ def sweep(cells: list[Cell]) -> list[dict]:
 
 
 def cochlea(cells: list[Cell]) -> list[dict]:
-    """The coil and the cochlea against Tier 2's torus and helix, and the cochlea against the coil, over
+    """The coil and the cochlea against the design experiment's torus and helix, and the cochlea against the coil, over
     matched configurations (the same coupling function and natural frequencies, at the reference restoring
     strength and ceiling)."""
-    runs = [c for c in cells if c.tier in ("tier2", "cochlea") and c.read == "windowed"
+    runs = [c for c in cells if c.experiment in ("design", "cochlea") and c.read == "windowed"
             and c.arm["restoring"] == 0.3 and c.arm["ceiling"] == 1.0 and c.arm["coupling"] in plan.PHASE_COUPLINGS]
 
     def of(geometry):
@@ -287,44 +284,45 @@ def cochlea(cells: list[Cell]) -> list[dict]:
 
 
 def projections(cells: list[Cell]) -> list[dict]:
-    """The projection tier: each reservoir under the seeded projection minus the fixed one, and the coupled
+    """The projection experiment: each reservoir under the seeded projection minus the fixed one, and the coupled
     network against its controls under the seeded projection (the spectrogram-only baseline and the trained
-    baselines are never projected, so their Tier 1 cells stand for both)."""
+    baselines are never projected, so their controls cells stand for both)."""
     out = []
     for task in ("recognition", "order"):
         r = READ[task]
-        mine = [c for c in cells if c.tier == "projection" and c.task == task and c.read == r]
+        mine = [c for c in cells if c.experiment == "projection" and c.task == task and c.read == r]
         seeded = [c for c in mine if c.projection == "seeded"]
         for label in sorted({c.label for c in mine}):
             groups = matched([c for c in seeded if c.label == label],
                              [c for c in mine if c.label == label and c.projection == "fixed"])
-            out += [{"comparison": f"{terms.arm(label)}: seeded minus fixed projection", "tier": "projection",
+            out += [{"comparison": f"{terms.arm(label)}: seeded minus fixed projection", "experiment": "projection",
                      "task": task, "noise": k[0], "gain": k[1], "width": k[2], "n_train": k[3],
                      **paired(v)} for k, v in sorted(groups.items(), key=str)]
         network = [c for c in seeded if c.label == COUPLED]
-        controls = [(BASELINE_WHOLE, [c for c in cells if c.tier == "tier1" and c.task == task and c.label == "baseline"
+        controls = [(BASELINE_WHOLE, [c for c in cells if c.experiment == "controls" and c.task == task and c.label == "baseline"
                                       and c.read == r + "@wholeclip"])]
         controls += [("the " + terms.arm(lab), [c for c in seeded if c.label == lab]) for lab in (UNCOUPLED, "bank-state", "bank-width")]
         for name, b_cells in controls:
             groups = matched(network, b_cells)
-            out += [{"comparison": f"{NETWORK} minus {name}, seeded projection", "tier": "projection", "task": task,
+            out += [{"comparison": f"{NETWORK} minus {name}, seeded projection", "experiment": "projection", "task": task,
                      "noise": k[0], "gain": k[1], "width": k[2], "n_train": k[3], "projection": "seeded",
                      **paired(v)} for k, v in sorted(groups.items(), key=str)]
     return out
 
 
 def reproduction(cells: list[Cell]) -> dict:
-    """The projection tier's unseeded cells against Tier 1's, cell for cell: the same runs, re-executed.
+    """The projection experiment's unseeded cells against the controls experiment's, cell for cell: the
+    same runs, re-executed.
 
-    Tier 1 ran on the CPU and the projection tier simulated its reservoirs on the Apple GPU, so this is
+    The controls ran on the CPU and the projection experiment simulated its reservoirs on the Apple GPU, so this is
     how far the two devices' floating point moves a recorded cell. A cell counts as identical only if its
     per-clip correctness is identical too.
     """
     def key(c: Cell) -> tuple:
         return (c.task, c.label, c.read, c.width, c.n_train, c.noise, c.gain, c.seed, c.pair)
-    tier1 = {key(c): c for c in cells if c.tier == "tier1"}
-    pairs = [(c, tier1[key(c)]) for c in cells
-             if c.tier == "projection" and c.projection != "seeded" and key(c) in tier1]
+    reference = {key(c): c for c in cells if c.experiment == "controls"}
+    pairs = [(c, reference[key(c)]) for c in cells
+             if c.experiment == "projection" and c.projection != "seeded" and key(c) in reference]
     if not pairs:
         return {}
     clips = [round(abs(a.acc - b.acc) * a.n_test) for a, b in pairs]
@@ -335,13 +333,25 @@ def reproduction(cells: list[Cell]) -> dict:
             "largest_clips": max(clips)}
 
 
+CHANCE = 0.1
+
+
+def leak_check(cells: list[Cell]) -> dict:
+    """With no input a reservoir's state carries nothing about the clip, so every cell of a zero-gain run
+    must read exactly chance; anything else would mean the read or the data leaks around the reservoir."""
+    zero = [c for c in cells if c.experiment == "leak-check" and c.gain == 0.0 and not c.label.endswith("@clipspan")]
+    return {"runs": len({(c.label, c.seed) for c in zero}), "cells": len(zero),
+            "off_chance": [f"{c.label} {c.read} width {c.width}: {100 * c.acc:.2f}%" for c in zero if c.acc != CHANCE]}
+
+
 def summary(cells: list[Cell] | None = None) -> dict:
     cells = rec.load() if cells is None else cells
     return {"accuracy": accuracies(cells),
-            "comparisons": (tier1(cells) + _against_network(cells, "becker", "recognition") + design(cells)
+            "comparisons": (controls(cells) + _against_network(cells, "becker-folds", "recognition") + design(cells)
                             + pathways(cells) + projections(cells) + sweep(cells) + cochlea(cells)),
             "order_baseline_at_chance": rec.baseline_at_chance(cells),
-            "projection_reproduces_tier1": reproduction(cells)}
+            "projection_reproduces_controls": reproduction(cells),
+            "leak_check": leak_check(cells)}
 
 
 # ---------------------------------------------------------------------------
@@ -426,10 +436,10 @@ def _arm(r: dict) -> str:
 
 
 def progress() -> dict[str, tuple[int, int]]:
-    """Runs recorded and runs planned, per tier."""
+    """Runs recorded and runs planned, per experiment."""
     root, have, out = rn.record_root(), {}, {}
-    for name, tier in plan.TIERS.items():
-        specs = list(tier())
+    for name, experiment in plan.EXPERIMENTS.items():
+        specs = list(experiment())
         for s in specs:
             if s.group() not in have:
                 path = root / f"{s.group()}.json"
@@ -442,80 +452,85 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
     acc, cmp = s["accuracy"], s["comparisons"]
     w, n = rec.PRIMARY_WIDTH, rec.PRIMARY_SIZE
 
-    def prim_acc(tier, task, n_train=n):
-        return sorted((r for r in acc if r["tier"] == tier and r["task"] == task and r["width"] == w
+    def prim_acc(experiment, task, n_train=n):
+        return sorted((r for r in acc if r["experiment"] == experiment and r["task"] == task and r["width"] == w
                        and r.get("projection", "fixed") == "fixed"
                        and r["n_train"] == n_train and r["read"].split("@")[0] == READ[task]), key=_rank)
 
-    def prim_cmp(tier, n_train=n, prefix=""):
-        return [r for r in cmp if r["tier"] == tier and r["width"] == w and r["n_train"] == n_train
+    def prim_cmp(experiment, n_train=n, prefix=""):
+        return [r for r in cmp if r["experiment"] == experiment and r["width"] == w and r["n_train"] == n_train
                 and r["comparison"].startswith(prefix) and "width 4,096 minus" not in r["comparison"]]
 
     def by_gain(r):
         return r["comparison"] + (f" (gain = {r['gain']:g})" if r["gain"] is not None else "")
 
+    lk = s["leak_check"]
     lines = ["# Results", "",
              "Generated by `uv run python -m harness.experiment.summary` from the record in this folder; every number "
-             "here and more (every width, size, pair and read) is in `summary.json`. Accuracies are mean ± "
-             "standard deviation over replicates (three seeds; five folds in Tier B), in percent. Differences "
-             "are paired, mean ± standard deviation over replicates, with the 95% interval from resampling test "
-             f"clips in brackets, in points. Primary cell: width {w}, {n:,} training clips.", "",
-             "Runs recorded: " + "; ".join(f"{k} {d:,} of {p:,}" for k, (d, p) in done.items())
-             + ". A tier not yet complete is summarized over the runs it has.", ""]
-    lines += ["## Tier 1, recognition: accuracy", ""]
-    lines += _grid(prim_acc("tier1", "recognition"), _arm, _by_noise, _acc)
-    lines += ["", "## Tier 1, recognition: differences", ""]
-    lines += _grid([r for r in prim_cmp("tier1") if r["task"] == "recognition"], by_gain,
+             "here and more (every width, size, pair and read) is in `summary.json`, and `README.md` says what each "
+             "record file holds. Accuracies are mean ± standard deviation over replicates (three seeds; five folds "
+             "on Becker et al.'s folds), in percent. Differences are paired, mean ± standard deviation over "
+             "replicates, with the 95% interval from resampling test clips in brackets, in points. Noise levels are "
+             f"signal-to-noise ratios. Primary cell: width {w}, {n:,} training clips.", "",
+             "Runs recorded: " + "; ".join(f"{k} {d:,} of {p:,}" for k, (d, p) in done.items()) + ".", "",
+             ("Leak check: not run yet." if not lk["cells"] else
+              f"Leak check: with no input, {lk['cells'] - len(lk['off_chance'])} of the {lk['cells']} cells of the "
+              f"{lk['runs']} zero-gain runs read exactly chance (10%)"
+              + (f"; off chance: {'; '.join(lk['off_chance'])}." if lk["off_chance"] else ".")), ""]
+    lines += ["## Controls, recognition: accuracy (Section 4.1, 4.2)", ""]
+    lines += _grid(prim_acc("controls", "recognition"), _arm, _by_noise, _acc)
+    lines += ["", "## Controls, recognition: the coupled network minus each other arm (Section 4.1, 4.2)", ""]
+    lines += _grid([r for r in prim_cmp("controls") if r["task"] == "recognition"], by_gain,
                    _by_noise, _diff)
-    lines += ["", "## Tier 1, recognition: accuracy by width and training size", ""]
+    lines += ["", "## Controls, recognition: accuracy by readout width and training size (Section 4.6)", ""]
     for noise in (0.0, 5.0):
-        rows = [r for r in acc if r["tier"] == "tier1" and r["task"] == "recognition" and r["noise"] == noise
+        rows = [r for r in acc if r["experiment"] == "controls" and r["task"] == "recognition" and r["noise"] == noise
                 and r["read"] in ("windowed", "windowed@wholeclip") and r["width"] != "native"]
         rows.sort(key=_rank)
         lines += [f"### {snr(noise)}", ""]
         lines += _grid(rows, _arm, _by_size, _acc) + [""]
-    lines += ["## Tier 1, recognition: width 4,096 minus 192", ""]
-    lines += _grid([r for r in cmp if r["tier"] == "tier1" and r["task"] == "recognition" and r["n_train"] == n
+    lines += ["## Controls, recognition: readout width 4,096 minus 192 (Section 4.6)", ""]
+    lines += _grid([r for r in cmp if r["experiment"] == "controls" and r["task"] == "recognition" and r["n_train"] == n
                     and "width 4,096 minus" in r["comparison"]], by_gain, _by_noise, _diff)
-    lines += ["", "## Tier 1, order task: accuracy, averaged over the five pairs", ""]
-    lines += _grid(sorted(_pooled(prim_acc("tier1", "order")), key=_rank), _arm, _by_noise, _acc)
-    lines += ["", "## Tier 1, order task: differences, pooled over the five pairs", ""]
-    lines += _grid([r for r in prim_cmp("tier1") if r["task"] == "order"], by_gain,
+    lines += ["", "## Controls, order task: accuracy, averaged over the five digit pairs (Section 4.7)", ""]
+    lines += _grid(sorted(_pooled(prim_acc("controls", "order")), key=_rank), _arm, _by_noise, _acc)
+    lines += ["", "## Controls, order task: the coupled network minus each other arm, pooled over the five pairs (Section 4.7)", ""]
+    lines += _grid([r for r in prim_cmp("controls") if r["task"] == "order"], by_gain,
                    _by_noise, _diff)
     at = s["order_baseline_at_chance"]
     off = [k for k, v in at.items() if not all(r["contains_chance"] for r in v.values())]
     lines += ["", "Order task, the spectrogram-only baseline's 95% interval contains chance (50%) in "
               f"{len(at) - len(off)} of {len(at)} pair and noise cells"
               + (f"; it does not in: {', '.join(off)}." if off else "."), ""]
-    lines += ["## Tier 2, design: each level minus its reference, over matched pairs", ""]
-    lines += _grid(prim_cmp("tier2"), lambda r: r["comparison"], _by_condition, _diff)
-    proj = [r for r in acc if r["tier"] == "projection" and r["width"] == w and r["n_train"] == n]
-    lines += ["", "## Tier 1's reservoirs under the fixed and the seeded projection", ""]
+    lines += ["## Design: each level minus its reference, over matched configurations (Section 4.3)", ""]
+    lines += _grid(prim_cmp("design"), lambda r: r["comparison"], _by_condition, _diff)
+    proj = [r for r in acc if r["experiment"] == "projection" and r["width"] == w and r["n_train"] == n]
+    lines += ["", "## Projection: the controls experiment's reservoirs under the fixed and a seeded projection (Section 4.6)", ""]
     if proj:
-        rp = s["projection_reproduces_tier1"]
-        lines += [f"Rerun on the Apple GPU, the projection tier's unseeded cells against Tier 1's on the CPU: "
-                  f"{rp['identical']:,} of {rp['cells']:,} identical, {rp['within_two_clips']:,} within two test "
-                  f"clips, largest difference {rp['largest_points']:.2f} points ({rp['largest_clips']} clips).", ""]
+        rp = s["projection_reproduces_controls"]
+        lines += [f"Rerun on the Apple GPU, the projection experiment's fixed-projection cells against the controls "
+                  f"experiment's on the CPU: {rp['identical']:,} of {rp['cells']:,} identical, {rp['within_two_clips']:,} "
+                  f"within two test clips, largest difference {rp['largest_points']:.2f} points ({rp['largest_clips']} clips).", ""]
     for task in ("recognition", "order"):
         rows = [r for r in proj if r["task"] == task]
         rows = _pooled_projection(rows) if task == "order" else rows
         lines += [f"### {task}", ""]
         lines += _grid(sorted(rows, key=_rank), lambda r: f"{_arm(r)}, {r['projection']}", _by_noise, _acc) + [""]
-    lines += _grid([r for r in cmp if r["tier"] == "projection" and r["width"] == w and r["n_train"] == n],
+    lines += _grid([r for r in cmp if r["experiment"] == "projection" and r["width"] == w and r["n_train"] == n],
                    lambda r: f"{r['task']}: {r['comparison']}" + (f" (gain = {r['gain']:g})" if r["gain"] is not None else ""),
                    _by_noise, _diff)
-    lines += ["", "## Sweep: restoring strength, coupling ceiling and gain beyond Tier 2's, each minus its reference", ""]
-    lines += _grid([r for r in cmp if r["tier"] == "sweep" and r["width"] == w and r["n_train"] == n],
+    lines += ["", "## Sweep: restoring strength, coupling ceiling and gain beyond the design experiment's, each minus its reference (Section 4.4)", ""]
+    lines += _grid([r for r in cmp if r["experiment"] == "sweep" and r["width"] == w and r["n_train"] == n],
                    lambda r: r["comparison"], _by_condition, _diff)
-    lines += ["", "## Coil and cochlea: each minus a Tier 2 geometry, over matched configurations", ""]
-    lines += _grid([r for r in cmp if r["tier"] == "cochlea" and r["width"] == w and r["n_train"] == n],
+    lines += ["", "## Cochlea: the coil and the cochlea, each minus another geometry, over matched configurations (Section 4.3)", ""]
+    lines += _grid([r for r in cmp if r["experiment"] == "cochlea" and r["width"] == w and r["n_train"] == n],
                    lambda r: r["comparison"], _by_condition, _diff)
-    lines += ["", "## Tier B, Becker et al.'s folds: accuracy", ""]
-    lines += _grid(prim_acc("becker", "recognition", plan.BECKER_TRAIN), _arm, _by_noise, _acc)
-    lines += ["", "## Tier B: differences", ""]
-    lines += _grid(prim_cmp("becker", plan.BECKER_TRAIN), by_gain, _by_noise, _diff)
-    lines += ["", "## Tier 3, quadrature pathway: each arm minus that pathway's baseline, and minus the same network on the spectrogram pathway", ""]
-    lines += _grid([r for r in prim_cmp("tier3")], lambda r: f"{terms.PATHWAYS[r['pathway']]} pathway: {r['comparison']}",
+    lines += ["", "## Becker folds: accuracy on Becker et al.'s five speaker folds, clean (Section 4.1)", ""]
+    lines += _grid(prim_acc("becker-folds", "recognition", plan.BECKER_TRAIN), _arm, _by_noise, _acc)
+    lines += ["", "## Becker folds: the coupled network minus each other arm", ""]
+    lines += _grid(prim_cmp("becker-folds", plan.BECKER_TRAIN), by_gain, _by_noise, _diff)
+    lines += ["", "## Quadrature: each network minus the quadrature front end's own baseline, and minus the same network on the spectrogram pathway (Section 4.5)", ""]
+    lines += _grid([r for r in prim_cmp("quadrature")], lambda r: f"{terms.PATHWAYS[r['pathway']]} pathway: {r['comparison']}",
                    _by_condition, _diff)
     return "\n".join(lines) + "\n"
 

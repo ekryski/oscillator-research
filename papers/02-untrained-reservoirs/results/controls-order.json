@@ -1,9 +1,9 @@
 {
- "group": "tier1-order-spectrogram",
+ "group": "controls-order",
  "runs": {
   "A/pair06/0db/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -114,7 +114,7 @@
   },
   "A/pair06/0db/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -225,7 +225,7 @@
   },
   "A/pair06/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -381,7 +381,7 @@
   },
   "A/pair06/0db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -538,7 +538,7 @@
   },
   "A/pair06/0db/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -649,7 +649,7 @@
   },
   "A/pair06/0db/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -760,7 +760,7 @@
   },
   "A/pair06/0db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -916,7 +916,7 @@
   },
   "A/pair06/0db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1073,7 +1073,7 @@
   },
   "A/pair06/0db/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1184,7 +1184,7 @@
   },
   "A/pair06/0db/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1295,7 +1295,7 @@
   },
   "A/pair06/0db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1451,7 +1451,7 @@
   },
   "A/pair06/0db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1608,7 +1608,7 @@
   },
   "A/pair06/0db/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1719,7 +1719,7 @@
   },
   "A/pair06/0db/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1830,7 +1830,7 @@
   },
   "A/pair06/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -1986,7 +1986,7 @@
   },
   "A/pair06/0db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2143,7 +2143,7 @@
   },
   "A/pair06/0db/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2254,7 +2254,7 @@
   },
   "A/pair06/0db/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2365,7 +2365,7 @@
   },
   "A/pair06/0db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2521,7 +2521,7 @@
   },
   "A/pair06/0db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2678,7 +2678,7 @@
   },
   "A/pair06/0db/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2789,7 +2789,7 @@
   },
   "A/pair06/0db/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -2900,7 +2900,7 @@
   },
   "A/pair06/0db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3056,7 +3056,7 @@
   },
   "A/pair06/0db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3213,7 +3213,7 @@
   },
   "A/pair06/0db/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3369,7 +3369,7 @@
   },
   "A/pair06/0db/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3488,7 +3488,7 @@
   },
   "A/pair06/0db/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3607,7 +3607,7 @@
   },
   "A/pair06/0db/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3726,7 +3726,7 @@
   },
   "A/pair06/0db/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3845,7 +3845,7 @@
   },
   "A/pair06/0db/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -3964,7 +3964,7 @@
   },
   "A/pair06/0db/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4120,7 +4120,7 @@
   },
   "A/pair06/0db/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4239,7 +4239,7 @@
   },
   "A/pair06/0db/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4358,7 +4358,7 @@
   },
   "A/pair06/0db/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4477,7 +4477,7 @@
   },
   "A/pair06/0db/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4596,7 +4596,7 @@
   },
   "A/pair06/0db/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4715,7 +4715,7 @@
   },
   "A/pair06/0db/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4871,7 +4871,7 @@
   },
   "A/pair06/0db/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -4990,7 +4990,7 @@
   },
   "A/pair06/0db/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5109,7 +5109,7 @@
   },
   "A/pair06/0db/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5228,7 +5228,7 @@
   },
   "A/pair06/0db/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5347,7 +5347,7 @@
   },
   "A/pair06/0db/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -5466,7 +5466,7 @@
   },
   "A/pair06/5db/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -5577,7 +5577,7 @@
   },
   "A/pair06/5db/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -5688,7 +5688,7 @@
   },
   "A/pair06/5db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -5844,7 +5844,7 @@
   },
   "A/pair06/5db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6001,7 +6001,7 @@
   },
   "A/pair06/5db/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6112,7 +6112,7 @@
   },
   "A/pair06/5db/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6223,7 +6223,7 @@
   },
   "A/pair06/5db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6379,7 +6379,7 @@
   },
   "A/pair06/5db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6536,7 +6536,7 @@
   },
   "A/pair06/5db/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6647,7 +6647,7 @@
   },
   "A/pair06/5db/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6758,7 +6758,7 @@
   },
   "A/pair06/5db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -6914,7 +6914,7 @@
   },
   "A/pair06/5db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -7071,7 +7071,7 @@
   },
   "A/pair06/5db/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -7182,7 +7182,7 @@
   },
   "A/pair06/5db/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -7293,7 +7293,7 @@
   },
   "A/pair06/5db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -7449,7 +7449,7 @@
   },
   "A/pair06/5db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -7606,7 +7606,7 @@
   },
   "A/pair06/5db/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -7717,7 +7717,7 @@
   },
   "A/pair06/5db/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -7828,7 +7828,7 @@
   },
   "A/pair06/5db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -7984,7 +7984,7 @@
   },
   "A/pair06/5db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -8141,7 +8141,7 @@
   },
   "A/pair06/5db/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -8252,7 +8252,7 @@
   },
   "A/pair06/5db/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -8363,7 +8363,7 @@
   },
   "A/pair06/5db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -8519,7 +8519,7 @@
   },
   "A/pair06/5db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -8676,7 +8676,7 @@
   },
   "A/pair06/5db/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -8832,7 +8832,7 @@
   },
   "A/pair06/5db/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -8951,7 +8951,7 @@
   },
   "A/pair06/5db/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -9070,7 +9070,7 @@
   },
   "A/pair06/5db/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -9189,7 +9189,7 @@
   },
   "A/pair06/5db/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -9308,7 +9308,7 @@
   },
   "A/pair06/5db/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -9427,7 +9427,7 @@
   },
   "A/pair06/5db/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -9583,7 +9583,7 @@
   },
   "A/pair06/5db/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -9702,7 +9702,7 @@
   },
   "A/pair06/5db/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -9821,7 +9821,7 @@
   },
   "A/pair06/5db/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -9940,7 +9940,7 @@
   },
   "A/pair06/5db/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -10059,7 +10059,7 @@
   },
   "A/pair06/5db/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -10178,7 +10178,7 @@
   },
   "A/pair06/5db/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -10334,7 +10334,7 @@
   },
   "A/pair06/5db/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -10453,7 +10453,7 @@
   },
   "A/pair06/5db/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -10572,7 +10572,7 @@
   },
   "A/pair06/5db/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -10691,7 +10691,7 @@
   },
   "A/pair06/5db/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -10810,7 +10810,7 @@
   },
   "A/pair06/5db/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -10929,7 +10929,7 @@
   },
   "A/pair06/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11040,7 +11040,7 @@
   },
   "A/pair06/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11151,7 +11151,7 @@
   },
   "A/pair06/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11307,7 +11307,7 @@
   },
   "A/pair06/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11464,7 +11464,7 @@
   },
   "A/pair06/clean/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11575,7 +11575,7 @@
   },
   "A/pair06/clean/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11686,7 +11686,7 @@
   },
   "A/pair06/clean/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11842,7 +11842,7 @@
   },
   "A/pair06/clean/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11999,7 +11999,7 @@
   },
   "A/pair06/clean/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -12110,7 +12110,7 @@
   },
   "A/pair06/clean/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -12221,7 +12221,7 @@
   },
   "A/pair06/clean/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -12377,7 +12377,7 @@
   },
   "A/pair06/clean/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -12534,7 +12534,7 @@
   },
   "A/pair06/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -12645,7 +12645,7 @@
   },
   "A/pair06/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -12756,7 +12756,7 @@
   },
   "A/pair06/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -12912,7 +12912,7 @@
   },
   "A/pair06/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -13069,7 +13069,7 @@
   },
   "A/pair06/clean/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -13180,7 +13180,7 @@
   },
   "A/pair06/clean/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -13291,7 +13291,7 @@
   },
   "A/pair06/clean/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -13447,7 +13447,7 @@
   },
   "A/pair06/clean/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -13604,7 +13604,7 @@
   },
   "A/pair06/clean/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -13715,7 +13715,7 @@
   },
   "A/pair06/clean/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -13826,7 +13826,7 @@
   },
   "A/pair06/clean/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -13982,7 +13982,7 @@
   },
   "A/pair06/clean/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -14139,7 +14139,7 @@
   },
   "A/pair06/clean/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -14295,7 +14295,7 @@
   },
   "A/pair06/clean/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -14414,7 +14414,7 @@
   },
   "A/pair06/clean/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -14533,7 +14533,7 @@
   },
   "A/pair06/clean/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -14652,7 +14652,7 @@
   },
   "A/pair06/clean/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -14771,7 +14771,7 @@
   },
   "A/pair06/clean/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -14890,7 +14890,7 @@
   },
   "A/pair06/clean/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -15046,7 +15046,7 @@
   },
   "A/pair06/clean/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -15165,7 +15165,7 @@
   },
   "A/pair06/clean/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -15284,7 +15284,7 @@
   },
   "A/pair06/clean/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -15403,7 +15403,7 @@
   },
   "A/pair06/clean/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -15522,7 +15522,7 @@
   },
   "A/pair06/clean/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -15641,7 +15641,7 @@
   },
   "A/pair06/clean/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -15797,7 +15797,7 @@
   },
   "A/pair06/clean/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -15916,7 +15916,7 @@
   },
   "A/pair06/clean/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -16035,7 +16035,7 @@
   },
   "A/pair06/clean/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -16154,7 +16154,7 @@
   },
   "A/pair06/clean/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -16273,7 +16273,7 @@
   },
   "A/pair06/clean/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -16392,7 +16392,7 @@
   },
   "A/pair18/0db/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -16503,7 +16503,7 @@
   },
   "A/pair18/0db/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -16614,7 +16614,7 @@
   },
   "A/pair18/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -16770,7 +16770,7 @@
   },
   "A/pair18/0db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -16927,7 +16927,7 @@
   },
   "A/pair18/0db/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -17038,7 +17038,7 @@
   },
   "A/pair18/0db/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -17149,7 +17149,7 @@
   },
   "A/pair18/0db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -17305,7 +17305,7 @@
   },
   "A/pair18/0db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -17462,7 +17462,7 @@
   },
   "A/pair18/0db/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -17573,7 +17573,7 @@
   },
   "A/pair18/0db/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -17684,7 +17684,7 @@
   },
   "A/pair18/0db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -17840,7 +17840,7 @@
   },
   "A/pair18/0db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -17997,7 +17997,7 @@
   },
   "A/pair18/0db/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -18108,7 +18108,7 @@
   },
   "A/pair18/0db/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -18219,7 +18219,7 @@
   },
   "A/pair18/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -18375,7 +18375,7 @@
   },
   "A/pair18/0db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -18532,7 +18532,7 @@
   },
   "A/pair18/0db/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -18643,7 +18643,7 @@
   },
   "A/pair18/0db/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -18754,7 +18754,7 @@
   },
   "A/pair18/0db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -18910,7 +18910,7 @@
   },
   "A/pair18/0db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -19067,7 +19067,7 @@
   },
   "A/pair18/0db/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -19178,7 +19178,7 @@
   },
   "A/pair18/0db/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -19289,7 +19289,7 @@
   },
   "A/pair18/0db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -19445,7 +19445,7 @@
   },
   "A/pair18/0db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -19602,7 +19602,7 @@
   },
   "A/pair18/0db/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -19758,7 +19758,7 @@
   },
   "A/pair18/0db/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -19877,7 +19877,7 @@
   },
   "A/pair18/0db/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -19996,7 +19996,7 @@
   },
   "A/pair18/0db/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -20115,7 +20115,7 @@
   },
   "A/pair18/0db/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -20234,7 +20234,7 @@
   },
   "A/pair18/0db/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -20353,7 +20353,7 @@
   },
   "A/pair18/0db/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -20509,7 +20509,7 @@
   },
   "A/pair18/0db/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -20628,7 +20628,7 @@
   },
   "A/pair18/0db/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -20747,7 +20747,7 @@
   },
   "A/pair18/0db/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -20866,7 +20866,7 @@
   },
   "A/pair18/0db/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -20985,7 +20985,7 @@
   },
   "A/pair18/0db/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -21104,7 +21104,7 @@
   },
   "A/pair18/0db/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -21260,7 +21260,7 @@
   },
   "A/pair18/0db/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -21379,7 +21379,7 @@
   },
   "A/pair18/0db/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -21498,7 +21498,7 @@
   },
   "A/pair18/0db/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -21617,7 +21617,7 @@
   },
   "A/pair18/0db/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -21736,7 +21736,7 @@
   },
   "A/pair18/0db/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -21855,7 +21855,7 @@
   },
   "A/pair18/5db/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -21966,7 +21966,7 @@
   },
   "A/pair18/5db/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -22077,7 +22077,7 @@
   },
   "A/pair18/5db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -22233,7 +22233,7 @@
   },
   "A/pair18/5db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -22390,7 +22390,7 @@
   },
   "A/pair18/5db/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -22501,7 +22501,7 @@
   },
   "A/pair18/5db/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -22612,7 +22612,7 @@
   },
   "A/pair18/5db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -22768,7 +22768,7 @@
   },
   "A/pair18/5db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -22925,7 +22925,7 @@
   },
   "A/pair18/5db/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -23036,7 +23036,7 @@
   },
   "A/pair18/5db/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -23147,7 +23147,7 @@
   },
   "A/pair18/5db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -23303,7 +23303,7 @@
   },
   "A/pair18/5db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -23460,7 +23460,7 @@
   },
   "A/pair18/5db/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -23571,7 +23571,7 @@
   },
   "A/pair18/5db/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -23682,7 +23682,7 @@
   },
   "A/pair18/5db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -23838,7 +23838,7 @@
   },
   "A/pair18/5db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -23995,7 +23995,7 @@
   },
   "A/pair18/5db/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -24106,7 +24106,7 @@
   },
   "A/pair18/5db/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -24217,7 +24217,7 @@
   },
   "A/pair18/5db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -24373,7 +24373,7 @@
   },
   "A/pair18/5db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -24530,7 +24530,7 @@
   },
   "A/pair18/5db/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -24641,7 +24641,7 @@
   },
   "A/pair18/5db/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -24752,7 +24752,7 @@
   },
   "A/pair18/5db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -24908,7 +24908,7 @@
   },
   "A/pair18/5db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -25065,7 +25065,7 @@
   },
   "A/pair18/5db/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -25221,7 +25221,7 @@
   },
   "A/pair18/5db/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -25340,7 +25340,7 @@
   },
   "A/pair18/5db/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -25459,7 +25459,7 @@
   },
   "A/pair18/5db/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -25578,7 +25578,7 @@
   },
   "A/pair18/5db/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -25697,7 +25697,7 @@
   },
   "A/pair18/5db/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -25816,7 +25816,7 @@
   },
   "A/pair18/5db/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -25972,7 +25972,7 @@
   },
   "A/pair18/5db/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26091,7 +26091,7 @@
   },
   "A/pair18/5db/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26210,7 +26210,7 @@
   },
   "A/pair18/5db/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26329,7 +26329,7 @@
   },
   "A/pair18/5db/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26448,7 +26448,7 @@
   },
   "A/pair18/5db/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26567,7 +26567,7 @@
   },
   "A/pair18/5db/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26723,7 +26723,7 @@
   },
   "A/pair18/5db/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26842,7 +26842,7 @@
   },
   "A/pair18/5db/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -26961,7 +26961,7 @@
   },
   "A/pair18/5db/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -27080,7 +27080,7 @@
   },
   "A/pair18/5db/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -27199,7 +27199,7 @@
   },
   "A/pair18/5db/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -27318,7 +27318,7 @@
   },
   "A/pair18/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -27429,7 +27429,7 @@
   },
   "A/pair18/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -27540,7 +27540,7 @@
   },
   "A/pair18/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -27696,7 +27696,7 @@
   },
   "A/pair18/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -27853,7 +27853,7 @@
   },
   "A/pair18/clean/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -27964,7 +27964,7 @@
   },
   "A/pair18/clean/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -28075,7 +28075,7 @@
   },
   "A/pair18/clean/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -28231,7 +28231,7 @@
   },
   "A/pair18/clean/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -28388,7 +28388,7 @@
   },
   "A/pair18/clean/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -28499,7 +28499,7 @@
   },
   "A/pair18/clean/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -28610,7 +28610,7 @@
   },
   "A/pair18/clean/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -28766,7 +28766,7 @@
   },
   "A/pair18/clean/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -28923,7 +28923,7 @@
   },
   "A/pair18/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -29034,7 +29034,7 @@
   },
   "A/pair18/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -29145,7 +29145,7 @@
   },
   "A/pair18/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -29301,7 +29301,7 @@
   },
   "A/pair18/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -29458,7 +29458,7 @@
   },
   "A/pair18/clean/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -29569,7 +29569,7 @@
   },
   "A/pair18/clean/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -29680,7 +29680,7 @@
   },
   "A/pair18/clean/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -29836,7 +29836,7 @@
   },
   "A/pair18/clean/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -29993,7 +29993,7 @@
   },
   "A/pair18/clean/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30104,7 +30104,7 @@
   },
   "A/pair18/clean/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30215,7 +30215,7 @@
   },
   "A/pair18/clean/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30371,7 +30371,7 @@
   },
   "A/pair18/clean/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30528,7 +30528,7 @@
   },
   "A/pair18/clean/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30684,7 +30684,7 @@
   },
   "A/pair18/clean/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30803,7 +30803,7 @@
   },
   "A/pair18/clean/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -30922,7 +30922,7 @@
   },
   "A/pair18/clean/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31041,7 +31041,7 @@
   },
   "A/pair18/clean/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31160,7 +31160,7 @@
   },
   "A/pair18/clean/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31279,7 +31279,7 @@
   },
   "A/pair18/clean/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31435,7 +31435,7 @@
   },
   "A/pair18/clean/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31554,7 +31554,7 @@
   },
   "A/pair18/clean/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31673,7 +31673,7 @@
   },
   "A/pair18/clean/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31792,7 +31792,7 @@
   },
   "A/pair18/clean/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -31911,7 +31911,7 @@
   },
   "A/pair18/clean/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32030,7 +32030,7 @@
   },
   "A/pair18/clean/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32186,7 +32186,7 @@
   },
   "A/pair18/clean/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32305,7 +32305,7 @@
   },
   "A/pair18/clean/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32424,7 +32424,7 @@
   },
   "A/pair18/clean/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32543,7 +32543,7 @@
   },
   "A/pair18/clean/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32662,7 +32662,7 @@
   },
   "A/pair18/clean/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -32781,7 +32781,7 @@
   },
   "A/pair25/0db/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -32892,7 +32892,7 @@
   },
   "A/pair25/0db/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33003,7 +33003,7 @@
   },
   "A/pair25/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33159,7 +33159,7 @@
   },
   "A/pair25/0db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33316,7 +33316,7 @@
   },
   "A/pair25/0db/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33427,7 +33427,7 @@
   },
   "A/pair25/0db/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33538,7 +33538,7 @@
   },
   "A/pair25/0db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33694,7 +33694,7 @@
   },
   "A/pair25/0db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33851,7 +33851,7 @@
   },
   "A/pair25/0db/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -33962,7 +33962,7 @@
   },
   "A/pair25/0db/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34073,7 +34073,7 @@
   },
   "A/pair25/0db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34229,7 +34229,7 @@
   },
   "A/pair25/0db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34386,7 +34386,7 @@
   },
   "A/pair25/0db/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34497,7 +34497,7 @@
   },
   "A/pair25/0db/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34608,7 +34608,7 @@
   },
   "A/pair25/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34764,7 +34764,7 @@
   },
   "A/pair25/0db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -34921,7 +34921,7 @@
   },
   "A/pair25/0db/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35032,7 +35032,7 @@
   },
   "A/pair25/0db/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35143,7 +35143,7 @@
   },
   "A/pair25/0db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35299,7 +35299,7 @@
   },
   "A/pair25/0db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35456,7 +35456,7 @@
   },
   "A/pair25/0db/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35567,7 +35567,7 @@
   },
   "A/pair25/0db/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35678,7 +35678,7 @@
   },
   "A/pair25/0db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35834,7 +35834,7 @@
   },
   "A/pair25/0db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -35991,7 +35991,7 @@
   },
   "A/pair25/0db/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36147,7 +36147,7 @@
   },
   "A/pair25/0db/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36266,7 +36266,7 @@
   },
   "A/pair25/0db/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36385,7 +36385,7 @@
   },
   "A/pair25/0db/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36504,7 +36504,7 @@
   },
   "A/pair25/0db/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36623,7 +36623,7 @@
   },
   "A/pair25/0db/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36742,7 +36742,7 @@
   },
   "A/pair25/0db/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -36898,7 +36898,7 @@
   },
   "A/pair25/0db/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37017,7 +37017,7 @@
   },
   "A/pair25/0db/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37136,7 +37136,7 @@
   },
   "A/pair25/0db/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37255,7 +37255,7 @@
   },
   "A/pair25/0db/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37374,7 +37374,7 @@
   },
   "A/pair25/0db/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37493,7 +37493,7 @@
   },
   "A/pair25/0db/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37649,7 +37649,7 @@
   },
   "A/pair25/0db/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37768,7 +37768,7 @@
   },
   "A/pair25/0db/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -37887,7 +37887,7 @@
   },
   "A/pair25/0db/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -38006,7 +38006,7 @@
   },
   "A/pair25/0db/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -38125,7 +38125,7 @@
   },
   "A/pair25/0db/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -38244,7 +38244,7 @@
   },
   "A/pair25/5db/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -38355,7 +38355,7 @@
   },
   "A/pair25/5db/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -38466,7 +38466,7 @@
   },
   "A/pair25/5db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -38622,7 +38622,7 @@
   },
   "A/pair25/5db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -38779,7 +38779,7 @@
   },
   "A/pair25/5db/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -38890,7 +38890,7 @@
   },
   "A/pair25/5db/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39001,7 +39001,7 @@
   },
   "A/pair25/5db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39157,7 +39157,7 @@
   },
   "A/pair25/5db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39314,7 +39314,7 @@
   },
   "A/pair25/5db/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39425,7 +39425,7 @@
   },
   "A/pair25/5db/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39536,7 +39536,7 @@
   },
   "A/pair25/5db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39692,7 +39692,7 @@
   },
   "A/pair25/5db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39849,7 +39849,7 @@
   },
   "A/pair25/5db/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -39960,7 +39960,7 @@
   },
   "A/pair25/5db/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -40071,7 +40071,7 @@
   },
   "A/pair25/5db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -40227,7 +40227,7 @@
   },
   "A/pair25/5db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -40384,7 +40384,7 @@
   },
   "A/pair25/5db/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -40495,7 +40495,7 @@
   },
   "A/pair25/5db/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -40606,7 +40606,7 @@
   },
   "A/pair25/5db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -40762,7 +40762,7 @@
   },
   "A/pair25/5db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -40919,7 +40919,7 @@
   },
   "A/pair25/5db/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -41030,7 +41030,7 @@
   },
   "A/pair25/5db/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -41141,7 +41141,7 @@
   },
   "A/pair25/5db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -41297,7 +41297,7 @@
   },
   "A/pair25/5db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -41454,7 +41454,7 @@
   },
   "A/pair25/5db/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -41610,7 +41610,7 @@
   },
   "A/pair25/5db/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -41729,7 +41729,7 @@
   },
   "A/pair25/5db/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -41848,7 +41848,7 @@
   },
   "A/pair25/5db/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -41967,7 +41967,7 @@
   },
   "A/pair25/5db/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -42086,7 +42086,7 @@
   },
   "A/pair25/5db/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -42205,7 +42205,7 @@
   },
   "A/pair25/5db/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -42361,7 +42361,7 @@
   },
   "A/pair25/5db/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -42480,7 +42480,7 @@
   },
   "A/pair25/5db/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -42599,7 +42599,7 @@
   },
   "A/pair25/5db/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -42718,7 +42718,7 @@
   },
   "A/pair25/5db/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -42837,7 +42837,7 @@
   },
   "A/pair25/5db/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -42956,7 +42956,7 @@
   },
   "A/pair25/5db/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -43112,7 +43112,7 @@
   },
   "A/pair25/5db/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -43231,7 +43231,7 @@
   },
   "A/pair25/5db/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -43350,7 +43350,7 @@
   },
   "A/pair25/5db/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -43469,7 +43469,7 @@
   },
   "A/pair25/5db/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -43588,7 +43588,7 @@
   },
   "A/pair25/5db/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -43707,7 +43707,7 @@
   },
   "A/pair25/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -43818,7 +43818,7 @@
   },
   "A/pair25/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -43929,7 +43929,7 @@
   },
   "A/pair25/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -44085,7 +44085,7 @@
   },
   "A/pair25/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -44242,7 +44242,7 @@
   },
   "A/pair25/clean/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -44353,7 +44353,7 @@
   },
   "A/pair25/clean/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -44464,7 +44464,7 @@
   },
   "A/pair25/clean/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -44620,7 +44620,7 @@
   },
   "A/pair25/clean/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -44777,7 +44777,7 @@
   },
   "A/pair25/clean/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -44888,7 +44888,7 @@
   },
   "A/pair25/clean/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -44999,7 +44999,7 @@
   },
   "A/pair25/clean/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -45155,7 +45155,7 @@
   },
   "A/pair25/clean/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -45312,7 +45312,7 @@
   },
   "A/pair25/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -45423,7 +45423,7 @@
   },
   "A/pair25/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -45534,7 +45534,7 @@
   },
   "A/pair25/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -45690,7 +45690,7 @@
   },
   "A/pair25/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -45847,7 +45847,7 @@
   },
   "A/pair25/clean/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -45958,7 +45958,7 @@
   },
   "A/pair25/clean/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -46069,7 +46069,7 @@
   },
   "A/pair25/clean/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -46225,7 +46225,7 @@
   },
   "A/pair25/clean/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -46382,7 +46382,7 @@
   },
   "A/pair25/clean/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -46493,7 +46493,7 @@
   },
   "A/pair25/clean/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -46604,7 +46604,7 @@
   },
   "A/pair25/clean/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -46760,7 +46760,7 @@
   },
   "A/pair25/clean/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -46917,7 +46917,7 @@
   },
   "A/pair25/clean/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -47073,7 +47073,7 @@
   },
   "A/pair25/clean/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -47192,7 +47192,7 @@
   },
   "A/pair25/clean/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -47311,7 +47311,7 @@
   },
   "A/pair25/clean/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -47430,7 +47430,7 @@
   },
   "A/pair25/clean/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -47549,7 +47549,7 @@
   },
   "A/pair25/clean/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -47668,7 +47668,7 @@
   },
   "A/pair25/clean/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -47824,7 +47824,7 @@
   },
   "A/pair25/clean/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -47943,7 +47943,7 @@
   },
   "A/pair25/clean/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -48062,7 +48062,7 @@
   },
   "A/pair25/clean/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -48181,7 +48181,7 @@
   },
   "A/pair25/clean/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -48300,7 +48300,7 @@
   },
   "A/pair25/clean/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -48419,7 +48419,7 @@
   },
   "A/pair25/clean/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -48575,7 +48575,7 @@
   },
   "A/pair25/clean/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -48694,7 +48694,7 @@
   },
   "A/pair25/clean/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -48813,7 +48813,7 @@
   },
   "A/pair25/clean/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -48932,7 +48932,7 @@
   },
   "A/pair25/clean/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -49051,7 +49051,7 @@
   },
   "A/pair25/clean/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -49170,7 +49170,7 @@
   },
   "A/pair37/0db/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -49281,7 +49281,7 @@
   },
   "A/pair37/0db/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -49392,7 +49392,7 @@
   },
   "A/pair37/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -49548,7 +49548,7 @@
   },
   "A/pair37/0db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -49705,7 +49705,7 @@
   },
   "A/pair37/0db/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -49816,7 +49816,7 @@
   },
   "A/pair37/0db/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -49927,7 +49927,7 @@
   },
   "A/pair37/0db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -50083,7 +50083,7 @@
   },
   "A/pair37/0db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -50240,7 +50240,7 @@
   },
   "A/pair37/0db/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -50351,7 +50351,7 @@
   },
   "A/pair37/0db/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -50462,7 +50462,7 @@
   },
   "A/pair37/0db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -50618,7 +50618,7 @@
   },
   "A/pair37/0db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -50775,7 +50775,7 @@
   },
   "A/pair37/0db/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -50886,7 +50886,7 @@
   },
   "A/pair37/0db/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -50997,7 +50997,7 @@
   },
   "A/pair37/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -51153,7 +51153,7 @@
   },
   "A/pair37/0db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -51310,7 +51310,7 @@
   },
   "A/pair37/0db/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -51421,7 +51421,7 @@
   },
   "A/pair37/0db/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -51532,7 +51532,7 @@
   },
   "A/pair37/0db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -51688,7 +51688,7 @@
   },
   "A/pair37/0db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -51845,7 +51845,7 @@
   },
   "A/pair37/0db/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -51956,7 +51956,7 @@
   },
   "A/pair37/0db/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -52067,7 +52067,7 @@
   },
   "A/pair37/0db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -52223,7 +52223,7 @@
   },
   "A/pair37/0db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -52380,7 +52380,7 @@
   },
   "A/pair37/0db/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -52536,7 +52536,7 @@
   },
   "A/pair37/0db/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -52655,7 +52655,7 @@
   },
   "A/pair37/0db/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -52774,7 +52774,7 @@
   },
   "A/pair37/0db/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -52893,7 +52893,7 @@
   },
   "A/pair37/0db/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -53012,7 +53012,7 @@
   },
   "A/pair37/0db/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -53131,7 +53131,7 @@
   },
   "A/pair37/0db/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -53287,7 +53287,7 @@
   },
   "A/pair37/0db/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -53406,7 +53406,7 @@
   },
   "A/pair37/0db/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -53525,7 +53525,7 @@
   },
   "A/pair37/0db/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -53644,7 +53644,7 @@
   },
   "A/pair37/0db/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -53763,7 +53763,7 @@
   },
   "A/pair37/0db/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -53882,7 +53882,7 @@
   },
   "A/pair37/0db/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -54038,7 +54038,7 @@
   },
   "A/pair37/0db/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -54157,7 +54157,7 @@
   },
   "A/pair37/0db/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -54276,7 +54276,7 @@
   },
   "A/pair37/0db/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -54395,7 +54395,7 @@
   },
   "A/pair37/0db/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -54514,7 +54514,7 @@
   },
   "A/pair37/0db/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -54633,7 +54633,7 @@
   },
   "A/pair37/5db/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -54744,7 +54744,7 @@
   },
   "A/pair37/5db/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -54855,7 +54855,7 @@
   },
   "A/pair37/5db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -55011,7 +55011,7 @@
   },
   "A/pair37/5db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -55168,7 +55168,7 @@
   },
   "A/pair37/5db/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -55279,7 +55279,7 @@
   },
   "A/pair37/5db/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -55390,7 +55390,7 @@
   },
   "A/pair37/5db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -55546,7 +55546,7 @@
   },
   "A/pair37/5db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -55703,7 +55703,7 @@
   },
   "A/pair37/5db/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -55814,7 +55814,7 @@
   },
   "A/pair37/5db/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -55925,7 +55925,7 @@
   },
   "A/pair37/5db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -56081,7 +56081,7 @@
   },
   "A/pair37/5db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -56238,7 +56238,7 @@
   },
   "A/pair37/5db/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -56349,7 +56349,7 @@
   },
   "A/pair37/5db/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -56460,7 +56460,7 @@
   },
   "A/pair37/5db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -56616,7 +56616,7 @@
   },
   "A/pair37/5db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -56773,7 +56773,7 @@
   },
   "A/pair37/5db/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -56884,7 +56884,7 @@
   },
   "A/pair37/5db/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -56995,7 +56995,7 @@
   },
   "A/pair37/5db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -57151,7 +57151,7 @@
   },
   "A/pair37/5db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -57308,7 +57308,7 @@
   },
   "A/pair37/5db/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -57419,7 +57419,7 @@
   },
   "A/pair37/5db/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -57530,7 +57530,7 @@
   },
   "A/pair37/5db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -57686,7 +57686,7 @@
   },
   "A/pair37/5db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -57843,7 +57843,7 @@
   },
   "A/pair37/5db/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -57999,7 +57999,7 @@
   },
   "A/pair37/5db/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -58118,7 +58118,7 @@
   },
   "A/pair37/5db/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -58237,7 +58237,7 @@
   },
   "A/pair37/5db/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -58356,7 +58356,7 @@
   },
   "A/pair37/5db/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -58475,7 +58475,7 @@
   },
   "A/pair37/5db/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -58594,7 +58594,7 @@
   },
   "A/pair37/5db/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -58750,7 +58750,7 @@
   },
   "A/pair37/5db/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -58869,7 +58869,7 @@
   },
   "A/pair37/5db/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -58988,7 +58988,7 @@
   },
   "A/pair37/5db/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -59107,7 +59107,7 @@
   },
   "A/pair37/5db/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -59226,7 +59226,7 @@
   },
   "A/pair37/5db/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -59345,7 +59345,7 @@
   },
   "A/pair37/5db/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -59501,7 +59501,7 @@
   },
   "A/pair37/5db/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -59620,7 +59620,7 @@
   },
   "A/pair37/5db/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -59739,7 +59739,7 @@
   },
   "A/pair37/5db/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -59858,7 +59858,7 @@
   },
   "A/pair37/5db/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -59977,7 +59977,7 @@
   },
   "A/pair37/5db/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -60096,7 +60096,7 @@
   },
   "A/pair37/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -60207,7 +60207,7 @@
   },
   "A/pair37/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -60318,7 +60318,7 @@
   },
   "A/pair37/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -60474,7 +60474,7 @@
   },
   "A/pair37/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -60631,7 +60631,7 @@
   },
   "A/pair37/clean/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -60742,7 +60742,7 @@
   },
   "A/pair37/clean/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -60853,7 +60853,7 @@
   },
   "A/pair37/clean/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -61009,7 +61009,7 @@
   },
   "A/pair37/clean/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -61166,7 +61166,7 @@
   },
   "A/pair37/clean/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -61277,7 +61277,7 @@
   },
   "A/pair37/clean/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -61388,7 +61388,7 @@
   },
   "A/pair37/clean/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -61544,7 +61544,7 @@
   },
   "A/pair37/clean/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -61701,7 +61701,7 @@
   },
   "A/pair37/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -61812,7 +61812,7 @@
   },
   "A/pair37/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -61923,7 +61923,7 @@
   },
   "A/pair37/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -62079,7 +62079,7 @@
   },
   "A/pair37/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -62236,7 +62236,7 @@
   },
   "A/pair37/clean/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -62347,7 +62347,7 @@
   },
   "A/pair37/clean/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -62458,7 +62458,7 @@
   },
   "A/pair37/clean/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -62614,7 +62614,7 @@
   },
   "A/pair37/clean/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -62771,7 +62771,7 @@
   },
   "A/pair37/clean/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -62882,7 +62882,7 @@
   },
   "A/pair37/clean/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -62993,7 +62993,7 @@
   },
   "A/pair37/clean/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -63149,7 +63149,7 @@
   },
   "A/pair37/clean/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -63306,7 +63306,7 @@
   },
   "A/pair37/clean/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -63462,7 +63462,7 @@
   },
   "A/pair37/clean/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -63581,7 +63581,7 @@
   },
   "A/pair37/clean/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -63700,7 +63700,7 @@
   },
   "A/pair37/clean/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -63819,7 +63819,7 @@
   },
   "A/pair37/clean/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -63938,7 +63938,7 @@
   },
   "A/pair37/clean/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -64057,7 +64057,7 @@
   },
   "A/pair37/clean/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -64213,7 +64213,7 @@
   },
   "A/pair37/clean/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -64332,7 +64332,7 @@
   },
   "A/pair37/clean/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -64451,7 +64451,7 @@
   },
   "A/pair37/clean/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -64570,7 +64570,7 @@
   },
   "A/pair37/clean/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -64689,7 +64689,7 @@
   },
   "A/pair37/clean/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -64808,7 +64808,7 @@
   },
   "A/pair37/clean/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -64964,7 +64964,7 @@
   },
   "A/pair37/clean/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -65083,7 +65083,7 @@
   },
   "A/pair37/clean/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -65202,7 +65202,7 @@
   },
   "A/pair37/clean/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -65321,7 +65321,7 @@
   },
   "A/pair37/clean/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -65440,7 +65440,7 @@
   },
   "A/pair37/clean/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -65559,7 +65559,7 @@
   },
   "A/pair49/0db/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -65670,7 +65670,7 @@
   },
   "A/pair49/0db/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -65781,7 +65781,7 @@
   },
   "A/pair49/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -65937,7 +65937,7 @@
   },
   "A/pair49/0db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -66094,7 +66094,7 @@
   },
   "A/pair49/0db/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -66205,7 +66205,7 @@
   },
   "A/pair49/0db/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -66316,7 +66316,7 @@
   },
   "A/pair49/0db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -66472,7 +66472,7 @@
   },
   "A/pair49/0db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -66629,7 +66629,7 @@
   },
   "A/pair49/0db/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -66740,7 +66740,7 @@
   },
   "A/pair49/0db/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -66851,7 +66851,7 @@
   },
   "A/pair49/0db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -67007,7 +67007,7 @@
   },
   "A/pair49/0db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -67164,7 +67164,7 @@
   },
   "A/pair49/0db/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -67275,7 +67275,7 @@
   },
   "A/pair49/0db/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -67386,7 +67386,7 @@
   },
   "A/pair49/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -67542,7 +67542,7 @@
   },
   "A/pair49/0db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -67699,7 +67699,7 @@
   },
   "A/pair49/0db/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -67810,7 +67810,7 @@
   },
   "A/pair49/0db/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -67921,7 +67921,7 @@
   },
   "A/pair49/0db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -68077,7 +68077,7 @@
   },
   "A/pair49/0db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -68234,7 +68234,7 @@
   },
   "A/pair49/0db/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -68345,7 +68345,7 @@
   },
   "A/pair49/0db/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -68456,7 +68456,7 @@
   },
   "A/pair49/0db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -68612,7 +68612,7 @@
   },
   "A/pair49/0db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -68769,7 +68769,7 @@
   },
   "A/pair49/0db/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -68925,7 +68925,7 @@
   },
   "A/pair49/0db/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -69044,7 +69044,7 @@
   },
   "A/pair49/0db/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -69163,7 +69163,7 @@
   },
   "A/pair49/0db/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -69282,7 +69282,7 @@
   },
   "A/pair49/0db/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -69401,7 +69401,7 @@
   },
   "A/pair49/0db/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -69520,7 +69520,7 @@
   },
   "A/pair49/0db/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -69676,7 +69676,7 @@
   },
   "A/pair49/0db/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -69795,7 +69795,7 @@
   },
   "A/pair49/0db/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -69914,7 +69914,7 @@
   },
   "A/pair49/0db/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -70033,7 +70033,7 @@
   },
   "A/pair49/0db/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -70152,7 +70152,7 @@
   },
   "A/pair49/0db/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -70271,7 +70271,7 @@
   },
   "A/pair49/0db/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -70427,7 +70427,7 @@
   },
   "A/pair49/0db/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -70546,7 +70546,7 @@
   },
   "A/pair49/0db/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -70665,7 +70665,7 @@
   },
   "A/pair49/0db/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -70784,7 +70784,7 @@
   },
   "A/pair49/0db/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -70903,7 +70903,7 @@
   },
   "A/pair49/0db/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 0.0,
@@ -71022,7 +71022,7 @@
   },
   "A/pair49/5db/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -71133,7 +71133,7 @@
   },
   "A/pair49/5db/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -71244,7 +71244,7 @@
   },
   "A/pair49/5db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -71400,7 +71400,7 @@
   },
   "A/pair49/5db/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -71557,7 +71557,7 @@
   },
   "A/pair49/5db/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -71668,7 +71668,7 @@
   },
   "A/pair49/5db/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -71779,7 +71779,7 @@
   },
   "A/pair49/5db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -71935,7 +71935,7 @@
   },
   "A/pair49/5db/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -72092,7 +72092,7 @@
   },
   "A/pair49/5db/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -72203,7 +72203,7 @@
   },
   "A/pair49/5db/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -72314,7 +72314,7 @@
   },
   "A/pair49/5db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -72470,7 +72470,7 @@
   },
   "A/pair49/5db/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -72627,7 +72627,7 @@
   },
   "A/pair49/5db/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -72738,7 +72738,7 @@
   },
   "A/pair49/5db/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -72849,7 +72849,7 @@
   },
   "A/pair49/5db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -73005,7 +73005,7 @@
   },
   "A/pair49/5db/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -73162,7 +73162,7 @@
   },
   "A/pair49/5db/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -73273,7 +73273,7 @@
   },
   "A/pair49/5db/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -73384,7 +73384,7 @@
   },
   "A/pair49/5db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -73540,7 +73540,7 @@
   },
   "A/pair49/5db/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -73697,7 +73697,7 @@
   },
   "A/pair49/5db/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -73808,7 +73808,7 @@
   },
   "A/pair49/5db/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -73919,7 +73919,7 @@
   },
   "A/pair49/5db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -74075,7 +74075,7 @@
   },
   "A/pair49/5db/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -74232,7 +74232,7 @@
   },
   "A/pair49/5db/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -74388,7 +74388,7 @@
   },
   "A/pair49/5db/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -74507,7 +74507,7 @@
   },
   "A/pair49/5db/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -74626,7 +74626,7 @@
   },
   "A/pair49/5db/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -74745,7 +74745,7 @@
   },
   "A/pair49/5db/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -74864,7 +74864,7 @@
   },
   "A/pair49/5db/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -74983,7 +74983,7 @@
   },
   "A/pair49/5db/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -75139,7 +75139,7 @@
   },
   "A/pair49/5db/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -75258,7 +75258,7 @@
   },
   "A/pair49/5db/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -75377,7 +75377,7 @@
   },
   "A/pair49/5db/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -75496,7 +75496,7 @@
   },
   "A/pair49/5db/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -75615,7 +75615,7 @@
   },
   "A/pair49/5db/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -75734,7 +75734,7 @@
   },
   "A/pair49/5db/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -75890,7 +75890,7 @@
   },
   "A/pair49/5db/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -76009,7 +76009,7 @@
   },
   "A/pair49/5db/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -76128,7 +76128,7 @@
   },
   "A/pair49/5db/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -76247,7 +76247,7 @@
   },
   "A/pair49/5db/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -76366,7 +76366,7 @@
   },
   "A/pair49/5db/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": 5.0,
@@ -76485,7 +76485,7 @@
   },
   "A/pair49/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -76596,7 +76596,7 @@
   },
   "A/pair49/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -76707,7 +76707,7 @@
   },
   "A/pair49/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -76863,7 +76863,7 @@
   },
   "A/pair49/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -77020,7 +77020,7 @@
   },
   "A/pair49/clean/g1/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -77131,7 +77131,7 @@
   },
   "A/pair49/clean/g1/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -77242,7 +77242,7 @@
   },
   "A/pair49/clean/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -77398,7 +77398,7 @@
   },
   "A/pair49/clean/g1/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -77555,7 +77555,7 @@
   },
   "A/pair49/clean/g1/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -77666,7 +77666,7 @@
   },
   "A/pair49/clean/g1/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -77777,7 +77777,7 @@
   },
   "A/pair49/clean/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -77933,7 +77933,7 @@
   },
   "A/pair49/clean/g1/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -78090,7 +78090,7 @@
   },
   "A/pair49/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -78201,7 +78201,7 @@
   },
   "A/pair49/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -78312,7 +78312,7 @@
   },
   "A/pair49/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -78468,7 +78468,7 @@
   },
   "A/pair49/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -78625,7 +78625,7 @@
   },
   "A/pair49/clean/g2/s1/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -78736,7 +78736,7 @@
   },
   "A/pair49/clean/g2/s1/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -78847,7 +78847,7 @@
   },
   "A/pair49/clean/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -79003,7 +79003,7 @@
   },
   "A/pair49/clean/g2/s1/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -79160,7 +79160,7 @@
   },
   "A/pair49/clean/g2/s2/bank-state": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -79271,7 +79271,7 @@
   },
   "A/pair49/clean/g2/s2/bank-width": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -79382,7 +79382,7 @@
   },
   "A/pair49/clean/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -79538,7 +79538,7 @@
   },
   "A/pair49/clean/g2/s2/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -79695,7 +79695,7 @@
   },
   "A/pair49/clean/s0/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -79851,7 +79851,7 @@
   },
   "A/pair49/clean/s0/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -79970,7 +79970,7 @@
   },
   "A/pair49/clean/s0/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -80089,7 +80089,7 @@
   },
   "A/pair49/clean/s0/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -80208,7 +80208,7 @@
   },
   "A/pair49/clean/s0/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -80327,7 +80327,7 @@
   },
   "A/pair49/clean/s0/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -80446,7 +80446,7 @@
   },
   "A/pair49/clean/s1/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -80602,7 +80602,7 @@
   },
   "A/pair49/clean/s1/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -80721,7 +80721,7 @@
   },
   "A/pair49/clean/s1/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -80840,7 +80840,7 @@
   },
   "A/pair49/clean/s1/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -80959,7 +80959,7 @@
   },
   "A/pair49/clean/s1/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -81078,7 +81078,7 @@
   },
   "A/pair49/clean/s1/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -81197,7 +81197,7 @@
   },
   "A/pair49/clean/s2/baseline": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -81353,7 +81353,7 @@
   },
   "A/pair49/clean/s2/trained-cnn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -81472,7 +81472,7 @@
   },
   "A/pair49/clean/s2/trained-gru/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -81591,7 +81591,7 @@
   },
   "A/pair49/clean/s2/trained-s4d/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -81710,7 +81710,7 @@
   },
   "A/pair49/clean/s2/trained-tcn/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -81829,7 +81829,7 @@
   },
   "A/pair49/clean/s2/trained-transformer/n2048": {
    "spec": {
-    "tier": "tier1",
+    "experiment": "controls",
     "task": "order",
     "pathway": "spectrogram",
     "noise_db": null,

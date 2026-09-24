@@ -284,3 +284,6 @@ publishing/.work/
 # none of that belongs in it. Kept in the working tree because it is the thing
 # actually being worked from.
 independent-researcher-publishing-playbook.md
+
+# a record writer's half-written temporary, swapped in atomically when complete
+papers/*/results/*.tmp

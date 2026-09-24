@@ -1,9 +1,9 @@
 {
- "group": "becker-recognition-spectrogram",
+ "group": "becker-folds-recognition",
  "runs": {
   "B0/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -133,7 +133,7 @@
   },
   "B0/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -263,7 +263,7 @@
   },
   "B0/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -527,7 +527,7 @@
   },
   "B0/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -792,7 +792,7 @@
   },
   "B0/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -922,7 +922,7 @@
   },
   "B0/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -1052,7 +1052,7 @@
   },
   "B0/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -1316,7 +1316,7 @@
   },
   "B0/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -1581,7 +1581,7 @@
   },
   "B0/clean/s0/baseline": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -1779,7 +1779,7 @@
   },
   "B0/clean/s0/trained-cnn/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -1916,7 +1916,7 @@
   },
   "B0/clean/s0/trained-gru/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -2053,7 +2053,7 @@
   },
   "B0/clean/s0/trained-s4d/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -2190,7 +2190,7 @@
   },
   "B0/clean/s0/trained-tcn/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -2327,7 +2327,7 @@
   },
   "B0/clean/s0/trained-transformer/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -2464,7 +2464,7 @@
   },
   "B1/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -2594,7 +2594,7 @@
   },
   "B1/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -2724,7 +2724,7 @@
   },
   "B1/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -2988,7 +2988,7 @@
   },
   "B1/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -3253,7 +3253,7 @@
   },
   "B1/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -3383,7 +3383,7 @@
   },
   "B1/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -3513,7 +3513,7 @@
   },
   "B1/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -3777,7 +3777,7 @@
   },
   "B1/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -4042,7 +4042,7 @@
   },
   "B1/clean/s0/baseline": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -4240,7 +4240,7 @@
   },
   "B1/clean/s0/trained-cnn/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -4377,7 +4377,7 @@
   },
   "B1/clean/s0/trained-gru/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -4514,7 +4514,7 @@
   },
   "B1/clean/s0/trained-s4d/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -4651,7 +4651,7 @@
   },
   "B1/clean/s0/trained-tcn/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -4788,7 +4788,7 @@
   },
   "B1/clean/s0/trained-transformer/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -4925,7 +4925,7 @@
   },
   "B2/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -5055,7 +5055,7 @@
   },
   "B2/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -5185,7 +5185,7 @@
   },
   "B2/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -5449,7 +5449,7 @@
   },
   "B2/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -5714,7 +5714,7 @@
   },
   "B2/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -5844,7 +5844,7 @@
   },
   "B2/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -5974,7 +5974,7 @@
   },
   "B2/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -6238,7 +6238,7 @@
   },
   "B2/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -6503,7 +6503,7 @@
   },
   "B2/clean/s0/baseline": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -6701,7 +6701,7 @@
   },
   "B2/clean/s0/trained-cnn/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -6838,7 +6838,7 @@
   },
   "B2/clean/s0/trained-gru/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -6975,7 +6975,7 @@
   },
   "B2/clean/s0/trained-s4d/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -7112,7 +7112,7 @@
   },
   "B2/clean/s0/trained-tcn/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -7249,7 +7249,7 @@
   },
   "B2/clean/s0/trained-transformer/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -7386,7 +7386,7 @@
   },
   "B3/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -7516,7 +7516,7 @@
   },
   "B3/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -7646,7 +7646,7 @@
   },
   "B3/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -7910,7 +7910,7 @@
   },
   "B3/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -8175,7 +8175,7 @@
   },
   "B3/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -8305,7 +8305,7 @@
   },
   "B3/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -8435,7 +8435,7 @@
   },
   "B3/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -8699,7 +8699,7 @@
   },
   "B3/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -8964,7 +8964,7 @@
   },
   "B3/clean/s0/baseline": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -9162,7 +9162,7 @@
   },
   "B3/clean/s0/trained-cnn/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -9299,7 +9299,7 @@
   },
   "B3/clean/s0/trained-gru/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -9436,7 +9436,7 @@
   },
   "B3/clean/s0/trained-s4d/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -9573,7 +9573,7 @@
   },
   "B3/clean/s0/trained-tcn/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -9710,7 +9710,7 @@
   },
   "B3/clean/s0/trained-transformer/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -9847,7 +9847,7 @@
   },
   "B4/clean/g1/s0/bank-state": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -9977,7 +9977,7 @@
   },
   "B4/clean/g1/s0/bank-width": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -10107,7 +10107,7 @@
   },
   "B4/clean/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -10371,7 +10371,7 @@
   },
   "B4/clean/g1/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -10636,7 +10636,7 @@
   },
   "B4/clean/g2/s0/bank-state": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -10766,7 +10766,7 @@
   },
   "B4/clean/g2/s0/bank-width": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -10896,7 +10896,7 @@
   },
   "B4/clean/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11160,7 +11160,7 @@
   },
   "B4/clean/g2/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11425,7 +11425,7 @@
   },
   "B4/clean/s0/baseline": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11623,7 +11623,7 @@
   },
   "B4/clean/s0/trained-cnn/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11760,7 +11760,7 @@
   },
   "B4/clean/s0/trained-gru/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -11897,7 +11897,7 @@
   },
   "B4/clean/s0/trained-s4d/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -12034,7 +12034,7 @@
   },
   "B4/clean/s0/trained-tcn/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,
@@ -12171,7 +12171,7 @@
   },
   "B4/clean/s0/trained-transformer/n18000": {
    "spec": {
-    "tier": "becker",
+    "experiment": "becker-folds",
     "task": "recognition",
     "pathway": "spectrogram",
     "noise_db": null,

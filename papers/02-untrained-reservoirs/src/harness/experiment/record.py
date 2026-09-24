@@ -27,7 +27,7 @@ COUPLED_LABEL = "coupled-kuramoto-torus-random-restoring0.3-ceiling1"
 @dataclass(frozen=True)
 class Cell:
     """One recorded accuracy, with what it belongs to."""
-    tier: str
+    experiment: str
     task: str
     pathway: str
     noise: float | None
@@ -51,15 +51,17 @@ def load(groups: list[str] | None = None) -> list[Cell]:
     paths = sorted(root.glob("*.json")) if groups is None else [root / f"{g}.json" for g in groups]
     out = []
     for path in paths:
-        if path.name in ("gates.json", "summary.json") or not path.exists():
+        if path.name == "summary.json":
             continue
+        if not path.exists():
+            raise FileNotFoundError(f"no record file {path.name}: the group name is wrong or its runs are not in")
         for rec in json.loads(path.read_text())["runs"].values():
             s = rec["spec"]
             label = Arm(**s["arm"]).label()
             if s.get("span", "fixed") != "fixed":
                 label += "@clipspan"
             for c in rec["cells"]:
-                out.append(Cell(s["tier"], s["task"], s["pathway"], s["noise_db"], s["gain"], s["seed"],
+                out.append(Cell(s["experiment"], s["task"], s["pathway"], s["noise_db"], s["gain"], s["seed"],
                                 s["arm"], label, tuple(s["pair"]), c["read"], c["width"], c["n_train"],
                                 c["acc"], c.get("correct"), rec["n_test"], s.get("fold", -1),
                                 c.get("projection", "fixed")))
@@ -75,7 +77,7 @@ def bits(c: Cell) -> np.ndarray:
 def baseline_at_chance(cells: list[Cell]) -> dict:
     """The order task's spectrogram-only baseline, per pair and noise level: its accuracy, the 95% interval
     from resampling test clips, and whether that interval contains chance (50%)."""
-    base = [c for c in cells if c.tier == "tier1" and c.task == "order" and c.arm["kind"] == "baseline"
+    base = [c for c in cells if c.experiment == "controls" and c.task == "order" and c.arm["kind"] == "baseline"
             and c.width == PRIMARY_WIDTH and c.n_train == PRIMARY_SIZE]
     out = {}
     for pair in sorted({c.pair for c in base}):

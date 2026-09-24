@@ -1,10 +1,10 @@
-"""The tiers, and the driver that runs them.
+"""The experiments, and the driver that runs them.
 
     uv run python -m harness.experiment.plan prepare            # banks' row caches, once
-    uv run python -m harness.experiment.plan run tier1 --workers 3 --dry-run
-    uv run python -m harness.experiment.plan run gate tier1 --workers 3
+    uv run python -m harness.experiment.plan run controls --workers 3 --dry-run
+    uv run python -m harness.experiment.plan run leak-check controls --workers 3
 
-Every tier is a list of specs derived from DESIGN.md; nothing here is a
+Every experiment is a list of specs fixed in advance; nothing here is a
 free choice at run time. The driver skips every spec already recorded, so a
 sweep that stops restarts where it left off, and it runs the costliest specs
 first so the pool drains evenly. A spec that fails is logged with its
@@ -26,7 +26,7 @@ from harness.experiment import run as rn
 from harness.experiment.arms import Arm
 
 NOISES = (None, 0.0, 5.0)
-DESIGN_NOISES = (0.0, 5.0)          # clean audio is left out of the design tiers, where the task saturates
+DESIGN_NOISES = (0.0, 5.0)          # clean audio is left out of the design experiments, where the task saturates
 GAINS = (1.0, 2.0)
 SEEDS = (0, 1, 2)
 TRAINED_ARCHS = ("gru", "tcn", "cnn", "transformer", "s4d")
@@ -37,7 +37,7 @@ FREQUENCIES = ("random", "tonotopic", "identical")
 RESTORINGS = (0.3, 0.1)
 CEILINGS = (1.0, 0.5)
 BECKER_TRAIN = 18000
-#: the sweep beyond Tier 2's levels: restoring strengths up to the natural frequency, where an
+#: the sweep beyond the design experiment's levels: restoring strengths up to the natural frequency, where an
 #: oscillator stops rotating; coupling ceilings above 1; and gains up to 12, below the integrator's
 #: bound, where drive, natural frequency and coupling together would pass pi radians a step
 SWEEP_RESTORINGS = (0.5, 0.8, 1.0)
@@ -56,37 +56,37 @@ def _trained(arch: str) -> Arm:
     return Arm("trained", arch=arch)
 
 
-def gate() -> Iterator[rn.Spec]:
-    """The g = 0 sanity cells, and the per-clip-span diagnostic."""
+def leak_check() -> Iterator[rn.Spec]:
+    """The zero-input cells, which must read chance, and the per-clip-span diagnostic."""
     for arm in UNTRAINED:
-        yield rn.Spec("gate", "recognition", "spectrogram", 0.0, 0.0, 0, arm)
+        yield rn.Spec("leak-check", "recognition", "spectrogram", 0.0, 0.0, 0, arm)
     # how much a per-clip read window gives the network: the leak the fixed window closes
     for gain in (0.0, *GAINS):
         for seed in SEEDS:
-            yield rn.Spec("gate", "recognition", "spectrogram", 0.0, gain, seed, COUPLED, span="clip")
+            yield rn.Spec("leak-check", "recognition", "spectrogram", 0.0, gain, seed, COUPLED, span="clip")
 
 
-def tier1() -> Iterator[rn.Spec]:
+def controls() -> Iterator[rn.Spec]:
     """The arms, on recognition at three training sizes and on the order task."""
     for noise in NOISES:
         for seed in SEEDS:
-            yield rn.Spec("tier1", "recognition", "spectrogram", noise, None, seed, BASELINE, sizes=pr.SIZES)
+            yield rn.Spec("controls", "recognition", "spectrogram", noise, None, seed, BASELINE, sizes=pr.SIZES)
             for gain in GAINS:
                 for arm in UNTRAINED:
-                    yield rn.Spec("tier1", "recognition", "spectrogram", noise, gain, seed, arm, sizes=pr.SIZES)
+                    yield rn.Spec("controls", "recognition", "spectrogram", noise, gain, seed, arm, sizes=pr.SIZES)
             for arch in TRAINED_ARCHS:
                 for n in pr.SIZES:
-                    yield rn.Spec("tier1", "recognition", "spectrogram", noise, None, seed, _trained(arch),
+                    yield rn.Spec("controls", "recognition", "spectrogram", noise, None, seed, _trained(arch),
                                   sizes=(n,), native_sizes=(n,) if n == rn.PRIMARY_SIZE else ())
     for pair in pr.PAIRS:
         for noise in NOISES:
             for seed in SEEDS:
-                yield rn.Spec("tier1", "order", "spectrogram", noise, None, seed, BASELINE, pair=pair)
+                yield rn.Spec("controls", "order", "spectrogram", noise, None, seed, BASELINE, pair=pair)
                 for gain in GAINS:
                     for arm in UNTRAINED:
-                        yield rn.Spec("tier1", "order", "spectrogram", noise, gain, seed, arm, pair=pair)
+                        yield rn.Spec("controls", "order", "spectrogram", noise, gain, seed, arm, pair=pair)
                 for arch in TRAINED_ARCHS:
-                    yield rn.Spec("tier1", "order", "spectrogram", noise, None, seed, _trained(arch), pair=pair)
+                    yield rn.Spec("controls", "order", "spectrogram", noise, None, seed, _trained(arch), pair=pair)
 
 
 def _design_arms() -> Iterator[Arm]:
@@ -100,13 +100,13 @@ def _design_arms() -> Iterator[Arm]:
                                   restoring=restoring, ceiling=ceiling)
 
 
-def tier2() -> Iterator[rn.Spec]:
+def design() -> Iterator[rn.Spec]:
     """The design factorial, read at the primary size with and without rotation rates."""
     for noise in DESIGN_NOISES:
         for gain in GAINS:
             for seed in SEEDS:
                 for arm in _design_arms():
-                    yield rn.Spec("tier2", "recognition", "spectrogram", noise, gain, seed, arm,
+                    yield rn.Spec("design", "recognition", "spectrogram", noise, gain, seed, arm,
                                   bits="primary", reads=("windowed", "windowed+rate"))
 
 
@@ -115,19 +115,19 @@ def _diagonal() -> list[Arm]:
     return arms + [Arm("network", geometry="helix", frequencies=f) for f in ("random", "tonotopic")]
 
 
-def tier3() -> Iterator[rn.Spec]:
+def quadrature() -> Iterator[rn.Spec]:
     """The quadrature pathway: a diagonal of the design rather than the full factorial."""
     for noise in DESIGN_NOISES:
         for seed in SEEDS:
-            yield rn.Spec("tier3", "recognition", "quadrature", noise, None, seed, BASELINE, bits="primary")
+            yield rn.Spec("quadrature", "recognition", "quadrature", noise, None, seed, BASELINE, bits="primary")
             for gain in GAINS:
                 for arm in _diagonal():
-                    yield rn.Spec("tier3", "recognition", "quadrature", noise, gain, seed, arm, bits="primary")
+                    yield rn.Spec("quadrature", "recognition", "quadrature", noise, gain, seed, arm, bits="primary")
 
 
 def sweep() -> Iterator[rn.Spec]:
-    """Every coupling function at the reference configuration, beyond Tier 2's restoring strengths,
-    coupling ceilings and gains. Paired with Tier 2's reference cells: same clips, seeds and reads."""
+    """Every coupling function at the reference configuration, beyond the design experiment's
+    restoring strengths, coupling ceilings and gains. Paired with its reference cells: same clips, seeds and reads."""
     common = dict(bits="primary", reads=("windowed", "windowed+rate"))
     for noise in DESIGN_NOISES:
         for seed in SEEDS:
@@ -146,8 +146,8 @@ def sweep() -> Iterator[rn.Spec]:
 
 def cochlea() -> Iterator[rn.Spec]:
     """The coil and the cochlea (harness.models.geometries.coil), for every phase coupling function and
-    kind of natural frequencies, at the reference restoring strength and ceiling. Paired with Tier 2's
-    torus and helix cells: same clips, seeds and reads."""
+    kind of natural frequencies, at the reference restoring strength and ceiling. Paired with the design
+    experiment's torus and helix cells: same clips, seeds and reads."""
     common = dict(bits="primary", reads=("windowed", "windowed+rate"))
     for noise in DESIGN_NOISES:
         for gain in GAINS:
@@ -161,11 +161,11 @@ def cochlea() -> Iterator[rn.Spec]:
 
 
 def projection() -> Iterator[rn.Spec]:
-    """Tier 1's reservoir runs again at the primary size, read under the fixed and the seeded projection.
+    """The controls experiment's reservoir runs again at the primary size, read under the fixed and the
+    seeded projection.
 
-    Added on 2026-09-24 (DESIGN.md decision log): the fixed
-    projection is one draw for every seed, so the spread over seeds leaves out
-    the projection's own variability. The fixed cells here must equal Tier 1's.
+    The fixed projection is one draw for every seed, so the spread over seeds leaves out the
+    projection's own variability. The fixed cells here must equal the controls experiment's.
     """
     for noise in NOISES:
         for seed in SEEDS:
@@ -182,20 +182,20 @@ def projection() -> Iterator[rn.Spec]:
                                       native_sizes=(), reads=("pooled",), projection="both")
 
 
-def becker() -> Iterator[rn.Spec]:
+def becker_folds() -> Iterator[rn.Spec]:
     """Protocol B: Becker et al.'s folds, clean audio, for comparison with published results."""
     for fold in range(len(pr.BECKER_FOLDS)):
         common = dict(protocol="B", fold=fold, sizes=(BECKER_TRAIN,), native_sizes=())
-        yield rn.Spec("becker", "recognition", "spectrogram", None, None, 0, BASELINE, **common)
+        yield rn.Spec("becker-folds", "recognition", "spectrogram", None, None, 0, BASELINE, **common)
         for gain in GAINS:
             for arm in UNTRAINED:
-                yield rn.Spec("becker", "recognition", "spectrogram", None, gain, 0, arm, **common)
+                yield rn.Spec("becker-folds", "recognition", "spectrogram", None, gain, 0, arm, **common)
         for arch in TRAINED_ARCHS:
-            yield rn.Spec("becker", "recognition", "spectrogram", None, None, 0, _trained(arch), **common)
+            yield rn.Spec("becker-folds", "recognition", "spectrogram", None, None, 0, _trained(arch), **common)
 
 
-TIERS = {"gate": gate, "tier1": tier1, "tier2": tier2, "becker": becker, "tier3": tier3,
-         "projection": projection, "sweep": sweep, "cochlea": cochlea}
+EXPERIMENTS = {"leak-check": leak_check, "controls": controls, "design": design, "quadrature": quadrature,
+               "becker-folds": becker_folds, "projection": projection, "sweep": sweep, "cochlea": cochlea}
 
 
 # ---------------------------------------------------------------------------
@@ -214,7 +214,7 @@ def cost(spec: rn.Spec) -> float:
 # ---------------------------------------------------------------------------
 
 def prepare(workers: int) -> None:
-    """Build every row cache the tiers read, in parallel, skipping those that exist."""
+    """Build every row cache the experiments read, in parallel, skipping those that exist."""
     bank = pr.load_bank()
     n = len(bank["labels"])
     jobs = [("rows", p, noise, None, None) for p in pr.CACHED_PATHWAYS for noise in NOISES
@@ -246,10 +246,10 @@ def _work(spec: rn.Spec, device: str, threads: int) -> tuple[str, float]:
 
 
 def planned(names: list[str]) -> list[rn.Spec]:
-    specs = [s for name in names for s in TIERS[name]()]
+    specs = [s for name in names for s in EXPERIMENTS[name]()]
     ids = [(s.group(), s.run_id()) for s in specs]
     if len(set(ids)) != len(ids):
-        raise RuntimeError("two specs share a record address; the tier definitions are wrong")
+        raise RuntimeError("two specs share a record address; the experiment definitions are wrong")
     return specs
 
 
@@ -258,7 +258,7 @@ def pending(specs: list[rn.Spec]) -> list[rn.Spec]:
     return sorted((s for s in specs if s.run_id() not in done[s.group()]), key=cost, reverse=True)
 
 
-def sweep(names: list[str], workers: int, threads: int, device: str, dry_run: bool,
+def drive(names: list[str], workers: int, threads: int, device: str, dry_run: bool,
           task: str | None = None) -> None:
     specs = [s for s in planned(names) if task is None or s.task == task]
     todo = pending(specs)
@@ -295,23 +295,23 @@ def sweep(names: list[str], workers: int, threads: int, device: str, dry_run: bo
 
 
 def main(argv: list[str] | None = None) -> None:
-    ap = argparse.ArgumentParser(description="the study's tiers")
+    ap = argparse.ArgumentParser(description="the study's experiments")
     sub = ap.add_subparsers(dest="command", required=True)
-    p = sub.add_parser("prepare", help="build the row caches the tiers read")
+    p = sub.add_parser("prepare", help="build the row caches the experiments read")
     p.add_argument("--workers", type=int, default=4)
-    r = sub.add_parser("run", help="run one or more tiers")
-    r.add_argument("tiers", nargs="+", choices=sorted(TIERS))
+    r = sub.add_parser("run", help="run one or more experiments")
+    r.add_argument("experiments", nargs="+", choices=sorted(EXPERIMENTS))
     r.add_argument("--workers", type=int, default=3)
     r.add_argument("--threads", type=int, default=2)
     r.add_argument("--device", default="cpu")
     r.add_argument("--dry-run", action="store_true")
     r.add_argument("--task", choices=("recognition", "order"),
-                   help="run only this task's specs, so two machines can split a tier without sharing a file")
+                   help="run only this task's specs, so two machines can split an experiment without sharing a file")
     a = ap.parse_args(argv)
     if a.command == "prepare":
         prepare(a.workers)
     else:
-        sweep(a.tiers, a.workers, a.threads, a.device, a.dry_run, a.task)
+        drive(a.experiments, a.workers, a.threads, a.device, a.dry_run, a.task)
 
 
 if __name__ == "__main__":
