@@ -21,12 +21,13 @@ Paper 03 runs that ablation for paper 02's networks. The lattice runs from 8 × 
 
 | path | contents |
 |---|---|
-| [`size-and-channel-layout-DRAFT.md`](size-and-channel-layout-DRAFT.md) | the manuscript: title, a draft abstract, section headings, the experimental design, and the glossary |
+| [`size-and-channel-layout-DRAFT.md`](size-and-channel-layout-DRAFT.md) | the manuscript, in paper 02's outline: a draft abstract, the introduction, background and methods, results left to write, and appendices (glossary, experimental design, channels and layers, coupling functions) |
 | [`REGISTRATION.md`](REGISTRATION.md) | the draft pre-registration: questions, data, arms and size matching, the read, the tiers, what is taken from paper 02, reporting |
 | [`TIERS.md`](TIERS.md) | what each tier runs, its run count, its cost in CPU-hours and memory, and the stages to run it in |
 | [`references/`](references/) | the bibliography and citation map |
 | [`metadata/`](metadata/) | the front matter |
 | [`src/`](src/) | the harness, derived from paper 02's, with its tests: [start here](src/README.md) |
+| `resources/figures/` | the figures, drawn by `src/scripts/draw_*_figure.py` (three adapted from paper 02's) |
 | `results/confirmatory/` | the record, as the tiers run |
 
 ## Checking the design

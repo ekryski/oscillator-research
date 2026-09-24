@@ -41,7 +41,7 @@ src/
 │   ├── stimuli/         the bank's clip loader, the three front ends, the injection path
 │   ├── measurement/     the summary statistics and the fixed projection (paper 02's, unchanged)
 │   └── utils/           constants and paths
-├── scripts/pod_run.sh   everything on a GPU pod
+├── scripts/            pod_run.sh (everything on a GPU pod) and the figure scripts
 ├── tests/               one file per concern
 └── data/                the bank and row caches (gitignored)
 ```
