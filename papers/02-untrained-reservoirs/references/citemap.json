@@ -31,6 +31,9 @@
  "daido1992": [
   "Daido 1992"
  ],
+ "davis1952": [
+  "Davis et al. 1952"
+ ],
  "doelling2023": [
   "Doelling et al. 2023"
  ],
@@ -48,6 +51,9 @@
  ],
  "jaeger2007": [
   "Jaeger et al. 2007"
+ ],
+ "johnson1984": [
+  "Johnson & Lindenstrauss 1984"
  ],
  "keller2023": [
   "Keller & Welling 2023"
@@ -91,6 +97,12 @@
  ],
  "sakaguchi1986": [
   "Sakaguchi & Kuramoto 1986"
+ ],
+ "sakaguchi1987": [
+  "Sakaguchi et al. 1987"
+ ],
+ "shepard1982": [
+  "Shepard 1982"
  ],
  "strogatz2000": [
   "Strogatz 2000"
