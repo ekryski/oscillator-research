@@ -1,6 +1,6 @@
 """Draw the appendix schematic: layers stack in depth, channels sit side by side.
 
-    uv run python scripts/draw_channels_figure.py
+    cd src && uv run python ../scripts/draw_channels_figure.py      # from the paper's folder
 
 A drawing, not a result: nothing here reads the record. Writes
 resources/figures/a1-channels-and-layers.{pdf,png}.

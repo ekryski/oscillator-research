@@ -1,6 +1,6 @@
 """Draw the appendix schematic of the eight lattice geometries.
 
-    uv run python scripts/draw_geometries_figure.py
+    cd src && uv run python ../scripts/draw_geometries_figure.py      # from the paper's folder
 
 A drawing, not a result: nothing here reads the record. Every channel stores
 its 256 oscillators the same way, as a 16 x 16 grid whose row r is driven by

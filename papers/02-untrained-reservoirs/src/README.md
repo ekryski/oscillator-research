@@ -4,8 +4,9 @@ Everything needed to rerun the study and check its numbers. Its record is [`../r
 
 ## Quick start
 
+From this folder:
+
 ```bash
-cd papers/02-untrained-reservoirs/src
 uv sync
 uv run pytest                                   # contract tests, no data needed
 uv run python -m harness.experiment.summary     # every accuracy and difference, from the committed record
@@ -37,7 +38,7 @@ uv run python -m harness.experiment.summary                 # every accuracy and
 uv run python -m harness.experiment.figures                 # the paper's figures and their tables
 ```
 
-`plan run <experiment> --dry-run` prints what would run. Every run is recorded under an identity derived from its specification, so a sweep stopped at any point restarts where it left off, and `--task order` or `--task recognition` lets two machines split an experiment without sharing a file. `--device mps` or `--device cuda` simulates the untrained arms on a GPU; the readout is closed-form and runs on the CPU, and the trained baselines always train on the CPU. A GPU rounds differently from the CPU, so its cells can differ from the CPU's by a test clip or two. `scripts/pod_run.sh <AudioMNIST checkout> [experiment ...]` runs any experiment on a RunPod pod from the pushed branch. Set `OSC_RESULTS_DIR` to write a reproduction into a fresh folder instead of the committed record.
+`plan run <experiment> --dry-run` prints what would run. Every run is recorded under an identity derived from its specification, so a sweep stopped at any point restarts where it left off, and `--task order` or `--task recognition` lets two machines split an experiment without sharing a file. `--device mps` or `--device cuda` simulates the untrained arms on a GPU; the readout is closed-form and runs on the CPU, and the trained baselines always train on the CPU. A GPU rounds differently from the CPU, so its cells can differ from the CPU's by a test clip or two. Set `OSC_RESULTS_DIR` to write a reproduction into a fresh folder instead of the committed record.
 
 | module | what it owns |
 |---|---|
@@ -56,7 +57,6 @@ uv run python -m harness.experiment.figures                 # the paper's figure
 | `models/leaky_bank.py` | the leaky-integrator bank |
 | `models/baselines/` | the five trained baselines |
 | `measurement/` | the read's statistics, the projection, the ridge, the phase instruments |
-| `scripts/draw_*_figure.py` | the appendix schematics (channels, geometries, coupling functions) |
 
 ### Terms in the code
 
@@ -94,12 +94,7 @@ Subclass `Geometry` (or `PlanarGeometry`), implement the four methods, and regis
 
 ## Figures
 
-`experiment/figures.py` draws the result figures from the record. The appendix schematics are drawn by `scripts/draw_*_figure.py`, and read nothing from the record. Authored SVGs render to PDF and PNG from the repository root:
-
-```bash
-uv run --with svglib --with reportlab python3 publishing/lib/svg_render.py \
-    papers/02-untrained-reservoirs/resources/figures
-```
+`experiment/figures.py` draws the result figures from the record, into `../resources/figures/`.
 
 ## Determinism
 

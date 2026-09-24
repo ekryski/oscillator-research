@@ -24,8 +24,11 @@ The experiments are listed in the paper's Appendix B, and [`results/README.md`](
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
 | [`src/`](src/) | the experiment harness, its driver, and the tests: [start here](src/README.md) |
+| [`scripts/`](scripts/) | the paper's own scripts, outside the experiment code: the appendix schematics, the audio examples, and a runner for a GPU pod ([below](#scripts)) |
 | [`results/`](results/) | the record, one file per experiment and task, with `summary.md` and a [README](results/README.md) saying what each file holds; every number in the paper comes from it |
 | `resources/figures/` | the paper's figures |
+| [`resources/audio/examples/`](resources/audio/examples/) | clips as the arms hear them: a test digit clean, at 0 dB and at −5 dB, and order-task sequences in both orders |
+| `…-supplement.zip` | the anonymized supplementary material for review: `src/`, `results/` and the audio examples; built, not committed ([below](#rebuilding-the-paper)) |
 
 ## Checking the numbers
 
@@ -37,14 +40,26 @@ cd src && uv sync && uv run python -m harness.experiment.summary
 
 Every accuracy and paired difference prints with its spread over seeds and a 95% interval over test clips. [`src/README.md`](src/README.md) covers getting the data, the code layout, the tests, and re-running the experiments from scratch.
 
+## Scripts
+
+The paper's own scripts sit in [`scripts/`](scripts/), outside the experiment code, and run with its environment, from `src/`:
+
+```bash
+cd src
+uv run python ../scripts/draw_channels_figure.py      # the appendix schematics; also draw_geometries_ and draw_coupling_figure.py
+uv run python ../scripts/export_audio_examples.py     # the audio examples, from the bank
+```
+
+The schematics read nothing from the record. Authored SVGs render to PDF and PNG from the repository root with `uv run --with svglib --with reportlab python3 publishing/lib/svg_render.py papers/02-untrained-reservoirs/resources/figures`. [`scripts/pod_run.sh`](scripts/pod_run.sh) runs any experiment on a RunPod GPU pod, or any Linux machine with a GPU, from the pushed branch: `bash scripts/pod_run.sh <AudioMNIST checkout> [experiment ...]`.
+
 ## Rebuilding the paper
 
 ```bash
-bash publishing/publish.sh 02
+bash publishing/publish.sh 02            # every format
+bash publishing/publish.sh 02 --iclr     # the ICLR submission build, and the supplement zip
 ```
 
-Regenerates every format above, in place, from the Markdown. See
-[publishing/README.md](../../publishing/README.md).
+Regenerates every format above, in place, from the Markdown, and writes the anonymized supplement zip beside them (the `supplement` format, `python3 publishing/supplement.py 02` on its own). See [publishing/README.md](../../publishing/README.md).
 
 <!-- citation:start -->
 ## Citing this paper

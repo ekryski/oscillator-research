@@ -2,8 +2,8 @@
 # Run the study's experiments on a RunPod pod, or any Linux machine with a GPU.
 # One command, top to bottom:
 #
-#   bash pod_run.sh /workspace/AudioMNIST                        # every experiment
-#   bash pod_run.sh /workspace/AudioMNIST design becker-folds    # just these
+#   bash scripts/pod_run.sh /workspace/AudioMNIST                        # every experiment
+#   bash scripts/pod_run.sh /workspace/AudioMNIST design becker-folds    # just these
 #
 # The argument is the AudioMNIST checkout on the attached volume: the folder
 # that holds data/01 ... data/60. The script clones or updates the repository,

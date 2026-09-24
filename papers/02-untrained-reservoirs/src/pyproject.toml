@@ -29,12 +29,6 @@ target-version = "py312"
 select = ["E", "F", "W", "I", "UP", "B"]
 ignore = ["E501"]
 
-# scripts/ bootstrap sys.path before importing the harness so they stay
-# runnable without an install.
-[tool.ruff.lint.per-file-ignores]
-"scripts/*.py" = ["E402"]
-"scripts/readout_ladder.py" = ["E402", "B007"]  # `ep` is the early-stop epoch count
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

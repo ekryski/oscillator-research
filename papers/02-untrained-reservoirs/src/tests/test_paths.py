@@ -48,7 +48,6 @@ def test_environment_overrides_redirect_both_roots(monkeypatch, tmp_path):
 def test_the_committed_results_tree_is_where_the_paper_points():
     assert paths.RESULTS_DIR.is_dir(), "the committed per-run results should be present"
     assert (paths.RESULTS_DIR / "controls-recognition.json").is_file()
-    assert (paths.PAPER_ROOT / "resources" / "figures").is_dir()
 
 
 def test_data_directory_is_not_committed():

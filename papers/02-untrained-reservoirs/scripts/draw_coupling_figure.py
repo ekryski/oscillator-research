@@ -1,6 +1,6 @@
 """Draw the appendix schematic of the six coupling functions.
 
-    uv run python scripts/draw_coupling_figure.py
+    cd src && uv run python ../scripts/draw_coupling_figure.py      # from the paper's folder
 
 A drawing, not a result: nothing here reads the record. Each coupling function
 is drawn twice for one neighbour j with a positive kernel weight: on the left,

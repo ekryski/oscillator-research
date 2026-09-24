@@ -41,8 +41,9 @@ papers/
 └── 02-untrained-reservoirs/
     ├── … the same, plus
     ├── src/         harness, experiment driver, tests
+    ├── scripts/     the paper's own scripts: schematics, audio examples, a GPU-pod runner
     ├── results/     the record: 6,275 runs, one file per experiment, and what each holds
-    └── resources/   figures and audio
+    └── resources/   figures, and audio examples to listen to
 
 publishing/          the scripts that turn a manuscript into those formats
 ```
