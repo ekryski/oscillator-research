@@ -1,10 +1,9 @@
 """Sphere — a latitude/longitude lattice with open poles.
 
-APPROXIMATION, STATED PLAINLY: this is a lat-long lattice, not true S^2
-spectral coupling. Latitude rows use the cylinder's open-axis mechanism,
-longitude is periodic, and each SOURCE oscillator's contribution is scaled by
-cos(latitude) — the sphere's area element, so near-pole rings, which oversample
-the surface, are weighted down.
+Note: this is a lat-long lattice, not true S^2 spectral coupling. Latitude 
+rows use the cylinder's open-axis mechanism, longitude is periodic, and each 
+SOURCE oscillator's contribution is scaled by cos(latitude) — the sphere's area 
+element, so near-pole rings, which oversample the surface, are weighted down.
 
 `torch-harmonics` (genuine spherical harmonics) was evaluated and rejected: it
 is not device-portable for this project's smoke ladder, and its real-SHT basis

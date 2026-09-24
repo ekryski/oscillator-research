@@ -8,7 +8,7 @@ dimension could plausibly matter.
 
 Fully periodic axes are symmetric, so which axis carries frequency is
 arbitrary-but-fixed: z (= the storage row) is the tonotopic axis, band b drives
-z-slice b. An open-z variant is a different venue, not this one.
+z-slice b. An open-z variant is a different geometry, not this one.
 """
 
 from __future__ import annotations

@@ -1,20 +1,20 @@
-"""The geometry interface every lattice venue implements.
+"""The geometry interface every different oscillator model lattice geometry implements.
 
-A geometry is a *seating chart*, not a different model: all nine reuse the same
-[C, G, G] kernel and state storage, so the parameter budget is matched by
-construction and a geometry comparison is a genuine single-factor experiment.
-What changes is only how the lattice's edges are glued, which shows up in
-exactly four places:
+A geometry is a "seating chart" of how the oscillator's lattice is arranged, 
+not a different model: all nine geometries reuse the same [C, G, G] kernel 
+and state storage, so the parameter budget is matched by construction and a 
+geometry comparison is a genuine single-factor experiment. What changes is 
+only how the lattice's edges are glued, which shows up in exactly four places:
 
     embed_kernel     open axes need the kernel at signed offsets in a padded
                      buffer, so a linear convolution replaces a circular one
-    kernel_spectrum  the transform the venue's topology calls for (1-D ring,
+    kernel_spectrum  the transform the model's topology calls for (1-D ring,
                      2-D grid, 3-D prism, or a bipartite pair of 3-D blocks)
     apply            how a field is prepared, convolved, and cropped back
     circulant_index  the same operator as a dense gather, for the matmul path
 
 Both paths are the same operator; `tests/test_geometries.py` asserts they agree
-to floating-point rounding on every venue, which is what lets the runner pick
+to floating-point rounding on every model geometry, which is what lets the runner pick
 whichever is faster on the device it finds.
 
 Geometries are plain objects rather than modules: they hold no parameters, and
@@ -33,14 +33,14 @@ TWO_PI = 2 * math.pi
 
 
 class Geometry(ABC):
-    """One lattice venue. Stateless apart from device-local constant caches."""
+    """One lattice geometry. Stateless apart from device-local constant caches."""
 
-    #: the `--boundary` value that selects this venue
+    #: the `--boundary` value that selects this geometry
     name: str
     #: the declared frequency axis, for the tonotopy record in the docs
     frequency_axis: str = "grid rows"
     #: kernel-support masking is defined on the 2-D row/column offset grid;
-    #: venues that index offsets differently opt out rather than mask wrongly
+    #: geometries that index offsets differently opt out rather than mask wrongly
     supports_kernel_support: bool = True
 
     def __init__(self, grid: int):
@@ -49,9 +49,9 @@ class Geometry(ABC):
         self.validate()
 
     def validate(self) -> None:  # noqa: B027 - optional hook, not a contract
-        """Raise if this venue cannot be built at `self.grid`.
+        """Raise if this geometry cannot be built at `self.grid`.
 
-        Most venues work at any grid; the ones with derived cell dimensions
+        Most geometries work at any grid size; the ones with derived cell dimensions
         (cube, diamond) override this to reject grids their layout cannot
         express, so the failure lands at construction rather than mid-sweep.
         """
@@ -60,14 +60,14 @@ class Geometry(ABC):
     def clamp_factor(self) -> float:
         """Divisor applied to the spectral clamp so the cap stays a TRUE
         operator-norm bound. 1.0 wherever max |K-hat| already bounds the
-        operator; the twisted venues override it because their mirrored
+        operator; the twisted geometries override it because their mirrored
         double-cover extension carries norm sqrt(2)."""
         return 1.0
 
     # --- kernel side ------------------------------------------------------
 
     def embed_kernel(self, kernel: torch.Tensor) -> torch.Tensor:
-        """[C, G, G] -> the buffer the transform runs on. Identity for venues
+        """[C, G, G] -> the buffer the transform runs on. Identity for geometries
         whose axes are all periodic."""
         return kernel
 
@@ -139,7 +139,7 @@ class Geometry(ABC):
 
 
 class PlanarGeometry(Geometry):
-    """Shared machinery for the venues that stay a 2-D row/column grid:
+    """Shared machinery for the geometries that stay a 2-D row/column grid:
     torus, cylinder, sheet, sphere, and the twisted pair. They differ only in
     which axes are padded open and how the field is prepared before the
     transform, so the kernel side is identical for all of them."""
