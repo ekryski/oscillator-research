@@ -33,15 +33,15 @@ from harness.confirm.arms import Arm
 CHANCE = 0.1
 #: one reused run per record file and arm kind: (tier maker's spec fields)
 REUSE_SAMPLE = (
-    rn.Spec("size", "recognition", "envelope", 0.0, 2.0, 0, Arm("field")),
-    rn.Spec("size", "recognition", "envelope", 5.0, 1.0, 1, Arm("field", severed=True)),
+    rn.Spec("size", "recognition", "envelope", 0.0, 1.0, 0, Arm("field")),
+    rn.Spec("size", "recognition", "envelope", 0.0, 1.0, 1, Arm("field", severed=True)),
     rn.Spec("size", "recognition", "envelope", 0.0, 1.0, 2, Arm("bank", channels=8)),
-    rn.Spec("size", "recognition", "envelope", 5.0, None, 0, Arm("floor"), reads=("windowed", "windowed@wholeclip")),
+    rn.Spec("size", "recognition", "envelope", 0.0, None, 0, Arm("floor"), reads=("windowed", "windowed@wholeclip")),
     rn.Spec("trained", "recognition", "envelope", 0.0, None, 1, Arm("ann", arch="gru"), reads=("windowed",)),
-    rn.Spec("design", "recognition", "envelope", 0.0, 2.0, 0, Arm("field", physics="winfree", boundary="cube")),
-    rn.Spec("design", "recognition", "envelope", 5.0, 1.0, 2, Arm("field", physics="sl", boundary="torus")),
+    rn.Spec("design", "recognition", "envelope", 0.0, 1.0, 0, Arm("field", physics="winfree", boundary="cube")),
+    rn.Spec("design", "recognition", "envelope", 0.0, 1.0, 2, Arm("field", physics="sl", boundary="torus")),
     rn.Spec("design", "recognition", "envelope", 0.0, 1.0, 1, Arm("field", physics="sakaguchi", boundary="sheet")),
-    rn.Spec("quadrature", "recognition", "quadrature", 0.0, 2.0, 0, Arm("field")),
+    rn.Spec("quadrature", "recognition", "quadrature", 0.0, 1.0, 0, Arm("field")),
     rn.Spec("carrier", "recognition", "carrier", 0.0, 32.0, 0, Arm("field")),
 )
 

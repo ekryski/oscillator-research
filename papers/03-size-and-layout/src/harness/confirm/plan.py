@@ -39,8 +39,10 @@ CHANNELS = (1, 2, 4, 8, 16)
 #: band mapping: 0 drives each of a lattice's G rows with its own mel band; 16 maps paper 02's 16
 #: bands onto the rows. At 16 x 16 the two are the same, and it runs once.
 MAPPINGS = (0, 16)
-NOISES = (0.0, 5.0)                     # no result is read from clean audio, where the task saturates
-GAINS = (1.0, 2.0)
+#: slimmed by the author on 2026-09-24 to one noise level and one input gain: 0 dB (paper 02 ran clean,
+#: 0 and +5 dB; clean audio saturates the task) and gain 1 (paper 02 ran 1 and 2)
+NOISES = (0.0,)
+GAINS = (1.0,)
 SEEDS = (0, 1, 2)
 ANN_ARCHS = ("gru", "tcn", "cnn", "transformer", "s4d")
 PHASE_FAMILIES = ("kuramoto", "sakaguchi", "harmonic2", "winfree")

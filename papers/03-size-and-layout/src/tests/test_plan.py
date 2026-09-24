@@ -6,11 +6,11 @@ from harness.confirm import plan
 from harness.confirm import run as rn
 from harness.confirm.arms import Arm
 
-#: the run counts TIERS.md and REGISTRATION.md state
-COUNTS = {"gate": 30, "size": 1674, "trained": 1350, "design": 13500, "quadrature": 1134, "carrier": 240,
-          "design-quadrature": 12420, "design-carrier": 1875}
-REUSED = {"gate": 0, "size": 54, "trained": 30, "design": 300, "quadrature": 18, "carrier": 9,
-          "design-quadrature": 48, "design-carrier": 18}
+#: the run counts TIERS.md and REGISTRATION.md state (slimmed to 0 dB and input gain 1 on 2026-09-24)
+COUNTS = {"gate": 30, "size": 432, "trained": 675, "design": 3375, "quadrature": 297, "carrier": 240,
+          "design-quadrature": 3105, "design-carrier": 1875}
+REUSED = {"gate": 0, "size": 15, "trained": 15, "design": 75, "quadrature": 6, "carrier": 9,
+          "design-quadrature": 12, "design-carrier": 18}
 
 
 @pytest.mark.parametrize("tier", plan.TIERS)
@@ -18,6 +18,14 @@ def test_each_tier_has_the_documented_runs_and_no_two_share_an_address(tier):
     specs = plan.planned([tier])
     assert len(specs) == COUNTS[tier]
     assert sum(map(plan.reused, specs)) == REUSED[tier]
+
+
+def test_every_tier_runs_at_0_db_and_input_gain_1_except_the_carrier_at_its_calibrated_gain():
+    specs = plan.planned(list(plan.TIERS))
+    assert {s.noise_db for s in specs} == {0.0}
+    assert {s.gain for s in specs if s.tier != "gate"} == {None, 1.0, plan.CARRIER_GAIN}
+    assert {s.gain for s in specs if s.gain == plan.CARRIER_GAIN} and all(
+        s.drive == "carrier" for s in specs if s.gain == plan.CARRIER_GAIN)
 
 
 def test_the_lattices_are_nine_and_16x16_runs_once():
