@@ -47,7 +47,8 @@ PATHWAYS = {"envelope": "band-energy", "quadrature": "quadrature", "carrier": "c
 REFERENCE = {"physics": "kuramoto", "boundary": "torus", "omega": "random", "damping": 0.3, "clamp": 1.0}
 CHANNELS, GRID = 4, 16
 
-_SUFFIX = re.compile(r"^(?P<base>.*?)(?:-c(?P<channels>\d+))?(?:-(?P<grid>\d+)x\d+)?(?:-(?P<bands>\d+)bands)?$")
+_SUFFIX = re.compile(r"^(?P<base>.*?)(?:-c(?P<channels>\d+))?(?:-(?P<grid>\d+)x\d+)?(?:-(?P<bands>\d+)bands)?"
+                     r"(?:-w(?P<window>\d+))?$")
 _OSCILLATORS = re.compile(r"^(field|severed)-(?P<physics>sl-fixedamp|[a-z0-9]+)-(?P<boundary>[a-z]+)-"
                           r"(?P<omega>[a-z]+)-lam(?P<damping>[0-9.]+)-clamp(?P<clamp>[0-9.]+)$")
 
@@ -77,6 +78,8 @@ def split(label: str) -> tuple[str, int, int, int | None]:
     """(base label, channels, grid, mapped bands or None) of a record label."""
     m = _SUFFIX.match(label)
     base = m["base"]
+    if m["window"]:
+        base = base.removesuffix(f"-w{m['window']}")
     if base.startswith("bank") and m["channels"]:
         return "bank", int(m["channels"]), int(m["grid"] or GRID), int(m["bands"]) if m["bands"] else None
     return (base, int(m["channels"] or CHANNELS), int(m["grid"] or GRID),
@@ -92,7 +95,23 @@ def _size(channels: int, grid: int, bands: int | None, always: bool = False) -> 
     return parts
 
 
+def window_of(label: str) -> int | None:
+    """The analysis window a label names, in samples, or None for paper 02's 512."""
+    m = _SUFFIX.match(label)
+    return int(m["window"]) if m["window"] else None
+
+
 def arm(label: str, tier: str | None = None) -> str:
+    """The paper's name for a record label, with its analysis window where it is not paper 02's."""
+    name = _arm(label)
+    window = window_of(label)
+    if window is None:
+        return name
+    text = f"{window:,}-sample window"
+    return name[:-1] + f", {text})" if name.endswith(")") else f"{name} ({text})"
+
+
+def _arm(label: str) -> str:
     """The paper's name for a record label.
 
     Paper 02's reference network at paper 02's size is named plainly; any

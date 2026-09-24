@@ -173,15 +173,16 @@ class Clips:
 
 def _recognition_block(bank: dict, spec: Spec, idx: torch.Tensor):
     """Rows maker for bank clips `idx`, from the pathway's cache when there is one."""
-    bands, grid = spec.arm.n_bands, spec.arm.grid
-    cache = (pr.load_rows(pr.rows_path(spec.drive, spec.noise_db, bands), len(bank["labels"]))
+    bands, grid, window = spec.arm.n_bands, spec.arm.grid, spec.arm.n_window
+    cache = (pr.load_rows(pr.rows_path(spec.drive, spec.noise_db, bands, window), len(bank["labels"]))
              if spec.drive in pr.CACHED_DRIVES else None)
     if cache is not None:
         return lambda a, b: (pr.to_rows(cache["rows"][idx[a:b]], grid), cache["tvalid"][idx[a:b]])
 
     def make(a, b):
         waves, lens, _ = pr.recognition_clips(bank, idx[a:b], spec.noise_db)
-        return pr.to_rows(pr.front_end(waves, spec.drive, bands), grid), pr.valid_frames(lens, spec.drive)
+        rows = pr.front_end(waves, spec.drive, bands, window)
+        return pr.to_rows(rows, grid), pr.valid_frames(lens, spec.drive)
     return make
 
 

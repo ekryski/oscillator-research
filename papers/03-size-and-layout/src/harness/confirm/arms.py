@@ -49,6 +49,8 @@ from harness.models.leaky_bank import LeakyBank
 from harness.utils.constants import ALPHA, BETA, WARMUP_FRAMES
 
 GRID = 16
+#: paper 02's analysis window, in samples
+WINDOW = 512
 N_CLASSES = 10
 #: how much of each clip a read covers
 SPANS = ("fixed", "clip")
@@ -84,15 +86,21 @@ class Arm:
     arch: str = ""
     grid: int = GRID                # the lattice is grid x grid per channel
     bands: int = 0                  # mel bands in the front end; 0 is one per lattice row
+    window: int = 0                 # the front end's analysis window in samples; 0 is paper 02's 512
 
     @property
     def n_bands(self) -> int:
         return self.bands or self.grid
 
+    @property
+    def n_window(self) -> int:
+        return self.window or WINDOW
+
     def _lattice(self) -> str:
-        """'' at the registered 16 x 16 with a band per row, so every registered label is unchanged."""
+        """'' at paper 02's 16 x 16 with a band per row and its window, so paper 02's labels are unchanged."""
         out = "" if self.grid == GRID else f"-{self.grid}x{self.grid}"
-        return out + ("" if self.n_bands == self.grid else f"-{self.n_bands}bands")
+        out += "" if self.n_bands == self.grid else f"-{self.n_bands}bands"
+        return out + ("" if self.n_window == WINDOW else f"-w{self.n_window}")
 
     def label(self) -> str:
         if self.kind == "floor":

@@ -23,7 +23,7 @@ import torch
 
 from harness.stimuli.digits import DIGIT_MAX_SAMPLES, DIGIT_SR, DIGIT_TRIM_FRAC, clip_path, load_clip
 from harness.stimuli.filterbank import bandpass_rows
-from harness.stimuli.frontend import hop_num_frames, hop_rows, hop_rows_quad
+from harness.stimuli.frontend import HOP_N_FFT, hop_num_frames, hop_rows, hop_rows_quad
 from harness.utils.paths import AUDIOMNIST_DIR, CACHE_DIR
 
 BANK_PATH = CACHE_DIR / "digits_v2.pt"
@@ -132,13 +132,16 @@ def add_noise(waves: torch.Tensor, lens: torch.Tensor, clip_ids: torch.Tensor,
     return waves + noise * (rms * 10.0 ** (noise_db / 20.0))[:, None]
 
 
-def front_end(waves: torch.Tensor, drive: str, grid: int = 16) -> torch.Tensor:
-    """The fixed, parameter-free front end of each input pathway, at `grid` bands."""
+def front_end(waves: torch.Tensor, drive: str, grid: int = 16, window: int = HOP_N_FFT) -> torch.Tensor:
+    """The fixed, parameter-free front end of each input pathway, at `grid` bands and an analysis
+    window of `window` samples (the band-energy and quadrature pathways; the carrier has no window)."""
     if drive == "envelope":
-        return hop_rows(waves, grid)
+        return hop_rows(waves, grid, window=window)
     if drive == "quadrature":
-        return hop_rows_quad(waves, grid)
+        return hop_rows_quad(waves, grid, window=window)
     if drive == "carrier":
+        if window != HOP_N_FFT:
+            raise ValueError("the carrier pathway has no analysis window")
         return bandpass_rows(waves, grid)
     raise ValueError(f"unknown drive '{drive}'")
 
@@ -200,9 +203,9 @@ def level_name(noise_db: float | None) -> str:
     return "clean" if noise_db is None else f"{noise_db:g}db"
 
 
-def rows_path(drive: str, noise_db: float | None, bands: int = 16) -> Path:
-    """The cache for a drive, level and band count; 16 bands keep paper 02's file name."""
-    size = "" if bands == 16 else f"-{bands}bands"
+def rows_path(drive: str, noise_db: float | None, bands: int = 16, window: int = HOP_N_FFT) -> Path:
+    """The cache for a drive, level, band count and window; 16 bands keep paper 02's file name."""
+    size = ("" if bands == 16 else f"-{bands}bands") + ("" if window == HOP_N_FFT else f"-w{window}")
     return ROWS_DIR / f"{drive}{size}-{level_name(noise_db)}.pt"
 
 
@@ -213,20 +216,20 @@ def _save(out: Path, rows: torch.Tensor, tvalid: torch.Tensor, **meta) -> None:
     tmp.replace(out)                    # atomic: a reader never sees half a cache
 
 
-def build_rows(bank: dict, drive: str, noise_db: float | None, bands: int = 16) -> Path:
+def build_rows(bank: dict, drive: str, noise_db: float | None, bands: int = 16, window: int = HOP_N_FFT) -> Path:
     """Front-end rows for every clip in the bank, in canonical order."""
     n = len(bank["labels"])
     rows = tvalid = None
     for a in range(0, n, CACHE_BATCH):
         idx = torch.arange(a, min(a + CACHE_BATCH, n))
         waves, lens, _ = recognition_clips(bank, idx, noise_db)
-        r = front_end(waves, drive, bands)
+        r = front_end(waves, drive, bands, window)
         if rows is None:
             rows = torch.empty((n, *r.shape[1:]))
             tvalid = torch.empty(n, dtype=torch.long)
         rows[idx], tvalid[idx] = r, valid_frames(lens, drive)
-    out = rows_path(drive, noise_db, bands)
-    _save(out, rows, tvalid, n_clips=n, drive=drive, noise_db=noise_db, bands=bands)
+    out = rows_path(drive, noise_db, bands, window)
+    _save(out, rows, tvalid, n_clips=n, drive=drive, noise_db=noise_db, bands=bands, window=window)
     return out
 
 

@@ -181,3 +181,40 @@ def test_the_log_spaced_bands_span_four_octaves_at_every_count_and_are_paper_02s
     for bands in (8, 32, 64, 128):
         e = band_edges(bands)
         assert e[0] == F_LO and torch.isclose(e[-1], torch.tensor(16 * F_LO, dtype=torch.float64))
+
+
+@pytest.mark.parametrize("bands,window", [(64, 1024), (128, 2048)])
+def test_a_longer_window_keeps_paper_02s_frame_count_and_centres(bands, window):
+    """A real window of `window` samples, centred where paper 02's 512-sample frame is centred."""
+    assert fft_points(bands, window) == window
+    waves = torch.zeros(1, 16000)
+    at = 20 * HOP_LENGTH + 256                       # the centre of paper 02's frame 20
+    waves[0, at] = 1.0
+    energy = hop_rows(waves, bands, window=window).sum(-1)[0]
+    assert energy.shape[0] == hop_num_frames(16000) == 61
+    lit = set(torch.nonzero(energy > 0).flatten().tolist())
+    reach = window // 2 // HOP_LENGTH                # frames whose window, centred at 256 k + 256, covers `at`
+    assert lit == set(range(20 - reach + 1, 20 + reach)), (lit, reach)
+    fb = _mel(bands, 16000, window=window).mel.mel_scale.fb
+    assert int((fb > 0).sum(0).min()) >= 3
+
+
+def test_the_window_changes_nothing_at_its_default_and_is_refused_where_it_cannot_be():
+    torch.manual_seed(0)
+    waves = torch.randn(2, 16000) * 0.2
+    for bands in (16, 64):
+        assert torch.equal(hop_rows(waves, bands), hop_rows(waves, bands, window=512))
+    with pytest.raises(ValueError, match="multiple of"):
+        hop_rows(waves, 64, window=1000)
+    q = hop_rows_quad(waves, 64, window=1024)
+    assert q.shape == (2, 61, 64, 2) and torch.isfinite(q).all()
+    assert torch.allclose(q.pow(2).sum(-1).sqrt(), hop_rows(waves, 64, window=1024), atol=1e-4)
+
+
+def test_a_window_is_part_of_an_arms_label_and_a_caches_name():
+    from harness.confirm import protocol as pr
+    from harness.confirm.arms import Arm
+    assert Arm("field", grid=64, window=1024).label().endswith("-64x64-w1024")
+    assert Arm("field", grid=64, window=512).label() == Arm("field", grid=64).label()
+    assert pr.rows_path("envelope", 0.0, 128, 2048).name == "envelope-128bands-w2048-0db.pt"
+    assert pr.rows_path("envelope", 0.0, 16).name == "envelope-0db.pt"
