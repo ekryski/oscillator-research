@@ -271,6 +271,200 @@ def gain_figure(stem: str = "c6-gain-sweep") -> None:
     print(f"wrote {path}.{{pdf,png}}")
 
 
+#: the arms figures' rows, top to bottom: (arm label, read suffix, row label, colour, group); the read is the
+#: task's primary one, plus the suffix. Gain applies to the reservoirs only: gain 1 filled, gain 2 open.
+SL_REFERENCE = "coupled-stuart-landau-torus-random-restoring0.3-ceiling1"
+ARM_ROWS = (
+    ("baseline", "@wholeclip", "Spectrogram-only baseline, whole clip", "#6E6E6E", "input"),
+    ("baseline", "", "Spectrogram-only baseline, from frame 16", "#ABABAB", "input"),
+    (sm.COUPLED, "", "Coupled oscillator network, Kuramoto", "#534AB7", "network"),
+    (SL_REFERENCE, "", "Coupled oscillator network, Stuart–Landau", "#8E2C8A", "network"),
+    (sm.UNCOUPLED, "", "Uncoupled oscillator network, Kuramoto", "#A9A4DB", "network"),
+    ("bank-state", "", "Leaky-integrator bank, state-matched", "#D85A30", "bank"),
+    ("bank-width", "", "Leaky-integrator bank, width-matched", "#EFA98F", "bank"),
+    *((f"trained-{a}", "", name, "#0F6E56", "trained") for a, name in
+      (("gru", "GRU"), ("tcn", "TCN"), ("cnn", "CNN"), ("transformer", "Transformer"), ("s4d", "S4D"))),
+)
+
+
+def arms_accuracy(task: str) -> dict[tuple, dict]:
+    """(arm, read, gain, noise) -> accuracy at the primary width and training size; the order task's averaged
+    over its five digit pairs within each seed. Recognition adds the Stuart–Landau network's reference cells."""
+    if task == "recognition":
+        rows = sm.accuracies(rec.load(["controls-recognition", "design-recognition-stuart-landau"]))
+    else:
+        rows = sm.accuracies(rec.load(["controls-order"]))
+    rows = [r for r in rows if r["width"] == rec.PRIMARY_WIDTH and r["n_train"] == rec.PRIMARY_SIZE
+            and r.get("projection", "fixed") == "fixed"]
+    if task == "order":
+        rows = sm._pooled(rows)
+    return {(r["arm"], r["read"], r["gain"], r["noise"]): r for r in rows}
+
+
+def arms_figure(task: str, stem: str) -> None:
+    """Every arm's accuracy per noise level: the mean over three seeds and one standard deviation, reservoirs
+    at gain 1 (filled) and 2 (open)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+
+    acc = arms_accuracy(task)
+    read = sm.READ[task]
+    rows = [r for r in ARM_ROWS if any(k[0] == r[0] and k[1] == read + r[1] for k in acc)]
+    fig, axes = plt.subplots(1, len(NOISES), figsize=(10.0, 0.3 * len(rows) + 1.3), sharey=True)
+    for ax, (noise, title) in zip(axes, NOISES, strict=True):
+        lo, hi = 100.0, 0.0
+        for y, (arm, suffix, _, colour, _) in enumerate(rows):
+            for gain, dy, face in ((None, 0.0, colour), (1.0, -0.14, colour), (2.0, 0.14, "white")):
+                r = acc.get((arm, read + suffix, gain, noise))
+                if r is None:
+                    continue
+                ax.errorbar(r["mean"], y + dy, xerr=r["sd"] or 0, fmt="o", color=colour, markerfacecolor=face,
+                            markersize=5, capsize=2, elinewidth=1, markeredgewidth=1.1)
+                lo, hi = min(lo, r["mean"] - (r["sd"] or 0)), max(hi, r["mean"] + (r["sd"] or 0))
+        for y in range(1, len(rows)):
+            if rows[y][4] != rows[y - 1][4]:
+                ax.axhline(y - 0.5, color="#DDDDDD", linewidth=0.8)
+        base = acc.get(("baseline", read + "@wholeclip", None, noise))
+        if base is not None and task == "recognition":
+            ax.axvline(base["mean"], color="#6E6E6E", linewidth=0.8, linestyle="--", alpha=0.6)
+        if task == "order":
+            ax.axvline(50, color="#333333", linewidth=0.8, linestyle=":")
+            ax.set_xlim(45, 101)
+        else:
+            pad = 0.06 * (hi - lo)
+            ax.set_xlim(lo - pad, hi + pad)
+        ax.set_title(title, fontsize=10)
+        ax.set_xlabel("test accuracy (%)")
+        ax.spines[["top", "right"]].set_visible(False)
+    axes[0].set_yticks(range(len(rows)), [r[2] for r in rows], fontsize=8.5)
+    axes[0].invert_yaxis()
+    handles = [Line2D([], [], marker="o", linestyle="none", color="#555555", label="reservoir at gain 1, or an arm without gain"),
+               Line2D([], [], marker="o", linestyle="none", color="#555555", markerfacecolor="white", label="reservoir at gain 2")]
+    if task == "order":
+        handles.append(Line2D([], [], color="#333333", linewidth=0.8, linestyle=":", label="chance"))
+    else:
+        handles.append(Line2D([], [], color="#6E6E6E", linewidth=0.8, linestyle="--", alpha=0.6,
+                              label="spectrogram-only baseline, whole clip"))
+    fig.legend(handles=handles, frameon=False, fontsize=8, loc="lower center", ncol=3, bbox_to_anchor=(0.55, -0.02))
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    _save(fig, stem)
+
+
+def _save(fig, stem: str) -> None:
+    import matplotlib.pyplot as plt
+    path = FIGURES_DIR / stem
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+    for suffix, kwargs in SAVE:
+        fig.savefig(path.with_suffix(suffix), bbox_inches="tight", **kwargs)
+    plt.close(fig)
+    print(f"wrote {path}.{{pdf,png}}")
+
+
+#: the design figure's panels: (title, factor prefix, reference, [(level as the summary names it, row label)])
+DESIGN_PANELS = (
+    ("coupling function, minus Kuramoto", "coupling function", "Kuramoto",
+     (("Kuramoto–Sakaguchi", "Kuramoto–Sakaguchi"), ("second harmonic", "second harmonic"),
+      ("Stuart–Landau", "Stuart–Landau"), ("Stuart–Landau, fixed amplitude", "Stuart–Landau, fixed amplitude"),
+      ("Winfree", "Winfree"))),
+    ("natural frequencies, minus random", "natural frequencies", "random",
+     (("identical", "identical"), ("tonotopic", "tonotopic"))),
+    ("lattice geometry, minus torus", "lattice geometry", "torus",
+     (("cube", "cube"), ("cylinder", "cylinder"), ("helix", "helix"), ("sheet", "sheet"), ("sphere", "sphere"),
+      ("coil", "coil"), ("cochlea", "cochlea"), ("cochlea-matched", "cochlea, matched coupling"))),
+)
+
+
+def design_panels_figure(stem: str = "c4-design-differences") -> None:
+    """Each coupling function, natural frequencies and lattice geometry minus its reference, per condition: the
+    mean over seeds and the paired 95% interval. The coil and cochlea come from the cochlea experiment."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    cells = rec.load(None)
+    rows = [r for r in sm.design(cells) + sm.cochlea(cells)
+            if r["width"] == rec.PRIMARY_WIDTH and r["n_train"] == rec.PRIMARY_SIZE and "ci95" in r]
+    by = {(r["comparison"], r["noise"], r["gain"]): r for r in rows}
+    fig = plt.figure(figsize=(10.0, 4.3))
+    grid = fig.add_gridspec(2, 2, height_ratios=(5, 2.6), hspace=0.55, wspace=0.55)
+    axes = (fig.add_subplot(grid[0, 0]), fig.add_subplot(grid[1, 0]), fig.add_subplot(grid[:, 1]))
+    for ax, (title, factor, ref, levels) in zip(axes, DESIGN_PANELS, strict=True):
+        for i, (noise, gain, legend, colour, marker) in enumerate(CONDITIONS):
+            offset = (i - 1.5) * 0.17
+            for j, (level, _) in enumerate(levels):
+                r = by.get((f"{factor}: {level} minus {ref}", noise, gain))
+                if r is None:
+                    continue
+                ax.plot(r["ci95"], [j + offset] * 2, color=colour, linewidth=1.2)
+                ax.plot(r["mean"], j + offset, marker=marker, color=colour, markersize=4, linestyle="none",
+                        label=legend if (j == 0 and ax is axes[0]) else None)
+        ax.axvline(0, color="#333333", linewidth=0.8, linestyle=":")
+        if factor == "lattice geometry":
+            ax.axhline(4.5, color="#DDDDDD", linewidth=0.8)
+        ax.set_yticks(range(len(levels)), [label for _, label in levels], fontsize=8)
+        ax.set_ylim(len(levels) - 0.5, -0.5)
+        ax.set_title(title, fontsize=9.5)
+        ax.tick_params(axis="x", labelsize=8)
+        ax.spines[["top", "right"]].set_visible(False)
+    for ax in (axes[1], axes[2]):
+        ax.set_xlabel("difference in test accuracy (points)", fontsize=8.5)
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, frameon=False, fontsize=8, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.06))
+    _save(fig, stem)
+
+
+def sweep_figure(stem: str = "c6-restoring-ceiling-gain") -> None:
+    """Accuracy against restoring strength, coupling ceiling and input gain for every coupling function at the
+    reference configuration, at 0 and -5 dB: the design experiment's levels with the sweep's, gain 1 in the
+    first two columns."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    from harness.experiment import plan
+    from harness.experiment.arms import Arm
+    groups = [f"{e}-recognition-{c}" for e in ("design", "sweep") for c, _ in GAIN_COUPLINGS]
+    acc = {(r["arm"], r["noise"], r["gain"]): r for r in sm.accuracies(rec.load(groups))
+           if r["width"] == rec.PRIMARY_WIDTH and r["n_train"] == rec.PRIMARY_SIZE and r["read"] == "windowed"}
+    columns = (
+        ("restoring strength", (0.1, 0.3) + plan.SWEEP_RESTORINGS, lambda c, v: (Arm("network", coupling=c, restoring=v), 1.0), False),
+        ("coupling ceiling", (0.5, 1.0) + plan.SWEEP_CEILINGS, lambda c, v: (Arm("network", coupling=c, ceiling=v), 1.0), False),
+        ("input gain", (1.0, 2.0) + plan.SWEEP_GAINS, lambda c, v: (Arm("network", coupling=c), v), True),
+    )
+    fig, axes = plt.subplots(2, 3, figsize=(10.0, 5.0), sharey="row", gridspec_kw={"width_ratios": (1, 1, 1.6)})
+    for row, noise in enumerate((0.0, 5.0)):
+        for col, (name, values, arm_of, log) in enumerate(columns):
+            ax = axes[row, col]
+            ax.axvline(values[1] if col < 2 else values[0], color="#BBBBBB", linewidth=0.8, linestyle=":")
+            for coupling, colour in GAIN_COUPLINGS:
+                pts = []
+                for v in values:
+                    arm, gain = arm_of(coupling, v)
+                    r = acc.get((arm.label(), noise, gain))
+                    if r is not None:
+                        pts.append((v, r))
+                if pts:
+                    ax.errorbar([v for v, _ in pts], [r["mean"] for _, r in pts], yerr=[r["sd"] for _, r in pts],
+                                color=colour, marker="o", markersize=3, capsize=1.5, linewidth=1.1,
+                                label=terms.level(coupling))
+            if log:
+                ax.set_xscale("log")
+                ax.minorticks_off()
+            ax.set_xticks(values, [f"{v:g}" for v in values], fontsize=7.5)
+            ax.tick_params(axis="y", labelsize=8)
+            ax.set_title(f"{name}, {sm.snr(noise)}", fontsize=9.5)
+            ax.spines[["top", "right"]].set_visible(False)
+            if row == 1:
+                ax.set_xlabel(name, fontsize=8.5)
+        axes[row, 0].set_ylabel("test accuracy (%)", fontsize=8.5)
+    handles, labels = axes[0, 2].get_legend_handles_labels()
+    fig.legend(handles, labels, frameon=False, fontsize=8, loc="lower center", ncol=6, bbox_to_anchor=(0.5, -0.03))
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
+    _save(fig, stem)
+
+
 def one_way_f(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     """One-way ANOVA F per feature: [n, ...] features, [n] labels -> [...] between-class over within-class
     variance, each over its degrees of freedom. A feature constant within every class reads 0."""
@@ -395,10 +589,12 @@ def main(argv: list[str] | None = None) -> None:
         print(f"\ngain {gains[0]:g}\n" + recognition_table(acc, gains))
     print("\ntrained baselines\n" + trained_table(acc))
     size_figure()
-    gain_figure()
+    arms_figure("recognition", "c3-recognition-arms")
+    arms_figure("order", "c8-order-arms")
+    design_panels_figure()
+    sweep_figure()
     rows = design_differences()
     if rows:
-        design_figure(rows)
         print("\ndesign\n" + design_table(rows))
 
 
