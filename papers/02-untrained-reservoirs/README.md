@@ -4,15 +4,17 @@ Geometry, coupling, and drive effects in oscillator networks.
 
 **[Read the paper →](spoken-digit-recognition-without-training-DRAFT.md)**
 
-An untrained coupled oscillator network (1,024 oscillators, 2,048 parameters) is read by a linear readout on spoken-digit recognition (AudioMNIST, speaker-disjoint) and compared with a spectrogram-only baseline, an uncoupled oscillator network, two leaky-integrator banks and five trained baselines of about the same size, every arm read the same way. The study varies the coupling function, lattice geometry, natural frequencies, restoring strength, coupling ceiling, input pathway, input gain, noise level, readout width and training-set size, on recognition and on a temporal-order task.
+An untrained coupled oscillator network (1,024 oscillators, 2,048 parameters) is read by a linear readout on spoken-digit recognition (AudioMNIST, speakers held out, with added noise at signal-to-noise ratios of 0 and −5 dB) and compared with a spectrogram-only baseline, an uncoupled oscillator network, two leaky-integrator banks and five trained baselines of about the same size, every arm read the same way. Eight experiments, 6,275 runs in all, vary the coupling function, lattice geometry (a coil and a cochlea among them), natural frequencies, restoring strength, coupling ceiling, input pathway, input gain, readout width and training-set size, on recognition and on a temporal-order task.
 
-What each tier runs is in [TIERS.md](TIERS.md), the design, with its decision log, in [DESIGN.md](DESIGN.md), and the results, as the tiers finish, in [`results/summary.md`](results/summary.md). The paper is being rewritten from those results, so this page states none yet; the terms are defined in the paper's glossary (Appendix A).
+Most of the accuracy comes from the input representation and the readout. At a matched width the Kuramoto network reads within a percentage point of the readout fitted to its input alone in noise, and near chance when the audio drives it in quadrature; it carries the order of events by integrating its input, as a non-oscillating leaky-integrator bank does. A free oscillator amplitude (Stuart–Landau) is the one design choice that moved accuracy by more than about a point, lifting the network above its input and into the range of the trained baselines, which otherwise read higher; the lattice geometry, the cochlea included, moved it by less than a point.
+
+The experiments are listed in the paper's Appendix B, and [`results/README.md`](results/README.md) says which file of the record holds each; the terms are defined in the paper's glossary (Appendix A).
 
 ## What is here
 
 | path | contents |
 |---|---|
-| [`spoken-digit-recognition-without-training-DRAFT.md`](spoken-digit-recognition-without-training-DRAFT.md) | the manuscript — the editing surface |
+| [`spoken-digit-recognition-without-training-DRAFT.md`](spoken-digit-recognition-without-training-DRAFT.md) | the manuscript, and the file to edit |
 | [`…-DRAFT.pdf`](spoken-digit-recognition-without-training-DRAFT.pdf) · [`.html`](spoken-digit-recognition-without-training-DRAFT.html) · [`.epub`](spoken-digit-recognition-without-training-DRAFT.epub) · [`.docx`](spoken-digit-recognition-without-training-DRAFT.docx) | the same paper to read or download |
 | [`…-DRAFT-tmlr.pdf`](spoken-digit-recognition-without-training-DRAFT-tmlr.pdf) | the TMLR submission build, anonymous, in the journal's own style |
 | [`…-DRAFT-iclr.pdf`](spoken-digit-recognition-without-training-DRAFT-iclr.pdf) | the ICLR 2027 submission build, anonymous and line-numbered, in ICLR's own style |
@@ -21,9 +23,8 @@ What each tier runs is in [TIERS.md](TIERS.md), the design, with its decision lo
 | [`…-DRAFT-arxiv.tar.gz`](spoken-digit-recognition-without-training-DRAFT-arxiv.tar.gz) | LaTeX source, style files, bibliography and figures, ready to upload |
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
-| [`src/`](src/) | the experiment harness, the sweep driver, and the tests — [start here](src/README.md) |
-| [`TIERS.md`](TIERS.md) · [`DESIGN.md`](DESIGN.md) | what each tier of the study tests, and its design |
-| [`results/`](results/) | the record, one file per tier, task and input pathway, with `summary.md`; every number in the paper comes from it |
+| [`src/`](src/) | the experiment harness, its driver, and the tests: [start here](src/README.md) |
+| [`results/`](results/) | the record, one file per experiment and task, with `summary.md` and a [README](results/README.md) saying what each file holds; every number in the paper comes from it |
 | `resources/figures/` | the paper's figures |
 
 ## Checking the numbers
@@ -34,10 +35,7 @@ No corpus needed; the committed results are enough:
 cd src && uv sync && uv run python -m harness.experiment.summary
 ```
 
-Every accuracy and paired difference prints with its spread over seeds and a
-95% interval over test clips.
-[`src/README.md`](src/README.md) covers getting the data, the code layout, the
-tests, and re-running the experiments from scratch.
+Every accuracy and paired difference prints with its spread over seeds and a 95% interval over test clips. [`src/README.md`](src/README.md) covers getting the data, the code layout, the tests, and re-running the experiments from scratch.
 
 ## Rebuilding the paper
 
