@@ -12,13 +12,18 @@ needs comes from here, and all of it is computed by the harness's own code:
                          clips, and one entry per config: which readout, the
                          record's accuracies for that cell, and reference
                          logits the browser checks itself against
-    readouts/<id>.bin    one fitted readout per config (float32)
+    readouts/<id>.bin    one fitted readout per config: the first standardization's
+                         scales, its means folded into one shift per projected
+                         feature, the second standardization and the ridge
     projections/p<D>.bin the readout's fixed projection for native width D,
                          its first 192 columns (float16)
     nets/<id>.bin        a trained baseline's weights (float32)
     audio/*.wav          the demo clips, as the bank stores them
     audio/noise.bin      the unit white noise the harness adds to each demo
                          clip at 0 and +5 dB (int16, / 4096)
+    record.json          the recorded recognition cells of the gate and Tier 1,
+                         every read, size and width, per seed: the numbers the
+                         post quotes, copied, never recomputed
 
 A config is one arm on one pathway at one registered input gain and noise
 level, at seed 0. Its readout is the registered primary cell: the four-window
@@ -78,7 +83,7 @@ PATHWAY_NOISES = {"envelope": (None, 0.0, 5.0), "quadrature": (0.0, 5.0), "carri
 DESIGN_NOISES = pl.DESIGN_NOISES
 SHAPES = pl.SHAPES
 FAMILIES = pl.PHASE_FAMILIES + pl.AMPLITUDE_FAMILIES
-PARTS = ("base", "envelope", "design", "quadrature", "carrier")
+PARTS = ("base", "record", "envelope", "design", "quadrature", "carrier")
 
 
 # ---------------------------------------------------------------------------
@@ -182,6 +187,29 @@ def record_cell(cfg: Config, read: str) -> dict | None:
     mean = sum(vals) / len(vals)
     sd = math.sqrt(sum((v - mean) ** 2 for v in vals) / (len(vals) - 1)) if len(vals) > 1 else 0.0
     return {"seeds": {str(k): v for k, v in sorted(accs.items())}, "mean": mean, "sd": sd, "n": len(vals)}
+
+
+def export_record(out: Path) -> dict:
+    """The gate's and Tier 1's recognition cells, one row per cell with every seed's accuracy."""
+    tables = {}
+    for tier, group in (("gate", "gate-recognition-envelope"), ("tier1", "tier1-recognition-envelope")):
+        rows: dict[tuple, dict] = {}
+        for run in _group(group).values():
+            s = run["spec"]
+            if s["protocol"] != "A":
+                continue
+            arm = am.Arm(**s["arm"])
+            for cell in run["cells"]:
+                key = (arm.label(), s["noise_db"], s["gain"], s["span"], cell["read"], cell["n_train"],
+                       cell["width"])
+                rows.setdefault(key, {})[s["seed"]] = round(cell["acc"], 6)
+        tables[tier] = [[*k, [v[i] for i in sorted(v)]] for k, v in sorted(rows.items(), key=str)]
+    names = sorted({r[0] for t in tables.values() for r in t})
+    record = {"columns": ["arm", "noise_db", "gain", "span", "read", "n_train", "width", "accs"],
+              "names": {n: terms.arm(n) for n in names}, **tables,
+              "copied": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
+    (out / "record.json").write_text(json.dumps(record, separators=(",", ":")) + "\n")
+    return {"file": "record.json", "rows": {k: len(v) for k, v in tables.items()}}
 
 
 # ---------------------------------------------------------------------------
@@ -294,18 +322,31 @@ def fit_readout(blocks: list[torch.Tensor], labels: torch.Tensor, layout: ro.Lay
     return out
 
 
-def browser_logits(blocks: list[torch.Tensor], rows: slice, r: dict, p16: torch.Tensor | None) -> torch.Tensor:
-    """Logits computed the way the page computes them: float64, the projection from float16."""
-    inv1 = torch.where(r["sd1"] > ro.MIN_SD, 1.0 / r["sd1"], torch.zeros_like(r["sd1"])).float().double()
-    m1, m2, s2 = r["mean1"].float().double(), r["mean2"].float().double(), r["sd2"].float().double()
-    w = r["w"].float().double()
+def browser_readout(r: dict, p16: torch.Tensor | None) -> dict:
+    """The readout as the page stores it. The first standardization's mean is folded
+    into one shift per projected feature, computed against the same float16
+    projection the page multiplies by, so the page's
+    (x * inv1) @ P - shift equals ((x - mean1) * inv1) @ P up to float64 rounding."""
+    out = {"mean2": r["mean2"].float(), "sd2": r["sd2"].float(), "weight": r["w"][:-1].float(),
+           "bias": r["w"][-1].float()}
+    if r["projected"]:
+        inv1 = torch.where(r["sd1"] > ro.MIN_SD, 1.0 / r["sd1"], torch.zeros_like(r["sd1"])).float()
+        out["inv1"] = inv1
+        out["shift"] = (r["mean1"].float().double() * inv1.double()) @ p16.double()
+    return out
+
+
+def browser_logits(blocks: list[torch.Tensor], rows: slice, b: dict, p16: torch.Tensor | None) -> torch.Tensor:
+    """Logits computed the way the page computes them, from what the page stores, in float64."""
+    m2, s2 = b["mean2"].double(), b["sd2"].double()
+    w, bias = b["weight"].double(), b["bias"].double()
     out = []
     for a in range(rows.start or 0, rows.stop, 1024):
-        b = min(a + 1024, rows.stop)
-        x = torch.cat([blk[a:b] for blk in blocks], dim=1).double()
-        if r["projected"]:
-            x = ((x - m1) * inv1) @ p16.double()
-        out.append(((x - m2) / s2) @ w[:-1] + w[-1])
+        stop = min(a + 1024, rows.stop)
+        x = torch.cat([blk[a:stop] for blk in blocks], dim=1).double()
+        if "inv1" in b:
+            x = (x * b["inv1"].double()) @ p16.double() - b["shift"]
+        out.append(((x - m2) / s2) @ w + bias)
     return torch.cat(out)
 
 
@@ -509,10 +550,9 @@ def export_config(cfg: Config, out: Path, bank: dict, args, projections: dict) -
                 projections[native] = {"file": f"projections/p{native}.bin", "rows": native, "cols": WIDTH,
                                        "dtype": "float16", "p16": p16}
             p16 = projections[native]["p16"].float()
-        inv1 = torch.where(r["sd1"] > ro.MIN_SD, 1.0 / r["sd1"], torch.zeros_like(r["sd1"]))
-        parts = ([("mean1", r["mean1"], np.float32), ("inv1", inv1, np.float32)] if r["projected"] else [])
-        parts += [("mean2", r["mean2"], np.float32), ("sd2", r["sd2"], np.float32),
-                  ("weight", r["w"][:-1], np.float32), ("bias", r["w"][-1], np.float32)]
+        br = browser_readout(r, p16)
+        parts = [(name, br[name], np.float64 if name == "shift" else np.float32)
+                 for name in ("inv1", "shift", "mean2", "sd2", "weight", "bias") if name in br]
         cid = cfg.cid(read)
         layout = write_bin(out / "readouts" / f"{cid}.bin", parts)
 
@@ -527,7 +567,7 @@ def export_config(cfg: Config, out: Path, bank: dict, args, projections: dict) -
             "n_train": clips.layout.n_train, "n_test": clips.layout.n_test if with_test else 0,
         }
         if with_test:
-            logits = browser_logits(blocks[read], clips.layout.test, r, p16)
+            logits = browser_logits(blocks[read], clips.layout.test, br, p16)
             agree = (logits.argmax(1) == r["pred"]).sum().item()
             entry["export"] = {"acc": r["acc"], "ref_acc": r["ref_acc"], "browser_agree": agree,
                                "browser_acc": (logits.argmax(1) == clips.labels[clips.layout.test])
@@ -536,7 +576,7 @@ def export_config(cfg: Config, out: Path, bank: dict, args, projections: dict) -
             if rec and str(SEED) in rec["seeds"] and not args.smoke:
                 entry["export"]["matches_record"] = abs(rec["seeds"][str(SEED)] - r["acc"]) < 1e-12
         # reference outputs on the demo clips, at this config's noise level
-        dl = browser_logits(demo[read], slice(0, len(demo_rows)), r, p16)
+        dl = browser_logits(demo[read], slice(0, len(demo_rows)), br, p16)
         feat = torch.cat(demo[read], dim=1)
         entry["demo"] = {"logits": [[round(float(v), 6) for v in row] for row in dl],
                          "feature_sum": [float(v) for v in feat.double().sum(1)],
@@ -584,10 +624,14 @@ def main(argv: list[str] | None = None) -> None:
             arm = am.Arm(**e["arm"])
             cfg = Config(e["part"], e["drive"], arm, e["gain"], e["noise_db"], e["tier"] or "")
             e["record"] = record_cell(cfg, e["read"])
+        manifest["record"] = export_record(out)
         manifest["record_refreshed"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
         manifest_path.write_text(json.dumps(manifest, indent=1) + "\n")
         return
 
+    if "record" in parts:
+        manifest["record"] = export_record(out)
+        manifest_path.write_text(json.dumps(manifest, indent=1) + "\n")
     bank = pr.load_bank()
     if "base" in parts or "frontend" not in manifest:
         manifest.update(export_base(out, bank))
