@@ -157,4 +157,6 @@ Before freezing, the only runs on the confirmatory data were zero-drive field ce
 
 ## Change log
 
-Empty. Entries are added only after freezing, each with a timestamp and a reason.
+Entries are added only after freezing, each with a timestamp and a reason.
+
+**2026-09-23 20:04 MDT. Results are reported without the section 9 bars.** Every accuracy is reported as its mean over replicates (three seeds; the five folds under Protocol B) with the sample standard deviation and each replicate's value, and every comparison as the paired difference with its standard deviation over replicates and a 95% interval from resampling test clips (`harness.confirm.summary`). No threshold is applied and no verdict is drawn. Whether a difference is a real gain is left to further seeds and to a side-by-side comparison of the arms, to be published as supplementary material. Reason: the author judged a fixed bar such as +3 points arbitrary. **This decision was made after the Tier 1 results had been seen.** The bars are still scored, unchanged, by `harness.confirm.score`, and its Tier 1 verdicts remain in the record (`results/confirmatory/verdicts.json`, commit c68a1fb).
