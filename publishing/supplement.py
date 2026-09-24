@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
-"""Build a paper's anonymized supplementary material: its code, run record and figures, as one zip.
+"""Build a paper's anonymized supplementary material: its code, run record and audio examples, as one zip.
 
     python3 publishing/supplement.py 02     # papers/02-*/<manuscript stem>-supplement.zip
+    bash publishing/publish.sh 02 --iclr    # the same, as the build's `supplement` format
 
 A double-blind venue takes the code and data as a zip that must not identify the
-author. The zip holds the committed files (git ls-files, so no corpus, cache or
-lock file) of the paths a paper lists below, under one neutral top folder, with
-the paper's metadata/supplement-README.md as its README. Because the repository
-is public, anything that would lead back to it is taken out on the way:
+author. For a paper with a metadata/supplement-README.md, the zip holds the
+committed files (git ls-files, so no corpus, cache or lock file) of
 
-    the run record's git commits      dropped from every run's `env`
-    files that name the repository    left out (the pod script clones it)
-    passages that need the repository cut from the README that carries them
+    src/                        the experiment code and its tests
+    results/                    the run record, its summary and its README
+    resources/audio/examples/   as audio/: clips as the arms hear them
 
-and a last scan of every file refuses to write the zip if an identifying string
-survives. The zip is a build output, not committed.
+under one neutral top folder, with the supplement README as its README. The
+paper's own scripts (its schematics, its GPU-pod runner) live outside src/ and
+stay out. Because the repository is public, the run record's git commits are
+dropped on the way, and a last scan of every file refuses to write the zip if a
+string that names the author, the repository or the paper's folder survives. The
+zip is a build output, not committed.
 """
 from __future__ import annotations
 
@@ -29,29 +32,18 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 TOP = "supplement"
-
-#: per paper: what goes in, what stays out, and the passages cut from files that go in
-PAPERS = {
-    "02": {
-        "include": ("src", "results", "resources/figures"),
-        "exclude": ("src/scripts/pod_run.sh",),
-        "cut": {
-            "src/README.md": (
-                re.compile(r" `scripts/pod_run\.sh [^\n]*? from the pushed branch\."),
-                re.compile(r" Authored SVGs render to PDF and PNG from the repository root:\n\n```bash\n.*?```\n", re.S),
-            ),
-        },
-    },
-}
-
+README = Path("metadata/supplement-README.md")
+#: (path in the paper's folder, path in the zip)
+CONTENTS = (("src", "src"), ("results", "results"), ("resources/audio/examples", "audio"))
 #: strings that would identify the author or the repository; any hit stops the build
-IDENTIFYING = re.compile(r"(?i)kryski|\beric\b|/users/|oscillator-research|\bek/|github\.com/(?!soerenab/)|waffuru")
+IDENTIFYING = r"(?i)kryski|\beric\b|/users/|oscillator-research|\bek/|github\.com/(?!soerenab/)"
 
 
-def paper_dir(number: str) -> Path:
+def paper_dir(paper: str) -> Path:
+    number = paper.split("-")[0]
     matches = sorted(REPO.glob(f"papers/{number}-*"))
     if len(matches) != 1:
-        sys.exit(f"no single paper folder for {number}: {matches}")
+        sys.exit(f"no single paper folder for {paper}: {matches}")
     return matches[0]
 
 
@@ -89,27 +81,25 @@ def scannable(rel: str, raw: bytes) -> str:
     return raw.decode(errors="ignore")
 
 
-def build(number: str, out: Path | None = None) -> Path:
-    paper, conf = paper_dir(number), PAPERS[number]
-    files = [f for f in tracked(paper, conf["include"]) if f not in conf["exclude"]]
+def build(paper_arg: str, out: Path | None = None) -> Path:
+    paper = paper_dir(paper_arg)
+    if not (paper / README).exists():
+        sys.exit(f"{paper.name} has no {README}: nothing says what its supplement is")
     contents: dict[str, bytes] = {}
-    for rel in files:
-        raw = (paper / rel).read_bytes()
-        if rel.startswith("results/") and rel.endswith(".json"):
-            raw = scrub_record(raw)
-        for pattern in conf["cut"].get(rel, ()):
-            text, n = pattern.subn("", raw.decode())
-            if n != 1:
-                sys.exit(f"{rel}: expected one passage matching {pattern.pattern[:60]!r}, found {n}")
-            raw = text.encode()
-        contents[rel] = raw
-    contents["README.md"] = (paper / "metadata" / "supplement-README.md").read_bytes()
+    for source, target in CONTENTS:
+        for rel in tracked(paper, (source,)):
+            raw = (paper / rel).read_bytes()
+            if rel.startswith("results/") and rel.endswith(".json"):
+                raw = scrub_record(raw)
+            contents[target + rel[len(source):]] = raw
+    contents["README.md"] = (paper / README).read_bytes()
 
     kept = [rel for rel, raw in contents.items() if rel.startswith("results/") and b'"commit"' in raw]
     if kept:
         sys.exit(f"git commits would ship in: {', '.join(kept)}")
-    hits = [(rel, m.group(0)) for rel, raw in contents.items() if not rel.endswith((".png", ".pdf"))
-            for m in IDENTIFYING.finditer(scannable(rel, raw))]
+    identifying = re.compile(f"{IDENTIFYING}|{re.escape(paper.name)}")
+    hits = [(rel, m.group(0)) for rel, raw in contents.items() if not rel.endswith((".png", ".pdf", ".wav"))
+            for m in identifying.finditer(scannable(rel, raw))]
     if hits:
         shown = "\n".join(f"  {rel}: {hit!r}" for rel, hit in hits[:20])
         sys.exit(f"identifying strings would ship ({len(hits)}):\n{shown}")
@@ -129,7 +119,7 @@ def build(number: str, out: Path | None = None) -> Path:
 
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("paper", choices=sorted(PAPERS), help="the paper's number")
+    ap.add_argument("paper", help="the paper's number or folder name, e.g. 02")
     ap.add_argument("--out", type=Path, help="where to write the zip (default: beside the manuscript)")
     a = ap.parse_args(argv)
     build(a.paper, a.out)

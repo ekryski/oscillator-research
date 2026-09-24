@@ -290,3 +290,4 @@ papers/*/results/*.tmp
 
 # a paper's anonymized supplementary zip, built by publishing/supplement.py
 papers/*/*-supplement.zip
+papers/*/supplement/

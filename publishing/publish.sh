@@ -45,6 +45,8 @@
 #          `tmlr` is accepted as the old name for this format.
 #   pdf epub html docx   general reading formats, citeproc-rendered
 #   tex arxiv            LaTeX source, and a self-contained arXiv upload bundle
+#   supplement           the anonymized code-and-data zip for review (publishing/supplement.py),
+#                        for a paper with a metadata/supplement-README.md; others skip it
 #
 # Two companion tools, run when you want them rather than every build:
 #   publishing/lib/fetch_metadata.py  completes entries from the DOI registries
@@ -99,9 +101,9 @@ VENUE_BST="$(ls "$TEMPLATES/$VENUE"/*.bst 2>/dev/null | head -1)"
 BIBLIO_STYLE="$(basename "${VENUE_BST:-plainnat.bst}" .bst)"
 
 # the venue build is the submission; epub/html/docx are for reading and sharing;
-# arxiv is the posting bundle. The plain `pdf` and `tex` formats are dropped from
+# arxiv is the posting bundle; supplement is the review's code and data. The plain `pdf` and `tex` formats are dropped from
 # the default because they duplicate the venue ones — pass them explicitly.
-FORMATS="${FORMATS:-venue epub html docx arxiv}"
+FORMATS="${FORMATS:-venue epub html docx arxiv supplement}"
 # Citation style for the reading formats. The default is author-year because the
 # manuscripts are written that way ("Fries (2015) develops that observation"):
 # under a numeric style citeproc replaces the name with a bracketed number, the
@@ -136,6 +138,7 @@ if [ "$DRY_RUN" = 1 ]; then
             case "$fmt" in
                 venue|tmlr) echo "would write $dir$name-$SUFFIX.pdf and .tex" ;;
                 arxiv) echo "would write $dir$name-arxiv.tar.gz (preprint face, $HOUSE_VENUE style)" ;;
+                supplement) [ -f "${dir}metadata/supplement-README.md" ] && echo "would write $dir${name%-DRAFT}-supplement.zip (anonymized src, results, audio)" ;;
                 pdf|epub|html|docx|tex) echo "would write $dir$name.$fmt" ;;
                 *) echo "unknown format '$fmt'" ;;
             esac
@@ -480,6 +483,11 @@ for dir in papers/*/; do
                     --output="$bundle/$name.tex" "$tex_body" || continue
                 (cd "$WORK" && tar czf "$ROOT/$dir$name-arxiv.tar.gz" "arxiv-$slug")
                 echo "    $dir$name-arxiv.tar.gz (tex + style + references.bib + figures)"
+                ;;
+            supplement)
+                # the review's code and data, anonymized; a paper without a supplement README has none
+                [ -f "${dir}metadata/supplement-README.md" ] || continue
+                python3 publishing/supplement.py "$slug" | sed 's/^/    /' || missing=1
                 ;;
             *) echo "    unknown format '$fmt'" ;;
         esac
