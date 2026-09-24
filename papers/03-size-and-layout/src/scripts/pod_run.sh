@@ -20,9 +20,12 @@
 # land in papers/03-size-and-layout/results/confirmatory/; the rsync lines to
 # copy them back are printed at the end.
 #
-# Pod: one GPU with 24 GB or more, 32 or more vCPUs, 64 GB or more RAM. A
-# streamed 128 x 128 run holds about 11 GB; `plan run <tier> --dry-run` prints
-# each run's estimate.
+# Pod: one GPU, 32 or more vCPUs, 64 GB or more RAM. 24 GB of GPU memory is
+# enough off the carrier pathway; a carrier batch of 32 clips at 1,024 states
+# held about 35 GB on the M1 Max, so the carrier wants 48 GB or more (the
+# benchmark halves any batch that does not fit and says so). A streamed
+# 128 x 128 run holds up to about 23 GB of host memory; `plan run <tier>
+# --dry-run` prints each run's estimate.
 set -euo pipefail
 
 AUDIOMNIST=""
