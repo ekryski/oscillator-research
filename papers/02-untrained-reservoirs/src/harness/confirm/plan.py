@@ -131,6 +131,28 @@ def carrier() -> Iterator[rn.Spec]:
             yield rn.Spec("tier3", "recognition", "carrier", 0.0, CARRIER_GAIN, seed, arm, bits="primary")
 
 
+def projection() -> Iterator[rn.Spec]:
+    """Tier 1's reservoir runs again at the primary size, read under the fixed and the seeded projection.
+
+    Added after the freeze (REGISTRATION.md change log, 2026-09-24): the fixed
+    projection is one draw for every seed, so the spread over seeds leaves out
+    the projection's own variability. The fixed cells here must equal Tier 1's.
+    """
+    for noise in NOISES:
+        for seed in SEEDS:
+            for gain in GAINS:
+                for arm in FROZEN:
+                    yield rn.Spec("projection", "recognition", "envelope", noise, gain, seed, arm,
+                                  native_sizes=(), bits="primary", reads=("windowed",), projection="both")
+    for pair in pr.PAIRS:
+        for noise in NOISES:
+            for seed in SEEDS:
+                for gain in GAINS:
+                    for arm in FROZEN:
+                        yield rn.Spec("projection", "order", "envelope", noise, gain, seed, arm, pair=pair,
+                                      native_sizes=(), reads=("pooled",), projection="both")
+
+
 def becker() -> Iterator[rn.Spec]:
     """Protocol B: Becker et al.'s folds, clean audio, for comparison with published results."""
     for fold in range(len(pr.BECKER_FOLDS)):
@@ -143,7 +165,8 @@ def becker() -> Iterator[rn.Spec]:
             yield rn.Spec("becker", "recognition", "envelope", None, None, 0, _ann(arch), **common)
 
 
-TIERS = {"gate": gate, "tier1": tier1, "tier2": tier2, "becker": becker, "tier3": tier3, "carrier": carrier}
+TIERS = {"gate": gate, "tier1": tier1, "tier2": tier2, "becker": becker, "tier3": tier3, "carrier": carrier,
+         "projection": projection}
 
 
 # ---------------------------------------------------------------------------

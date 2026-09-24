@@ -195,7 +195,7 @@ def _block_stats(blocks: list[torch.Tensor], rows: slice) -> tuple[torch.Tensor,
 
 
 def _projected(blocks: list[torch.Tensor], rows: slice, mean: torch.Tensor, sd: torch.Tensor,
-               width: int) -> torch.Tensor:
+               width: int, seed: int | None = None) -> torch.Tensor:
     """Standardize, then project to `width`, a chunk of rows at a time.
 
     Rows are centred before they are scaled and projected, which keeps float32
@@ -204,7 +204,7 @@ def _projected(blocks: list[torch.Tensor], rows: slice, mean: torch.Tensor, sd: 
     nothing, and is given weight zero rather than being divided by nothing.
     Blocks take consecutive row ranges of the one projection matrix.
     """
-    p = projection_matrix(int(mean.numel()), width)
+    p = projection_matrix(int(mean.numel()), width, seed)
     m = mean.float()
     inv = torch.where(sd > MIN_SD, 1.0 / sd, torch.zeros_like(sd)).float()
     out = []
@@ -227,12 +227,14 @@ def _native(blocks: list[torch.Tensor], rows: slice) -> torch.Tensor:
 
 def read_cells(reads: dict[str, list[torch.Tensor]], labels: torch.Tensor, layout: Layout,
                sizes: tuple[int, ...], widths: tuple[int, ...], native_sizes: tuple[int, ...],
-               n_classes: int, keep_bits: Callable[[str, int, int], bool]) -> list[dict]:
+               n_classes: int, keep_bits: Callable[[str, int, int], bool],
+               projection_seed: int | None = None) -> list[dict]:
     """Every (read, size, width) cell a run asks for.
 
     `reads` maps a read's name to its feature blocks, rows laid out by `layout`.
     `keep_bits(read, width, size)` says which cells store per-clip correctness.
     A width at or above the native width is the native read, fitted once.
+    `projection_seed` reads through the seeded projection instead of the fixed one.
     """
     y_te = labels[layout.test]
     y_val = labels[layout.val] if layout.n_val else None
@@ -251,9 +253,9 @@ def read_cells(reads: dict[str, list[torch.Tensor]], labels: torch.Tensor, layou
             below = [e for _, e in wanted if e < native]
             if below:
                 top = max(below)
-                p_tr = _projected(blocks, rows_tr, mean, sd, top)
-                p_te = _projected(blocks, layout.test, mean, sd, top)
-                p_val = _projected(blocks, layout.val, mean, sd, top) if layout.n_val else None
+                p_tr = _projected(blocks, rows_tr, mean, sd, top, projection_seed)
+                p_te = _projected(blocks, layout.test, mean, sd, top, projection_seed)
+                p_val = _projected(blocks, layout.val, mean, sd, top, projection_seed) if layout.n_val else None
             done: dict[int, dict] = {}
             for requested, effective in wanted:
                 if effective not in done:

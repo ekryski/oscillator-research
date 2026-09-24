@@ -88,9 +88,9 @@ def accuracies(cells: list[Cell]) -> list[dict]:
     """One record per arm, read, condition, width and size, over its replicates."""
     groups = defaultdict(dict)
     for c in cells:
-        key = (c.tier, c.task, c.drive, c.label, c.read, c.noise, c.gain, c.pair, c.width, c.n_train)
+        key = (c.tier, c.task, c.drive, c.label, c.read, c.noise, c.gain, c.pair, c.width, c.n_train, c.projection)
         groups[key][replicate(c)] = c.acc
-    fields = ("tier", "task", "drive", "arm", "read", "noise", "gain", "pair", "width", "n_train")
+    fields = ("tier", "task", "drive", "arm", "read", "noise", "gain", "pair", "width", "n_train", "projection")
     return [{**dict(zip(fields, k, strict=True)), "name": terms.arm(k[3]), "pathway": terms.PATHWAYS[k[2]],
              "pair": list(k[7]) or None, **spread(v)} for k, v in sorted(groups.items(), key=str)]
 
@@ -99,29 +99,34 @@ def accuracies(cells: list[Cell]) -> list[dict]:
 # Comparisons
 # ---------------------------------------------------------------------------
 
-def versus(cells: list[Cell], name: str, a: tuple[str, str], b: tuple[str, str], *, tier: str, task: str,
-           drive: str = "envelope", widths: tuple | None = None) -> list[dict]:
-    """a minus b, each an (arm, read), matched on condition, replicate, width and size.
+def matched(a_cells: list[Cell], b_cells: list[Cell], widths: tuple | None = None) -> dict[tuple, list]:
+    """Pairs (a, b) matched on condition, replicate, width and size, grouped by condition, width and size.
 
-    `widths=(wa, wb)` compares a at width wa with b at width wb rather than width
-    for width. An arm without gain is matched at every gain of the other.
-    Order-task pairs are pooled into one comparison per condition.
+    `widths=(wa, wb)` takes a at width wa and b at width wb rather than width for
+    width. An arm without gain is matched at every gain of the other.
+    Order-task pairs are pooled into one group per condition.
     """
-    mine = [c for c in cells if c.tier == tier and c.task == task and c.drive == drive]
-    bs = [c for c in mine if (c.label, c.read) == b]
-    b_gain = any(c.gain is not None for c in bs)
-    idx = {(c.noise, c.gain, c.pair, c.width, c.n_train, replicate(c)): c for c in bs}
+    b_gain = any(c.gain is not None for c in b_cells)
+    idx = {(c.noise, c.gain, c.pair, c.width, c.n_train, replicate(c)): c for c in b_cells}
     groups = defaultdict(list)
-    for c in mine:
-        if (c.label, c.read) != a or (widths and c.width != widths[0]):
+    for c in a_cells:
+        if widths and c.width != widths[0]:
             continue
         other = idx.get((c.noise, c.gain if b_gain else None, c.pair, widths[1] if widths else c.width,
                          c.n_train, replicate(c)))
         if other is not None:
             groups[(c.noise, c.gain, c.width, c.n_train)].append((c, other))
+    return groups
+
+
+def versus(cells: list[Cell], name: str, a: tuple[str, str], b: tuple[str, str], *, tier: str, task: str,
+           drive: str = "envelope", widths: tuple | None = None, projection: str = "fixed") -> list[dict]:
+    """a minus b, each an (arm, read), in one tier and under one projection."""
+    mine = [c for c in cells if c.tier == tier and c.task == task and c.drive == drive and c.projection == projection]
+    groups = matched([c for c in mine if (c.label, c.read) == a], [c for c in mine if (c.label, c.read) == b], widths)
     return [{"comparison": name, "a": " ".join(a), "b": " ".join(b), "tier": tier, "task": task, "drive": drive,
              "noise": k[0], "gain": k[1], "width": k[2], "b_width": widths[1] if widths else k[2],
-             "n_train": k[3], **paired(v)} for k, v in sorted(groups.items(), key=str)]
+             "n_train": k[3], "projection": projection, **paired(v)} for k, v in sorted(groups.items(), key=str)]
 
 
 BASELINE_WHOLE = "the spectrogram-only baseline, whole clip"
@@ -201,11 +206,38 @@ def drives(cells: list[Cell]) -> list[dict]:
     return out
 
 
+def projections(cells: list[Cell]) -> list[dict]:
+    """The projection tier: each reservoir under the seeded projection minus the fixed one, and the coupled
+    network against its controls under the seeded projection (the spectrogram-only baseline and the trained
+    baselines are never projected, so their Tier 1 cells stand for both)."""
+    out = []
+    for task in ("recognition", "order"):
+        r = READ[task]
+        mine = [c for c in cells if c.tier == "projection" and c.task == task and c.read == r]
+        seeded = [c for c in mine if c.projection == "seeded"]
+        for label in sorted({c.label for c in mine}):
+            groups = matched([c for c in seeded if c.label == label],
+                             [c for c in mine if c.label == label and c.projection == "fixed"])
+            out += [{"comparison": f"{terms.arm(label)}: seeded minus fixed projection", "tier": "projection",
+                     "task": task, "noise": k[0], "gain": k[1], "width": k[2], "n_train": k[3],
+                     **paired(v)} for k, v in sorted(groups.items(), key=str)]
+        network = [c for c in seeded if c.label == FIELD]
+        controls = [(BASELINE_WHOLE, [c for c in cells if c.tier == "tier1" and c.task == task and c.label == "floor"
+                                      and c.read == r + "@wholeclip"])]
+        controls += [("the " + terms.arm(lab), [c for c in seeded if c.label == lab]) for lab in (SEVERED, "bank-c4", "bank-c8")]
+        for name, b_cells in controls:
+            groups = matched(network, b_cells)
+            out += [{"comparison": f"{NETWORK} minus {name}, seeded projection", "tier": "projection", "task": task,
+                     "noise": k[0], "gain": k[1], "width": k[2], "n_train": k[3], "projection": "seeded",
+                     **paired(v)} for k, v in sorted(groups.items(), key=str)]
+    return out
+
+
 def summary(cells: list[Cell] | None = None) -> dict:
     cells = sc.load() if cells is None else cells
     return {"accuracy": accuracies(cells),
             "comparisons": (tier1(cells) + _against_network(cells, "becker", "recognition") + design(cells)
-                            + drives(cells)),
+                            + drives(cells) + projections(cells)),
             "order_floor_at_chance": sc.order_gate(cells)}
 
 
@@ -270,6 +302,14 @@ def _rank(r: dict) -> tuple:
             r.get("gain") or 0)
 
 
+def _pooled_projection(records: list[dict]) -> list[dict]:
+    """Order-task accuracies averaged over pairs, kept apart by projection."""
+    out = []
+    for proj in ("fixed", "seeded"):
+        out += [{**r, "projection": proj} for r in _pooled([r for r in records if r["projection"] == proj])]
+    return out
+
+
 def _arm(r: dict) -> str:
     name = terms.arm(r["arm"])
     if r["arm"] == "floor":
@@ -296,6 +336,7 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
 
     def prim_acc(tier, task, n_train=n):
         return sorted((r for r in acc if r["tier"] == tier and r["task"] == task and r["width"] == w
+                       and r.get("projection", "fixed") == "fixed"
                        and r["n_train"] == n_train and r["read"].split("@")[0] == READ[task]), key=_rank)
 
     def prim_cmp(tier, n_train=n, prefix=""):
@@ -340,6 +381,24 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
               f"{len(gate)} pair and noise cells" + (f"; not at chance: {', '.join(off)}." if off else "."), ""]
     lines += ["## Tier 2, design: each level minus its reference, over matched pairs", ""]
     lines += _grid(prim_cmp("tier2"), lambda r: r["comparison"], _by_condition, _diff)
+    proj = [r for r in acc if r["tier"] == "projection" and r["width"] == w and r["n_train"] == n]
+    lines += ["", "## Tier 1's reservoirs under the fixed and the seeded projection", ""]
+    if proj:
+        base = {(r["task"], r["arm"], r["read"], r["noise"], r["gain"], str(r["pair"]), r["width"], r["n_train"]): r
+                for r in acc if r["tier"] == "tier1"}
+        drift = [abs(r["mean"] - base[k]["mean"]) for r in proj if r["projection"] == "fixed"
+                 and (k := (r["task"], r["arm"], r["read"], r["noise"], r["gain"], str(r["pair"]), r["width"],
+                            r["n_train"])) in base]
+        lines += [f"The fixed cells reproduce Tier 1's: largest difference {max(drift, default=0):.4f} points "
+                  f"over {len(drift)} cells.", ""]
+    for task in ("recognition", "order"):
+        rows = [r for r in proj if r["task"] == task]
+        rows = _pooled_projection(rows) if task == "order" else rows
+        lines += [f"### {task}", ""]
+        lines += _grid(sorted(rows, key=_rank), lambda r: f"{_arm(r)}, {r['projection']}", _by_noise, _acc) + [""]
+    lines += _grid([r for r in cmp if r["tier"] == "projection" and r["width"] == w and r["n_train"] == n],
+                   lambda r: f"{r['task']}: {r['comparison']}" + (f" (gain = {r['gain']:g})" if r["gain"] is not None else ""),
+                   _by_noise, _diff)
     lines += ["", "## Tier B, Becker et al.'s folds: accuracy", ""]
     lines += _grid(prim_acc("becker", "recognition", plan.BECKER_TRAIN), _arm, _by_noise, _acc)
     lines += ["", "## Tier B: differences", ""]

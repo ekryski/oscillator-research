@@ -197,3 +197,14 @@ def test_cached_order_sets_match_the_sets_built_on_the_fly(bank, tmp_path, monke
 def test_a_reads_filter_records_only_those_reads(bank):
     rec = rn.execute(spec(FIELD, reads=("windowed", "windowed+rate")), bank=bank)
     assert {c["read"] for c in rec["cells"]} == {"windowed", "windowed+rate"}
+
+
+def test_both_projections_keep_the_fixed_cells_exactly_and_add_only_projected_seeded_ones(bank):
+    fixed = rn.execute(spec(FIELD, reads=("windowed",)), bank=bank)
+    both = rn.execute(spec(FIELD, reads=("windowed",), projection="both"), bank=bank)
+    strip = lambda c: {k: v for k, v in c.items() if k != "projection"}  # noqa: E731
+    assert [strip(c) for c in both["cells"] if c["projection"] == "fixed"] == fixed["cells"]
+    seeded = [c for c in both["cells"] if c["projection"] == "seeded"]
+    native = both["native_widths"]["windowed"]
+    assert seeded and all(c["effective_width"] < native for c in seeded)
+    assert {(c["n_train"], c["width"]) for c in seeded} == {(n, w) for n in SIZES for w in (64, 256)}

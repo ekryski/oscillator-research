@@ -55,6 +55,7 @@ class Cell:
     bits: str | None
     n_test: int
     fold: int = -1
+    projection: str = "fixed"
 
 
 def load(groups: list[str] | None = None) -> list[Cell]:
@@ -72,7 +73,8 @@ def load(groups: list[str] | None = None) -> list[Cell]:
             for c in rec["cells"]:
                 out.append(Cell(s["tier"], s["task"], s["drive"], s["noise_db"], s["gain"], s["seed"],
                                 s["arm"], label, tuple(s["pair"]), c["read"], c["width"], c["n_train"],
-                                c["acc"], c.get("correct"), rec["n_test"], s.get("fold", -1)))
+                                c["acc"], c.get("correct"), rec["n_test"], s.get("fold", -1),
+                                c.get("projection", "fixed")))
     return out
 
 

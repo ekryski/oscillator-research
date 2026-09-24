@@ -48,7 +48,7 @@ PROJECTION_SEED = 4242
 #: every common width is the leading columns of one projection this wide, so a
 #: narrow read is exactly the first columns of a wide one
 MAX_WIDTH = 4096
-_PROJECTIONS: dict[int, torch.Tensor] = {}
+_PROJECTIONS: dict = {}
 
 
 def span(frames: int, lo: int, hi: torch.Tensor | None, windows: int,
@@ -161,21 +161,30 @@ def rotation_rate(sincos: torch.Tensor, windows: int = 1, lo: int = 0,
     return torch.cat(out, dim=1)
 
 
-def projection_matrix(native: int, width: int) -> torch.Tensor:
-    """The fixed [native, width] random projection: the leading `width` columns of one draw.
+def projection_matrix(native: int, width: int, seed: int | None = None) -> torch.Tensor:
+    """The [native, width] random projection: the leading `width` columns of one draw.
 
-    One [native, MAX_WIDTH] Gaussian matrix is drawn per native width, from one
-    seed, and cached; every width takes its leading columns. Columns of a
-    Gaussian matrix are independent, so each width is a projection in its own
-    right, and a wide read contains the narrow one: any accuracy the wide read
-    adds comes from the added features alone.
+    One [native, MAX_WIDTH] Gaussian matrix is drawn per native width and
+    cached; every width takes its leading columns. Columns of a Gaussian matrix
+    are independent, so each width is a projection in its own right, and a wide
+    read contains the narrow one: any accuracy the wide read adds comes from the
+    added features alone.
+
+    Without `seed` this is the fixed projection every registered run used, one
+    draw for every seed. With it, the seeded projection: a draw of its own for
+    each run seed (generator seed PROJECTION_SEED + 1 + seed), so the spread
+    over seeds includes the projection's variability too.
     """
     if width > MAX_WIDTH:
         raise ValueError(f"width {width} exceeds the {MAX_WIDTH}-column projection")
-    if native not in _PROJECTIONS:
-        gen = torch.Generator().manual_seed(PROJECTION_SEED)
-        _PROJECTIONS[native] = torch.randn(native, MAX_WIDTH, generator=gen) / math.sqrt(native)
-    return _PROJECTIONS[native][:, :width]
+    key = native if seed is None else (native, seed)
+    if key not in _PROJECTIONS:
+        if seed is not None:              # hold one seeded draw per native width, not one per seed
+            for k in [k for k in _PROJECTIONS if isinstance(k, tuple) and k[0] == native]:
+                del _PROJECTIONS[k]
+        gen = torch.Generator().manual_seed(PROJECTION_SEED if seed is None else PROJECTION_SEED + 1 + seed)
+        _PROJECTIONS[key] = torch.randn(native, MAX_WIDTH, generator=gen) / math.sqrt(native)
+    return _PROJECTIONS[key][:, :width]
 
 
 def project(features: torch.Tensor, width: int) -> torch.Tensor:
