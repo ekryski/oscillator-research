@@ -54,6 +54,7 @@ class Cell:
     acc: float
     bits: str | None
     n_test: int
+    fold: int = -1
 
 
 def load(groups: list[str] | None = None) -> list[Cell]:
@@ -61,7 +62,7 @@ def load(groups: list[str] | None = None) -> list[Cell]:
     paths = sorted(root.glob("*.json")) if groups is None else [root / f"{g}.json" for g in groups]
     out = []
     for path in paths:
-        if path.name in ("gates.json", "verdicts.json") or not path.exists():
+        if path.name in ("gates.json", "verdicts.json", "summary.json") or not path.exists():
             continue
         for run_id, rec in json.loads(path.read_text())["runs"].items():
             s = rec["spec"]
@@ -71,7 +72,7 @@ def load(groups: list[str] | None = None) -> list[Cell]:
             for c in rec["cells"]:
                 out.append(Cell(s["tier"], s["task"], s["drive"], s["noise_db"], s["gain"], s["seed"],
                                 s["arm"], label, tuple(s["pair"]), c["read"], c["width"], c["n_train"],
-                                c["acc"], c.get("correct"), rec["n_test"]))
+                                c["acc"], c.get("correct"), rec["n_test"], s.get("fold", -1)))
     return out
 
 

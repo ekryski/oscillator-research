@@ -1,0 +1,363 @@
+"""Every accuracy and every comparison in the confirmatory record, with its spread.
+
+    uv run python -m harness.confirm.summary      # write summary.json and summary.md
+
+No threshold decides anything here. An accuracy is reported as its mean over
+replicates (three seeds under Protocol A, five folds under Protocol B), the
+sample standard deviation and each replicate's own value, all in points. A
+comparison A minus B is paired: matched on condition and replicate, it reports
+each replicate's difference, their mean and standard deviation, and a 95%
+interval from resampling test clips. Seeds share one test set, so their
+per-clip differences are averaged; folds and order-task pairs each have their
+own test clips, so theirs are concatenated. Whether a difference is a gain is
+left to the reader.
+
+The registered bars are still scored by `harness.confirm.score`. Reporting
+without them was decided after Tier 1 had been seen, and is logged in
+REGISTRATION.md's change log.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import statistics
+from collections import defaultdict
+
+import numpy as np
+
+from harness.confirm import plan
+from harness.confirm import run as rn
+from harness.confirm import score as sc
+from harness.confirm.score import Cell
+
+FIELD = sc.FIELD_LABEL
+SEVERED = FIELD.replace("field-", "severed-", 1)
+READ = {"recognition": "windowed", "order": "pooled"}
+#: the reference level of each design factor: the Tier 1 field's own
+REFERENCE = {"physics": "kuramoto", "boundary": "torus", "omega": "random", "damping": 0.3, "clamp": 1.0}
+#: bootstrap resamples drawn per batch, bounding memory on Protocol B's 30,000 test clips
+CHUNK = 100
+
+
+def replicate(c: Cell) -> str:
+    return f"fold{c.fold}" if c.fold >= 0 else f"seed{c.seed}"
+
+
+def spread(values: dict[str, float]) -> dict:
+    """Mean, sample standard deviation and each replicate's value, from fractions to points."""
+    pts = {k: 100 * v for k, v in sorted(values.items())}
+    xs = list(pts.values())
+    return {"mean": statistics.fmean(xs), "sd": statistics.stdev(xs) if len(xs) > 1 else None,
+            "n": len(xs), "values": pts}
+
+
+def interval(per_clip: np.ndarray) -> list[float]:
+    """The 95% interval of the mean from resampling clips, in points."""
+    rng = np.random.default_rng(sc.BOOT_SEED)
+    boots = np.concatenate([per_clip[rng.integers(0, len(per_clip), (CHUNK, len(per_clip)))].mean(axis=1)
+                            for _ in range(sc.BOOTSTRAP // CHUNK)])
+    lo, hi = np.quantile(boots, [(1 - sc.CONFIDENCE) / 2, (1 + sc.CONFIDENCE) / 2])
+    return [100 * float(lo), 100 * float(hi)]
+
+
+def paired(pairs: list[tuple[Cell, Cell]]) -> dict:
+    """A minus B over matched cells.
+
+    A replicate's difference is the mean over its own pairs (twins, order-task
+    pairs). The interval resamples test clips: per-clip differences are averaged
+    over cells that share a test set and concatenated over test sets that do not.
+    """
+    by_rep = defaultdict(list)
+    for a, b in pairs:
+        by_rep[replicate(a)].append(a.acc - b.acc)
+    out = {**spread({r: statistics.fmean(v) for r, v in by_rep.items()}), "n_pairs": len(pairs)}
+    if all(a.bits and b.bits for a, b in pairs):
+        by_set = defaultdict(list)
+        for a, b in pairs:
+            by_set[(a.fold, a.pair)].append(sc._bits(a) - sc._bits(b))
+        out["ci95"] = interval(np.concatenate([np.mean(v, axis=0) for _, v in sorted(by_set.items())]))
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Accuracies
+# ---------------------------------------------------------------------------
+
+def accuracies(cells: list[Cell]) -> list[dict]:
+    """One record per arm, read, condition, width and size, over its replicates."""
+    groups = defaultdict(dict)
+    for c in cells:
+        key = (c.tier, c.task, c.drive, c.label, c.read, c.noise, c.gain, c.pair, c.width, c.n_train)
+        groups[key][replicate(c)] = c.acc
+    fields = ("tier", "task", "drive", "arm", "read", "noise", "gain", "pair", "width", "n_train")
+    return [{**dict(zip(fields, k, strict=True)), "pair": list(k[7]) or None, **spread(v)}
+            for k, v in sorted(groups.items(), key=str)]
+
+
+# ---------------------------------------------------------------------------
+# Comparisons
+# ---------------------------------------------------------------------------
+
+def versus(cells: list[Cell], name: str, a: tuple[str, str], b: tuple[str, str], *, tier: str, task: str,
+           drive: str = "envelope", widths: tuple | None = None) -> list[dict]:
+    """a minus b, each an (arm, read), matched on condition, replicate, width and size.
+
+    `widths=(wa, wb)` compares a at width wa with b at width wb rather than width
+    for width. An arm without gain is matched at every gain of the other.
+    Order-task pairs are pooled into one comparison per condition.
+    """
+    mine = [c for c in cells if c.tier == tier and c.task == task and c.drive == drive]
+    bs = [c for c in mine if (c.label, c.read) == b]
+    b_gain = any(c.gain is not None for c in bs)
+    idx = {(c.noise, c.gain, c.pair, c.width, c.n_train, replicate(c)): c for c in bs}
+    groups = defaultdict(list)
+    for c in mine:
+        if (c.label, c.read) != a or (widths and c.width != widths[0]):
+            continue
+        other = idx.get((c.noise, c.gain if b_gain else None, c.pair, widths[1] if widths else c.width,
+                         c.n_train, replicate(c)))
+        if other is not None:
+            groups[(c.noise, c.gain, c.width, c.n_train)].append((c, other))
+    return [{"comparison": name, "a": " ".join(a), "b": " ".join(b), "tier": tier, "task": task, "drive": drive,
+             "noise": k[0], "gain": k[1], "width": k[2], "b_width": widths[1] if widths else k[2],
+             "n_train": k[3], **paired(v)} for k, v in sorted(groups.items(), key=str)]
+
+
+def _against_field(cells: list[Cell], tier: str, task: str) -> list[dict]:
+    r = READ[task]
+    others = [("the whole-clip floor", ("floor", r + "@wholeclip")), ("the floor, arms' window", ("floor", r)),
+              ("the severed field", (SEVERED, r)), ("bank A", ("bank-c4", r)), ("bank B", ("bank-c8", r))]
+    others += [(arch, (f"ann-{arch}", r)) for arch in plan.ANN_ARCHS]
+    out = []
+    for name, b in others:
+        out += versus(cells, f"field minus {name}", (FIELD, r), b, tier=tier, task=task)
+    return out
+
+
+def tier1(cells: list[Cell]) -> list[dict]:
+    """The field against every other arm, rotation rates, and width 4,096 against 192 for every arm."""
+    out = []
+    for task in ("recognition", "order"):
+        r = READ[task]
+        out += _against_field(cells, "tier1", task)
+        out += versus(cells, "field with rotation rates minus field", (FIELD, r + "+rate"), (FIELD, r),
+                      tier="tier1", task=task)
+        for label in sorted({c.label for c in cells if c.tier == "tier1" and c.task == task}):
+            read = r + "@wholeclip" if label == "floor" else r
+            out += versus(cells, f"{label}: width 4096 minus 192", (label, read), (label, read),
+                          tier="tier1", task=task, widths=(4096, 192))
+    return out
+
+
+def design(cells: list[Cell]) -> list[dict]:
+    """Each Tier 2 factor level minus its reference, over twins identical in every other factor."""
+    prim = [c for c in cells if c.tier == "tier2" and c.read == "windowed"]
+    out = []
+    for factor, ref in REFERENCE.items():
+        def twin(c: Cell, factor: str = factor) -> tuple:
+            return (tuple(c.arm[f] for f in REFERENCE if f != factor), c.noise, c.gain, c.width, c.n_train,
+                    replicate(c))
+        refs = {twin(c): c for c in prim if c.arm[factor] == ref}
+        for level in sorted({c.arm[factor] for c in prim} - {ref}, key=str):
+            groups = defaultdict(list)
+            for c in prim:
+                if c.arm[factor] == level and twin(c) in refs:
+                    groups[(c.noise, c.gain, c.width, c.n_train)].append((c, refs[twin(c)]))
+            out += [{"comparison": f"{factor}: {level} minus {ref}", "tier": "tier2", "task": "recognition",
+                     "drive": "envelope", "noise": k[0], "gain": k[1], "width": k[2], "b_width": k[2],
+                     "n_train": k[3], **paired(v)} for k, v in sorted(groups.items(), key=str)]
+    # rotation rates, over every design arm
+    idx = {(c.label, c.noise, c.gain, c.width, c.n_train, replicate(c)): c for c in prim}
+    groups = defaultdict(list)
+    for c in cells:
+        if c.tier == "tier2" and c.read == "windowed+rate":
+            other = idx.get((c.label, c.noise, c.gain, c.width, c.n_train, replicate(c)))
+            if other is not None:
+                groups[(c.noise, c.gain, c.width, c.n_train)].append((c, other))
+    out += [{"comparison": "rotation rates added, every design arm", "tier": "tier2", "task": "recognition",
+             "drive": "envelope", "noise": k[0], "gain": k[1], "width": k[2], "b_width": k[2], "n_train": k[3],
+             **paired(v)} for k, v in sorted(groups.items(), key=str)]
+    return out
+
+
+def drives(cells: list[Cell]) -> list[dict]:
+    """Every arm on the quadrature and carrier drives, minus that drive's own floor."""
+    out = []
+    for drive in ("quadrature", "carrier"):
+        for label in sorted({c.label for c in cells if c.tier == "tier3" and c.drive == drive} - {"floor"}):
+            for name, read in (("the whole-clip floor", "windowed@wholeclip"), ("the floor, arms' window", "windowed")):
+                out += versus(cells, f"{label} minus {name}", (label, "windowed"), ("floor", read),
+                              tier="tier3", task="recognition", drive=drive)
+    return out
+
+
+def size(cells: list[Cell]) -> list[dict]:
+    """The field minus its matched bank at each size."""
+    out = []
+    for ch in plan.SIZE_CHANNELS:
+        field = FIELD + ("" if ch == 4 else f"-c{ch}")
+        out += versus(cells, f"field minus bank, {ch} channels", (field, "windowed"), (f"bank-c{ch}", "windowed"),
+                      tier="tier4", task="recognition")
+    return out
+
+
+def summary(cells: list[Cell] | None = None) -> dict:
+    cells = sc.load() if cells is None else cells
+    return {"accuracy": accuracies(cells),
+            "comparisons": (tier1(cells) + _against_field(cells, "becker", "recognition") + design(cells)
+                            + drives(cells) + size(cells)),
+            "order_floor_at_chance": sc.order_gate(cells)}
+
+
+# ---------------------------------------------------------------------------
+# The readable report: the primary cells
+# ---------------------------------------------------------------------------
+
+#: short names for the Tier 1 arms in the report
+NAMES = {FIELD: "field", SEVERED: "severed field", "bank-c4": "bank A", "bank-c8": "bank B"}
+
+
+def _noise(n) -> str:
+    return "clean" if n is None else f"{n:+g} dB".replace("+0 dB", "0 dB")
+
+
+def _by_noise(r: dict) -> tuple:
+    return (-1 if r["noise"] is None else r["noise"],), _noise(r["noise"])
+
+
+def _by_condition(r: dict) -> tuple:
+    gain = f", g{r['gain']:g}" if r["gain"] is not None else ""
+    return (-1 if r["noise"] is None else r["noise"], r["gain"] or 0), _noise(r["noise"]) + gain
+
+
+def _by_size(r: dict) -> tuple:
+    return (r["n_train"], r["width"]), f"n {r['n_train']:,}, w {r['width']:,}"
+
+
+def _acc(r: dict) -> str:
+    return f"{r['mean']:.1f}" + (f" ± {r['sd']:.1f}" if r["sd"] is not None else "")
+
+
+def _diff(r: dict) -> str:
+    s = f"{r['mean']:+.2f}" + (f" ± {r['sd']:.2f}" if r["sd"] is not None else "")
+    return s + (f" [{r['ci95'][0]:+.2f}, {r['ci95'][1]:+.2f}]" if "ci95" in r else "")
+
+
+def _grid(records: list[dict], row, col, cell) -> list[str]:
+    """A table: one row per `row(r)`, one column per `col(r)`, a (sort key, heading) pair."""
+    rows: dict = defaultdict(dict)
+    for r in records:
+        rows[row(r)][col(r)] = cell(r)
+    if not rows:
+        return ["(not run yet)"]
+    cols = sorted({c for v in rows.values() for c in v})
+    out = ["| | " + " | ".join(h for _, h in cols) + " |", "|---" * (len(cols) + 1) + "|"]
+    return out + [f"| {k} | " + " | ".join(v.get(c, "") for c in cols) + " |" for k, v in rows.items()]
+
+
+def _pooled(records: list[dict]) -> list[dict]:
+    """Order-task accuracies averaged over pairs within each replicate."""
+    groups = defaultdict(lambda: defaultdict(list))
+    for r in records:
+        for rep, v in r["values"].items():
+            groups[(r["arm"], r["read"], r["noise"], r["gain"])][rep].append(v / 100)
+    return [{"arm": k[0], "read": k[1], "noise": k[2], "gain": k[3],
+             **spread({rep: statistics.fmean(v) for rep, v in reps.items()})} for k, reps in groups.items()]
+
+
+def _arm(r: dict) -> str:
+    name = NAMES.get(r["arm"], r["arm"].removeprefix("ann-"))
+    if r["arm"] == "floor":
+        name += ", whole clip" if r["read"].endswith("@wholeclip") else ", arms' window"
+    return name + (f", g{r['gain']:g}" if r.get("gain") is not None else "")
+
+
+def progress() -> dict[str, tuple[int, int]]:
+    """Runs recorded and runs planned, per tier."""
+    root, have, out = rn.record_root(), {}, {}
+    for name, tier in plan.TIERS.items():
+        specs = list(tier())
+        for s in specs:
+            if s.group() not in have:
+                path = root / f"{s.group()}.json"
+                have[s.group()] = set(json.loads(path.read_text())["runs"]) if path.exists() else set()
+        out[name] = (sum(s.run_id() in have[s.group()] for s in specs), len(specs))
+    return out
+
+
+def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
+    acc, cmp = s["accuracy"], s["comparisons"]
+    w, n = sc.PRIMARY_WIDTH, sc.PRIMARY_SIZE
+
+    def prim_acc(tier, task, n_train=n):
+        return [r for r in acc if r["tier"] == tier and r["task"] == task and r["width"] == w
+                and r["n_train"] == n_train and r["read"].split("@")[0] == READ[task]]
+
+    def prim_cmp(tier, n_train=n, prefix=""):
+        return [r for r in cmp if r["tier"] == tier and r["width"] == w and r["n_train"] == n_train
+                and r["comparison"].startswith(prefix) and "width" not in r["comparison"]]
+
+    def by_gain(r):
+        name = r["comparison"]
+        for label, short in NAMES.items():
+            name = name.replace(label, short)
+        return name + (f", g{r['gain']:g}" if r["gain"] is not None else "")
+
+    lines = ["# Confirmatory results", "",
+             "Generated by `uv run python -m harness.confirm.summary` from the record in this folder; every number "
+             "here and more (every width, size, pair and read) is in `summary.json`. Accuracies are mean ± "
+             "standard deviation over replicates (three seeds; five folds in Tier B), in percent. Differences "
+             "are paired, mean ± standard deviation over replicates, with the 95% interval from resampling test "
+             f"clips in brackets, in points. Primary cell: width {w}, {n:,} training clips.", "",
+             "Runs recorded: " + "; ".join(f"{k} {d:,} of {p:,}" for k, (d, p) in done.items())
+             + ". A tier not yet complete is summarized over the runs it has.", ""]
+    lines += ["## Tier 1, recognition: accuracy", ""]
+    lines += _grid(prim_acc("tier1", "recognition"), _arm, _by_noise, _acc)
+    lines += ["", "## Tier 1, recognition: differences", ""]
+    lines += _grid([r for r in prim_cmp("tier1") if r["task"] == "recognition"], by_gain,
+                   _by_noise, _diff)
+    lines += ["", "## Tier 1, recognition: accuracy by width and training size", ""]
+    for noise in (0.0, 5.0):
+        rows = [r for r in acc if r["tier"] == "tier1" and r["task"] == "recognition" and r["noise"] == noise
+                and r["read"] in ("windowed", "windowed@wholeclip") and r["width"] != "native"]
+        lines += [f"### {_noise(noise)}", ""]
+        lines += _grid(rows, _arm, _by_size, _acc) + [""]
+    lines += ["## Tier 1, recognition: width 4,096 minus 192", ""]
+    lines += _grid([r for r in cmp if r["tier"] == "tier1" and r["task"] == "recognition" and r["n_train"] == n
+                    and "width" in r["comparison"]], by_gain, _by_noise, _diff)
+    lines += ["", "## Tier 1, order task: accuracy, averaged over the five pairs", ""]
+    lines += _grid(_pooled(prim_acc("tier1", "order")), _arm, _by_noise, _acc)
+    lines += ["", "## Tier 1, order task: differences, pooled over the five pairs", ""]
+    lines += _grid([r for r in prim_cmp("tier1") if r["task"] == "order"], by_gain,
+                   _by_noise, _diff)
+    gate = s["order_floor_at_chance"]
+    off = [k for k, v in gate.items() if not v["valid"]]
+    lines += ["", f"Order-task floor at chance (its 95% interval contains 50%): {len(gate) - len(off)} of "
+              f"{len(gate)} pair and noise cells" + (f"; not at chance: {', '.join(off)}." if off else "."), ""]
+    lines += ["## Tier 2, design: each level minus its reference, over twins", ""]
+    lines += _grid(prim_cmp("tier2"), lambda r: r["comparison"], _by_condition, _diff)
+    lines += ["", "## Tier B, Becker et al.'s folds: accuracy", ""]
+    lines += _grid(prim_acc("becker", "recognition", plan.BECKER_TRAIN), _arm, _by_noise, _acc)
+    lines += ["", "## Tier B: differences", ""]
+    lines += _grid(prim_cmp("becker", plan.BECKER_TRAIN), by_gain, _by_noise, _diff)
+    lines += ["", "## Tier 3, quadrature and carrier drives: each arm minus its drive's floor", ""]
+    lines += _grid([r for r in prim_cmp("tier3")], lambda r: f"{r['drive']}: {r['comparison']}", _by_condition, _diff)
+    lines += ["", "## Tier 4, size: field minus its matched bank", ""]
+    lines += _grid(prim_cmp("tier4"), lambda r: r["comparison"], _by_condition, _diff)
+    return "\n".join(lines) + "\n"
+
+
+def main(argv: list[str] | None = None) -> None:
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args(argv)
+    s = summary()
+    root = rn.record_root()
+    (root / "summary.json").write_text(json.dumps(s, indent=1, default=str) + "\n")
+    text = report(s, progress())
+    (root / "summary.md").write_text(text)
+    print(text)
+    print(f"wrote {root / 'summary.json'} and {root / 'summary.md'}")
+
+
+if __name__ == "__main__":
+    main()
