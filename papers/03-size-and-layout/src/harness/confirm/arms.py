@@ -354,13 +354,15 @@ def ann_features(backbone: nn.Module, rows: torch.Tensor, tvalid: torch.Tensor, 
 
 def train_ann(arm: Arm, rows: torch.Tensor, tvalid: torch.Tensor, labels: torch.Tensor,
               task: str, seed: int, n_classes: int = N_CLASSES, epochs: int = EPOCHS,
-              span: str = "fixed") -> tuple[nn.Module, nn.Module, dict]:
+              span: str = "fixed", device: str = "cpu") -> tuple[nn.Module, nn.Module, dict]:
     """Train a network end to end, with a learned linear head on the shared statistics.
 
     Conventional practice is a learned head; putting that head on the same
     statistics the ridge will read means the network is trained for the read it
     is judged by, and a recurrent network cannot hand the head its last state.
-    Returns (backbone, head, health).
+    Both are built on the CPU, so every device starts from the same weights,
+    and trained on `device`; the clips stay on the CPU and move a batch at a
+    time. Returns (backbone, head, health), on `device`.
     """
     torch.manual_seed(seed)
     backbone = build_ann(arm)
@@ -368,6 +370,7 @@ def train_ann(arm: Arm, rows: torch.Tensor, tvalid: torch.Tensor, labels: torch.
     with torch.no_grad():
         width = ann_features(backbone, rows[:2], tvalid[:2], windows, span).shape[1]
     head = nn.Linear(width, n_classes)
+    backbone, head = backbone.to(device), head.to(device)
     params = list(backbone.parameters()) + list(head.parameters())
     steps = epochs * ((len(rows) + BATCH - 1) // BATCH)
     opt = torch.optim.AdamW(params, lr=LR)
@@ -381,8 +384,8 @@ def train_ann(arm: Arm, rows: torch.Tensor, tvalid: torch.Tensor, labels: torch.
         total = 0.0
         for i in range(0, len(rows), BATCH):
             idx = perm[i:i + BATCH]
-            logits = head(ann_features(backbone, rows[idx], tvalid[idx], windows, span))
-            loss = nn.functional.cross_entropy(logits, labels[idx])
+            logits = head(ann_features(backbone, rows[idx].to(device), tvalid[idx].to(device), windows, span))
+            loss = nn.functional.cross_entropy(logits, labels[idx].to(device))
             if not torch.isfinite(loss):
                 raise FloatingPointError(f"{arm.label()} seed {seed}: non-finite loss")
             opt.zero_grad()

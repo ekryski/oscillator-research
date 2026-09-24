@@ -108,11 +108,18 @@ def test_every_coupling_function_runs_on_every_geometry_and_lattice(coupling, gr
         assert torch.isfinite(feats).all() and feats.abs().max() <= 1 + 1e-6, f"{boundary} x {coupling}"
 
 
-def test_large_lattices_couple_by_fft_and_build_no_dense_operator():
+def test_auto_couples_densely_where_that_is_faster_and_builds_no_dense_operator_otherwise():
+    from harness.models.phase import auto_impl
+    assert [auto_impl("cpu", g) for g in (8, 16, 32, 64, 128)] == ["matmul", "matmul", "fft", "fft", "fft"]
+    assert [auto_impl("mps", g) for g in (8, 16, 32, 64, 128)] == ["matmul"] * 4 + ["fft"]
+    assert {auto_impl("cuda", g) for g in (8, 16, 128)} == {"fft"}
     for grid in (32, 64, 128):
         blk = PhaseBlock(channels=1, grid=grid, spectral_clamp=1.0)
-        assert blk.coupling_impl == "fft" and not hasattr(blk, "_circ_idx")
-    assert PhaseBlock(channels=1, grid=16, spectral_clamp=1.0).coupling_impl == "auto"
+        blk.prepare_coupling()
+        assert blk.coupling_impl == "fft" and blk._circ is None
+    blk = PhaseBlock(channels=1, grid=16, spectral_clamp=1.0)
+    blk.prepare_coupling()
+    assert blk.coupling_impl == "matmul" and blk._circ is not None
 
 
 def test_geometry_registry_is_complete_and_self_describing():

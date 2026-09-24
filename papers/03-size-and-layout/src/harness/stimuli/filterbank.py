@@ -39,6 +39,6 @@ def bandpass_rows(wave: torch.Tensor, grid: int) -> torch.Tensor:
     x = torch.fft.rfft(wave, dim=1)  # [B, T//2+1]
     bin_f = torch.arange(x.shape[1], dtype=torch.float64) / t
     e = band_edges(grid)
-    mask = ((bin_f[None, :] >= e[:-1, None]) & (bin_f[None, :] < e[1:, None])).to(torch.float32)
+    mask = ((bin_f[None, :] >= e[:-1, None]) & (bin_f[None, :] < e[1:, None])).to(wave.device, torch.float32)
     y = torch.fft.irfft(x[:, None, :] * mask[None, :, :], n=t, dim=2)  # [B, G, T]
     return y.transpose(1, 2).contiguous()  # [B, T, G]

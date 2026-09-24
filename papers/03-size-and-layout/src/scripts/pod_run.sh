@@ -42,7 +42,7 @@ uv sync
 ln -sfn "$AUDIOMNIST" data/AudioMNIST
 
 CPUS="$(nproc)"
-DEVICE="$(uv run python -c 'import torch; print("cuda" if torch.cuda.is_available() else "cpu")')"
+DEVICE="$(uv run python -c 'from harness.utils.device import resolve; print(resolve("auto"))')"   # cuda, mps or cpu
 echo "=== $(git rev-parse --short HEAD) on $CPUS cpus, device $DEVICE"
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null || true
 MEM_GB="$(awk '/MemAvailable/ {printf "%d", $2 / 1048576}' /proc/meminfo)"
@@ -50,7 +50,7 @@ MEM_GB="$(awk '/MemAvailable/ {printf "%d", $2 / 1048576}' /proc/meminfo)"
 [ -f data/cache/digits_v2.pt ] || uv run python -m harness.confirm.protocol --build-bank
 uv run python -m harness.confirm.plan prepare --workers "$(( CPUS < 16 ? CPUS : 16 ))"
 uv run pytest -q
-uv run python -m harness.confirm.gates reuse --device cpu
+uv run python -m harness.confirm.gates reuse                # always on the CPU, the only device bit-identical to paper 02
 
 for tier in "${TIERS[@]}"; do
     case "$tier" in

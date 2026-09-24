@@ -51,10 +51,19 @@ COUPLINGS = ("kuramoto", "sakaguchi", "harmonic2", "winfree")
 KERNEL_SCALINGS = ("exact", "cap")
 #: guards the division when a kernel's peak is zero
 PEAK_EPS = 1e-8
-#: lattices this size and larger always couple by FFT
-FFT_FROM_GRID = 32
+#: the largest lattice each device couples with the dense operator under "auto"; above it, FFT.
+#: Measured per channel and clip: on one CPU thread the dense path is paper 02's at 16 x 16, and FFT
+#: is 3.6 times faster at 32 x 32; on MPS (M1 Max) the dense path is 2 to 80 times faster than FFT
+#: up to 64 x 64, where its operator is 4,096 x 4,096, and its operator too large at 128 x 128;
+#: CUDA uses FFT, as paper 02 did.
+DENSE_UP_TO = {"cpu": 16, "mps": 64, "cuda": 0}
 
-__all__ = ["COUPLINGS", "KERNEL_SCALINGS", "PhaseBlock", "PhaseCore", "ceiling_factor"]
+
+def auto_impl(device_type: str, grid: int) -> str:
+    """The coupling implementation "auto" resolves to on a device, for a lattice size."""
+    return "matmul" if grid <= DENSE_UP_TO.get(device_type, 16) else "fft"
+
+__all__ = ["COUPLINGS", "KERNEL_SCALINGS", "PhaseBlock", "PhaseCore", "auto_impl", "ceiling_factor"]
 
 
 def ceiling_factor(peak: torch.Tensor, ceiling: float, scaling: str) -> torch.Tensor:
@@ -99,23 +108,25 @@ class PhaseBlock(nn.Module):
             self.winfree_i = nn.Parameter(torch.tensor([[1.0, 0.0, 1.0]]).repeat(channels, 1))
 
         # FFT and the dense circulant matmul are the same operator; "auto"
-        # resolves at the first prepare_coupling() from the device (the dense
-        # path on CPU, FFT on a GPU), as in paper 02, below 32 x 32. From 32 x 32
-        # up it is always FFT: the circulant is N^2 = G^4 entries per channel,
-        # and on one CPU thread FFT is 3.6 times faster at 32 x 32 (paper 02 ran
-        # 32 x 32 dense, but none of those runs is reused).
+        # resolves at the first prepare_coupling() from the device the block
+        # then lives on (`auto_impl`), and the dense operator's gather index is
+        # built then, on that device, and only if it is used.
         if coupling_impl not in ("fft", "matmul", "auto"):
             raise ValueError(f"unknown coupling_impl '{coupling_impl}'")
-        if coupling_impl == "auto" and grid >= FFT_FROM_GRID:
-            coupling_impl = "fft"
         self.coupling_impl = coupling_impl
+        self._circ: tuple[torch.device, torch.Tensor] | None = None
 
         # the draws, in paper 02's order: the kernels, then the natural frequencies
         self.kernel = nn.Parameter(torch.randn(channels, grid, grid) * 0.05)
         self.natural_freqs = nn.Parameter(torch.randn(channels, grid, grid) * 0.1 + 1.0)
-        if coupling_impl in ("matmul", "auto"):
+
+    def _circ_idx(self) -> torch.Tensor:
+        """The dense operator's gather index, built once on the kernel's device."""
+        device = self.kernel.device
+        if self._circ is None or self._circ[0] != device:
             idx = self.geometry.circulant_index()
-            self.register_buffer("_circ_idx", idx.reshape(-1, *idx.shape[-2:]).squeeze(0), persistent=False)
+            self._circ = (device, idx.reshape(-1, *idx.shape[-2:]).squeeze(0).to(device))
+        return self._circ[1]
 
     def spectrum(self) -> torch.Tensor:
         """Each channel's kernel spectrum, before it meets the ceiling."""
@@ -128,7 +139,7 @@ class PhaseBlock(nn.Module):
     def prepare_coupling(self) -> torch.Tensor:
         """Build the coupling operator once per scan: the complex spectrum (fft) or the dense matrix."""
         if self.coupling_impl == "auto":
-            self.coupling_impl = "fft" if self.kernel.device.type == "cuda" else "matmul"
+            self.coupling_impl = auto_impl(self.kernel.device.type, self.grid)
         geom = self.geometry
         embedded = geom.embed_kernel(self.kernel)
         kfft = geom.kernel_spectrum(embedded)
@@ -140,7 +151,7 @@ class PhaseBlock(nn.Module):
             coup: torch.Tensor = kfft
         else:
             taps = geom.spectrum_to_taps(kfft, embedded.shape)
-            coup = geom.dense_operator(taps, self._circ_idx)
+            coup = geom.dense_operator(taps, self._circ_idx())
 
         if self.coupling == "winfree" and self.boundary not in ("torus", "cylinder"):
             # Winfree's influence term K*1 varies across the lattice on the open

@@ -1,6 +1,6 @@
 """Integrity gates, checked before any result they guard is read.
 
-    uv run python -m harness.confirm.gates reuse    # paper 02's 16 x 16 cells reproduce under this harness
+    uv run python -m harness.confirm.gates reuse    # paper 02's 16 x 16 cells reproduce under this harness (CPU)
     uv run python -m harness.confirm.gates check    # every recorded zero-input cell reads chance
 
 The reuse gate is what licenses taking cells from paper 02's record. It
@@ -47,8 +47,13 @@ REUSE_SAMPLE = (
 )
 
 
-def reuse(device: str = "cpu", threads: int = 4) -> dict:
-    """Re-run the sample; every accuracy and per-clip record must equal paper 02's."""
+def reuse(threads: int = 4) -> dict:
+    """Re-run the sample on the CPU; every accuracy and per-clip record must equal paper 02's.
+
+    Always on the CPU: paper 02's record was made on CPUs, and only the CPU is
+    bit-identical to it (a GPU's sums run in other orders).
+    """
+    device = "cpu"
     torch.set_num_threads(threads)
     report = {"sample": [], "passed": True, "when": time.strftime("%Y-%m-%d %H:%M:%S")}
     before = os.environ.get("OSC_RESULTS_DIR")
@@ -120,10 +125,9 @@ def _save(name: str, report: dict) -> None:
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(description="integrity gates")
     p.add_argument("gate", choices=("reuse", "check"))
-    p.add_argument("--device", default="cpu")
     p.add_argument("--threads", type=int, default=4)
     a = p.parse_args(argv)
-    ok = (reuse(a.device, a.threads) if a.gate == "reuse" else check())["passed"]
+    ok = (reuse(a.threads) if a.gate == "reuse" else check())["passed"]
     raise SystemExit(0 if ok else 1)
 
 

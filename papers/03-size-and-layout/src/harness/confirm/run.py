@@ -36,6 +36,7 @@ from harness.confirm import arms as am
 from harness.confirm import protocol as pr
 from harness.confirm import readout as ro
 from harness.confirm import stream as st
+from harness.utils.device import describe, resolve
 from harness.utils.paths import results_root
 
 #: the registered common widths; an arm is never read wider than its native width
@@ -44,8 +45,8 @@ WIDTHS = (192, 1024, 4096)
 PRIMARY_SIZE = 2048
 PRIMARY_STAT = {"recognition": "windowed", "order": "pooled"}
 #: clips per batch, by task and drive; the carrier runs at 16 kHz, so its batches
-#: are small, and a GPU holds four times as many of its 16,000-frame trajectories
-BATCH = {"recognition": 512, "carrier": 8, "carrier-cuda": 32}
+#: are small, and a GPU (CUDA or MPS) holds four times as many of its 16,000-frame trajectories
+BATCH = {"recognition": 512, "carrier": 8, "carrier-gpu": 32}
 #: a batch holds this many states' trajectories at the sizes above; larger arms (or channels) shrink it
 BATCH_STATES = 1024
 #: above this many states a batch shrinks in proportion (paper 02's rule, unchanged up to 4,096 states)
@@ -144,7 +145,7 @@ def write(spec: Spec, record: dict) -> None:
 
 
 def environment(device: str) -> dict:
-    """What produced the numbers: library versions and the code's commit."""
+    """What produced the numbers: library versions, the device (and which GPU), and the code's commit."""
     here = Path(__file__).resolve().parent
 
     def git(*args: str) -> str:
@@ -152,7 +153,7 @@ def environment(device: str) -> dict:
         return out.stdout.strip()
 
     return {"torch": torch.__version__, "python": sys.version.split()[0],
-            "platform": platform.platform(), "machine": platform.machine(), "device": device,
+            "platform": platform.platform(), "machine": platform.machine(), **describe(device),
             "commit": git("rev-parse", "HEAD"), "dirty": bool(git("status", "--porcelain", "--", "."))}
 
 
@@ -201,7 +202,7 @@ def batch_size(spec: Spec, device: str = "cpu", states: int | None = None) -> in
 
     `states` is what one pass simulates: the whole arm, or one channel of a streamed arm.
     """
-    carrier = "carrier-cuda" if device.startswith("cuda") else "carrier"
+    carrier = "carrier-gpu" if device.startswith(("cuda", "mps")) else "carrier"
     size = BATCH[carrier] if spec.drive == "carrier" else BATCH[spec.task]
     states = spec.arm.states if states is None else states
     if spec.drive != "carrier" and states > LARGE_STATES:
@@ -261,8 +262,9 @@ def _store(buffers: dict, feats: dict, where: slice, total: int) -> None:
 
 
 def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
-    """Run one spec and return its record (not yet written)."""
+    """Run one spec and return its record (not yet written). `device` may be "auto" (harness.utils.device)."""
     t0 = time.perf_counter()
+    device = resolve(device)
     bank = pr.load_bank() if bank is None else bank
     clips = assemble(spec, bank)
     total = len(clips.labels)
@@ -278,16 +280,17 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
         n_tr = spec.sizes[0]
         t1 = time.perf_counter()
         backbone, head, health = am.train_ann(arm, rows[:n_tr], tvalid[:n_tr], clips.labels[:n_tr],
-                                              spec.task, spec.seed, clips.n_classes, span=spec.span)
+                                              spec.task, spec.seed, clips.n_classes, span=spec.span, device=device)
         timing["train_s"] = time.perf_counter() - t1
         with torch.no_grad():
             for a in range(0, total, BATCH[spec.task]):
                 b = min(a + BATCH[spec.task], total)
-                _store(buffers, am.ann_blocks(backbone, rows[a:b], tvalid[a:b], spec.task, spec.span),
-                       slice(a, b), total)
+                _store(buffers, am.ann_blocks(backbone, rows[a:b].to(device), tvalid[a:b].to(device), spec.task,
+                                              spec.span), slice(a, b), total)
             primary = buffers[PRIMARY_STAT[spec.task]]
             test = clips.layout.test
-            extra["head_acc"] = (head(primary[test]).argmax(1) == clips.labels[test]).double().mean().item()
+            predicted = head(primary[test].to(device)).argmax(1).cpu()
+            extra["head_acc"] = (predicted == clips.labels[test]).double().mean().item()
         model = backbone
     else:
         rate = CARRIER_RATE_HZ if spec.drive == "carrier" else None

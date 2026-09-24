@@ -32,6 +32,7 @@ from multiprocessing import get_context
 from harness.confirm import protocol as pr
 from harness.confirm import run as rn
 from harness.confirm.arms import Arm
+from harness.utils.device import DEVICES, resolve
 from harness.utils.paths import PAPER02_ROOT
 
 GRIDS = (8, 16, 32, 64, 128)            # lattices of G x G oscillators per channel
@@ -449,6 +450,7 @@ def _work(spec: rn.Spec, device: str, threads: int) -> tuple[str, float]:
 
 def drive(names: list[str], workers: int, threads: int, device: str, dry_run: bool,
           grids=(), channels=()) -> None:
+    device = resolve(device)
     specs = planned(names, grids, channels)
     todo = pending(specs)
     n_reused = sum(paper02_complete(run) for run in map(paper02_run, specs))
@@ -500,7 +502,9 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--channels", type=int, nargs="+", default=[], help="only these channel counts")
     r.add_argument("--workers", type=int, default=3)
     r.add_argument("--threads", type=int, default=2)
-    r.add_argument("--device", default="cpu")
+    r.add_argument("--device", default="auto", choices=DEVICES,
+                   help="auto: CUDA if present, else Apple Silicon's GPU (mps), else the CPU; only cpu is "
+                        "bit-identical to paper 02")
     r.add_argument("--dry-run", action="store_true")
     a = ap.parse_args(argv)
     if a.command == "estimate":

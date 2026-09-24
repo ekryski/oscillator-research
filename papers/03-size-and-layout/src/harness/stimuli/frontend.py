@@ -35,7 +35,7 @@ UNPADDED_BANDS = 32
 HOP_OFFSET = 10.0
 HOP_SCALE = 10.0
 
-_MELS: dict[tuple[int, int], MelFrontend] = {}
+_MELS: dict[tuple[int, int, str], MelFrontend] = {}
 
 
 def fft_points(bands: int) -> int:
@@ -48,22 +48,24 @@ def hop_num_frames(n_samples: int) -> int:
     return max(0, (n_samples - HOP_N_FFT) // HOP_LENGTH + 1)
 
 
-def _mel(grid: int, sample_rate: int) -> MelFrontend:
-    key = (grid, sample_rate)
+def _mel(grid: int, sample_rate: int, device: torch.device | str = "cpu") -> MelFrontend:
+    """The mel front end for a band count, on the device its waveforms are on (built once per device)."""
+    key = (grid, sample_rate, str(device))
     if key not in _MELS:
         n_fft = fft_points(grid)
         if n_fft == HOP_N_FFT:
-            _MELS[key] = MelFrontend(sample_rate=sample_rate, n_fft=HOP_N_FFT, hop=HOP_LENGTH, n_mels=grid)
+            mel = MelFrontend(sample_rate=sample_rate, n_fft=HOP_N_FFT, hop=HOP_LENGTH, n_mels=grid)
         else:
-            _MELS[key] = MelFrontend(sample_rate=sample_rate, n_fft=n_fft, hop=HOP_LENGTH, n_mels=grid,
-                                     win_length=HOP_N_FFT, pad=(n_fft - HOP_N_FFT) // 2)
+            mel = MelFrontend(sample_rate=sample_rate, n_fft=n_fft, hop=HOP_LENGTH, n_mels=grid,
+                              win_length=HOP_N_FFT, pad=(n_fft - HOP_N_FFT) // 2)
+        _MELS[key] = mel.to(device)
     return _MELS[key]
 
 
 @torch.no_grad()
 def hop_rows(waves: torch.Tensor, grid: int = HOP_N_ROWS, sample_rate: int = 16000) -> torch.Tensor:
     """waves [B, L] -> rows [B, T, grid]: log-mel, then the fixed affine (x + 10) / 10 clamped at 0."""
-    logmel = _mel(grid, sample_rate)(waves)          # [B, T, grid]
+    logmel = _mel(grid, sample_rate, waves.device)(waves)          # [B, T, grid]
     return torch.clamp((logmel + HOP_OFFSET) / HOP_SCALE, min=0.0)
 
 
@@ -81,7 +83,7 @@ def _quad_maps(grid: int, sample_rate: int) -> tuple[torch.Tensor, torch.Tensor]
     """(band -> peak bin index [grid], that bin's frequency in Hz [grid]), from the band-energy filters."""
     key = (grid, sample_rate)
     if key not in _QUAD:
-        fb = _mel(grid, sample_rate).mel.mel_scale.fb   # [n_freqs, n_mels]
+        fb = _mel(grid, sample_rate).mel.mel_scale.fb   # [n_freqs, n_mels], always from the CPU copy
         bins = fb.argmax(dim=0)                        # [grid] peak bin per band
         freqs = bins.to(torch.float32) * sample_rate / fft_points(grid)
         _QUAD[key] = (bins, freqs)
@@ -99,20 +101,22 @@ def hop_rows_quad(waves: torch.Tensor, grid: int = HOP_N_ROWS, sample_rate: int 
     as the unpadded one wherever their bins coincide."""
     amp = hop_rows(waves, grid, sample_rate)           # [B, T, grid]
     bins, freqs = _quad_maps(grid, sample_rate)
+    bins, freqs = bins.to(waves.device), freqs.to(waves.device)
     n_fft = fft_points(grid)
     if n_fft == HOP_N_FFT:                             # paper 02's arithmetic, unchanged
-        spec = torch.stft(waves, n_fft=HOP_N_FFT, hop_length=HOP_LENGTH, window=torch.hann_window(HOP_N_FFT),
-                          center=False, return_complex=True)
+        window = torch.hann_window(HOP_N_FFT, device=waves.device)
+        spec = torch.stft(waves, n_fft=HOP_N_FFT, hop_length=HOP_LENGTH, window=window, center=False,
+                          return_complex=True)
         spec = spec[:, bins, :].transpose(1, 2)        # [B, T, grid] complex
-        t = torch.arange(spec.shape[1], dtype=torch.float32)[None, :, None]
+        t = torch.arange(spec.shape[1], dtype=torch.float32, device=waves.device)[None, :, None]
         when = t * HOP_LENGTH / sample_rate
     else:
         pad = (n_fft - HOP_N_FFT) // 2
         spec = torch.stft(torch.nn.functional.pad(waves, (pad, pad)), n_fft=n_fft, hop_length=HOP_LENGTH,
-                          win_length=HOP_N_FFT, window=torch.hann_window(HOP_N_FFT), center=False,
-                          return_complex=True)
+                          win_length=HOP_N_FFT, window=torch.hann_window(HOP_N_FFT, device=waves.device),
+                          center=False, return_complex=True)
         spec = spec[:, bins, :].transpose(1, 2)
-        t = torch.arange(spec.shape[1], dtype=torch.float32)[None, :, None]
+        t = torch.arange(spec.shape[1], dtype=torch.float32, device=waves.device)[None, :, None]
         when = (t * HOP_LENGTH - pad) / sample_rate    # each transform frame starts `pad` before its window
     demod = torch.exp(-2j * torch.pi * freqs[None, None, :] * when)
     phi = torch.angle(spec * demod)                    # baseband phase [B, T, grid]
