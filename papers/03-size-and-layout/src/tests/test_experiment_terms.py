@@ -1,7 +1,7 @@
 """The paper's terms for the record's labels."""
 
-from harness.confirm import terms
-from harness.confirm.arms import Arm
+from harness.experiment import terms
+from harness.experiment.arms import Arm
 
 
 def test_paper_02s_reference_network_is_named_plainly():

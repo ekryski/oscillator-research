@@ -10,7 +10,7 @@ from harness.utils.constants import WARMUP_FRAMES
 
 class GRUBaseline(nn.Module):
     """One GRU layer over the rows. Paper 02's hidden width is 18 (1,944 parameters on 16 rows);
-    paper 03 sets the width from the parameter budget (`harness.confirm.arms.ann_width`)."""
+    paper 03 sets the width from the parameter budget (`harness.experiment.arms.ann_width`)."""
 
     def __init__(self, grid: int = 16, hidden: int = 18):
         super().__init__()

@@ -6,11 +6,11 @@ import math
 import pytest
 import torch
 
-from harness.confirm import arms as am
-from harness.confirm import protocol as pr
-from harness.confirm import run as rn
+from harness.experiment import arms as am
+from harness.experiment import protocol as pr
+from harness.experiment import run as rn
 
-from .test_confirm_run import bank, spec  # noqa: F401  (the synthetic bank fixture)
+from .test_experiment_run import bank, spec  # noqa: F401  (the synthetic bank fixture)
 
 
 @pytest.fixture

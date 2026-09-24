@@ -22,7 +22,7 @@ fixed projection. Paper 03 also reads every projected width under a second
 projection seeded by the run's seed (`features.projection_matrix`), so the
 projection's own draw is sampled across seeds, and tags each cell with its
 projection. An arm too large to hold is standardized and projected channel by
-channel instead (`harness.confirm.stream`), and hands `fit_widths` its
+channel instead (`harness.experiment.stream`), and hands `fit_widths` its
 projected features.
 """
 

@@ -6,10 +6,10 @@ import numpy as np
 import pytest
 import torch
 
-from harness.confirm import plan
-from harness.confirm import readout as ro
-from harness.confirm import summary as sm
-from harness.confirm.arms import Arm
+from harness.experiment import plan
+from harness.experiment import readout as ro
+from harness.experiment import summary as sm
+from harness.experiment.arms import Arm
 
 N_TEST = 400
 FIELD_LABEL = "field-kuramoto-torus-random-lam0.3-clamp1"
@@ -46,8 +46,7 @@ def recorded(tmp_path, monkeypatch):
                 # paper 02's 16 x 16, 4-channel network, recorded in its own tier 1 file
                 old[f"A/{noise:g}db/g{gain:g}/s{seed}/{FIELD_LABEL}"] = run(Arm("field"), noise, gain, seed, 0.75,
                                                                            "windowed", tier="tier1")
-    (tmp_path / "confirmatory").mkdir(parents=True)
-    (tmp_path / "confirmatory" / "size-envelope-32x32.json").write_text(json.dumps({"runs": runs}))
+    (tmp_path / "size-envelope-32x32.json").write_text(json.dumps({"runs": runs}))
     (tmp_path / "paper02").mkdir()
     (tmp_path / "paper02" / "tier1-recognition-envelope.json").write_text(json.dumps({"runs": old}))
     return tmp_path
@@ -113,8 +112,7 @@ def test_the_order_tasks_pairs_are_pooled_and_a_sequences_positions_taken_togeth
         cells = [_cell(0.5, 3 * seed + p, position=p) for p in range(3)]
         seq[f"A/seq3/0db/g1/s{seed}/{net.label()}"] = {**_memory_run(net, seed, "sequence", cells, length=3),
                                                        "instruments": {"R": {"mean": 0.2 + 0.1 * seed}}}
-    root = tmp_path / "confirmatory"
-    root.mkdir(parents=True)
+    root = tmp_path
     (root / "size-order-envelope-8x8.json").write_text(json.dumps({"runs": order}))
     (root / "sequence-sequence-envelope-8x8.json").write_text(json.dumps({"runs": seq}))
     s = sm.summary()

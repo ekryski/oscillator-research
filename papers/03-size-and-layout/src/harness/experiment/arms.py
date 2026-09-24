@@ -2,8 +2,8 @@
 
 An arm's only job is to expose signals over time, [B, T, D]. Everything after
 that is shared: the same statistics over the same frames (harness.measurement
-.features), the same projection and the same ridge (harness.confirm.readout).
-The record keeps paper 02's labels; `harness.confirm.terms` gives the paper's
+.features), the same projection and the same ridge (harness.experiment.readout).
+The record keeps paper 02's labels; `harness.experiment.terms` gives the paper's
 terms for them.
 
     floor        the spectrogram-only baseline: the front-end rows themselves
@@ -211,7 +211,7 @@ def channel(arm: Arm, model: nn.Module, c: int) -> tuple[Arm, nn.Module]:
     starting phases (or its own leak rates and input weights), all receive
     the same input, and none acts on another. Channel c's trajectory is
     therefore the full arm's channel-c slice, which lets the streamed read
-    (harness.confirm.stream) simulate a large arm one channel at a time. Every
+    (harness.experiment.stream) simulate a large arm one channel at a time. Every
     stored tensor is sliced along the one axis where a one-channel arm
     differs from the full one, so nothing is redrawn.
     """

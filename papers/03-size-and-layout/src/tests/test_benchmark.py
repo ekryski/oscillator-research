@@ -6,10 +6,10 @@ import math
 import pytest
 import torch
 
-from harness.confirm import benchmark as bm
-from harness.confirm import plan
-from harness.confirm import run as rn
-from harness.confirm.arms import Arm
+from harness.experiment import benchmark as bm
+from harness.experiment import plan
+from harness.experiment import run as rn
+from harness.experiment.arms import Arm
 
 FAST = {"matmul_flops": 1e11, "randn_per_s": 5e7, "ridge_s": 10.0}
 

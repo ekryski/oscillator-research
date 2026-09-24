@@ -1,10 +1,10 @@
 """Paper 03's tiers, what they cost, which cells come from paper 02, and the driver that runs them.
 
-    uv run python -m harness.confirm.plan estimate                        # runs, CPU-hours and memory per tier
-    uv run python -m harness.confirm.plan prepare                         # the row caches, once
-    uv run python -m harness.confirm.plan run size --grids 8 16 32 --dry-run
-    uv run python -m harness.confirm.plan run gate size trained --grids 8 16 32 --workers 6
-    uv run python -m harness.confirm.plan benchmark --device cuda --out ../results/benchmark/cuda.json
+    uv run python -m harness.experiment.plan estimate                        # runs, CPU-hours and memory per tier
+    uv run python -m harness.experiment.plan prepare                         # the row caches, once
+    uv run python -m harness.experiment.plan run size --grids 8 16 32 --dry-run
+    uv run python -m harness.experiment.plan run gate size trained --grids 8 16 32 --workers 6
+    uv run python -m harness.experiment.plan benchmark --device cuda --out ../results/benchmark/cuda.json
 
 Every tier is a list of specs; nothing here is a free choice at run time.
 `--grids` and `--channels` select a stage of a tier (its lattices and channel
@@ -30,11 +30,11 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import get_context
 from pathlib import Path
 
-from harness.confirm import arms as am
-from harness.confirm import protocol as pr
-from harness.confirm import readout as ro
-from harness.confirm import run as rn
-from harness.confirm.arms import Arm
+from harness.experiment import arms as am
+from harness.experiment import protocol as pr
+from harness.experiment import readout as ro
+from harness.experiment import run as rn
+from harness.experiment.arms import Arm
 from harness.utils.device import DEVICES, resolve
 from harness.utils.paths import PAPER02_ROOT
 
@@ -266,10 +266,10 @@ TIERS = {"gate": gate, "size": size, "trained": trained, "sequence": sequence, "
 # cell is read from paper 02's record rather than run again. Exact kernel
 # scaling leaves every 16 x 16 network bit-identical to paper 02's
 # (tests/test_kernel_scaling.py), the read of an arm this size is paper 02's
-# own code, and `harness.confirm.gates reuse` re-runs a sample and requires
+# own code, and `harness.experiment.gates reuse` re-runs a sample and requires
 # every accuracy to match.
 
-PAPER02_RECORD = PAPER02_ROOT / "results" / "confirmatory"
+PAPER02_RECORD = PAPER02_ROOT / "results"
 
 
 TIER1, QUAD02, CARRIER02 = ("tier1-recognition-envelope", "tier3-recognition-quadrature",
@@ -730,7 +730,7 @@ def main(argv: list[str] | None = None) -> None:
     elif a.command == "prepare":
         prepare(a.workers, tuple(a.grids))
     elif a.command == "benchmark":
-        from harness.confirm.benchmark import benchmark
+        from harness.experiment.benchmark import benchmark
         benchmark(a.device, tuple(a.grids), tuple(a.channels), tuple(a.pathways), not a.no_designs, a.max_clips,
                   a.out)
     else:

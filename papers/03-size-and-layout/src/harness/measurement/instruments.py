@@ -2,7 +2,7 @@
 
 Carried from paper 02's harness (its `analytic_row_phase`). The instruments
 themselves (the order parameter, locking to the drive, the entrained share and
-the amplitude) are computed per clip by `harness.confirm.arms.field_instruments`
+the amplitude) are computed per clip by `harness.experiment.arms.field_instruments`
 and summarized per run; nothing here reaches the readout.
 """
 

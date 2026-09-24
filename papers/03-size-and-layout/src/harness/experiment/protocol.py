@@ -111,7 +111,7 @@ def load_bank(path: Path = BANK_PATH) -> dict:
     """Memory-mapped, so parallel workers share one copy of the clips."""
     if not path.exists():
         raise FileNotFoundError(f"{path} not found: build it with "
-                                "`uv run python -m harness.confirm.protocol --build-bank`")
+                                "`uv run python -m harness.experiment.protocol --build-bank`")
     return torch.load(path, mmap=True, weights_only=True)
 
 

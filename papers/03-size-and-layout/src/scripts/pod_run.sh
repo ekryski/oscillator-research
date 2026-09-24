@@ -17,7 +17,7 @@
 # volume (the folder that holds data/01 ... data/60). The script builds the
 # bank and the row caches, runs the reuse gate (paper 02's 16 x 16 cells must
 # reproduce, on the CPU), then the tiers. Every step is resume-safe. Results
-# land in papers/03-size-and-layout/results/confirmatory/; the rsync lines to
+# land in papers/03-size-and-layout/results/; the rsync lines to
 # copy them back are printed at the end.
 #
 # Pod: one GPU, 32 or more vCPUs, 64 GB or more RAM. 24 GB of GPU memory is
@@ -68,27 +68,27 @@ if [ "${BENCHMARK:-1}" != 0 ]; then
     SLUG="$(echo "${GPU:-$DEVICE}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-$//')"
     OUT="../results/benchmark/benchmark-${SLUG}-$(date +%Y-%m-%d).json"
     # shellcheck disable=SC2086
-    uv run python -m harness.confirm.plan benchmark --device "$DEVICE" --out "$OUT" ${BENCHMARK_ARGS:-} \
+    uv run python -m harness.experiment.plan benchmark --device "$DEVICE" --out "$OUT" ${BENCHMARK_ARGS:-} \
         | tee "${OUT%.json}.log"
 fi
 
 if [ "${#TIERS[@]}" -gt 0 ]; then
-    [ -f data/cache/digits_v2.pt ] || uv run python -m harness.confirm.protocol --build-bank
-    uv run python -m harness.confirm.plan prepare --workers "$(( CPUS < 16 ? CPUS : 16 ))"
-    uv run python -m harness.confirm.gates reuse            # always on the CPU, the only device bit-identical to paper 02
+    [ -f data/cache/digits_v2.pt ] || uv run python -m harness.experiment.protocol --build-bank
+    uv run python -m harness.experiment.plan prepare --workers "$(( CPUS < 16 ? CPUS : 16 ))"
+    uv run python -m harness.experiment.gates reuse            # always on the CPU, the only device bit-identical to paper 02
     for tier in "${TIERS[@]}"; do
         case "$tier" in
             carrier|design-carrier) W=2; T=4 ;;                               # 16,000 steps a clip
             *) W=$(( CPUS / 2 < MEM_GB / 12 ? CPUS / 2 : MEM_GB / 12 )); W=$(( W < 1 ? 1 : W )); T=2 ;;
         esac
-        uv run python -m harness.confirm.plan run "$tier" --workers "$W" --threads "$T" --device "$DEVICE" \
+        uv run python -m harness.experiment.plan run "$tier" --workers "$W" --threads "$T" --device "$DEVICE" \
             ${EXTRA[@]+"${EXTRA[@]}"}
-        if [ "$tier" = gate ]; then uv run python -m harness.confirm.gates check; fi
+        if [ "$tier" = gate ]; then uv run python -m harness.experiment.gates check; fi
     done
-    uv run python -m harness.confirm.summary > /dev/null
+    uv run python -m harness.experiment.summary > /dev/null
 fi
 
 echo
 echo "=== done. From your machine:"
 echo "rsync -avz -e 'ssh -p <PORT> -i ~/.ssh/runpod_ed25519' root@<HOST>:$WORK/papers/03-size-and-layout/results/benchmark/ papers/03-size-and-layout/results/benchmark/"
-[ "${#TIERS[@]}" -eq 0 ] || echo "rsync -avz -e 'ssh -p <PORT> -i ~/.ssh/runpod_ed25519' root@<HOST>:$WORK/papers/03-size-and-layout/results/confirmatory/ papers/03-size-and-layout/results/confirmatory/"
+[ "${#TIERS[@]}" -eq 0 ] || echo "rsync -avz -e 'ssh -p <PORT> -i ~/.ssh/runpod_ed25519' root@<HOST>:$WORK/papers/03-size-and-layout/results/ papers/03-size-and-layout/results/"

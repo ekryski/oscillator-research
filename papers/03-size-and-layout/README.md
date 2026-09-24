@@ -28,7 +28,7 @@ Paper 03 runs that ablation for paper 02's networks. The lattice runs from 8 × 
 | [`metadata/`](metadata/) | the front matter |
 | [`src/`](src/) | the harness, derived from paper 02's, with its tests: [start here](src/README.md) |
 | `resources/figures/` | the figures, drawn by `src/scripts/draw_*_figure.py` (three adapted from paper 02's) |
-| `results/confirmatory/` | the record, as the tiers run |
+| `results/` | the record, as the tiers run |
 | `results/benchmark/` | GPU benchmark reports (`plan benchmark`), which price the tiers on the machine that ran them |
 
 ## Checking the design
@@ -36,8 +36,8 @@ Paper 03 runs that ablation for paper 02's networks. The lattice runs from 8 × 
 ```bash
 cd src && uv sync
 uv run pytest                                    # the contract tests, no data needed
-uv run python -m harness.confirm.plan estimate   # runs, CPU- and GPU-hours and memory for every tier and lattice
-uv run python -m harness.confirm.plan benchmark --device cuda --out ../results/benchmark/cuda.json   # time it on a GPU
+uv run python -m harness.experiment.plan estimate   # runs, CPU- and GPU-hours and memory for every tier and lattice
+uv run python -m harness.experiment.plan benchmark --device cuda --out ../results/benchmark/cuda.json   # time it on a GPU
 ```
 
 Running the tiers needs paper 02's digit bank; see [src/data/README.md](src/data/README.md).

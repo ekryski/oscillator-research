@@ -1,7 +1,7 @@
 """Time one batch of each network on this machine's device, and extrapolate every run and tier from it.
 
-    uv run python -m harness.confirm.plan benchmark --device cuda --out ../results/benchmark/cuda.json
-    uv run python -m harness.confirm.plan benchmark --device mps --grids 8 16 --channels 1 4 --no-designs
+    uv run python -m harness.experiment.plan benchmark --device cuda --out ../results/benchmark/cuda.json
+    uv run python -m harness.experiment.plan benchmark --device mps --grids 8 16 --channels 1 4 --no-designs
 
 The cost model in `plan.py` was measured on an M1 Max; the carrier, which
 integrates 16,000 steps a clip, was extrapolated from the band-energy pathway
@@ -45,10 +45,10 @@ from pathlib import Path
 
 import torch
 
-from harness.confirm import arms as am
-from harness.confirm import plan
-from harness.confirm import readout as ro
-from harness.confirm import run as rn
+from harness.experiment import arms as am
+from harness.experiment import plan
+from harness.experiment import readout as ro
+from harness.experiment import run as rn
 from harness.measurement.features import MAX_WIDTH
 from harness.stimuli.filterbank import bandpass_rows
 from harness.utils.device import describe, resolve

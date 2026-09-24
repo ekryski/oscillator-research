@@ -3,8 +3,8 @@
 import pytest
 import torch
 
-from harness.confirm import arms as am
-from harness.confirm import plan
+from harness.experiment import arms as am
+from harness.experiment import plan
 
 PAPER02 = {"gru": (18, 1944), "tcn": (12, 1948), "cnn": (13, 2109), "transformer": (16, 1968), "s4d": (16, 1840)}
 

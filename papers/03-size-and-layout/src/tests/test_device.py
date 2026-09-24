@@ -11,16 +11,16 @@ import math
 import pytest
 import torch
 
-from harness.confirm import arms as am
-from harness.confirm import readout as ro
-from harness.confirm import run as rn
-from harness.confirm import stream as st
+from harness.experiment import arms as am
+from harness.experiment import readout as ro
+from harness.experiment import run as rn
+from harness.experiment import stream as st
 from harness.models.geometries import BOUNDARIES
 from harness.stimuli.filterbank import bandpass_rows
 from harness.stimuli.frontend import hop_rows, hop_rows_quad
 from harness.utils import device as dv
 
-from .test_confirm_run import bank, spec  # noqa: F401  (the synthetic bank fixture)
+from .test_experiment_run import bank, spec  # noqa: F401  (the synthetic bank fixture)
 
 GPUS = [d for d in ("mps", "cuda") if dv.available(d)]
 gpu = pytest.mark.parametrize("device", GPUS or [pytest.param("none", marks=pytest.mark.skip("no GPU here"))])

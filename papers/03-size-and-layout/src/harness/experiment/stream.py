@@ -60,8 +60,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 import torch
 
-from harness.confirm import arms as am
-from harness.confirm import readout as ro
+from harness.experiment import arms as am
+from harness.experiment import readout as ro
 from harness.measurement.features import MAX_WIDTH, projection_seed
 
 #: arms with more states than this are read channel by channel

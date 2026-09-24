@@ -1,7 +1,7 @@
 """One AudioMNIST recording, loaded exactly as paper 02's bank loaded it.
 
 Paper 03 reuses paper 02's 50-repetition bank (`digits_v2.pt`); the bank is
-built by `harness.confirm.protocol --build-bank`, which calls `load_clip` for
+built by `harness.experiment.protocol --build-bank`, which calls `load_clip` for
 every recording. Nothing here draws a random number: same corpus in, same
 bank out.
 """

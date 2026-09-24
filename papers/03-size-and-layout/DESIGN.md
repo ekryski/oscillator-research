@@ -2,7 +2,7 @@
 
 The current design of paper 03, its open questions (section 11), and a dated log of every change to it (at the end). No run has been made.
 
-Everything below is implemented in `src/harness/confirm/` and tested in `src/tests/`; where this text and the code could disagree, the tier definitions in `harness/confirm/plan.py` are the plan. [TIERS.md](TIERS.md) gives each tier's cost.
+Everything below is implemented in `src/harness/experiment/` and tested in `src/tests/`; where this text and the code could disagree, the tier definitions in `harness/experiment/plan.py` are the plan. [TIERS.md](TIERS.md) gives each tier's cost.
 
 ## 1. What this is
 

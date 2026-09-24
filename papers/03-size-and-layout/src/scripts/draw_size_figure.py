@@ -3,7 +3,7 @@
     uv run python scripts/draw_size_figure.py
 
 A drawing, not a result: nothing here reads the record. The numbers in it come
-from the plan (harness.confirm.plan) and the arms (harness.confirm.arms), so
+from the plan (harness.experiment.plan) and the arms (harness.experiment.arms), so
 the figure cannot drift from the design. Writes
 resources/figures/a4-size-and-band-mapping.{pdf,png}.
 """
@@ -19,9 +19,9 @@ import matplotlib.pyplot as plt
 from matplotlib import colormaps
 from matplotlib.patches import Rectangle
 
-from harness.confirm import plan
-from harness.confirm import stream as st
-from harness.confirm.arms import Arm
+from harness.experiment import plan
+from harness.experiment import stream as st
+from harness.experiment.arms import Arm
 from harness.utils.paths import FIGURES_DIR
 
 INK, MUTED, NETWORK = "#222222", "#8C8C8C", "#534AB7"
@@ -63,7 +63,7 @@ def size_panel(ax) -> None:
 
 def mapping(ax, x0: float, bands: int, rows: int, title: str) -> None:
     """Bands on the left, lattice rows on the right: each row coloured by the band or bands that drive
-    it, and joined to them (harness.confirm.protocol.to_rows: one band per row, a band on rows / bands
+    it, and joined to them (harness.experiment.protocol.to_rows: one band per row, a band on rows / bands
     adjacent rows, or the mean of bands / rows adjacent bands)."""
     h, w, gap = 5.0, 0.35, 1.0
     ax.text(x0 + (2 * w + gap) / 2, h + 0.35, title, ha="center", va="bottom", fontsize=8)

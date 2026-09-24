@@ -6,9 +6,9 @@ per-clip correctness where the plan asks for it. The training block and the
 test block are batched separately, so a test clip's features are computed in
 the same batch in every tier that uses it. An arm with more than
 `stream.STREAM_STATES` states is instead read channel by channel
-(`harness.confirm.stream`).
+(`harness.experiment.stream`).
 
-The record lives under results/confirmatory/, one file per tier, input
+The record lives under results/, one file per tier, task, input
 pathway and lattice (and coupling function in the design tiers). A run's
 identity is derived from its specification alone, so a sweep can be stopped
 and restarted and each run lands in the same place exactly once. Run
@@ -32,10 +32,10 @@ from pathlib import Path
 
 import torch
 
-from harness.confirm import arms as am
-from harness.confirm import protocol as pr
-from harness.confirm import readout as ro
-from harness.confirm import stream as st
+from harness.experiment import arms as am
+from harness.experiment import protocol as pr
+from harness.experiment import readout as ro
+from harness.experiment import stream as st
 from harness.utils.device import describe, resolve
 from harness.utils.paths import results_root
 
@@ -117,7 +117,8 @@ class Spec:
 # ---------------------------------------------------------------------------
 
 def record_root() -> Path:
-    return results_root() / "confirmatory"
+    """Where the record lives, read per call: OSC_RESULTS_DIR redirects it, e.g. to reproduce into a fresh tree."""
+    return results_root()
 
 
 def group_path(group: str) -> Path:
@@ -398,7 +399,7 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
 
 
 def _execute_streamed(spec: Spec, clips: Clips, model: torch.nn.Module, device: str, t0: float) -> dict:
-    """An arm too large to hold, read channel by channel (harness.confirm.stream), one read at a time.
+    """An arm too large to hold, read channel by channel (harness.experiment.stream), one read at a time.
 
     Each read simulates the channels again, so that only one read's features
     and matrices are held at once; a network's instruments are recorded on

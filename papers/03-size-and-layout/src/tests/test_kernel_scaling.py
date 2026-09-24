@@ -15,8 +15,8 @@ every 16 x 16 network is bit-identical under the two rules, and paper 02's
 import pytest
 import torch
 
-from harness.confirm import arms as am
-from harness.confirm import plan
+from harness.experiment import arms as am
+from harness.experiment import plan
 from harness.models.field import physics_block
 from harness.models.geometries import BOUNDARIES
 from harness.models.phase import PhaseBlock, ceiling_factor

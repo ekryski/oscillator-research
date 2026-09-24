@@ -2,9 +2,9 @@
 
 import pytest
 
-from harness.confirm import plan
-from harness.confirm import run as rn
-from harness.confirm.arms import Arm
+from harness.experiment import plan
+from harness.experiment import run as rn
+from harness.experiment.arms import Arm
 
 #: the run counts TIERS.md and DESIGN.md state
 COUNTS = {"gate": 30, "size": 2688, "trained": 825, "sequence": 1296, "design": 3375, "quadrature": 363,

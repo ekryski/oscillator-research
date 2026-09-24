@@ -1,7 +1,7 @@
 """Integrity gates, checked before any result they guard is read.
 
-    uv run python -m harness.confirm.gates reuse    # paper 02's 16 x 16 cells reproduce under this harness (CPU)
-    uv run python -m harness.confirm.gates check    # every recorded zero-input cell reads chance
+    uv run python -m harness.experiment.gates reuse    # paper 02's 16 x 16 cells reproduce under this harness (CPU)
+    uv run python -m harness.experiment.gates check    # every recorded zero-input cell reads chance
 
 The reuse gate is what licenses taking cells from paper 02's record. It
 re-runs a fixed sample of the paper 02 runs that paper 03 reuses, one from
@@ -26,10 +26,10 @@ import time
 
 import torch
 
-from harness.confirm import plan
-from harness.confirm import run as rn
-from harness.confirm.arms import Arm
-from harness.confirm.readout import projection_of
+from harness.experiment import plan
+from harness.experiment import run as rn
+from harness.experiment.arms import Arm
+from harness.experiment.readout import projection_of
 
 CHANCE = 0.1
 #: one reused run per record file and arm kind: (tier maker's spec fields)

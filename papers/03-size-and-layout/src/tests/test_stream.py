@@ -2,7 +2,7 @@
 
 A large arm is simulated one channel at a time, standardized with its own
 channel's training statistics, and projected into the run's features as it
-goes (harness.confirm.stream). These tests hold it to the in-memory read:
+goes (harness.experiment.stream). These tests hold it to the in-memory read:
 given paper 02's projection matrix, rows matched to the channel's features,
 it gives the same projected features to float32 rounding and the same
 accuracy in every cell. With its own per-channel draw it is another fixed
@@ -12,13 +12,13 @@ Gaussian matrix of the same scale.
 import pytest
 import torch
 
-from harness.confirm import arms as am
-from harness.confirm import readout as ro
-from harness.confirm import run as rn
-from harness.confirm import stream as st
+from harness.experiment import arms as am
+from harness.experiment import readout as ro
+from harness.experiment import run as rn
+from harness.experiment import stream as st
 from harness.measurement.features import projection_matrix
 
-from .test_confirm_run import bank, spec  # noqa: F401  (the synthetic bank fixture)
+from .test_experiment_run import bank, spec  # noqa: F401  (the synthetic bank fixture)
 
 
 def _global_rows(arm: am.Arm, c: int, windows: int = 4, read: str = "windowed") -> torch.Tensor:
