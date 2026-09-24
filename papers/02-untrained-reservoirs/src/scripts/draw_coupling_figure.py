@@ -122,7 +122,7 @@ FUNCTIONS = (
      [(0, "stable"), (-math.pi, "unstable"), (math.pi, "unstable")]),
     ("Kuramoto–Sakaguchi", "Kᵢⱼ sin(θⱼ − θᵢ − α),  α = π/4",
      "the pull aims α behind the neighbour: an in-phase pair still locks, but slowed, "
-     "and a population can settle into travelling waves.",
+     "and a population can settle into partial coherence rather than all-or-nothing locking.",
      sakaguchi, ((THETA_J - ALPHA, "aim"),),
      [(lambda d: math.sin(d - ALPHA), "sin(θⱼ − θᵢ − α)", SOLID), (lambda d: math.sin(d), "Kuramoto", DASHED)], DIFF,
      [(ALPHA, "stable")]),

@@ -12,6 +12,7 @@ import argparse
 
 from harness.confirm import score as sc
 from harness.confirm import summary as sm
+from harness.confirm import terms
 from harness.utils.paths import FIGURES_DIR
 
 NOISES = ((None, "clean"), (0.0, "0 dB"), (5.0, "+5 dB"))
@@ -106,6 +107,34 @@ def recognition_figure(acc: dict[tuple, dict], stem: str, gains: tuple[float, ..
     print(f"wrote {path}.{{pdf,png}}")
 
 
+TRAINED = ("ann-gru", "ann-tcn", "ann-cnn", "ann-transformer", "ann-s4d")
+
+
+def trained_table(acc: dict[tuple, dict]) -> str:
+    """The trained baselines at the primary cell, with their parameter counts and training failures."""
+    import json
+    from collections import Counter
+
+    from harness.confirm import run as rn
+    record = json.loads((rn.record_root() / "tier1-recognition-envelope.json").read_text())["runs"]
+    params, failed, total = {}, Counter(), Counter()
+    for run_id, rec in record.items():
+        label = run_id.split("/")[-2]
+        if label in TRAINED:
+            params[label] = rec["arm_meta"]["trained_params"]
+            if rec["spec"]["noise_db"] is not None:
+                total[label] += 1
+                failed[label] += not rec["health"]["healthy"]
+    lines = ["| trained baseline | parameters | " + " | ".join(h for _, h in NOISES)
+             + " | failed runs with noise |", "|---" * (len(NOISES) + 3) + "|"]
+    for label in TRAINED:
+        cells = [acc[(label, "windowed", None, noise)] for noise, _ in NOISES]
+        lines.append(f"| {terms.arm(label)} | {params[label]:,} | "
+                     + " | ".join(f"{c['mean']:.1f} ± {c['sd']:.1f}" for c in cells)
+                     + f" | {failed[label]} of {total[label]} |")
+    return "\n".join(lines)
+
+
 def main(argv: list[str] | None = None) -> None:
     argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args(argv)
     acc = recognition_cells()
@@ -113,6 +142,7 @@ def main(argv: list[str] | None = None) -> None:
         recognition_figure(acc, stem, gains)
     for gains in ((1.0,), (2.0,)):
         print(f"\ngain {gains[0]:g}\n" + recognition_table(acc, gains))
+    print("\ntrained baselines\n" + trained_table(acc))
 
 
 if __name__ == "__main__":
