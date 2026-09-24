@@ -29,7 +29,6 @@ import numpy as np
 from harness.confirm import plan, terms
 from harness.confirm import run as rn
 from harness.confirm import score as sc
-from harness.confirm.arms import Arm
 from harness.confirm.score import Cell
 
 FIELD = sc.FIELD_LABEL
@@ -92,7 +91,7 @@ def accuracies(cells: list[Cell]) -> list[dict]:
         key = (c.tier, c.task, c.drive, c.label, c.read, c.noise, c.gain, c.pair, c.width, c.n_train)
         groups[key][replicate(c)] = c.acc
     fields = ("tier", "task", "drive", "arm", "read", "noise", "gain", "pair", "width", "n_train")
-    return [{**dict(zip(fields, k, strict=True)), "name": terms.arm(k[3], k[0]), "pathway": terms.PATHWAYS[k[2]],
+    return [{**dict(zip(fields, k, strict=True)), "name": terms.arm(k[3]), "pathway": terms.PATHWAYS[k[2]],
              "pair": list(k[7]) or None, **spread(v)} for k, v in sorted(groups.items(), key=str)]
 
 
@@ -202,33 +201,11 @@ def drives(cells: list[Cell]) -> list[dict]:
     return out
 
 
-def size(cells: list[Cell]) -> list[dict]:
-    """Tier 4: at each lattice, band mapping and channel count, the coupled network minus its state-matched
-    bank, and each minus the spectrogram-only baseline on the same rows."""
-    out = []
-    for grid in plan.SIZE_GRIDS:
-        for bands in plan.SIZE_BANDS:
-            if grid == 16 and bands == 16:
-                continue
-            baseline = Arm("floor", grid=grid, bands=bands).label()
-            for ch in plan.SIZE_CHANNELS:
-                network = Arm("field", channels=ch, grid=grid, bands=bands).label()
-                bank = Arm("bank", channels=ch, grid=grid, bands=bands).label()
-                where = terms.arm(network).removeprefix(NETWORK).strip(" ()") or "4 channels, 16 × 16 lattice"
-                out += versus(cells, f"{NETWORK} minus the state-matched leaky-integrator bank ({where})",
-                              (network, "windowed"), (bank, "windowed"), tier="tier4", task="recognition")
-                for name, label in ((NETWORK, network), ("state-matched leaky-integrator bank", bank)):
-                    out += versus(cells, f"{name} minus the spectrogram-only baseline, whole clip ({where})",
-                                  (label, "windowed"), (baseline, "windowed@wholeclip"), tier="tier4",
-                                  task="recognition")
-    return out
-
-
 def summary(cells: list[Cell] | None = None) -> dict:
     cells = sc.load() if cells is None else cells
     return {"accuracy": accuracies(cells),
             "comparisons": (tier1(cells) + _against_network(cells, "becker", "recognition") + design(cells)
-                            + drives(cells) + size(cells)),
+                            + drives(cells)),
             "order_floor_at_chance": sc.order_gate(cells)}
 
 
@@ -294,7 +271,7 @@ def _rank(r: dict) -> tuple:
 
 
 def _arm(r: dict) -> str:
-    name = terms.arm(r["arm"], r.get("tier"))
+    name = terms.arm(r["arm"])
     if r["arm"] == "floor":
         name += ", whole clip" if r["read"].endswith("@wholeclip") else ", from frame 16"
     return name + (f" (gain = {r['gain']:g})" if r.get("gain") is not None else "")
@@ -370,8 +347,6 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
     lines += ["", "## Tier 3, quadrature and carrier pathways: each arm minus that pathway's baseline", ""]
     lines += _grid([r for r in prim_cmp("tier3")], lambda r: f"{terms.PATHWAYS[r['drive']]} pathway: {r['comparison']}",
                    _by_condition, _diff)
-    lines += ["", "## Tier 4, size: coupled oscillator network minus the state-matched leaky-integrator bank", ""]
-    lines += _grid(prim_cmp("tier4"), lambda r: r["comparison"], _by_condition, _diff)
     return "\n".join(lines) + "\n"
 
 

@@ -18,7 +18,7 @@ set -euo pipefail
 
 AUDIOMNIST="${1:?usage: pod_run.sh <path to the AudioMNIST checkout> [tier ...]}"
 shift || true
-if [ "$#" -gt 0 ]; then TIERS=("$@"); else TIERS=(gate tier1 tier2 becker tier3 tier4 carrier); fi
+if [ "$#" -gt 0 ]; then TIERS=("$@"); else TIERS=(gate tier1 tier2 becker tier3 carrier); fi
 REPO="${REPO:-https://github.com/ekryski/oscillator-research.git}"
 BRANCH="${BRANCH:-ek/paper-02}"
 WORK="${WORK:-/workspace/oscillator-research}"

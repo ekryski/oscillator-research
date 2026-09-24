@@ -70,33 +70,18 @@ class Arm:
     channels: int = 4
     severed: bool = False
     arch: str = ""
-    grid: int = GRID                # the lattice is grid x grid per channel
-    bands: int = 0                  # mel bands in the front end; 0 is one per lattice row
-
-    @property
-    def n_bands(self) -> int:
-        return self.bands or self.grid
-
-    def _lattice(self) -> str:
-        """'' at the registered 16 x 16 with a band per row, so every registered label is unchanged."""
-        out = "" if self.grid == GRID else f"-{self.grid}x{self.grid}"
-        return out + ("" if self.n_bands == self.grid else f"-{self.n_bands}bands")
 
     def label(self) -> str:
         if self.kind == "floor":
-            return "floor" + self._lattice()
+            return "floor"
         if self.kind == "bank":
-            return f"bank-c{self.channels}" + self._lattice()
+            return f"bank-c{self.channels}"
         if self.kind == "ann":
             return f"ann-{self.arch}"
         name = "severed" if self.severed else "field"
         size = "" if self.channels == 4 else f"-c{self.channels}"
         return (f"{name}-{self.physics}-{self.boundary}-{self.omega}"
-                f"-lam{self.damping:g}-clamp{self.clamp:g}{size}{self._lattice()}")
-
-    @property
-    def states(self) -> int:
-        return self.channels * self.grid * self.grid if self.kind in ("field", "bank") else 0
+                f"-lam{self.damping:g}-clamp{self.clamp:g}{size}")
 
     @property
     def uses_gain(self) -> bool:
@@ -141,14 +126,14 @@ def build_frozen(arm: Arm, gain: float, seed: int, device: str = "cpu",
         return None
     if arm.kind == "bank":
         extra = {} if rate_hz is None else {"rate_hz": rate_hz}
-        return LeakyBank(channels=arm.channels, grid=arm.grid, gain=gain, seed=seed, **extra).to(device)
+        return LeakyBank(channels=arm.channels, grid=GRID, gain=gain, seed=seed, **extra).to(device)
     if arm.kind != "field":
         raise ValueError(f"{arm.kind} is not a frozen arm")
     core, coupling = ((arm.physics, "kuramoto") if arm.physics in ("sl", "sl-fixedamp")
                       else ("phase", arm.physics))
     torch.manual_seed(seed)              # the kernel and natural-frequency draws
     field = OscillatorField(
-        channels=arm.channels, grid=arm.grid, coupling=coupling, damping=arm.damping,
+        channels=arm.channels, grid=GRID, coupling=coupling, damping=arm.damping,
         spectral_clamp=arm.clamp, substeps=SUBSTEPS, dt=DT, n_classes=N_CLASSES,
         probe_seed=PROBE_SEED + seed, gain=gain, seed=seed, core=core, boundary=arm.boundary,
         sakaguchi_alpha=ALPHA if arm.physics == "sakaguchi" else 0.0,
@@ -157,7 +142,7 @@ def build_frozen(arm: Arm, gain: float, seed: int, device: str = "cpu",
     with torch.no_grad():
         if arm.omega == "designed":
             block.natural_freqs.copy_(tonotopic_omega(
-                arm.channels, arm.grid, DT, SUBSTEPS, torch.Generator().manual_seed(DESIGNED_OMEGA_SEED + seed)))
+                arm.channels, GRID, DT, SUBSTEPS, torch.Generator().manual_seed(DESIGNED_OMEGA_SEED + seed)))
         elif arm.omega == "uniform":
             block.natural_freqs.fill_(1.0)
         if arm.severed:
@@ -203,7 +188,7 @@ def meta(arm: Arm, model: nn.Module | None) -> dict:
         return {"states": 0, "stored_params": 0, "trained_params": 0}
     stored = sum(p.numel() for p in model.parameters())
     trained = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    states = arm.states if arm.kind in ("field", "bank") else None
+    states = arm.channels * GRID * GRID if arm.kind in ("field", "bank") else None
     out = {"states": states, "stored_params": stored, "trained_params": trained}
     if arm.severed:
         # the zeroed kernel is still stored, but it no longer does anything

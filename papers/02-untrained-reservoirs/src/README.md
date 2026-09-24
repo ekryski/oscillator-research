@@ -161,7 +161,7 @@ uv run python -m harness.confirm.plan prepare            # front-end rows, once 
 uv run python -m harness.confirm.gates legacy            # the exploratory record reproduces
 uv run python -m harness.confirm.plan run gate tier1 --workers 3 --threads 2
 uv run python -m harness.confirm.gates check             # every zero-drive cell reads chance
-uv run python -m harness.confirm.plan run tier2 becker tier3 tier4 --workers 6 --threads 1
+uv run python -m harness.confirm.plan run tier2 becker tier3 --workers 6 --threads 1
 uv run python -m harness.confirm.summary                 # every accuracy and difference with its spread
 uv run python -m harness.confirm.figures                 # the paper's confirmatory figures and their tables
 uv run python -m harness.confirm.score                   # the registered bars' verdicts, for the record

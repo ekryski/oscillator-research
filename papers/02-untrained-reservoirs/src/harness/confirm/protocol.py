@@ -194,24 +194,6 @@ def front_end(waves: torch.Tensor, drive: str, grid: int = 16) -> torch.Tensor:
     raise ValueError(f"unknown drive '{drive}'")
 
 
-def to_rows(rows: torch.Tensor, grid: int) -> torch.Tensor:
-    """[B, T, bands] -> [B, T, grid]: the fixed map from a front end's bands onto a lattice's rows.
-
-    One band per row needs nothing. More rows than bands give each band
-    grid // bands adjacent rows; fewer rows give each row the mean of
-    bands // grid adjacent bands. Either way nothing is fitted, and the rows
-    stay in frequency order.
-    """
-    bands = rows.shape[-1]
-    if bands == grid:
-        return rows
-    if grid % bands == 0:
-        return rows.repeat_interleave(grid // bands, dim=-1)
-    if bands % grid == 0:
-        return rows.unflatten(-1, (grid, bands // grid)).mean(-1)
-    raise ValueError(f"cannot map {bands} bands onto {grid} rows")
-
-
 def valid_frames(lens: torch.Tensor, drive: str) -> torch.Tensor:
     """How many of each clip's rows hold speech: hop frames, or samples for the carrier."""
     if drive == "carrier":
@@ -290,10 +272,8 @@ def level_name(noise_db: float | None) -> str:
     return "clean" if noise_db is None else f"{noise_db:g}db"
 
 
-def rows_path(drive: str, noise_db: float | None, bands: int = 16) -> Path:
-    """The cache for a drive and level; the registered 16 bands keep their original name."""
-    size = "" if bands == 16 else f"-{bands}bands"
-    return ROWS_DIR / f"{drive}{size}-{level_name(noise_db)}.pt"
+def rows_path(drive: str, noise_db: float | None) -> Path:
+    return ROWS_DIR / f"{drive}-{level_name(noise_db)}.pt"
 
 
 def order_rows_path(pair: tuple[int, int], set_code: int, noise_db: float | None) -> Path:
@@ -307,20 +287,20 @@ def _save(out: Path, rows: torch.Tensor, tvalid: torch.Tensor, **meta) -> None:
     tmp.replace(out)                    # atomic: a reader never sees half a cache
 
 
-def build_rows(bank: dict, drive: str, noise_db: float | None, bands: int = 16) -> Path:
+def build_rows(bank: dict, drive: str, noise_db: float | None) -> Path:
     """Front-end rows for every clip in the bank, in canonical order."""
     n = len(bank["labels"])
     rows = tvalid = None
     for a in range(0, n, CACHE_BATCH):
         idx = torch.arange(a, min(a + CACHE_BATCH, n))
         waves, lens, _ = recognition_clips(bank, idx, noise_db)
-        r = front_end(waves, drive, bands)
+        r = front_end(waves, drive)
         if rows is None:
             rows = torch.empty((n, *r.shape[1:]))
             tvalid = torch.empty(n, dtype=torch.long)
         rows[idx], tvalid[idx] = r, valid_frames(lens, drive)
-    out = rows_path(drive, noise_db, bands)
-    _save(out, rows, tvalid, n_clips=n, drive=drive, noise_db=noise_db, bands=bands)
+    out = rows_path(drive, noise_db)
+    _save(out, rows, tvalid, n_clips=n, drive=drive, noise_db=noise_db)
     return out
 
 
