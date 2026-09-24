@@ -68,7 +68,7 @@ All six families share the update
 θ̇ᵢ = ωᵢ + couplingᵢ(θ; K) + driveᵢ − λ·sin θᵢ,
 where K is a per-channel spatial coupling kernel applied convolutionally over the lattice,
 ω the natural frequencies, λ a pinning toward rest, and the drive enters per the pathway
-(§4.3). The families differ only in the coupling term, a controlled deviation series from
+(§4.4). The families differ only in the coupling term, a controlled deviation series from
 the Kuramoto base:
 
 | family | coupling (essence) | primary source | why it is in the matrix |
@@ -127,7 +127,7 @@ The probe asks one question: are the ten digits' feature vectors linearly separa
 reader is ridge regression, W = (ΦᵀΦ + λI)⁻¹ΦᵀY: one closed-form hyperplane per class,
 chosen as the *weakest* reader precisely so attribution is unambiguous: a linear scorer cannot compute, so any separation it finds must pre-exist in the features; the dynamics
 wrote it. The probe measures the outcome (class-separable response), not mechanism; locking
-and coherence are measured separately by instrumentation (§4.6). The weakest-reader choice
+and coherence are measured separately by instrumentation (§4.7). The weakest-reader choice
 is itself tested, not assumed (§5.4).
 
 **Floor.** The identical ridge on the frontend features directly, field bypassed, per
@@ -147,7 +147,27 @@ separation it finds must already exist in the features rather than being compute
 
 ## 4 Methods
 
-### 4.1 Task and data
+### 4.1 Experimental design
+
+The confirmatory study was registered before its first run and is organized in seven tiers. Every run is one arm at one noise level, gain and seed, read at several readout widths and training sizes; the run counts below are the registered totals.
+
+| tier | question | arms | varied | fixed | runs |
+|---|---|---|---|---|---|
+| gate | Does the pipeline leak? | field, severed field, bank A and bank B with no drive; the field read over each clip's own length | the per-clip read at gain 0, 1 and 2, seeds 0–2 | 0 dB; the zero-drive cells at seed 0 | 13 |
+| 1, arms | Do the dynamics add anything beyond the input, a leaky bank, or severed coupling, and how do trained networks compare? (H1, H2, H3, H5, H6) | floor, field, severed field, bank A, bank B, GRU, TCN, CNN, transformer, S4D | noise clean, 0 and +5 dB; gain 1 and 2 (untrained dynamical arms); seeds 0–2; recognition at 2,048, 8,192 and 24,000 training clips, each network trained at each size; the order task on 5 digit pairs | field: Kuramoto, torus, random ω, pinning 0.3, clamp 1; order task at 2,048 training and 2,048 test sequences | 846 (216 recognition, 630 order) |
+| 2, design | Does field design move accuracy? (H4) | field only | coupling law (6), geometry (6; the Stuart-Landau cores on the torus only), ω structure (random, designed, uniform), pinning (0.3, 0.1), clamp (1, 0.5); noise 0 and +5 dB; gain 1 and 2; seeds 0–2 | 2,048 training clips; the four-window read, with and without rotation rates | 3,744 |
+| B, Becker | Where do we sit against published numbers? | the Tier 1 arms | the 5 speaker folds of [Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038); gain 1 and 2 | clean audio; 18,000 training, 6,000 validation and 6,000 test clips; seed 0 | 70 |
+| 3, quadrature | Does phase-referenced input beat its own floor? (H4) | floor and 10 field configurations: the 4 phase coupling laws and the helix, each with random and designed ω | noise 0 and +5 dB; gain 1 and 2; seeds 0–2 | quadrature front end; 2,048 training clips | 126 |
+| 4, size | Does the field's size matter against a matched bank? | field and bank A | 1, 4 and 16 channels (256, 1,024 and 4,096 states); noise 0 and +5 dB; seeds 0–2 | 16 × 16 lattice; gain 2; 2,048 training clips | 36 |
+| carrier | Does driving with the waveform itself help? (H4) | floor, bank A, the 10 Tier 3 field configurations, and the 2 Stuart-Landau cores with random and designed ω | seeds 0–2 | 0 dB; gain 32; 16 kHz drive; 2,048 training clips | 48 |
+
+**Arms.** The floor is the front end alone: its 16 band envelopes, read directly. The field is 1,024 oscillators (4 channels on a 16 × 16 lattice) with 2,048 fixed parameters, exposing sin θ and cos θ. The severed field is the same field with its coupling kernel zeroed. Bank A is a leaky bank matching the field's 1,024 states and 2,048 parameters; bank B matches the field's 2,048 exposed signals, at twice the parameters. The five networks are trained end to end, at 1,840 to 2,109 parameters each.
+
+**The read.** Every arm is read by one function: the mean, standard deviation and mean absolute frame-to-frame change of each signal, over each of four equal windows of frames 16 to 61 for recognition, and over frames 16 to 147 as one window for the order task. The features are standardized, projected by one fixed Gaussian matrix to widths 192, 1,024 and 4,096 (never wider than the arm itself; the unprojected read is also fitted at 2,048 clips), and classified by a ridge whose penalty is chosen on the last eighth of the training set. The floor is also read from frame 0; that whole-clip floor is the primary control. The field arms also get a read with their rotation rates added.
+
+**The primary cell** for every verdict is width 192, 2,048 training clips and the four-window read (the whole-span read for the order task). The test set is always the 6,000 clips of test speakers 49 to 60, except in Tier B, which uses the published test fold.
+
+### 4.2 Task and data
 
 AudioMNIST ([Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)): 30,000 recordings, 60 speakers × 10 digits × 50 repetitions at
 48 kHz. Bank: repetitions 0–19 per speaker×digit, resampled to 16 kHz, peak-normalized to
@@ -157,7 +177,7 @@ frames. Training/evaluation sets are drawn from the bank with replacement (repea
 receive fresh noise draws); the protocol size is 2,048 training / 512 test clips per run,
 and all decision bars are scored only at this size.
 
-### 4.2 Primary frontend (mel envelope)
+### 4.3 Primary frontend (mel envelope)
 
 512-sample/256-hop Hann STFT → 16 mel bands → log → fixed affine (v+10)/10 clamped at 0 →
 rows [T×16] at 62.5 fps. Zero trainable parameters and no per-utterance statistics
@@ -169,7 +189,7 @@ correlation, identical for every arm; no overlap across clips. A lens-cost contr
 conventional baseline at 40 mel bands so the 16-band bottleneck's cost is a measured number
 in anchor comparisons.
 
-### 4.3 The transduction ladder (drive pathways)
+### 4.4 The transduction ladder (drive pathways)
 
 Three pathways are chosen so each adds exactly one kind of information or mechanism over
 the last, making result differences attributable to that addition:
@@ -196,7 +216,7 @@ collapsed at every gain tested (§5.2, §6), consistent with Adler theory; train
 the required phase relation is suggested, not shown. Carrier drive admits injection locking
 when |Δω| ≤ A (single-oscillator idealization; measured in §5.3).
 
-### 4.4 Noise protocol
+### 4.5 Noise protocol
 
 Added white noise with σ = RMS(speech) · 10^(dB/20), drawn i.i.d. per sample over the full
 padded window; 0 dB means noise at speech-equal power (not clean audio), −10 dB means
@@ -208,7 +228,7 @@ Conditions of record: **0 dB primary, +5 dB as the harsher-noise robustness comp
 clip at every level, one seeded noise draw rescaled per level) ship with the paper,
 regenerable by a committed script.
 
-### 4.5 Drive scale, gain, and the integrator-validity bound
+### 4.6 Drive scale, gain, and the integrator-validity bound
 
 The gain dial multiplies frontend-relative units, so cross-frontend gain equality is
 meaningless: measured row scales at 0 dB are mel-affine RMS 1.32 versus carrier RMS 0.021, a 62.5× units gap. Each frontend therefore runs at its own gate-calibrated gain,
@@ -222,7 +242,7 @@ drive, when a question needs it, is reached by increasing substeps, never by gai
 bound. Prior art for the response shape: input scaling is a canonical reservoir
 hyperparameter with an interior optimum ([Lukoševičius 2012](https://doi.org/10.1007/978-3-642-35289-8_36)).
 
-### 4.6 Instrumentation (mechanism, never verdicts)
+### 4.7 Instrumentation (mechanism, never verdicts)
 
 Drive-phase PLV per band: each oscillator's phase is compared against the analytic
 (Hilbert) phase of its own row's *delivered drive*; entrained fraction is the share above a
@@ -234,7 +254,7 @@ The global order parameter $R = |\langle e^{i\theta}\rangle|$ (no reference; the
 per-tick drive-increment statistics complete the instrument set. Instruments are
 diagnostics; verdicts come only from the pre-registered accuracy bars.
 
-### 4.7 Evidential standard
+### 4.8 Evidential standard
 
 **Scope and evidence.** Speech recognition from frozen oscillator fields. Every number reported here comes
 from a pre-registered, protocol-complete run; decision criteria were written before each run and verdicts
