@@ -50,27 +50,39 @@ The confirmatory study was registered before its first run and is organized in s
 
 ### 4.6 Drive scale, gain, and the integrator-validity bound
 
-### 4.7 Instrumentation (mechanism, never verdicts)
+### 4.7 Instrumentation
 
 ### 4.8 Evidential standard
 
 ## 5 Results
 
-### 5.1 Conventional references at exact parameter parity
+| arm | clean | 0 dB | +5 dB |
+|---|---|---|---|
+| **Floor**: the front end alone, its 16 band envelopes read directly; no dynamics | 93.6 ± 0.3 | 78.0 ± 0.6 | 71.6 ± 1.6 |
+| **Oscillator field** (gain = 1): 1,024 coupled oscillators, untrained | 91.1 ± 0.4 | 77.8 ± 0.8 | 70.7 ± 0.3 |
+| **Severed field** (gain = 1): the same field with its coupling removed | 90.6 ± 0.3 | 76.9 ± 0.5 | 69.7 ± 0.4 |
+| **Bank A** (gain = 1): 1,024 leaky integrators with the field's states and parameters, untrained | 93.4 ± 0.2 | 73.8 ± 0.5 | 66.6 ± 0.8 |
+| **Transformer**: trained end to end, 1,968 parameters | 96.2 ± 0.4 | 76.0 ± 1.4 | 69.0 ± 1.8 |
 
-### 5.2 The untrained matrix: a statics plateau, with design effects bounded below threshold
+Table: Digit-recognition accuracy (%) on AudioMNIST, mean ± standard deviation over three seeds. Training: 2,048 clips drawn from the 24,000 recordings of speakers 1 to 48, with the same white noise level in training and test audio (0 dB: noise as loud as the speech; +5 dB: noise 5 dB louder than the speech). A seed sets an arm's random parameters and which 2,048 clips it is trained on. For the floor, field, severed field and bank A only the readout is fitted; the transformer is also trained end to end on the same clips. Evaluation: each arm's signals are summarized by the same three statistics over four time windows, projected to 192 features and classified by a ridge readout, and scored on all 6,000 clips of the 12 held-out speakers (49 to 60). The floor is read from the first frame of each clip, the other arms from frame 16, after their warm-up. Gain scales the input into the untrained dynamical arms and does not apply to the floor or the transformer.
 
-### 5.3 The transduction test: carrier drive does not rescue the plateau
+![Digit-recognition accuracy on the 6,000 test clips of AudioMNIST speakers 49 to 60, by the noise level of the training and test audio. Bars are the mean over three seeds and error bars one standard deviation. Every arm was trained on 2,048 clips from speakers 1 to 48 and read by the same ridge readout on 192 features; the transformer was also trained end to end. Gain applies only to the untrained dynamical arms (field, severed field, bank A). Dotted line: chance, 10%.](resources/figures/c1-recognition-accuracy.png)
 
-### 5.4 Readout sufficiency: the linear probe, tested
+### 5.1 Trained conventional networks
+
+### 5.2 Field design: coupling law, geometry and natural frequencies
+
+### 5.3 Input pathways: quadrature and carrier drive
+
+### 5.4 Readout sufficiency
 
 ### 5.5 Sensitivity of the canonical physics values
 
-### 5.6 Coherence and readability: an inverted-U, suggested
+### 5.6 Coherence and readability
 
-### 5.7 The task axis: untrained state carries temporal order near-perfectly
+### 5.7 Temporal order
 
-## 6 The phase-referenced collapse: model and mechanism
+## 6 Phase-referenced input: model and mechanism
 
 ## 7 Discussion
 
