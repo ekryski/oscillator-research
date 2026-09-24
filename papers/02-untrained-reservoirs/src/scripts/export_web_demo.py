@@ -23,7 +23,10 @@ needs comes from here, and all of it is computed by the harness's own code:
     nets/<id>.bin        a trained baseline's weights (float32)
     audio/*.wav          the demo clips, as the bank stores them
     audio/noise.bin      the unit white noise the harness adds to each demo
-                         clip at 0 and +5 dB (int16, / 4096)
+                         clip at 0 and +5 dB, exactly (float32): the quadrature
+                         pathway reads each band's phase from one frequency
+                         bin, and where that bin is nearly empty a rounded copy
+                         of the noise is enough to swing it
     record.json          the recorded recognition cells of the gate and Tier 1,
                          every read, size and width, per seed: the numbers the
                          post quotes, copied, never recomputed
@@ -79,7 +82,6 @@ SIZE = rn.PRIMARY_SIZE
 #: the demo clips: two per digit, from two different test speakers (49-58 and 60-51), repetition 0
 DEMO_SPEAKERS = lambda d: (49 + d, 60 - d)  # noqa: E731
 DEMO_REP = 0
-NOISE_I16_SCALE = 4096.0
 CARRIER_GAIN = pl.CARRIER_GAIN
 GAINS = pl.GAINS
 PATHWAY_NOISES = {"envelope": (None, 0.0, 5.0), "quadrature": (0.0, 5.0), "carrier": (0.0,)}
@@ -480,16 +482,14 @@ def export_base(out: Path, bank: dict) -> dict:
         for db in (0.0, 5.0):
             gen = torch.Generator().manual_seed(pr.NOISE_SEED + uid * pr.NOISE_UID_STRIDE + noise_level_code(db))
             levels.append(torch.randn(16000, generator=gen))
-        unit = torch.stack(levels)
-        assert unit.abs().max() < 32767 / NOISE_I16_SCALE
-        noise.append(torch.round(unit * NOISE_I16_SCALE).to(torch.int16))
+        noise.append(torch.stack(levels))
         clips.append({"digit": d, "speaker": spk, "rep": int(bank["reps"][i]), "uid": uid, "bank_index": i,
                       "samples": int(bank["lens"][i]), "file": name})
     noise_arr = torch.stack(noise).numpy()                                  # [clips, 2 levels, 16000]
     (out / "audio").mkdir(parents=True, exist_ok=True)
-    noise_arr.astype("<i2").tofile(out / "audio" / "noise.bin")
+    noise_arr.astype("<f4").tofile(out / "audio" / "noise.bin")
     return {"frontend": frontend, "physics": physics, "banks": banks, "clips": clips,
-            "noise": {"file": "audio/noise.bin", "levels_db": [0.0, 5.0], "scale": NOISE_I16_SCALE,
+            "noise": {"file": "audio/noise.bin", "levels_db": [0.0, 5.0], "dtype": "float32",
                       "samples": 16000, "seed": pr.NOISE_SEED}}
 
 
