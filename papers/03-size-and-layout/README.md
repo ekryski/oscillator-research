@@ -14,7 +14,7 @@ Paper 03 runs that ablation for paper 02's networks. The lattice runs from 8 × 
 
 - **The gap** it fills is one paper 01 names: parameter and oscillator count, and channel layout, had not been ablated.
 - **The tasks, data, protocol, noise, read and readout** are paper 02's, unchanged, and so is every arm at 16 × 16; the digit-sequence task is new.
-- **Paper 02's cells are reused**, not rerun: its 16 × 16, 4-channel runs (225 of the 15,489 planned) are read from its record and cited to it. Scaling every coupling kernel exactly to the coupling ceiling, which paper 03 introduces because a random 8 × 8 kernel usually falls short of it, leaves every 16 × 16 network bit-identical to paper 02's; a reuse gate re-runs a sample and requires every cell to match.
+- **Paper 02's cells are reused**, not rerun: its 16 × 16, 4-channel runs (225 of the 15,489 planned) are read from its record and cited to it. Scaling every coupling kernel exactly to the coupling ceiling, which paper 03 introduces because a random 8 × 8 kernel usually falls short of it, leaves every 16 × 16 network bit-identical to paper 02's; a reuse check re-runs a sample on the CPU and compares every cell with paper 02's record.
 - **The size tier** began as paper 02's widened tier 4, which the author moved into this paper.
 
 ## What is here

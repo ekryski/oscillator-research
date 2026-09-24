@@ -15,7 +15,7 @@ To run anything, the bank and row caches are needed: see [data/README.md](data/R
 
 ## What changed from paper 02
 
-Paper 02's harness ran one lattice (16 × 16) and, in its widened tier 4, lattices of 8 × 8 and 32 × 32. Paper 03 carries over only what it needs (no Becker protocol, no exploratory harness, none of the exploratory geometries or cores; paper 02's order task, its rotation-rate read and its coherence instruments are carried over) and changes the things below. Every change leaves paper 02's 16 × 16, 4-channel runs bit for bit as they were, which is what lets paper 03 take them from paper 02's record.
+Paper 02's harness ran one lattice (16 × 16) and, in its widened tier 4, lattices of 8 × 8 and 32 × 32. Paper 03 carries over only what it runs (no Becker protocol; paper 02's order task, its rotation-rate read and its coherence instruments are carried over) and changes the things below. Every change leaves paper 02's 16 × 16, 4-channel runs bit for bit as they were, which is what lets paper 03 take them from paper 02's record.
 
 | change | where | why it leaves paper 02's cells alone |
 |---|---|---|
@@ -26,10 +26,10 @@ Paper 02's harness ran one lattice (16 × 16) and, in its widened tier 4, lattic
 | **The streamed read.** An arm with more than 4,096 states is simulated, standardized and projected one channel at a time, one read at a time, recording its instruments on the first pass. | `experiment/stream.py`, `experiment/run.py` | Arms up to 4,096 states are read in memory by paper 02's code. The streamed read is tested against it, reads and instruments alike (`tests/test_stream.py`). |
 | **The digit-sequence task.** Two, three or four different digits joined into one clip, as paper 02 joins its order task's pairs, each position named by a 10-way readout of its own on the whole-span read; exact chance levels in `protocol.sequence_chance`. | `experiment/protocol.py` (`sequence_set`, `sequence_clips`), `experiment/readout.py`, `experiment/run.py` | New; paper 02's order clips are rebuilt bit for bit by the same joining code (`tests/test_memory_tasks.py`). |
 | **Two projections.** Every projected read is recorded under paper 02's fixed matrix (generator seed 4242) and under one seeded by the run's seed (4242 + 1 + seed), each cell tagged `projection`: `fixed`, `seeded`, or `none` for an unprojected read. | `measurement/features.py`, `experiment/readout.py`, `experiment/stream.py` | The fixed cells are paper 02's arithmetic; its untagged cells are read as fixed (or `none` where unprojected). |
-| **Devices.** `--device auto\|cpu\|mps\|cuda`; models, front ends, the projection and the trained baselines run on the device, the ridge on the CPU in float64. | `utils/device.py`, `models/phase.py` (`auto_impl`), `experiment/run.py` | The CPU path is paper 02's; a GPU is close but not bit-identical, so the reuse gate and any paper 02 cell run here use the CPU. |
-| **Trained baselines sized to each network.** One width knob per architecture, set so the parameter count meets 2 · C · G². | `experiment/arms.py` (`ann_width`) | At 2,048 parameters on 16 rows the widths are paper 02's (18, 12, 13, 16, 16), and so are the parameter counts. |
+| **Devices.** `--device auto\|cpu\|mps\|cuda`; the untrained arms, the front ends' batches and the projection run on the device, the ridge on the CPU in float64. The trained baselines train on the CPU, as in paper 02, unless `plan run --trained-device` moves them. | `utils/device.py`, `models/phase.py` (`auto_impl`), `experiment/run.py` | The CPU path is paper 02's; a GPU is close but not bit-identical, so the reuse check and any paper 02 cell run here use the CPU. |
+| **Trained baselines sized to each network.** One width knob per architecture, set so the parameter count meets 2 · C · G². | `experiment/arms.py` (`trained_width`) | At 2,048 parameters on 16 rows the widths are paper 02's (18, 12, 13, 16, 16), and so are the parameter counts. |
 
-Before the first commit of this harness, paper 02's harness and this one were run side by side on synthetic input: the trajectories and windowed features of all 26 coupling-function and geometry configurations, the uncoupled network and both banks at 16 × 16 (3 seeds, 2 gains, band-energy and quadrature pathways; 318 cases) had identical SHA-256 hashes, and the five trained baselines trained for two epochs gave identical features. `uv run python -m harness.experiment.gates reuse` repeats the check on the real record.
+Before the first commit of this harness, paper 02's harness and this one were run side by side on synthetic input: the trajectories and windowed features of all 26 coupling-function and geometry configurations, the uncoupled network and both banks at 16 × 16 (3 seeds, 2 gains, spectrogram and quadrature pathways; 318 cases) had identical SHA-256 hashes, and the five trained baselines trained for two epochs gave identical features. `uv run python -m harness.experiment.gates reuse` repeats the check on the real record.
 
 ## Layout
 
@@ -58,7 +58,7 @@ src/
 | `experiment/stream.py` | the read of an arm too large to hold, one channel at a time |
 | `experiment/protocol.py` | the bank, Protocol A, per-clip noise, the order and digit-sequence sets and clips, the front ends, the band mapping (`to_rows`), row caches |
 | `experiment/summary.py` | every accuracy, instrument and paired difference with its spread, paper 02's cells folded in, the order task's pairs pooled and the sequence's positions taken together: `summary.json`, `summary.md` |
-| `experiment/gates.py` | the reuse gate and the zero-input gate |
+| `experiment/gates.py` | the integrity checks: reuse (paper 02's cells re-run and compared) and zero input (every cell at chance) |
 | `experiment/terms.py` | the paper's names for the record's labels |
 
 ## Running the tiers
@@ -66,7 +66,7 @@ src/
 ```bash
 uv run python -m harness.experiment.plan benchmark --device cuda --out ../results/benchmark/cuda.json   # price the tiers on this GPU
 uv run python -m harness.experiment.plan prepare                         # row caches: every pathway, band count, window, order and sequence set
-uv run python -m harness.experiment.gates reuse                          # paper 02's 16 x 16 cells reproduce under this harness
+uv run python -m harness.experiment.gates reuse                          # paper 02's 16 x 16 cells, re-run and compared with its record
 uv run python -m harness.experiment.plan run gate --workers 4 --threads 1
 uv run python -m harness.experiment.gates check                          # every zero-input cell reads chance
 uv run python -m harness.experiment.plan run size trained sequence --grids 8 16 32 --device mps --workers 2
@@ -82,20 +82,19 @@ Every arm is read by paper 02's contract: three statistics per signal over four 
 
 ## Terms in the code
 
-The paper's glossary (Appendix A of the manuscript) defines the terms. The code and the record keep paper 02's labels, because they are the runs' identities and paper 03 takes cells from paper 02's record under them; `experiment/terms.py` turns them into the paper's terms for everything people read.
+The paper's glossary (Appendix A of the manuscript) defines the terms. The code and the record use them in short form, exactly as paper 02's do, so a paper 02 cell and the paper 03 cell it stands for share a label and a run identity; `experiment/terms.py` spells them out in full for everything people read. Paper 03's labels add the size where it is not paper 02's, in this order: `-ch<C>` (a channel count other than 4), `-<G>x<G>` (a lattice other than 16 x 16), `-16bands` (paper 02's 16 bands mapped onto the rows) and `-w<N>` (an analysis window other than 512 samples). The model layer (`harness/models`: `OscillatorField`, `damping=`, `spectral_clamp=`, `boundary=`) keeps its own parameter names, which `experiment/arms.py` maps onto.
 
 | paper term | in the code and the record |
 |---|---|
-| spectrogram-only baseline | arm kind `floor`; its whole-clip read is `windowed@wholeclip` |
-| coupled oscillator network | arm kind `field`, labels `field-<coupling>-<geometry>-<ω>-lam<λ>-clamp<ceiling>[-c<C>][-<G>x<G>][-16bands][-w<N>]` |
-| uncoupled oscillator network | `field` with `severed=True`, labels `severed-...` |
-| leaky-integrator bank, state-matched | `bank-c<C>[-<G>x<G>][-16bands][-w<N>]` (`LeakyBank`); paper 02's `bank-c8`, its width-matched bank, is the 8-channel state-matched bank here |
-| trained baselines, sized to a network | `ann-<arch>[-c<C>][-<G>x<G>][-16bands][-w<N>]`: `gru`, `tcn`, `cnn`, `transformer`, `s4d` |
-| reservoir | the untrained arms: `field` and `bank` |
-| untrained | "frozen" |
+| spectrogram-only baseline | arm kind `baseline`, label `baseline[-<G>x<G>][-16bands][-w<N>]`; its whole-clip read is `windowed@wholeclip` |
+| coupled oscillator network | arm kind `network`, labels `coupled-<coupling>-<geometry>-<frequencies>-restoring<λ>-ceiling<c>[-ch<C>][-<G>x<G>][-16bands][-w<N>]` |
+| uncoupled oscillator network | `network` with `coupled=False`, labels `uncoupled-...` |
+| leaky-integrator bank, state-matched | `bank-state` (4 channels), `bank-width` (8), `bank-ch<C>` otherwise, then the lattice suffixes (`LeakyBank`); paper 02's width-matched bank, `bank-width`, is the 8-channel state-matched bank here |
+| trained baselines, sized to a network | `trained-<arch>[-ch<C>][-<G>x<G>][-16bands][-w<N>]`: `gru`, `tcn`, `cnn`, `transformer`, `s4d` |
+| reservoir | the untrained arms: `network` and `bank` (`build_untrained`, `untrained_signals`, `untrained_features`) |
 | readout | the ridge (`readout.py`) |
-| coupling function | `physics`: `kuramoto`, `sakaguchi`, `harmonic2`, `winfree`, `sl`, `sl-fixedamp` |
-| lattice geometry | `boundary` |
+| coupling function | `coupling`: `kuramoto`, `kuramoto-sakaguchi`, `second-harmonic`, `winfree`, `stuart-landau`, `stuart-landau-fixed` (`arms.CORES` maps them to the model layer's names) |
+| lattice geometry | `geometry` |
 | lattice, G × G | `grid` |
 | channel | `channels` |
 | band mapping: one band per row / 16 bands mapped onto the rows | `bands`: `0` / `16`; `-16bands` in labels |
@@ -103,20 +102,22 @@ The paper's glossary (Appendix A of the manuscript) defines the terms. The code 
 | recognition / order task / digit-sequence task | `task`: `recognition` / `order` (`pair`) / `sequence` (`length`; a cell's `position`) |
 | the primary read / the whole-span read | `windowed` (four windows) / `pooled` (one window) |
 | rotation rates added | a read's `+rate` suffix (`windowed+rate`, `pooled+rate`) |
-| order parameter R, locking to the drive, share entrained | a run's `instruments`: `R`, `plv`, `entrained`, `amplitude` |
-| natural frequencies: random / tonotopic / identical | `omega`: `random` / `designed` / `uniform` |
-| restoring strength λ | `damping`, `lam` in labels |
-| coupling ceiling | `clamp`, `spectral_clamp`; exact scaling is `kernel_scaling="exact"` |
+| order parameter R, locking to the drive, share entrained | a run's `instruments` (`network_instruments`): `R`, `plv`, `entrained`, `amplitude` |
+| natural frequencies: random / tonotopic / identical | `frequencies`: `random` / `tonotopic` / `identical` |
+| restoring strength λ | `restoring`, `restoring<λ>` in labels |
+| coupling ceiling | `ceiling`, `ceiling<c>` in labels; exact scaling is `kernel_scaling="exact"` |
 | coupling kernel | `kernel` |
 | input gain | `gain`, `g` in run ids |
-| input pathway: band-energy / quadrature / carrier | `drive`: `envelope` / `quadrature` / `carrier` |
-| mel spectrogram, band energies | the front-end rows (`hop_rows`) |
+| input pathway: spectrogram / quadrature / carrier | `pathway`: `spectrogram` / `quadrature` / `carrier` |
+| mel spectrogram, band energies | the front-end rows (`hop_rows`), cached as `spectrogram-*.pt` |
+| a trained baseline's training and read | `train_baseline`, `trained_blocks`, `trained_features`, `trained_width` |
 | matched pair | the cells `summary.compare` pairs |
 | parameter budget, 2 · C · G² | `Arm.budget` |
 | fixed / seeded projection | a cell's `projection`: `fixed` / `seeded` (`none` if unprojected) |
+| a record file | `results/<tier>-<task>-<pathway>-<G>x<G>[-<coupling>].json` |
 
 ## Determinism and devices
 
 Forward passes are bit-identical from run to run on every geometry (`tests/test_geometries.py`), and every number comes from a forward pass of an untrained arm or a trained baseline's features. The streamed read's sums run in a different order from the in-memory read's, so the two agree to float32 rounding rather than bit for bit; an arm is read one way or the other by its size alone.
 
-Only the CPU is bit-identical to paper 02. On MPS or CUDA the rows, the arms' parameters and the trained baselines' starting weights are the CPU's (all made on the CPU), but the GPU's FFTs, matrix products and reductions sum in other orders, so its trajectories differ from the CPU's at the level of rounding (within 2e-3 after the short scans of `tests/test_device.py`) and whole runs by a few test clips. The dense and FFT couplings are chosen per device by speed (`models/phase.py`, `auto_impl`): on MPS the dense operator measured 2 to 80 times faster than FFT up to 64 x 64. The MPS tests skip where MPS is absent.
+Only the CPU is bit-identical to paper 02. On MPS or CUDA the rows, the arms' parameters and the trained baselines' starting weights are the CPU's (all made on the CPU; the trained baselines also train there unless moved), but the GPU's FFTs, matrix products and reductions sum in other orders, so its trajectories differ from the CPU's at the level of rounding (within 2e-3 after the short scans of `tests/test_device.py`) and whole runs by a few test clips. The dense and FFT couplings are chosen per device by speed (`models/phase.py`, `auto_impl`): on MPS the dense operator measured 2 to 80 times faster than FFT up to 64 x 64. The MPS tests skip where MPS is absent.
