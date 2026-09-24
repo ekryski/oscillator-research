@@ -287,3 +287,6 @@ independent-researcher-publishing-playbook.md
 
 # a record writer's half-written temporary, swapped in atomically when complete
 papers/*/results/*.tmp
+
+# a paper's anonymized supplementary zip, built by publishing/supplement.py
+papers/*/*-supplement.zip
