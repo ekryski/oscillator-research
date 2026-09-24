@@ -37,7 +37,11 @@ OMEGAS = ("random", "designed", "uniform")
 DAMPINGS = (0.3, 0.1)
 CLAMPS = (1.0, 0.5)
 CARRIER_GAIN = 32.0                 # the carrier pathway's calibrated gain in the exploratory phase
-SIZE_CHANNELS = (1, 4, 16)          # 256, 1,024 and 4,096 states on the same 16 x 16 lattice
+SIZE_CHANNELS = (1, 2, 4, 8, 16)
+SIZE_GRIDS = (8, 16, 32)            # 8 x 8, 16 x 16 and 32 x 32 lattices
+#: a lattice other than 16 x 16 is driven either by its own number of mel bands, one per row,
+#: or by the registered 16 bands mapped onto its rows (protocol.to_rows); at 16 x 16 they coincide
+SIZE_BANDS = (0, 16)
 BECKER_TRAIN = 18000
 
 FLOOR = Arm("floor")
@@ -132,15 +136,39 @@ def carrier() -> Iterator[rn.Spec]:
             yield rn.Spec("tier3", "recognition", "carrier", 0.0, CARRIER_GAIN, seed, arm, bits="primary")
 
 
+def _size_specs() -> Iterator[rn.Spec]:
+    """Size: the coupled network and its state-matched bank at every lattice, channel count and band mapping.
+
+    Amended after the freeze (REGISTRATION.md change log, 2026-09-23): the
+    registered tier was 1, 4 and 16 channels of a 16 x 16 lattice at gain 2.
+    Each lattice and band mapping also gets the spectrogram-only baseline on
+    exactly the rows its networks are driven with.
+    """
+    for grid in SIZE_GRIDS:
+        for bands in SIZE_BANDS:
+            if grid == 16 and bands == 16:
+                continue                              # the same as one band per row
+            for noise in DESIGN_NOISES:
+                for seed in SEEDS:
+                    yield rn.Spec("tier4", "recognition", "envelope", noise, None, seed,
+                                  Arm("floor", grid=grid, bands=bands), bits="primary")
+                    for channels in SIZE_CHANNELS:
+                        for gain in GAINS:
+                            for kind in ("field", "bank"):
+                                arm = Arm(kind, channels=channels, grid=grid, bands=bands)
+                                native = (rn.PRIMARY_SIZE,) if arm.states <= 1024 else ()
+                                yield rn.Spec("tier4", "recognition", "envelope", noise, gain, seed, arm,
+                                              native_sizes=native, bits="primary", reads=("windowed",))
+
+
 def tier4() -> Iterator[rn.Spec]:
-    """Size: the field and its matched leaky bank at 256, 1,024 and 4,096 states."""
-    for channels in SIZE_CHANNELS:
-        native = (rn.PRIMARY_SIZE,) if channels <= 4 else ()
-        for noise in DESIGN_NOISES:
-            for seed in SEEDS:
-                for arm in (Arm("field", channels=channels), Arm("bank", channels=channels)):
-                    yield rn.Spec("tier4", "recognition", "envelope", noise, 2.0, seed, arm,
-                                  native_sizes=native, bits="primary")
+    """Size, up to the registered largest arm (4,096 states)."""
+    return (s for s in _size_specs() if s.arm.states <= rn.LARGE_STATES)
+
+
+def tier4_large() -> Iterator[rn.Spec]:
+    """Size, above 4,096 states: 32 x 32 at 8 and 16 channels. Each run holds 10 to 20 GB, so run few at once."""
+    return (s for s in _size_specs() if s.arm.states > rn.LARGE_STATES)
 
 
 def becker() -> Iterator[rn.Spec]:
@@ -156,7 +184,7 @@ def becker() -> Iterator[rn.Spec]:
 
 
 TIERS = {"gate": gate, "tier1": tier1, "tier2": tier2, "becker": becker, "tier3": tier3,
-         "tier4": tier4, "carrier": carrier}
+         "tier4": tier4, "tier4-large": tier4_large, "carrier": carrier}
 
 
 # ---------------------------------------------------------------------------
@@ -169,7 +197,7 @@ def cost(spec: rn.Spec) -> float:
     per_clip = {"floor": 0.1, "bank": 0.4, "field": 1.0, "ann": 3.0}[spec.arm.kind]
     if spec.drive == "carrier":
         per_clip *= 250
-    return clips * per_clip * (spec.arm.channels / 4 if spec.arm.kind != "ann" else 1)
+    return clips * per_clip * (spec.arm.states / 1024 if spec.arm.kind in ("field", "bank") else 1)
 
 
 # ---------------------------------------------------------------------------
@@ -180,25 +208,27 @@ def prepare(workers: int) -> None:
     """Build every row cache the tiers read, in parallel, skipping those that exist."""
     bank = pr.load_bank()
     n = len(bank["labels"])
-    jobs = [("rows", d, noise, None, None) for d in pr.CACHED_DRIVES for noise in NOISES
+    jobs = [("rows", d, noise, None, None, 16) for d in pr.CACHED_DRIVES for noise in NOISES
             if pr.load_rows(pr.rows_path(d, noise), n) is None]
+    jobs += [("rows", "envelope", noise, None, None, bands) for bands in SIZE_GRIDS if bands != 16
+             for noise in DESIGN_NOISES if pr.load_rows(pr.rows_path("envelope", noise, bands), n) is None]
     for pair in pr.PAIRS:
         for noise in NOISES:
             for code in (0, *(s + 1 for s in SEEDS)):
                 size = pr.ORDER_TEST if code == 0 else pr.ORDER_TRAIN
                 if pr.load_rows(pr.order_rows_path(pair, code, noise), size) is None:
-                    jobs.append(("order", "envelope", noise, pair, code))
+                    jobs.append(("order", "envelope", noise, pair, code, 16))
     print(f"=== prepare: {len(jobs)} row cache(s) to build with {workers} worker(s)")
     with ProcessPoolExecutor(workers, mp_context=get_context("spawn")) as ex:
         for f in as_completed([ex.submit(_build, *j) for j in jobs]):
             print(f"    {f.result()}")
 
 
-def _build(kind, drive, noise, pair, code) -> str:
+def _build(kind, drive, noise, pair, code, bands) -> str:
     import torch
     torch.set_num_threads(1)
     bank = pr.load_bank()
-    out = (pr.build_rows(bank, drive, noise) if kind == "rows"
+    out = (pr.build_rows(bank, drive, noise, bands) if kind == "rows"
            else pr.build_order_rows(bank, pair, code, noise))
     return str(out.name)
 

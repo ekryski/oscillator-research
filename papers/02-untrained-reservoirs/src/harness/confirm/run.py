@@ -41,6 +41,8 @@ PRIMARY_STAT = {"recognition": "windowed", "order": "pooled"}
 #: clips per batch, by task and drive; the carrier runs at 16 kHz, so its batches
 #: are small, and a GPU holds four times as many of its 16,000-frame trajectories
 BATCH = {"recognition": 512, "order": 256, "carrier": 8, "carrier-cuda": 32}
+#: above this many states a batch shrinks in proportion; every registered arm is at or below it
+LARGE_STATES = 4096
 #: the carrier path drives the field at the audio sample rate
 CARRIER_RATE_HZ = 16000.0
 
@@ -67,7 +69,10 @@ class Spec:
 
     def group(self) -> str:
         name = f"{self.tier}-{self.task}-{self.drive}"
-        return f"{name}-{self.arm.physics}" if self.tier == "tier2" else name
+        if self.tier == "tier2":
+            return f"{name}-{self.arm.physics}"
+        # the largest size runs get their own file, so another machine can run them alongside
+        return f"{name}-large" if self.tier == "tier4" and self.arm.states > LARGE_STATES else name
 
     def run_id(self) -> str:
         parts = [f"B{self.fold}" if self.protocol == "B" else "A"]
@@ -171,14 +176,15 @@ def _order_block(bank: dict, spec: Spec, pool: torch.Tensor, n: int, code: int):
 
 def _recognition_block(bank: dict, spec: Spec, idx: torch.Tensor):
     """Rows maker for bank clips `idx`, from the drive's cache when there is one."""
-    cache = (pr.load_rows(pr.rows_path(spec.drive, spec.noise_db), len(bank["labels"]))
+    bands, grid = spec.arm.n_bands, spec.arm.grid
+    cache = (pr.load_rows(pr.rows_path(spec.drive, spec.noise_db, bands), len(bank["labels"]))
              if spec.drive in pr.CACHED_DRIVES else None)
     if cache is not None:
-        return lambda a, b: (cache["rows"][idx[a:b]], cache["tvalid"][idx[a:b]])
+        return lambda a, b: (pr.to_rows(cache["rows"][idx[a:b]], grid), cache["tvalid"][idx[a:b]])
 
     def make(a, b):
         waves, lens, _ = pr.recognition_clips(bank, idx[a:b], spec.noise_db)
-        return pr.front_end(waves, spec.drive), pr.valid_frames(lens, spec.drive)
+        return pr.to_rows(pr.front_end(waves, spec.drive, bands), grid), pr.valid_frames(lens, spec.drive)
     return make
 
 
@@ -207,6 +213,8 @@ def batches(spec: Spec, clips: Clips, device: str = "cpu") -> Iterator[tuple[tor
     """(rows, valid frames, rows' place in the readout order), block by block."""
     carrier = "carrier-cuda" if device.startswith("cuda") else "carrier"
     size = BATCH[carrier] if spec.drive == "carrier" else BATCH[spec.task]
+    if spec.drive != "carrier" and spec.arm.states > LARGE_STATES:
+        size = max(16, size * LARGE_STATES // spec.arm.states)     # bound a batch's trajectory memory
     at = 0
     for make, n in zip(clips.blocks, clips.sizes):
         for a in range(0, n, size):
@@ -266,12 +274,15 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
     else:
         rate = CARRIER_RATE_HZ if spec.drive == "carrier" else None
         model = am.build_frozen(arm, spec.gain if spec.gain is not None else 0.0, spec.seed, device, rate)
+        # store only the blocks the recorded reads use: a large arm's unread blocks run to gigabytes
+        keep = {k for read, keys in am.reads(arm, spec.task).items() if not spec.reads or read in spec.reads
+                for k in keys}
         t1 = time.perf_counter()
         with torch.no_grad():
             for rows, tvalid, where in batches(spec, clips, device):
                 sig = am.frozen_signals(arm, model, rows.to(device))
-                _store(buffers, am.frozen_features(arm, sig, tvalid.to(device), spec.task, spec.span),
-                       where, total)
+                feats = am.frozen_features(arm, sig, tvalid.to(device), spec.task, spec.span)
+                _store(buffers, {k: v for k, v in feats.items() if k in keep}, where, total)
         timing["simulate_s"] = time.perf_counter() - t1
 
     t2 = time.perf_counter()

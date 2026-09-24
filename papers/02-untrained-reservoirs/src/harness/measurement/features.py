@@ -49,6 +49,8 @@ PROJECTION_SEED = 4242
 #: narrow read is exactly the first columns of a wide one
 MAX_WIDTH = 4096
 _PROJECTIONS: dict[int, torch.Tensor] = {}
+#: native widths above this are not cached beside one another (a [native, 4096] draw is 1.6 GB at 98,304)
+LARGE_NATIVE = 98_304
 
 
 def span(frames: int, lo: int, hi: torch.Tensor | None, windows: int,
@@ -173,6 +175,9 @@ def projection_matrix(native: int, width: int) -> torch.Tensor:
     if width > MAX_WIDTH:
         raise ValueError(f"width {width} exceeds the {MAX_WIDTH}-column projection")
     if native not in _PROJECTIONS:
+        if native > LARGE_NATIVE:        # a large draw is gigabytes: hold one at a time
+            for k in [k for k in _PROJECTIONS if k > LARGE_NATIVE]:
+                del _PROJECTIONS[k]
         gen = torch.Generator().manual_seed(PROJECTION_SEED)
         _PROJECTIONS[native] = torch.randn(native, MAX_WIDTH, generator=gen) / math.sqrt(native)
     return _PROJECTIONS[native][:, :width]

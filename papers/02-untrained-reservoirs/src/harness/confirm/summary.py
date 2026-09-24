@@ -29,6 +29,7 @@ import numpy as np
 from harness.confirm import plan, terms
 from harness.confirm import run as rn
 from harness.confirm import score as sc
+from harness.confirm.arms import Arm
 from harness.confirm.score import Cell
 
 FIELD = sc.FIELD_LABEL
@@ -91,7 +92,7 @@ def accuracies(cells: list[Cell]) -> list[dict]:
         key = (c.tier, c.task, c.drive, c.label, c.read, c.noise, c.gain, c.pair, c.width, c.n_train)
         groups[key][replicate(c)] = c.acc
     fields = ("tier", "task", "drive", "arm", "read", "noise", "gain", "pair", "width", "n_train")
-    return [{**dict(zip(fields, k, strict=True)), "name": terms.arm(k[3]), "pathway": terms.PATHWAYS[k[2]],
+    return [{**dict(zip(fields, k, strict=True)), "name": terms.arm(k[3], k[0]), "pathway": terms.PATHWAYS[k[2]],
              "pair": list(k[7]) or None, **spread(v)} for k, v in sorted(groups.items(), key=str)]
 
 
@@ -202,13 +203,24 @@ def drives(cells: list[Cell]) -> list[dict]:
 
 
 def size(cells: list[Cell]) -> list[dict]:
-    """The coupled network minus the state-matched leaky-integrator bank at each size."""
+    """Tier 4: at each lattice, band mapping and channel count, the coupled network minus its state-matched
+    bank, and each minus the spectrogram-only baseline on the same rows."""
     out = []
-    for ch in plan.SIZE_CHANNELS:
-        network = FIELD + ("" if ch == 4 else f"-c{ch}")
-        out += versus(cells, f"{NETWORK} minus the state-matched leaky-integrator bank, {ch} channels",
-                      (network, "windowed"), (f"bank-c{ch}", "windowed"),
-                      tier="tier4", task="recognition")
+    for grid in plan.SIZE_GRIDS:
+        for bands in plan.SIZE_BANDS:
+            if grid == 16 and bands == 16:
+                continue
+            baseline = Arm("floor", grid=grid, bands=bands).label()
+            for ch in plan.SIZE_CHANNELS:
+                network = Arm("field", channels=ch, grid=grid, bands=bands).label()
+                bank = Arm("bank", channels=ch, grid=grid, bands=bands).label()
+                where = terms.arm(network).removeprefix(NETWORK).strip(" ()") or "4 channels, 16 × 16 lattice"
+                out += versus(cells, f"{NETWORK} minus the state-matched leaky-integrator bank ({where})",
+                              (network, "windowed"), (bank, "windowed"), tier="tier4", task="recognition")
+                for name, label in ((NETWORK, network), ("state-matched leaky-integrator bank", bank)):
+                    out += versus(cells, f"{name} minus the spectrogram-only baseline, whole clip ({where})",
+                                  (label, "windowed"), (baseline, "windowed@wholeclip"), tier="tier4",
+                                  task="recognition")
     return out
 
 
@@ -282,7 +294,7 @@ def _rank(r: dict) -> tuple:
 
 
 def _arm(r: dict) -> str:
-    name = terms.arm(r["arm"])
+    name = terms.arm(r["arm"], r.get("tier"))
     if r["arm"] == "floor":
         name += ", whole clip" if r["read"].endswith("@wholeclip") else ", from frame 16"
     return name + (f" (gain = {r['gain']:g})" if r.get("gain") is not None else "")

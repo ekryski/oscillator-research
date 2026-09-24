@@ -197,3 +197,37 @@ def test_cached_order_sets_match_the_sets_built_on_the_fly(bank, tmp_path, monke
 def test_a_reads_filter_records_only_those_reads(bank):
     rec = rn.execute(spec(FIELD, reads=("windowed", "windowed+rate")), bank=bank)
     assert {c["read"] for c in rec["cells"]} == {"windowed", "windowed+rate"}
+
+
+def test_adding_the_lattice_left_every_registered_label_as_it_was():
+    assert FIELD.label() == "field-kuramoto-torus-random-lam0.3-clamp1"
+    assert am.Arm("field", channels=16).label() == "field-kuramoto-torus-random-lam0.3-clamp1-c16"
+    assert (am.Arm("floor").label(), am.Arm("bank", channels=8).label()) == ("floor", "bank-c8")
+    assert am.Arm("field", grid=16, bands=16).label() == FIELD.label()       # a band per row is the default
+    assert am.Arm("bank", channels=2, grid=32, bands=16).label() == "bank-c2-32x32-16bands"
+    assert pr.rows_path("envelope", 0.0).name == "envelope-0db.pt"
+
+
+def test_bands_map_onto_rows_in_frequency_order_without_anything_fitted():
+    rows = torch.arange(16.0).view(1, 1, 16)
+    assert pr.to_rows(rows, 16) is rows
+    assert pr.to_rows(rows, 32)[0, 0, :4].tolist() == [0.0, 0.0, 1.0, 1.0]
+    assert pr.to_rows(rows, 8)[0, 0, :3].tolist() == [0.5, 2.5, 4.5]
+    with pytest.raises(ValueError, match="cannot map"):
+        pr.to_rows(rows, 12)
+
+
+@pytest.mark.parametrize("arm", [am.Arm("field", channels=1, grid=8), am.Arm("bank", channels=2, grid=8, bands=16),
+                                 am.Arm("field", channels=1, grid=32, bands=16), am.Arm("floor", grid=32, bands=16)],
+                         ids=lambda a: a.label())
+def test_a_lattice_of_another_size_runs_with_its_rows(bank, arm):
+    rec = rn.execute(spec(arm, tier="tier4", reads=("windowed",)), bank=bank)
+    signals = {"field": 2 * arm.states, "bank": arm.states, "floor": arm.grid}[arm.kind]
+    assert rec["native_widths"] == {"windowed": 12 * signals}
+    assert rec["arm_meta"]["states"] == (arm.states if arm.kind != "floor" else 0)
+    assert all(0.0 <= c["acc"] <= 1.0 for c in rec["cells"])
+
+
+def test_the_largest_size_runs_record_to_their_own_file():
+    assert spec(am.Arm("field", channels=16, grid=32), tier="tier4").group() == "tier4-recognition-envelope-large"
+    assert spec(am.Arm("field", channels=16), tier="tier4").group() == "tier4-recognition-envelope"

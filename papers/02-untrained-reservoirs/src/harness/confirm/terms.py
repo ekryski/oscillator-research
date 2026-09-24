@@ -40,6 +40,7 @@ PATHWAYS = {"envelope": "band-energy", "quadrature": "quadrature", "carrier": "c
 #: the Tier 1 reference configuration of the coupled network
 REFERENCE = {"physics": "kuramoto", "boundary": "torus", "omega": "random", "damping": 0.3, "clamp": 1.0}
 
+_LATTICE = re.compile(r"^(?P<base>.*?)(?:-(?P<grid>\d+)x\d+)?(?:-(?P<bands>\d+)bands)?$")
 _OSCILLATORS = re.compile(r"^(field|severed)-(?P<physics>sl-fixedamp|[a-z0-9]+)-(?P<boundary>[a-z]+)-"
                           r"(?P<omega>[a-z]+)-lam(?P<damping>[0-9.]+)-clamp(?P<clamp>[0-9.]+)(?:-c(?P<channels>\d+))?$")
 
@@ -49,15 +50,36 @@ def level(value) -> str:
     return LEVELS.get(value, value) if isinstance(value, str) else f"{value:g}"
 
 
-def arm(label: str) -> str:
+def _lattice(grid: str | None, bands: str | None) -> list[str]:
+    """What a label's lattice suffix says: its size, and how its rows are driven if not one band each."""
+    out = [f"{grid} × {grid} lattice"] if grid else []
+    if bands:
+        out.append(f"{bands} mel bands mapped onto {grid} rows")
+    elif grid:
+        out.append(f"{grid} mel bands")
+    return out
+
+
+def _channels(n: int) -> str:
+    return f"{n} channel" + ("" if n == 1 else "s")
+
+
+def arm(label: str, tier: str | None = None) -> str:
     """The paper's name for a record label.
 
     The Tier 1 configuration of the oscillator networks is named plainly; any
-    other configuration names only the factors where it departs from it.
+    other configuration names only the factors where it departs from it. In
+    Tier 4 every bank is state-matched to the network with its channel count,
+    so `bank-c8` there is not the width-matched bank of the other tiers.
     """
-    if label in ARMS:
-        return ARMS[label]
-    m = _OSCILLATORS.match(label)
+    lat = _LATTICE.match(label)
+    base, extra = lat["base"], _lattice(lat["grid"], lat["bands"])
+    bank = re.fullmatch(r"bank-c(\d+)", base)
+    if bank and (tier == "tier4" or base not in ARMS):
+        return f"leaky-integrator bank, state-matched ({', '.join([_channels(int(bank[1])), *extra])})"
+    if base in ARMS:
+        return ARMS[base] + (f" ({', '.join(extra)})" if extra else "")
+    m = _OSCILLATORS.match(base)
     if not m:
         return label
     name = "uncoupled oscillator network" if label.startswith("severed") else "coupled oscillator network"
@@ -66,7 +88,7 @@ def arm(label: str) -> str:
              f"{level(m['omega'])} ω" if m["omega"] != REFERENCE["omega"] else "",
              f"λ {m['damping']}" if float(m["damping"]) != REFERENCE["damping"] else "",
              f"ceiling {m['clamp']}" if float(m["clamp"]) != REFERENCE["clamp"] else "",
-             f"{m['channels']} channels" if m["channels"] else ""]
+             _channels(int(m["channels"])) if m["channels"] else "", *extra]
     parts = [p for p in parts if p]
     return name + (f" ({', '.join(parts)})" if parts else "")
 
