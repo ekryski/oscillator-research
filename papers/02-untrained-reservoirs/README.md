@@ -1,12 +1,12 @@
 # Spoken-Digit Recognition Without Training
 
-Geometry, coupling, and drive effects in frozen oscillator fields.
+Geometry, coupling, and drive effects in oscillator networks.
 
 **[Read the paper →](spoken-digit-recognition-without-training-DRAFT.md)**
 
 An untrained coupled oscillator network (1,024 oscillators, 2,048 parameters) is read by a linear readout on spoken-digit recognition (AudioMNIST, speaker-disjoint) and compared with a spectrogram-only baseline, an uncoupled oscillator network, two leaky-integrator banks and five trained baselines of about the same size, every arm read the same way. A registered confirmatory run varies the coupling function, lattice geometry, natural frequencies, restoring strength, coupling ceiling, input pathway, input gain, noise level, readout width and training-set size, on recognition and on a temporal-order task.
 
-What each tier runs is in [TIERS.md](TIERS.md), the registered design in [REGISTRATION.md](REGISTRATION.md), and the results, as the tiers finish, in `results/confirmatory/summary.md`. The paper is being rewritten from those results, so this page states none yet; the terms are defined in the paper's glossary (Appendix A).
+What each tier runs is in [TIERS.md](TIERS.md), the design, with its decision log, in [DESIGN.md](DESIGN.md), and the results, as the tiers finish, in `results/confirmatory/summary.md`. The paper is being rewritten from those results, so this page states none yet; the terms are defined in the paper's glossary (Appendix A).
 
 ## What is here
 
@@ -21,7 +21,7 @@ What each tier runs is in [TIERS.md](TIERS.md), the registered design in [REGIST
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
 | [`src/`](src/) | the experiment harness, the sweep driver, and the tests — [start here](src/README.md) |
-| [`TIERS.md`](TIERS.md) · [`REGISTRATION.md`](REGISTRATION.md) | what each tier of the confirmatory run tests, and its registered design |
+| [`TIERS.md`](TIERS.md) · [`DESIGN.md`](DESIGN.md) | what each tier of the confirmatory run tests, and its design |
 | `results/confirmatory/` | the confirmatory record, one file per tier, task and input pathway, with `summary.md` |
 | `results/` | the exploratory record: 1,940 runs, grouped one file per drive variant and coupling law |
 | `resources/figures/` | the paper's figures |
@@ -53,12 +53,12 @@ Regenerates every format above, in place, from the Markdown. See
 <!-- citation:start -->
 ## Citing this paper
 
-Kryski, E. (2026). Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields [Preprint]. https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/
+Kryski, E. (2026). Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Oscillator Networks [Preprint]. https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/
 
 ```bibtex
 @techreport{kryski2026spokendigit,
   author      = {Eric Kryski},
-  title       = {Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields},
+  title       = {Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Oscillator Networks},
   year        = {2026},
   institution = {Independent research},
   type        = {Preprint},

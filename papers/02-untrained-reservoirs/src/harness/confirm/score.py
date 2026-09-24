@@ -1,4 +1,4 @@
-"""Score the confirmatory record against the registered bars (REGISTRATION.md, section 9).
+"""Score the confirmatory record against the design's first bars (DESIGN.md, section 9).
 
     uv run python -m harness.confirm.score            # print every verdict, write verdicts.json
 

@@ -14,7 +14,7 @@ left to the reader.
 
 The registered bars are still scored by `harness.confirm.score`. Reporting
 without them was decided after Tier 1 had been seen, and is logged in
-REGISTRATION.md's change log.
+DESIGN.md's decision log.
 """
 
 from __future__ import annotations

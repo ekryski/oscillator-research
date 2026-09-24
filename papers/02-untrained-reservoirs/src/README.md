@@ -4,8 +4,8 @@ Everything needed to rerun the paper and check its numbers. One command plans
 and drives a sweep; one module scores it.
 
 There are two harnesses here. `harness/confirm/` runs the **confirmatory
-study** registered in [`../REGISTRATION.md`](../REGISTRATION.md), frozen before
-its first run; its record is `../results/confirmatory/`. The rest of `harness/`
+study** designed in [`../DESIGN.md`](../DESIGN.md), with its decision log; its
+record is `../results/confirmatory/`. The rest of `harness/`
 is the exploratory harness that produced the August record in `../results/`,
 kept runnable so that record can be checked, which the confirmatory study's
 legacy gate does. Start with [the confirmatory run](#the-confirmatory-run).

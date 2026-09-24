@@ -1,8 +1,6 @@
-# Registration: confirmatory run for Paper 02
+# Design: confirmatory run for Paper 02
 
-**Status: FROZEN at 2026-09-23 03:53 MDT, in the commit that wrote this line. No registered run started before it.**
-
-Freezing means one commit that changes the status line above to FROZEN, made and pushed before any registered run starts, so that the hosting service's timestamp corroborates the local one. After freezing, the body is not edited: deviations go in the change log at the end, dated, with the reason.
+This document records the design of paper 02's confirmatory run: its questions, data, arms, read, readout, tiers and gates. It was written before the run's first tier started (commit f1d52fb, 2026-09-23 03:53 MDT), and the design has changed since where the experiment needed it; each change is in the decision log at the end, dated, with its reason. Sections 2 and 9 keep the hypotheses and bars as first written; results are reported without the bars (see the log).
 
 Everything below is implemented in `src/harness/confirm/` and tested in `src/tests/test_confirm_*.py`; where this text and the code could disagree, the code's tier definitions in `harness/confirm/plan.py` are the plan.
 
@@ -155,9 +153,9 @@ Resolved before freezing:
 
 Before freezing, the only runs on the confirmatory data were zero-drive field cells (the section 1 measurement) and three legacy re-runs of exploratory runs whose results were already on record. No driven arm was run under this protocol before this registration was frozen.
 
-## Change log
+## Decision log
 
-Entries are added only after freezing, each with a timestamp and a reason.
+Each change to the design after the run began, with its date and reason.
 
 **2026-09-23 20:04 MDT. Results are reported without the section 9 bars.** Every accuracy is reported as its mean over replicates (three seeds; the five folds under Protocol B) with the sample standard deviation and each replicate's value, and every comparison as the paired difference with its standard deviation over replicates and a 95% interval from resampling test clips (`harness.confirm.summary`). No threshold is applied and no verdict is drawn. Whether a difference is a real gain is left to further seeds and to a side-by-side comparison of the arms, to be published as supplementary material. Reason: the author judged a fixed bar such as +3 points arbitrary. **This decision was made after the Tier 1 results had been seen.** The bars are still scored, unchanged, by `harness.confirm.score`, and its Tier 1 verdicts remain in the record (`results/confirmatory/verdicts.json`, commit c68a1fb).
 

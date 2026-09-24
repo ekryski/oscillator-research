@@ -4,7 +4,7 @@
     uv run python -m harness.confirm.plan run tier1 --workers 3 --dry-run
     uv run python -m harness.confirm.plan run gate tier1 --workers 3
 
-Every tier is a list of specs derived from REGISTRATION.md; nothing here is a
+Every tier is a list of specs derived from DESIGN.md; nothing here is a
 free choice at run time. The driver skips every spec already recorded, so a
 sweep that stops restarts where it left off, and it runs the costliest specs
 first so the pool drains evenly. A spec that fails is logged with its
@@ -134,7 +134,7 @@ def carrier() -> Iterator[rn.Spec]:
 def projection() -> Iterator[rn.Spec]:
     """Tier 1's reservoir runs again at the primary size, read under the fixed and the seeded projection.
 
-    Added after the freeze (REGISTRATION.md change log, 2026-09-24): the fixed
+    Added on 2026-09-24 (DESIGN.md decision log): the fixed
     projection is one draw for every seed, so the spread over seeds leaves out
     the projection's own variability. The fixed cells here must equal Tier 1's.
     """
