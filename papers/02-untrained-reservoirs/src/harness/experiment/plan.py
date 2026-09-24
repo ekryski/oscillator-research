@@ -37,6 +37,12 @@ FREQUENCIES = ("random", "tonotopic", "identical")
 RESTORINGS = (0.3, 0.1)
 CEILINGS = (1.0, 0.5)
 BECKER_TRAIN = 18000
+#: the sweep beyond Tier 2's levels: restoring strengths up to the natural frequency, where an
+#: oscillator stops rotating; coupling ceilings above 1; and gains up to 12, below the integrator's
+#: bound, where drive, natural frequency and coupling together would pass pi radians a step
+SWEEP_RESTORINGS = (0.5, 0.8, 1.0)
+SWEEP_CEILINGS = (1.5, 2.0)
+SWEEP_GAINS = (3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0)
 
 BASELINE = Arm("baseline")
 COUPLED = Arm("network")            # Kuramoto, torus, random frequencies, restoring 0.3, ceiling 1
@@ -119,6 +125,25 @@ def tier3() -> Iterator[rn.Spec]:
                     yield rn.Spec("tier3", "recognition", "quadrature", noise, gain, seed, arm, bits="primary")
 
 
+def sweep() -> Iterator[rn.Spec]:
+    """Every coupling function at the reference configuration, beyond Tier 2's restoring strengths,
+    coupling ceilings and gains. Paired with Tier 2's reference cells: same clips, seeds and reads."""
+    common = dict(bits="primary", reads=("windowed", "windowed+rate"))
+    for noise in DESIGN_NOISES:
+        for seed in SEEDS:
+            for coupling in PHASE_COUPLINGS + AMPLITUDE_COUPLINGS:
+                for gain in GAINS:
+                    for restoring in SWEEP_RESTORINGS:
+                        yield rn.Spec("sweep", "recognition", "spectrogram", noise, gain, seed,
+                                      Arm("network", coupling=coupling, restoring=restoring), **common)
+                    for ceiling in SWEEP_CEILINGS:
+                        yield rn.Spec("sweep", "recognition", "spectrogram", noise, gain, seed,
+                                      Arm("network", coupling=coupling, ceiling=ceiling), **common)
+                for gain in SWEEP_GAINS:
+                    yield rn.Spec("sweep", "recognition", "spectrogram", noise, gain, seed,
+                                  Arm("network", coupling=coupling), **common)
+
+
 def projection() -> Iterator[rn.Spec]:
     """Tier 1's reservoir runs again at the primary size, read under the fixed and the seeded projection.
 
@@ -154,7 +179,7 @@ def becker() -> Iterator[rn.Spec]:
 
 
 TIERS = {"gate": gate, "tier1": tier1, "tier2": tier2, "becker": becker, "tier3": tier3,
-         "projection": projection}
+         "projection": projection, "sweep": sweep}
 
 
 # ---------------------------------------------------------------------------

@@ -66,7 +66,7 @@ class Spec:
 
     def group(self) -> str:
         name = f"{self.tier}-{self.task}-{self.pathway}"
-        return f"{name}-{self.arm.coupling}" if self.tier == "tier2" else name
+        return f"{name}-{self.arm.coupling}" if self.tier in ("tier2", "sweep") else name
 
     def run_id(self) -> str:
         parts = [f"B{self.fold}" if self.protocol == "B" else "A"]
