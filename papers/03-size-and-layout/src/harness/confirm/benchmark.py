@@ -71,6 +71,18 @@ def _reset_peak(device: str) -> None:
         torch.cuda.reset_peak_memory_stats()
 
 
+def _free(device: str) -> None:
+    """Return cached memory to the device, so one cell's allocations do not count against the next."""
+    if device.startswith("cuda"):
+        torch.cuda.empty_cache()
+    elif device == "mps":
+        torch.mps.empty_cache()
+
+
+def _out_of_memory(e: Exception) -> bool:
+    return isinstance(e, torch.OutOfMemoryError) or "out of memory" in str(e).lower()
+
+
 def _memory_gb(device: str) -> float | None:
     """Peak memory allocated on a CUDA device since the last reset; on MPS, what the driver holds now."""
     if device.startswith("cuda"):
@@ -95,7 +107,13 @@ def synthetic_rows(drive: str, n: int, grid: int) -> torch.Tensor:
 
 def time_arm(arm: am.Arm, drive: str, device: str, max_clips: int = MAX_CLIPS) -> dict:
     """Seconds per clip to simulate an arm, record a network's instruments and compute its statistics,
-    for the whole arm (a streamed arm is timed on one channel and multiplied by its channels)."""
+    for the whole arm (a streamed arm is timed on one channel and multiplied by its channels).
+
+    If the run's batch does not fit in the device's memory, the batch is halved until it does, and
+    the cell says so (`fits` false, `clips_timed` the batch that fitted): such a run would need a
+    smaller batch on this device. A cell that does not fit even one clip is recorded without a time.
+    """
+    _free(device)
     gain = plan.CARRIER_GAIN if drive == "carrier" else 1.0
     spec = plan._net("benchmark", drive, 0.0, gain, 0, arm)
     rate = rn.CARRIER_RATE_HZ if drive == "carrier" else None
@@ -103,9 +121,11 @@ def time_arm(arm: am.Arm, drive: str, device: str, max_clips: int = MAX_CLIPS) -
     one, sub, scale = arm, model, 1
     if spec.streamed:
         (one, sub), scale = am.channel(arm, model, 0), arm.channels
-    n = max(1, min(max_clips, rn.batch_size(spec, device, states=one.states)))
+    run_batch = rn.batch_size(spec, device, states=one.states)
+    n = max(1, min(max_clips, run_batch))
     rows = synthetic_rows(drive, n, arm.grid).to(device)
     tvalid = torch.full((n,), rows.shape[1], device=device)
+    cell = {"run_batch": run_batch, "streamed": spec.streamed, "channels_timed": one.channels}
 
     def batch(r: torch.Tensor) -> None:
         with torch.no_grad():
@@ -114,15 +134,29 @@ def time_arm(arm: am.Arm, drive: str, device: str, max_clips: int = MAX_CLIPS) -
                 am.field_instruments(sig, r, drive, one.channels, arm.grid)
             am.frozen_features(one, sig, tvalid[:len(r)], "recognition")
 
-    batch(rows[:1])                                    # warm-up: kernels, FFT plans, allocations
-    _sync(device)
-    _reset_peak(device)
-    t0 = time.perf_counter()
-    batch(rows)
-    _sync(device)
-    took = time.perf_counter() - t0
-    return {"clips_timed": n, "streamed": spec.streamed, "channels_timed": one.channels,
-            "seconds_per_clip": took / n * scale, "memory_gb": _memory_gb(device)}
+    fitted = n
+    while True:
+        try:
+            batch(rows[:1])                            # warm-up: kernels, FFT plans, allocations
+            _sync(device)
+            _reset_peak(device)
+            t0 = time.perf_counter()
+            batch(rows[:fitted])
+            _sync(device)
+            took = time.perf_counter() - t0
+            break
+        except (RuntimeError, torch.OutOfMemoryError) as e:
+            if not _out_of_memory(e):
+                raise
+            _free(device)
+            if fitted == 1:
+                return {**cell, "clips_timed": 0, "fits": False, "seconds_per_clip": None, "memory_gb": None}
+            fitted //= 2
+    out = {**cell, "clips_timed": fitted, "fits": fitted == n, "seconds_per_clip": took / fitted * scale,
+           "memory_gb": _memory_gb(device)}
+    model = sub = rows = None                          # drop the arm before freeing the cache
+    _free(device)
+    return out
 
 
 def time_front_end(grid: int, n: int = 8) -> float:
@@ -177,7 +211,7 @@ def run_seconds(spec: rn.Spec, m: dict) -> tuple[float, bool]:
     if (drive, a.grid, a.channels, kind) not in m["cells"] and drive == "quadrature":
         drive, factor = "envelope", plan.QUADRATURE_COST
     cell = m["cells"].get((drive, a.grid, a.channels, kind))
-    if cell is None:
+    if cell is None or cell["seconds_per_clip"] is None:
         return plan.seconds(spec, "mps"), False
     per_clip = cell["seconds_per_clip"] * factor
     if kind == "field" and (a.physics, a.boundary) != plan.REFERENCE:
@@ -247,20 +281,27 @@ def benchmark(device: str = "auto", grids=plan.GRIDS, channels=plan.CHANNELS, pa
                 for kind in (KINDS if drive != "quadrature" else ("field",)):
                     cell = time_arm(am.Arm(kind, channels=c, grid=grid), drive, device, max_clips)
                     m["cells"][(drive, grid, c, kind)] = cell
-                    log(f"    {drive:10s} {grid:3d}x{grid:<3d} {c:2d} ch {kind:5s} "
-                        f"{cell['seconds_per_clip'] * 1e3:11.2f} ms per clip ({cell['clips_timed']} clips"
+                    head = f"    {drive:10s} {grid:3d}x{grid:<3d} {c:2d} ch {kind:5s} "
+                    if cell["seconds_per_clip"] is None:
+                        log(head + "out of memory at one clip")
+                        continue
+                    log(head + f"{cell['seconds_per_clip'] * 1e3:11.2f} ms per clip ({cell['clips_timed']} clips"
+                        + ("" if cell["fits"] else f"; the run's batch of {cell['run_batch']} does not fit")
                         + (", one channel" if cell["streamed"] else "")
                         + (f", {cell['memory_gb']:.1f} GB" if cell["memory_gb"] is not None else "") + ")")
             if not designs:
                 continue
             ref = time_arm(am.Arm("field", grid=grid, channels=1), drive, device, max_clips)["seconds_per_clip"]
+            if ref is None:
+                continue
             families = plan.PHASE_FAMILIES + (() if drive == "quadrature" else plan.AMPLITUDE_FAMILIES)
             for family, shape in plan.designs(families):
                 if (family, shape) == plan.REFERENCE:
                     continue
                 arm = am.Arm("field", physics=family, boundary=shape, grid=grid, channels=1)
-                m["designs"][(drive, grid, family, shape)] = time_arm(arm, drive, device, max_clips)[
-                    "seconds_per_clip"] / ref
+                t_design = time_arm(arm, drive, device, max_clips)["seconds_per_clip"]
+                if t_design is not None:
+                    m["designs"][(drive, grid, family, shape)] = t_design / ref
             log(f"    {drive:10s} {grid:3d}x{grid:<3d} designs: " + ", ".join(
                 f"{fa}/{sh} {v:.2f}" for (d, g, fa, sh), v in m["designs"].items() if (d, g) == (drive, grid)))
     tiers, runs = extrapolate(m)

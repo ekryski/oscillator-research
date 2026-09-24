@@ -4,6 +4,7 @@ import json
 import math
 
 import pytest
+import torch
 
 from harness.confirm import benchmark as bm
 from harness.confirm import plan
@@ -61,4 +62,22 @@ def test_the_baselines_and_untimed_arms_are_modelled():
     floor = rn.Spec("size", "recognition", "envelope", 0.0, None, 0, Arm("floor", grid=8))
     assert bm.run_seconds(floor, m) == (plan.seconds(floor, "mps"), False)
     net = plan._net("size", "envelope", 0.0, 1.0, 0, Arm("field", grid=64))
+    assert bm.run_seconds(net, m) == (plan.seconds(net, "mps"), False)
+
+
+def test_a_batch_too_large_for_the_device_is_halved_until_it_fits(monkeypatch):
+    real = bm.am.frozen_signals
+
+    def small_device(arm, model, rows):
+        if len(rows) > 1:
+            raise torch.OutOfMemoryError("CUDA out of memory (simulated)")
+        return real(arm, model, rows)
+    monkeypatch.setattr(bm.am, "frozen_signals", small_device)
+    cell = bm.time_arm(Arm("field", channels=1, grid=8), "envelope", "cpu", max_clips=4)
+    assert cell["clips_timed"] == 1 and not cell["fits"] and cell["seconds_per_clip"] > 0
+    monkeypatch.setattr(bm.am, "frozen_signals", lambda *a: (_ for _ in ()).throw(RuntimeError("out of memory")))
+    cell = bm.time_arm(Arm("field", channels=1, grid=8), "envelope", "cpu", max_clips=4)
+    assert cell["seconds_per_clip"] is None
+    m = {"cells": {("envelope", 8, 1, "field"): cell}, "designs": {}, "front_end": {}, "throughput": FAST}
+    net = plan._net("size", "envelope", 0.0, 1.0, 0, Arm("field", channels=1, grid=8))
     assert bm.run_seconds(net, m) == (plan.seconds(net, "mps"), False)
