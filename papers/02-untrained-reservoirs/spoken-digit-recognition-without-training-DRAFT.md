@@ -8,7 +8,7 @@ Coupled-oscillator networks are returning as a machine-learning substrate, on th
 
 ## 2 Background: the physics under test
 
-### 2.1 Coupling laws
+### 2.1 Coupling functions
 
 ### 2.2 Lattice geometries
 
@@ -20,21 +20,21 @@ Coupled-oscillator networks are returning as a machine-learning substrate, on th
 
 ### 4.1 Experimental design
 
-The confirmatory study was registered before its first run and is organized in seven tiers. Every run is one arm at one noise level, gain and seed, read at several readout widths and training sizes; the run counts below are the registered totals.
+The confirmatory study was registered before its first run and is organized in seven tiers. Every run is one arm at one noise level, input gain and seed, read at several readout widths and training sizes; the run counts below are the registered totals. Appendix A defines every term.
 
 | tier | question | arms | varied | fixed | runs |
 |---|---|---|---|---|---|
-| gate | Does the pipeline leak? | field, severed field, bank A and bank B with no drive; the field read over each clip's own length | the per-clip read at gain 0, 1 and 2, seeds 0–2 | 0 dB; the zero-drive cells at seed 0 | 13 |
-| 1, arms | Do the dynamics add anything beyond the input, a leaky bank, or severed coupling, and how do trained networks compare? (H1, H2, H3, H5, H6) | floor, field, severed field, bank A, bank B, GRU, TCN, CNN, transformer, S4D | noise clean, 0 and +5 dB; gain 1 and 2 (untrained dynamical arms); seeds 0–2; recognition at 2,048, 8,192 and 24,000 training clips, each network trained at each size; the order task on 5 digit pairs | field: Kuramoto, torus, random ω, pinning 0.3, clamp 1; order task at 2,048 training and 2,048 test sequences | 846 (216 recognition, 630 order) |
-| 2, design | Does field design move accuracy? (H4) | field only | coupling law (6), geometry (6; the Stuart-Landau cores on the torus only), ω structure (random, designed, uniform), pinning (0.3, 0.1), clamp (1, 0.5); noise 0 and +5 dB; gain 1 and 2; seeds 0–2 | 2,048 training clips; the four-window read, with and without rotation rates | 3,744 |
-| B, Becker | Where do we sit against published numbers? | the Tier 1 arms | the 5 speaker folds of [Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038); gain 1 and 2 | clean audio; 18,000 training, 6,000 validation and 6,000 test clips; seed 0 | 70 |
-| 3, quadrature | Does phase-referenced input beat its own floor? (H4) | floor and 10 field configurations: the 4 phase coupling laws and the helix, each with random and designed ω | noise 0 and +5 dB; gain 1 and 2; seeds 0–2 | quadrature front end; 2,048 training clips | 126 |
-| 4, size | Does the field's size matter against a matched bank? | field and bank A | 1, 4 and 16 channels (256, 1,024 and 4,096 states); noise 0 and +5 dB; seeds 0–2 | 16 × 16 lattice; gain 2; 2,048 training clips | 36 |
-| carrier | Does driving with the waveform itself help? (H4) | floor, bank A, the 10 Tier 3 field configurations, and the 2 Stuart-Landau cores with random and designed ω | seeds 0–2 | 0 dB; gain 32; 16 kHz drive; 2,048 training clips | 48 |
+| gate | Does the pipeline leak? | the coupled and uncoupled oscillator networks and both leaky-integrator banks, with no input; the coupled network read over each clip's own length | the per-clip read at input gain 0, 1 and 2, seeds 0–2 | 0 dB; the no-input cells at seed 0 | 13 |
+| 1, arms | Do the dynamics add anything beyond the input, a leaky-integrator bank, or uncoupled oscillators, and how do trained baselines compare? (H1, H2, H3, H5, H6) | spectrogram-only baseline, coupled oscillator network, uncoupled oscillator network, state-matched and width-matched leaky-integrator banks, and the trained baselines GRU, TCN, CNN, transformer and S4D | noise clean, 0 and +5 dB; input gain 1 and 2 (reservoirs); seeds 0–2; recognition at 2,048, 8,192 and 24,000 training clips, each trained baseline trained at each size; the order task on 5 digit pairs | coupled network: Kuramoto coupling, torus, random natural frequencies, restoring strength 0.3, coupling ceiling 1; order task at 2,048 training and 2,048 test sequences | 846 (216 recognition, 630 order) |
+| 2, design | Does network design move accuracy? (H4) | coupled oscillator network only | coupling function (6), lattice geometry (6; the Stuart–Landau functions on the torus only), natural frequencies (random, tonotopic, identical), restoring strength (0.3, 0.1), coupling ceiling (1, 0.5); noise 0 and +5 dB; input gain 1 and 2; seeds 0–2 | 2,048 training clips; the four-window read, with and without rotation rates | 3,744 |
+| B, Becker | Where do we sit against published numbers? | the Tier 1 arms | the 5 speaker folds of [Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038); input gain 1 and 2 | clean audio; 18,000 training, 6,000 validation and 6,000 test clips; seed 0 | 70 |
+| 3, quadrature | Does the quadrature pathway beat its own spectrogram-only baseline? (H4) | spectrogram-only baseline and 10 coupled-network configurations: the 4 phase coupling functions on the torus and Kuramoto on the helix, each with random and tonotopic natural frequencies | noise 0 and +5 dB; input gain 1 and 2; seeds 0–2 | quadrature pathway; 2,048 training clips | 126 |
+| 4, size | Does the network's size matter against a matched bank? | coupled oscillator network and state-matched leaky-integrator bank | 1, 4 and 16 channels (256, 1,024 and 4,096 states); noise 0 and +5 dB; seeds 0–2 | 16 × 16 lattice; input gain 2; 2,048 training clips | 36 |
+| carrier | Does driving with the waveform itself help? (H4) | spectrogram-only baseline, state-matched leaky-integrator bank, the 10 Tier 3 configurations, and the 2 Stuart–Landau coupling functions with random and tonotopic natural frequencies | seeds 0–2 | 0 dB; input gain 32; carrier pathway at 16 kHz; 2,048 training clips | 48 |
 
-**Arms.** The floor is the front end alone: its 16 band envelopes, read directly. The field is 1,024 oscillators (4 channels on a 16 × 16 lattice) with 2,048 fixed parameters, exposing sin θ and cos θ. The severed field is the same field with its coupling kernel zeroed. Bank A is a leaky bank matching the field's 1,024 states and 2,048 parameters; bank B matches the field's 2,048 exposed signals, at twice the parameters. The five networks are trained end to end, at 1,840 to 2,109 parameters each. Gain, the scale of the input driving an arm, applies only to the untrained dynamical arms: the field, the severed field and the two banks, whose response it changes because they are nonlinear. The floor has no dynamics for it to act on, and the readout's standardization would remove any fixed scale from its features; a trained network learns its own input scale.
+**Arms.** The spectrogram-only baseline is the front end and the readout with nothing between them: the readout reads the 16 mel band energies directly. The coupled oscillator network is 1,024 untrained oscillators, 4 channels of a 16 × 16 lattice, with 2,048 parameters, exposing sin θ and cos θ of each oscillator. The uncoupled oscillator network is the same network with its coupling kernels set to zero. The state-matched leaky-integrator bank has the network's 1,024 states and 2,048 parameters; the width-matched bank has 2,048 units, matching the network's 2,048 exposed signals at twice the parameters. These four untrained dynamical systems are the reservoirs. The five trained baselines are trained end to end, at 1,840 to 2,109 parameters each. Input gain, the scale of the input driving an arm, applies only to the reservoirs, whose response it changes because they are nonlinear. The spectrogram-only baseline has no dynamics for it to act on, and the readout's standardization would remove any fixed scale from its features; a trained baseline learns its own input scale.
 
-**The read.** Every arm is read by one function: the mean, standard deviation and mean absolute frame-to-frame change of each signal, over each of four equal windows of frames 16 to 61 for recognition, and over frames 16 to 147 as one window for the order task. The features are standardized, projected by one fixed Gaussian matrix to widths 192, 1,024 and 4,096 (never wider than the arm itself; the unprojected read is also fitted at 2,048 clips), and classified by a ridge whose penalty is chosen on the last eighth of the training set. The floor is also read from frame 0; that whole-clip floor is the primary control. The field arms also get a read with their rotation rates added.
+**The read.** Every arm is read by one function: the mean, standard deviation and mean absolute frame-to-frame change of each signal, over each of four equal windows of frames 16 to 61 for recognition, and over frames 16 to 147 as one window for the order task. The features are standardized, projected by one fixed Gaussian matrix to widths 192, 1,024 and 4,096 (never wider than the arm itself; the unprojected read is also fitted at 2,048 clips), and classified by a linear readout fitted by ridge regression, whose penalty is chosen on the last eighth of the training set. The spectrogram-only baseline is also read from frame 0; that whole-clip baseline is the primary control. The oscillator networks also get a read with their rotation rates added.
 
 **The primary cell** for every comparison is width 192, 2,048 training clips and the four-window read (the whole-span read for the order task). The test set is always the 6,000 clips of test speakers 49 to 60, except in Tier B, which uses the published test fold.
 
@@ -42,13 +42,13 @@ The confirmatory study was registered before its first run and is organized in s
 
 ### 4.2 Task and data
 
-### 4.3 Primary frontend (mel envelope)
+### 4.3 Front end: the mel spectrogram
 
-### 4.4 The transduction ladder (drive pathways)
+### 4.4 Input pathways
 
 ### 4.5 Noise protocol
 
-### 4.6 Drive scale, gain, and the integrator-validity bound
+### 4.6 Input gain and the integrator-validity bound
 
 ### 4.7 Instrumentation
 
@@ -58,25 +58,25 @@ The confirmatory study was registered before its first run and is organized in s
 
 | arm | clean | 0 dB | +5 dB |
 |---|---|---|---|
-| **Floor**: the front end alone, its 16 band envelopes read directly; no dynamics | 93.6 ± 0.3 | 78.0 ± 0.6 | 71.6 ± 1.6 |
-| **Oscillator field** (gain = 1): 1,024 coupled oscillators, untrained | 91.1 ± 0.4 | 77.8 ± 0.8 | 70.7 ± 0.3 |
-| **Severed field** (gain = 1): the same field with its coupling removed | 90.6 ± 0.3 | 76.9 ± 0.5 | 69.7 ± 0.4 |
-| **Bank A** (gain = 1): 1,024 leaky integrators with the field's states and parameters, untrained | 93.4 ± 0.2 | 73.8 ± 0.5 | 66.6 ± 0.8 |
-| **Transformer**: trained end to end, 1,968 parameters | 96.2 ± 0.4 | 76.0 ± 1.4 | 69.0 ± 1.8 |
+| **Spectrogram-only baseline**: the readout reads the 16 mel band energies directly; no reservoir | 93.6 ± 0.3 | 78.0 ± 0.6 | 71.6 ± 1.6 |
+| **Coupled oscillator network** (gain = 1): 1,024 oscillators, untrained | 91.1 ± 0.4 | 77.8 ± 0.8 | 70.7 ± 0.3 |
+| **Uncoupled oscillator network** (gain = 1): the same network with its coupling removed | 90.6 ± 0.3 | 76.9 ± 0.5 | 69.7 ± 0.4 |
+| **Leaky-integrator bank, state-matched** (gain = 1): 1,024 leaky integrators with the network's states and parameters, untrained | 93.4 ± 0.2 | 73.8 ± 0.5 | 66.6 ± 0.8 |
+| **Transformer**: a trained baseline, 1,968 parameters, trained end to end | 96.2 ± 0.4 | 76.0 ± 1.4 | 69.0 ± 1.8 |
 
-Table: Digit-recognition accuracy (%) on AudioMNIST, mean ± standard deviation over three seeds. Training: 2,048 clips drawn from the 24,000 recordings of speakers 1 to 48, with the same white noise level in training and test audio (0 dB: noise as loud as the speech; +5 dB: noise 5 dB louder than the speech). A seed sets an arm's random parameters and which 2,048 clips it is trained on. For the floor, field, severed field and bank A only the readout is fitted; the transformer is also trained end to end on the same clips. Evaluation: each arm's signals are summarized by the same three statistics over four time windows, projected to 192 features and classified by a ridge readout, and scored on all 6,000 clips of the 12 held-out speakers (49 to 60). The floor is read from the first frame of each clip, the other arms from frame 16, after their warm-up. Gain scales the input into the untrained dynamical arms and does not apply to the floor or the transformer.
+Table: Digit-recognition accuracy (%) on AudioMNIST, mean ± standard deviation over three seeds. Training: 2,048 clips drawn from the 24,000 recordings of speakers 1 to 48, with the same white noise level in training and test audio (0 dB: noise as loud as the speech; +5 dB: noise 5 dB louder than the speech). A seed sets an arm's random parameters and which 2,048 clips it is trained on. For the spectrogram-only baseline and the three reservoirs only the readout is fitted; the transformer is also trained end to end on the same clips. Evaluation: each arm's signals are summarized by the same three statistics over four time windows, projected to 192 features and classified by a linear readout fitted by ridge regression, and scored on all 6,000 clips of the 12 held-out speakers (49 to 60). The spectrogram-only baseline is read from the first frame of each clip, the other arms from frame 16, after their warm-up. Input gain applies only to the reservoirs, not to the spectrogram-only baseline or the transformer.
 
-![Digit-recognition accuracy on the 6,000 test clips of AudioMNIST speakers 49 to 60, by the noise level of the training and test audio. Bars are the mean over three seeds and error bars one standard deviation. Every arm was trained on 2,048 clips from speakers 1 to 48 and read by the same ridge readout on 192 features; the transformer was also trained end to end. Gain applies only to the untrained dynamical arms (field, severed field, bank A). Dotted line: chance, 10%.](resources/figures/c1-recognition-gain1.png)
+![Digit-recognition accuracy on the 6,000 test clips of AudioMNIST speakers 49 to 60, by the noise level of the training and test audio, with the reservoirs at input gain 1. Bars are the mean over three seeds and error bars one standard deviation. Every arm was trained on 2,048 clips from speakers 1 to 48 and read by the same linear readout on 192 features; the transformer was also trained end to end. Input gain applies only to the reservoirs: the coupled and uncoupled oscillator networks and the leaky-integrator bank. Dotted line: chance, 10%.](resources/figures/c1-recognition-gain1.png)
 
-![Digit-recognition accuracy with the untrained dynamical arms (field, severed field, bank A) driven at gain = 2, hatched. The floor and the transformer take no gain and are the same as at gain = 1. Every arm was trained on 2,048 clips from speakers 1 to 48 and read by the same ridge readout on 192 features, and scored on the 6,000 test clips of speakers 49 to 60. Bars are the mean over three seeds and error bars one standard deviation. Dotted line: chance, 10%.](resources/figures/c2-recognition-gain2.png)
+![Digit-recognition accuracy with the reservoirs (the coupled and uncoupled oscillator networks and the state-matched leaky-integrator bank) at input gain 2, hatched. The spectrogram-only baseline and the transformer take no gain and are the same as at gain 1. Every arm was trained on 2,048 clips from speakers 1 to 48, read by the same linear readout on 192 features, and scored on the 6,000 test clips of speakers 49 to 60. Bars are the mean over three seeds and error bars one standard deviation. Dotted line: chance, 10%.](resources/figures/c2-recognition-gain2.png)
 
-![Digit-recognition accuracy at both gains: each untrained dynamical arm at gain = 1 (solid) and gain = 2 (hatched), beside the floor and the transformer, which take no gain. Every arm was trained on 2,048 clips from speakers 1 to 48 and read by the same ridge readout on 192 features, and scored on the 6,000 test clips of speakers 49 to 60. Bars are the mean over three seeds and error bars one standard deviation. Dotted line: chance, 10%.](resources/figures/c3-recognition-both-gains.png)
+![Digit-recognition accuracy at both input gains: each reservoir at gain 1 (solid) and gain 2 (hatched), beside the spectrogram-only baseline and the transformer, which take no gain. Every arm was trained on 2,048 clips from speakers 1 to 48, read by the same linear readout on 192 features, and scored on the 6,000 test clips of speakers 49 to 60. Bars are the mean over three seeds and error bars one standard deviation. Dotted line: chance, 10%.](resources/figures/c3-recognition-both-gains.png)
 
-### 5.1 Trained conventional networks
+### 5.1 Trained baselines
 
-### 5.2 Field design: coupling law, geometry and natural frequencies
+### 5.2 Network design: coupling function, lattice geometry and natural frequencies
 
-### 5.3 Input pathways: quadrature and carrier drive
+### 5.3 Input pathways: quadrature and carrier
 
 ### 5.4 Readout sufficiency
 
@@ -86,7 +86,7 @@ Table: Digit-recognition accuracy (%) on AudioMNIST, mean ± standard deviation 
 
 ### 5.7 Temporal order
 
-## 6 Phase-referenced input: model and mechanism
+## 6 The quadrature pathway: model and mechanism
 
 ## 7 Discussion
 
@@ -152,6 +152,87 @@ This work was carried out by the author working with an AI coding agent, Claude 
 
 ## A Glossary
 
+The terms as this paper uses them. The code and the run record keep the labels the registration froze; src/README.md maps each term to its label.
+
+### A.1 The pipeline
+
 | Term | As used in this paper |
 |---|---|
-| **Leaky integrator** | A unit that holds one number x and, at each frame, moves a fraction a of the way toward its input: x ← (1 − a)·x + a·tanh(g_in·g·u), where u is the input, g the input gain, g_in the unit's own input weight, and tanh bounds the input. The old value decays exponentially, or "leaks", so the unit is a running average of its recent input with a time constant set by a; in signal-processing terms it is a first-order low-pass filter. The term is standard. In computational neuroscience it is the leaky-integrator neuron, the leaky integrate-and-fire model without the firing; in reservoir computing it is the unit of leaky-integrator echo state networks ([Jaeger et al. 2007](https://doi.org/10.1016/j.neunet.2007.04.016)), whose a is the "leaking rate" ([Lukoševičius 2012](https://doi.org/10.1007/978-3-642-35289-8_36)). The leaky-integrator banks used here have 1,024 or 2,048 units, time constants spaced logarithmically from 16 ms to 1 s, input weights g_in drawn from N(1, 0.1²), and no connections between units: nothing rotates and nothing is coupled. |
+| **Front end** | The fixed first stage every arm shares. It turns a clip's 16 kHz waveform into a mel spectrogram: a 512-point Fourier transform every 256 samples (16 ms), 16 mel bands, the log of each band's energy, and a fixed rescaling. Nothing in it is trained or fitted to the data. |
+| **Mel band** | One of the 16 frequency ranges the front end splits the audio into, spaced on the mel scale, which follows pitch perception: narrow at low frequencies, wide at high ones. |
+| **Band energy** | The log energy in one mel band, one value per frame: the signal the front end produces for that band. |
+| **Mel spectrogram** | A clip's 16 band energies together, frame by frame. The spectrogram-only baseline reads it directly; every reservoir is driven by it. |
+| **Frame** | One 16 ms step of the front end, 62.5 per second. |
+| **Reservoir** | An untrained dynamical system between the front end and the readout: here the coupled and uncoupled oscillator networks and the two leaky-integrator banks. The term is reservoir computing's ([Jaeger 2001](https://www.ai.rug.nl/minds/uploads/EchoStatesTechRep.pdf); [Maass 2002](https://doi.org/10.1162/089976602760407955)). |
+| **Readout** | The reader shared by every arm, and the only fitted part of an untrained arm: one linear layer from 192 features to 10 digit scores (1,930 weights), fitted by ridge regression, that is least squares with an L2 penalty, solved in closed form. The penalty is chosen from four values on the last eighth of the training clips, then the readout is refit on all of them. It is the same for every arm, so it is held constant across comparisons. |
+| **Untrained** | Parameters drawn at random once, from the seed, and never updated. In an untrained arm only the readout is fitted. |
+| **Input gain** | The factor that scales the input before it drives a reservoir: 1 or 2 (32 for the carrier pathway). It applies only to the reservoirs: the spectrogram-only baseline has no dynamics for it to act on, and a trained baseline learns its own input scale. |
+| **Input pathway** | How the audio drives a reservoir. Band-energy: each band energy adds to the rotation rate of the oscillators in its row. Quadrature: each band's energy and phase, so the push depends on where an oscillator is relative to the band's own cycle, a phase-referenced drive of the kind [Adler 1946](https://doi.org/10.1109/JRPROC.1946.229930) analysed. Carrier: the band-filtered waveform itself at 16 kHz, rather than its energy. |
+
+### A.2 Arms and baselines
+
+| Term | As used in this paper |
+|---|---|
+| **Arm** | One system under comparison, read the same way as every other. The term comes from experimental design. |
+| **Spectrogram-only baseline** | The front end and the readout with nothing between them: the readout reads the band energies directly, so it measures what the input alone supports. Read from the first frame, over the whole clip, it is the primary control, because it sees everything a reservoir is driven with; read from frame 16, it sees the frames every other arm is read over. On the quadrature and carrier pathways it reads that pathway's front end instead. |
+| **Coupled oscillator network** | The system under test: 1,024 untrained oscillators in 4 channels of a 16 × 16 lattice, coupled within each channel through a coupling kernel, with 2,048 parameters (the kernels and the natural frequencies). Also "the oscillator network". Its reference configuration: Kuramoto coupling, torus geometry, random natural frequencies, restoring strength 0.3, coupling ceiling 1. |
+| **Uncoupled oscillator network** | The same network with every coupling kernel set to zero: each oscillator keeps its natural frequency, restoring strength and input, but none acts on another. It isolates what the coupling contributes. |
+| **Leaky integrator** | A unit that holds one number x and, at each frame, moves a fraction a of the way toward its input: x ← (1 − a)·x + a·tanh(g_in·g·u), where u is the input, g the input gain, g_in the unit's own input weight, and tanh bounds the input. The old value decays exponentially, or "leaks", so the unit is a running average of its recent input with a time constant set by a; in signal-processing terms it is a first-order low-pass filter. The term is standard. In computational neuroscience it is the leaky-integrator neuron, the leaky integrate-and-fire model without the firing; in reservoir computing it is the unit of leaky-integrator echo state networks ([Jaeger et al. 2007](https://doi.org/10.1016/j.neunet.2007.04.016)), whose a is the "leaking rate" ([Lukoševičius 2012](https://doi.org/10.1007/978-3-642-35289-8_36)). |
+| **Leaky-integrator bank** | A reservoir of independent leaky integrators, routed like the oscillator network: mel band r drives every unit in row r. Time constants are spaced logarithmically from 16 ms to 1 s, input weights g_in are drawn from N(1, 0.1²), and no unit is connected to another: nothing rotates and nothing is coupled. State-matched: 1,024 units, the oscillator network's number of states and parameters. Width-matched: 2,048 units, the number of signals the oscillator network exposes (sin θ and cos θ of each oscillator), at twice the parameters. |
+| **Trained baselines** | Five conventional networks of 1,840 to 2,109 parameters, trained end to end (AdamW, 30 epochs) through a learned linear layer on the same statistics, then read by the same readout. GRU: a gated recurrent network. TCN: a small causal temporal convolutional network. CNN: two causal one-dimensional convolutions. Transformer: one causal self-attention layer, width 16 with two heads, and a two-layer feed-forward block. S4D: a diagonal state-space model. |
+| **Matched pair** | Two runs identical in every factor but the one compared, at the same noise level, input gain and seed. A design factor's effect is the mean difference over its matched pairs. |
+| **Seed** | Sets an arm's random parameters and which training clips it draws. Every condition is run at three seeds, and results are reported as their mean with the standard deviation. |
+
+### A.3 The oscillator network
+
+| Term | As used in this paper |
+|---|---|
+| **Oscillator** | A unit whose state advances around a cycle. A phase oscillator keeps only its phase θ, an angle; a Stuart–Landau oscillator also keeps an amplitude. The readout sees sin θ and cos θ of each. |
+| **Natural frequency ω** | The rate at which an oscillator would advance if nothing acted on it. Random: drawn from N(1, 0.1²). Tonotopic: each row set to the centre frequency of the mel band that drives it, with small jitter. Identical: all 1. |
+| **Lattice** | The 16 × 16 grid a channel's oscillators sit on. Rows follow frequency: mel band r drives row r, from lowest to highest. |
+| **Row** | The 16 oscillators of one channel that a single mel band drives. The only grouping built into the network. |
+| **Channel** | One independent 16 × 16 lattice of 256 oscillators, with its own coupling kernel and natural frequencies. Every channel receives the same input, and channels do not act on each other; the network's 4 channels are four differently drawn copies, read side by side. The name follows the channels of a convolutional network, where each channel likewise has its own kernel. |
+| **Coupling kernel** | A channel's table of coupling weights: a 16 × 16 array whose entry at an offset of so many rows and columns sets how strongly an oscillator is acted on by the one at that offset. The same table applies at every site, so the coupling is a convolution, and "kernel" is meant as in a convolutional network, not as a GPU compute kernel. It covers every offset, so each oscillator is coupled to every other in its channel. The weights are drawn from N(0, 0.05²): a positive weight pulls a pair toward the same phase, a negative one pushes it apart. Each channel has its own kernel. |
+| **Coupling function** | How the phases of two coupled oscillators turn into a push on one of them (A.4). |
+| **Coupling ceiling** | A cap on each channel's overall coupling strength, 1 or 0.5. It limits the channel's coupling as a whole, the largest factor by which the kernel amplifies any spatial pattern of phases across the channel (the peak of the kernel's spectrum), and enforces it by scaling every weight of that channel's kernel by the same factor. It does not cap individual pairs, neighbours or regions. Random kernels always exceed it here (peaks of 1.4 to 2.9 on the torus), so in practice the ceiling sets every channel's coupling strength. |
+| **Restoring strength λ** | The strength of a pull on every oscillator back toward phase 0, the term −λ sin θ, 0.3 or 0.1. It has the form of the restoring torque that returns a pendulum to rest, but the oscillators have no inertia, so nothing swings back past 0: an oscillator whose natural frequency is below λ is held in place, or locked ([Adler 1946](https://doi.org/10.1109/JRPROC.1946.229930)), and a faster one keeps rotating, slowed where the pull opposes it. For Stuart–Landau oscillators it is a pull toward phase 0 at unit amplitude. |
+| **Cluster** | A group of oscillators that move together, in phase or in fixed opposition, because of the dynamics rather than the wiring. Nothing in a kernel assigns an oscillator to a cluster; clusters form, or do not, as the network runs ([Pikovsky et al. 2001](https://doi.org/10.1017/CBO9780511755743)). |
+| **Rotation rate** | How far an oscillator's phase advances between frames, read as the mean of cos Δθ and sin Δθ over a window. An additional read, beside the statistics. |
+
+### A.4 Coupling functions
+
+Each is the coupling term in θ̇ᵢ = ωᵢ + couplingᵢ + g·uᵢ − λ sin θᵢ, where the sum runs over the oscillators j of oscillator i's channel and Kᵢⱼ is the kernel weight at their offset.
+
+| Term | As used in this paper |
+|---|---|
+| **Kuramoto** | Σⱼ Kᵢⱼ sin(θⱼ − θᵢ). Each oscillator is pulled toward the phases of the others, in proportion to the kernel weight: the minimal model of synchronization ([Kuramoto 1975](https://doi.org/10.1007/BFb0013365)), and the reference. |
+| **Kuramoto–Sakaguchi** | Σⱼ Kᵢⱼ sin(θⱼ − θᵢ − α), with α = π/4. A phase lag that breaks the pull's symmetry and admits travelling waves ([Sakaguchi & Kuramoto 1986](https://doi.org/10.1143/PTP.76.576)). |
+| **Second harmonic** | Kuramoto plus β Σⱼ Kᵢⱼ sin 2(θⱼ − θᵢ), with β = 0.5. The second harmonic favours two-cluster states, pairs in phase or in opposition ([Daido 1992](https://doi.org/10.1143/ptp/88.6.1213); [Hansel et al. 1993](https://doi.org/10.1103/PhysRevE.48.3470)). |
+| **Winfree** | −sin θᵢ Σⱼ Kᵢⱼ (1 + cos θⱼ). How strongly an oscillator responds depends on its own phase, and how strongly it acts on the others on its phase ([Winfree 1967](https://doi.org/10.1016/0022-5193%2867%2990051-3)). |
+| **Stuart–Landau** | Each oscillator is a complex amplitude z = x + iy that relaxes to a cycle of unit radius, and coupling is diffusive, Σⱼ Kᵢⱼ (zⱼ − zᵢ), so amplitude as well as phase carries the state ([Stuart 1960](https://doi.org/10.1017/S002211206000116X); [Aranson & Kramer 2002](https://doi.org/10.1103/RevModPhys.74.99)). The readout sees y and x in place of sin θ and cos θ. |
+| **Stuart–Landau, fixed amplitude** | The same with the amplitude held at 1: the phase-only limit, which reduces to Kuramoto. It separates what the amplitude adds. |
+
+### A.5 Lattice geometries
+
+| Term | As used in this paper |
+|---|---|
+| **Torus** | Both lattice axes wrap around: the top row is coupled to the bottom, and the left column to the right. The reference geometry. |
+| **Cylinder** | Columns wrap, rows do not: the frequency axis is open, as in the cochlea, so the highest band is not coupled around to the lowest. |
+| **Sheet** | Neither axis wraps, and coupling stops at every edge. With the cylinder and the torus it varies the number of wrapped axes from zero to two. |
+| **Helix** | The 256 sites read as one closed ring, one octave (64 sites, four rows) per turn, so an offset of one turn joins bands an octave apart. |
+| **Cube** | Each row's 16 columns read as a 4 × 4 slab, giving a 16 × 4 × 4 lattice that wraps on all three axes: the same oscillators, with shorter paths between them. |
+| **Sphere** | Rows as latitudes with open poles and columns as longitudes that wrap, each oscillator's influence weighted by the cosine of its latitude: an approximation to a sphere, not exact spherical coupling. |
+
+### A.6 The read and the evaluation
+
+| Term | As used in this paper |
+|---|---|
+| **Signal** | A time series an arm exposes to the readout: a band energy for the spectrogram-only baseline, sin θ or cos θ of an oscillator, a leaky integrator's state, or a trained baseline's hidden unit. |
+| **Summary statistics** | Per signal and window: the mean, the standard deviation and the mean absolute frame-to-frame change. None is an endpoint, and the absolute change cannot tell a rising signal from a falling one. |
+| **Window** | For recognition, frames 16 to 61 split into four equal windows; for the order task, frames 16 to 147 as one. Every clip is read over the same frames. |
+| **Warm-up** | The first 16 frames (256 ms), which every arm but the whole-clip spectrogram-only baseline skips. Reading every arm over the same frames after the warm-up means an arm with no input reads chance. |
+| **Width** | The number of features the readout sees: 192, 1,024 or 4,096, reached by one fixed random projection shared by every arm. An arm's native width is its feature count before projection: 192 for the spectrogram-only baseline, 24,576 for the oscillator network. |
+| **Primary cell** | Width 192, 2,048 training clips, and the four-window read (the whole-span read for the order task). |
+| **Protocols A and B** | A: train on speakers 1 to 48 and test on the 6,000 clips of speakers 49 to 60. B: the five speaker folds of [Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038). |
+| **Noise level** | White noise added to each clip at a level relative to its speech: 0 dB is as loud as the speech, and +5 dB is 5 dB louder (a signal-to-noise ratio of −5 dB). |
+| **Order task** | Two digits of a pair spoken one after the other; the task is to say which came first. The mean and spread of a signal do not depend on the order of its frames, so the input alone read over the whole span cannot answer it, and the spectrogram-only baseline reads chance, 50%. |
