@@ -96,8 +96,10 @@ For each training size, an arm's native features are standardized with that trai
 | B, Becker | every Tier 1 arm under Protocol B, both gains for the reservoirs | 70 |
 | 3, quadrature | a diagonal (4 phase functions by random and tonotopic frequencies on the torus, plus a helix pair) and its baseline; 0 and +5 dB, both gains, three seeds | 126 |
 | projection | Tier 1's reservoirs, recognition at 2,048 clips and the order task, each read under the fixed and a seeded projection | 432 |
+| sweep | every coupling function at the reference configuration: restoring strength 0.5, 0.8, 1.0 and coupling ceiling 1.5, 2.0 at both gains; gains 3, 4, 5, 6, 8, 10, 12; 0 and +5 dB, three seeds (decision log) | 612 |
+| cochlea | the coil and the cochlea for the four phase coupling functions and the three kinds of natural frequencies; restoring strength 0.3, ceiling 1; 0 and +5 dB, both gains, three seeds (decision log) | 288 |
 
-Clean audio is left out of Tiers 2 and 3, because the task saturates there; it is run in Tier 1 and Tier B for the comparison with published results. **Running order:** gate, 1, 2, B, 3, projection. A carrier tier, driving the networks with the band-filtered waveform at 16 kHz, was planned and withdrawn before any of its runs (see the decision log).
+Clean audio is left out of Tiers 2 and 3, because the task saturates there; it is run in Tier 1 and Tier B for the comparison with published results. **Running order:** gate, 1, 2, B, 3, projection, sweep, cochlea; the trained baselines of Tiers 1 and B were rerun after the others (decision log). A carrier tier, driving the networks with the band-filtered waveform at 16 kHz, was planned and withdrawn before any of its runs (see the decision log).
 
 ## 8. Integrity checks
 
