@@ -216,3 +216,31 @@ def test_both_projections_keep_the_fixed_cells_exactly_and_add_only_projected_se
 @pytest.mark.parametrize("arm", [FIELD, am.Arm("bank")], ids=lambda a: a.label())
 def test_an_untrained_arm_reads_the_same_on_the_apple_silicon_gpu(bank, arm):
     assert rn.execute(spec(arm), device="mps", bank=bank)["cells"] == rn.execute(spec(arm), bank=bank)["cells"]
+
+
+def test_a_network_records_how_synchronized_and_how_locked_it_is_and_nothing_else_does(bank):
+    for arm in (FIELD, am.Arm("field", severed=True), am.Arm("field", physics="sl")):
+        inst = rn.execute(spec(arm, reads=("windowed",)), bank=bank)["instruments"]
+        assert set(inst) == {"R", "plv", "entrained", "amplitude"}
+        for name in ("R", "plv", "entrained"):
+            assert 0.0 <= inst[name]["mean"] <= 1.0 and len(inst[name]["by_class"]) == 10
+        if arm.physics != "sl":
+            assert inst["amplitude"]["mean"] == pytest.approx(1.0, abs=1e-4)   # a phase core stays on the circle
+    assert "instruments" not in rn.execute(spec(am.Arm("bank"), reads=("windowed",)), bank=bank)
+
+
+def test_the_instruments_leave_every_cell_as_it_was(bank):
+    cells = rn.execute(spec(FIELD), bank=bank)["cells"]
+    assert cells == rn.execute(spec(FIELD), bank=bank)["cells"]
+
+
+def test_the_order_parameter_reads_one_for_a_locked_channel_and_near_zero_for_a_spread_one():
+    g, t = 4, 20
+    theta = torch.zeros(1, t, 1, g, g)
+    theta[..., :, :] = 0.3                                   # every oscillator at one phase
+    sig = torch.cat((theta.sin().flatten(2), theta.cos().flatten(2)), dim=2)
+    rows = torch.rand(1, t, g)
+    assert am.field_instruments(sig, rows, "envelope", 1, g, lo=0)["R"].item() == pytest.approx(1.0)
+    spread = torch.linspace(0, 2 * math.pi, g * g + 1)[:-1].view(1, 1, 1, g, g).expand(1, t, 1, g, g)
+    sig = torch.cat((spread.sin().flatten(2), spread.cos().flatten(2)), dim=2)
+    assert am.field_instruments(sig, rows, "envelope", 1, g, lo=0)["R"].item() < 1e-5

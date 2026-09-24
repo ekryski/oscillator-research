@@ -236,6 +236,17 @@ def _store(buffers: dict, feats: dict, where: slice, total: int) -> None:
         buffers[key][where] = value.cpu()
 
 
+def instrument_summary(per_clip: dict[str, torch.Tensor], labels: torch.Tensor, test: slice) -> dict:
+    """The coupled or uncoupled network's instruments over the test clips: mean, spread, and mean per class."""
+    y = labels[test]
+    out = {}
+    for name, values in per_clip.items():
+        v = values[test].double()
+        out[name] = {"mean": v.mean().item(), "sd": v.std().item(),
+                     "by_class": [v[y == k].mean().item() for k in range(int(y.max()) + 1)]}
+    return out
+
+
 def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
     """Run one spec and return its record (not yet written)."""
     t0 = time.perf_counter()
@@ -269,12 +280,18 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
         rate = CARRIER_RATE_HZ if spec.drive == "carrier" else None
         model = am.build_frozen(arm, spec.gain if spec.gain is not None else 0.0, spec.seed, device, rate)
         t1 = time.perf_counter()
+        per_clip: dict[str, torch.Tensor] = {}
         with torch.no_grad():
             for rows, tvalid, where in batches(spec, clips, device):
                 sig = am.frozen_signals(arm, model, rows.to(device))
+                if arm.kind == "field":
+                    for name, value in am.field_instruments(sig, rows.to(device), spec.drive, arm.channels).items():
+                        per_clip.setdefault(name, torch.zeros(total))[where] = value.cpu()
                 _store(buffers, am.frozen_features(arm, sig, tvalid.to(device), spec.task, spec.span),
                        where, total)
         timing["simulate_s"] = time.perf_counter() - t1
+        if per_clip:
+            extra["instruments"] = instrument_summary(per_clip, clips.labels, clips.layout.test)
 
     t2 = time.perf_counter()
     read_blocks = {read: [buffers[k] for k in keys] for read, keys in am.reads(arm, spec.task).items()
