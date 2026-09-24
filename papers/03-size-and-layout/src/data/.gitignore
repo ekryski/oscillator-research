@@ -1,0 +1,5 @@
+# Corpora and derived banks are never committed — see README.md for how to
+# fetch AudioMNIST and rebuild the bank.
+*
+!.gitignore
+!README.md
