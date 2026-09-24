@@ -24,7 +24,7 @@ Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 6
 | leaky-integrator bank, width-matched (gain = 2) | 89.4 ± 0.9 | 72.3 ± 0.8 | 65.1 ± 0.7 |
 | transformer | 96.3 ± 0.7 | 79.8 ± 0.6 | 72.3 ± 0.4 |
 | GRU | 96.5 ± 0.3 | 82.8 ± 1.3 | 76.9 ± 1.6 |
-| S4D | 93.2 ± 0.6 | 78.5 ± 0.5 | 74.2 ± 0.6 |
+| S4D | 95.5 ± 0.7 | 80.8 ± 1.2 | 74.6 ± 0.9 |
 | CNN | 94.7 ± 0.6 | 79.2 ± 2.0 | 73.9 ± 1.6 |
 | TCN | 97.0 ± 0.7 | 82.6 ± 1.3 | 76.2 ± 0.4 |
 
@@ -52,8 +52,8 @@ The cells of the table above, paired on the same test clips and seeds: mean ± s
 | coupled oscillator network minus the CNN (gain = 2) | -7.09 ± 0.58 [-7.72, -6.47] | -4.09 ± 1.52 [-4.87, -3.29] | -5.03 ± 0.74 [-5.95, -4.11] |
 | coupled oscillator network minus the transformer (gain = 1) | -5.25 ± 0.47 [-5.75, -4.73] | -1.98 ± 0.78 [-2.72, -1.22] | -1.60 ± 0.71 [-2.38, -0.83] |
 | coupled oscillator network minus the transformer (gain = 2) | -8.73 ± 0.70 [-9.30, -8.14] | -4.61 ± 0.93 [-5.36, -3.83] | -3.42 ± 0.41 [-4.22, -2.61] |
-| coupled oscillator network minus the S4D (gain = 1) | -2.14 ± 0.22 [-2.73, -1.55] | -0.73 ± 1.34 [-1.54, +0.08] | -3.45 ± 0.68 [-4.35, -2.58] |
-| coupled oscillator network minus the S4D (gain = 2) | -5.62 ± 0.62 [-6.28, -4.98] | -3.36 ± 0.27 [-4.16, -2.54] | -5.27 ± 0.97 [-6.18, -4.38] |
+| coupled oscillator network minus the S4D (gain = 1) | -4.41 ± 0.27 [-4.97, -3.83] | -2.97 ± 1.84 [-3.81, -2.19] | -3.87 ± 1.17 [-4.69, -3.01] |
+| coupled oscillator network minus the S4D (gain = 2) | -7.88 ± 0.66 [-8.52, -7.27] | -5.61 ± 0.88 [-6.43, -4.81] | -5.68 ± 0.34 [-6.54, -4.83] |
 | coupled oscillator network, with rotation rates minus without (gain = 1) | -0.30 ± 0.50 [-0.59, -0.01] | +0.59 ± 0.58 [+0.19, +0.99] | +0.38 ± 0.31 [-0.01, +0.76] |
 | coupled oscillator network, with rotation rates minus without (gain = 2) | +0.97 ± 0.67 [+0.63, +1.31] | +1.18 ± 1.06 [+0.74, +1.61] | +1.36 ± 0.55 [+0.97, +1.81] |
 
@@ -77,7 +77,7 @@ Each column is a training size (n clips, nested: each set contains the smaller) 
 | leaky-integrator bank, width-matched (gain = 2) | 72.3 ± 0.8 | 77.5 ± 0.4 | 77.9 ± 0.3 | 76.0 ± 0.3 | 81.7 ± 0.3 | 83.1 ± 0.1 | 76.6 ± 0.3 | 82.9 ± 0.1 | 84.4 ± 0.2 |
 | transformer | 79.8 ± 0.6 | 79.8 ± 0.6 | 79.8 ± 0.6 | 85.9 ± 1.3 | 85.9 ± 1.3 | 85.9 ± 1.3 | 90.6 ± 0.3 | 90.6 ± 0.3 | 90.6 ± 0.3 |
 | GRU | 82.8 ± 1.3 | 83.3 ± 1.2 | 83.3 ± 1.2 | 87.2 ± 1.1 | 87.6 ± 1.0 | 87.6 ± 1.0 | 89.9 ± 0.5 | 90.2 ± 0.5 | 90.2 ± 0.5 |
-| S4D | 78.5 ± 0.5 | 78.5 ± 0.5 | 78.5 ± 0.5 | 86.8 ± 0.6 | 86.8 ± 0.6 | 86.8 ± 0.6 | 88.5 ± 0.3 | 88.5 ± 0.3 | 88.5 ± 0.3 |
+| S4D | 80.8 ± 1.2 | 80.8 ± 1.2 | 80.8 ± 1.2 | 88.4 ± 0.4 | 88.4 ± 0.4 | 88.4 ± 0.4 | 90.4 ± 0.1 | 90.4 ± 0.1 | 90.4 ± 0.1 |
 | CNN | 79.2 ± 2.0 | 79.2 ± 2.0 | 79.2 ± 2.0 | 85.6 ± 1.1 | 85.6 ± 1.1 | 85.6 ± 1.1 | 86.7 ± 1.1 | 86.7 ± 1.1 | 86.7 ± 1.1 |
 | TCN | 82.6 ± 1.3 | 82.6 ± 1.3 | 82.6 ± 1.3 | 87.1 ± 1.2 | 87.1 ± 1.2 | 87.1 ± 1.2 | 89.7 ± 0.4 | 89.7 ± 0.4 | 89.7 ± 0.4 |
 
@@ -97,7 +97,7 @@ Each column is a training size (n clips, nested: each set contains the smaller) 
 | leaky-integrator bank, width-matched (gain = 2) | 65.1 ± 0.7 | 70.2 ± 0.8 | 70.2 ± 1.5 | 69.4 ± 0.5 | 75.2 ± 0.8 | 76.0 ± 0.8 | 70.4 ± 0.1 | 77.0 ± 0.2 | 78.1 ± 0.2 |
 | transformer | 72.3 ± 0.4 | 72.3 ± 0.4 | 72.3 ± 0.4 | 80.6 ± 1.0 | 80.6 ± 1.0 | 80.6 ± 1.0 | 84.7 ± 0.2 | 84.7 ± 0.2 | 84.7 ± 0.2 |
 | GRU | 76.9 ± 1.6 | 77.2 ± 1.2 | 77.2 ± 1.2 | 82.7 ± 0.9 | 83.0 ± 1.0 | 83.0 ± 1.0 | 84.9 ± 0.7 | 85.3 ± 0.8 | 85.3 ± 0.8 |
-| S4D | 74.2 ± 0.6 | 74.2 ± 0.6 | 74.2 ± 0.6 | 82.3 ± 0.7 | 82.3 ± 0.7 | 82.3 ± 0.7 | 83.5 ± 0.7 | 83.5 ± 0.7 | 83.5 ± 0.7 |
+| S4D | 74.6 ± 0.9 | 74.6 ± 0.9 | 74.6 ± 0.9 | 83.1 ± 0.3 | 83.1 ± 0.3 | 83.1 ± 0.3 | 85.4 ± 0.7 | 85.4 ± 0.7 | 85.4 ± 0.7 |
 | CNN | 73.9 ± 1.6 | 73.9 ± 1.6 | 73.9 ± 1.6 | 79.5 ± 1.3 | 79.5 ± 1.3 | 79.5 ± 1.3 | 81.4 ± 0.9 | 81.4 ± 0.9 | 81.4 ± 0.9 |
 | TCN | 76.2 ± 0.4 | 76.2 ± 0.4 | 76.2 ± 0.4 | 82.7 ± 1.0 | 82.7 ± 1.0 | 82.7 ± 1.0 | 84.3 ± 0.7 | 84.3 ± 0.7 | 84.3 ± 0.7 |
 
@@ -140,7 +140,7 @@ Readout width 192 and 2,048 training sequences per digit pair, the whole-span re
 | leaky-integrator bank, width-matched (gain = 2) | 99.8 ± 0.0 | 99.6 ± 0.1 | 99.0 ± 0.1 |
 | transformer | 99.9 ± 0.0 | 99.6 ± 0.1 | 99.3 ± 0.1 |
 | GRU | 99.8 ± 0.1 | 99.6 ± 0.1 | 99.0 ± 0.1 |
-| S4D | 99.5 ± 0.1 | 50.1 ± 0.2 | 49.8 ± 0.5 |
+| S4D | 99.1 ± 0.1 | 98.3 ± 0.7 | 96.9 ± 0.2 |
 | CNN | 92.2 ± 0.6 | 50.0 ± 0.4 | 50.0 ± 0.4 |
 | TCN | 99.9 ± 0.1 | 95.0 ± 0.4 | 91.1 ± 0.3 |
 
@@ -168,8 +168,8 @@ The cells of the table above, paired on the same test clips and seeds: mean ± s
 | coupled oscillator network minus the CNN (gain = 2) | +0.70 ± 1.05 [+0.20, +1.20] | +43.49 ± 0.42 [+42.87, +44.10] | +41.48 ± 0.74 [+40.82, +42.12] |
 | coupled oscillator network minus the transformer (gain = 1) | -2.23 ± 0.56 [-2.43, -2.03] | -3.40 ± 0.38 [-3.67, -3.15] | -3.82 ± 0.72 [-4.10, -3.53] |
 | coupled oscillator network minus the transformer (gain = 2) | -7.06 ± 0.53 [-7.39, -6.73] | -6.10 ± 0.12 [-6.44, -5.78] | -7.85 ± 0.63 [-8.25, -7.46] |
-| coupled oscillator network minus the S4D (gain = 1) | -1.80 ± 0.67 [-2.02, -1.60] | +46.16 ± 0.52 [+45.57, +46.77] | +45.63 ± 0.21 [+44.99, +46.25] |
-| coupled oscillator network minus the S4D (gain = 2) | -6.64 ± 0.54 [-6.96, -6.30] | +43.47 ± 0.16 [+42.86, +44.12] | +41.60 ± 0.16 [+40.91, +42.22] |
+| coupled oscillator network minus the S4D (gain = 1) | -1.34 ± 0.55 [-1.56, -1.14] | -2.10 ± 0.32 [-2.39, -1.83] | -1.45 ± 0.63 [-1.78, -1.10] |
+| coupled oscillator network minus the S4D (gain = 2) | -6.18 ± 0.44 [-6.50, -5.84] | -4.79 ± 0.79 [-5.15, -4.46] | -5.49 ± 0.57 [-5.89, -5.07] |
 | coupled oscillator network, with rotation rates minus without (gain = 1) | +0.55 ± 0.38 [+0.39, +0.70] | +0.38 ± 0.08 [+0.21, +0.56] | -0.10 ± 0.53 [-0.30, +0.08] |
 | coupled oscillator network, with rotation rates minus without (gain = 2) | +3.01 ± 0.56 [+2.74, +3.29] | +1.25 ± 0.15 [+1.01, +1.50] | +1.04 ± 0.36 [+0.75, +1.31] |
 
@@ -401,7 +401,7 @@ Readout width 192 and 18,000 training clips from 36 speakers per fold, the ridge
 | leaky-integrator bank, width-matched (gain = 2) | 90.9 ± 2.0 |
 | transformer | 98.4 ± 0.6 |
 | GRU | 98.3 ± 1.2 |
-| S4D | 97.6 ± 1.0 |
+| S4D | 98.0 ± 0.6 |
 | CNN | 97.0 ± 1.5 |
 | TCN | 98.2 ± 0.7 |
 
@@ -429,8 +429,8 @@ The cells of the table above, paired on the same test clips and folds: mean ± s
 | coupled oscillator network minus the CNN (gain = 2) | -8.11 ± 2.26 [-8.47, -7.76] |
 | coupled oscillator network minus the transformer (gain = 1) | -6.49 ± 2.50 [-6.81, -6.20] |
 | coupled oscillator network minus the transformer (gain = 2) | -9.55 ± 2.57 [-9.90, -9.21] |
-| coupled oscillator network minus the S4D (gain = 1) | -5.72 ± 2.14 [-6.02, -5.41] |
-| coupled oscillator network minus the S4D (gain = 2) | -8.78 ± 2.36 [-9.12, -8.44] |
+| coupled oscillator network minus the S4D (gain = 1) | -6.07 ± 2.44 [-6.38, -5.77] |
+| coupled oscillator network minus the S4D (gain = 2) | -9.13 ± 2.50 [-9.47, -8.77] |
 
 ## Quadrature: each network minus the quadrature front end's own baseline, and minus the same network on the spectrogram pathway (Section 4.5)
 
