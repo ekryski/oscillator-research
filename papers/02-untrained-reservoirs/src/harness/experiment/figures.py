@@ -17,7 +17,7 @@ from harness.experiment import summary as sm
 from harness.experiment import terms
 from harness.utils.paths import FIGURES_DIR
 
-NOISES = ((None, "clean"), (0.0, "0 dB"), (5.0, "+5 dB"))
+NOISES = tuple((n, sm.snr(n)) for n in (None, 0.0, 5.0))
 
 #: Tier 1 recognition arms: (arm, read, table label, legend label, colour); gain is set per figure
 BASELINE = ("baseline", "windowed@wholeclip",
@@ -110,8 +110,8 @@ def recognition_figure(acc: dict[tuple, dict], stem: str, gains: tuple[float, ..
 
 
 #: Tier 2's conditions, in plotting order: (noise, gain, legend, colour, marker)
-CONDITIONS = ((0.0, 1.0, "0 dB, gain = 1", "#534AB7", "o"), (0.0, 2.0, "0 dB, gain = 2", "#A9A4DB", "o"),
-              (5.0, 1.0, "+5 dB, gain = 1", "#D85A30", "s"), (5.0, 2.0, "+5 dB, gain = 2", "#EFA98F", "s"))
+CONDITIONS = tuple((n, g, f"{sm.snr(n)}, gain = {g:g}", colour, marker) for n, g, colour, marker in (
+    (0.0, 1.0, "#534AB7", "o"), (0.0, 2.0, "#A9A4DB", "o"), (5.0, 1.0, "#D85A30", "s"), (5.0, 2.0, "#EFA98F", "s")))
 
 
 def design_differences() -> list[dict]:
@@ -192,7 +192,7 @@ def size_figure(stem: str = "c5-training-size") -> None:
     acc = {(r["arm"], r["read"], r["gain"], r["noise"], r["width"], r["n_train"]): r for r in sm.accuracies(cells)}
     sizes = sorted({k[5] for k in acc})
     fig, axes = plt.subplots(1, 2, figsize=(9.0, 4.2), sharey=True)
-    for ax, noise, title in ((axes[0], 0.0, "0 dB"), (axes[1], 5.0, "+5 dB")):
+    for ax, noise, title in ((axes[0], 0.0, sm.snr(0.0)), (axes[1], 5.0, sm.snr(5.0))):
         for arm, read, gain, legend, colour in SIZE_ARMS:
             for width, style in ((192, "-"), (4096, "--")):
                 rows = [acc.get((arm, read, gain, noise, width, n)) for n in sizes]
@@ -239,7 +239,7 @@ def gain_figure(stem: str = "c6-gain-sweep") -> None:
            if r["width"] == rec.PRIMARY_WIDTH and r["n_train"] == rec.PRIMARY_SIZE and r["read"] == "windowed"}
     gains = (1.0, 2.0) + plan.SWEEP_GAINS
     fig, axes = plt.subplots(1, 2, figsize=(9.0, 4.0), sharey=True)
-    for ax, noise, title in ((axes[0], 0.0, "0 dB"), (axes[1], 5.0, "+5 dB")):
+    for ax, noise, title in ((axes[0], 0.0, sm.snr(0.0)), (axes[1], 5.0, sm.snr(5.0))):
         for coupling, colour in GAIN_COUPLINGS:
             label = Arm("network", coupling=coupling).label()
             pts = [(g, acc[(label, noise, g)]) for g in gains if (label, noise, g) in acc]

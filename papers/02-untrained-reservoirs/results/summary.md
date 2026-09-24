@@ -6,7 +6,7 @@ Runs recorded: gate 13 of 13; tier1 846 of 846; tier2 3,744 of 3,744; becker 70 
 
 ## Tier 1, recognition: accuracy
 
-| | clean | 0 dB | +5 dB |
+| | clean | 0 dB | −5 dB |
 |---|---|---|---|
 | spectrogram-only baseline, whole clip | 93.6 ± 0.3 | 78.0 ± 0.6 | 71.6 ± 1.6 |
 | spectrogram-only baseline, from frame 16 | 83.6 ± 0.3 | 61.9 ± 0.8 | 55.0 ± 1.9 |
@@ -26,7 +26,7 @@ Runs recorded: gate 13 of 13; tier1 846 of 846; tier2 3,744 of 3,744; becker 70 
 
 ## Tier 1, recognition: differences
 
-| | clean | 0 dB | +5 dB |
+| | clean | 0 dB | −5 dB |
 |---|---|---|---|
 | coupled oscillator network minus the spectrogram-only baseline, whole clip (gain = 1) | -2.53 ± 0.15 [-3.13, -1.92] | -0.23 ± 1.14 [-0.99, +0.52] | -0.88 ± 1.56 [-1.66, -0.09] |
 | coupled oscillator network minus the spectrogram-only baseline, whole clip (gain = 2) | -6.01 ± 0.28 [-6.67, -5.35] | -2.87 ± 0.55 [-3.62, -2.07] | -2.69 ± 1.82 [-3.54, -1.85] |
@@ -73,7 +73,7 @@ Runs recorded: gate 13 of 13; tier1 846 of 846; tier2 3,744 of 3,744; becker 70 
 | CNN | 79.2 ± 2.0 | 79.2 ± 2.0 | 79.2 ± 2.0 | 85.6 ± 1.1 | 85.6 ± 1.1 | 85.6 ± 1.1 | 86.7 ± 1.1 | 86.7 ± 1.1 | 86.7 ± 1.1 |
 | TCN | 82.6 ± 1.3 | 82.6 ± 1.3 | 82.6 ± 1.3 | 87.1 ± 1.2 | 87.1 ± 1.2 | 87.1 ± 1.2 | 89.7 ± 0.4 | 89.7 ± 0.4 | 89.7 ± 0.4 |
 
-### +5 dB
+### −5 dB
 
 | | n 2,048, w 192 | n 2,048, w 1,024 | n 2,048, w 4,096 | n 8,192, w 192 | n 8,192, w 1,024 | n 8,192, w 4,096 | n 24,000, w 192 | n 24,000, w 1,024 | n 24,000, w 4,096 |
 |---|---|---|---|---|---|---|---|---|---|
@@ -95,7 +95,7 @@ Runs recorded: gate 13 of 13; tier1 846 of 846; tier2 3,744 of 3,744; becker 70 
 
 ## Tier 1, recognition: width 4,096 minus 192
 
-| | clean | 0 dB | +5 dB |
+| | clean | 0 dB | −5 dB |
 |---|---|---|---|
 | leaky-integrator bank, state-matched: width 4,096 minus 192 (gain = 1) | +1.31 ± 0.52 [+0.94, +1.68] | +5.46 ± 0.15 [+4.81, +6.12] | +5.35 ± 0.27 [+4.63, +6.08] |
 | leaky-integrator bank, state-matched: width 4,096 minus 192 (gain = 2) | +2.93 ± 0.86 [+2.49, +3.38] | +5.04 ± 0.62 [+4.47, +5.68] | +5.63 ± 1.93 [+4.91, +6.34] |
@@ -114,7 +114,7 @@ Runs recorded: gate 13 of 13; tier1 846 of 846; tier2 3,744 of 3,744; becker 70 
 
 ## Tier 1, order task: accuracy, averaged over the five pairs
 
-| | clean | 0 dB | +5 dB |
+| | clean | 0 dB | −5 dB |
 |---|---|---|---|
 | spectrogram-only baseline, whole clip | 49.9 ± 0.5 | 49.9 ± 0.3 | 50.1 ± 0.6 |
 | spectrogram-only baseline, from frame 16 | 50.6 ± 0.4 | 49.8 ± 0.7 | 50.2 ± 0.4 |
@@ -134,7 +134,7 @@ Runs recorded: gate 13 of 13; tier1 846 of 846; tier2 3,744 of 3,744; becker 70 
 
 ## Tier 1, order task: differences, pooled over the five pairs
 
-| | clean | 0 dB | +5 dB |
+| | clean | 0 dB | −5 dB |
 |---|---|---|---|
 | coupled oscillator network minus the spectrogram-only baseline, whole clip (gain = 1) | +47.85 ± 0.92 [+47.27, +48.43] | +46.30 ± 0.47 [+45.71, +46.92] | +45.37 ± 0.53 [+44.74, +46.03] |
 | coupled oscillator network minus the spectrogram-only baseline, whole clip (gain = 2) | +43.02 ± 0.20 [+42.40, +43.66] | +43.61 ± 0.30 [+42.97, +44.25] | +41.33 ± 0.45 [+40.65, +42.04] |
@@ -163,7 +163,7 @@ Order task, the spectrogram-only baseline's 95% interval contains chance (50%) i
 
 ## Tier 2, design: each level minus its reference, over matched pairs
 
-| | 0 dB, gain = 1 | 0 dB, gain = 2 | +5 dB, gain = 1 | +5 dB, gain = 2 |
+| | 0 dB, gain = 1 | 0 dB, gain = 2 | −5 dB, gain = 1 | −5 dB, gain = 2 |
 |---|---|---|---|---|
 | coupling function: Kuramoto–Sakaguchi minus Kuramoto | -0.05 ± 0.23 [-0.11, +0.02] | -0.01 ± 0.25 [-0.10, +0.07] | +0.04 ± 0.07 [-0.03, +0.11] | -0.09 ± 0.09 [-0.18, -0.00] |
 | coupling function: second harmonic minus Kuramoto | +0.24 ± 0.09 [+0.15, +0.34] | +0.15 ± 0.20 [+0.05, +0.24] | +0.46 ± 0.21 [+0.36, +0.55] | +0.30 ± 0.06 [+0.20, +0.39] |
@@ -193,7 +193,7 @@ Rerun on the Apple GPU, the projection tier's unseeded cells against Tier 1's on
 
 ### recognition
 
-| | clean | 0 dB | +5 dB |
+| | clean | 0 dB | −5 dB |
 |---|---|---|---|
 | coupled oscillator network (gain = 1), fixed | 91.1 ± 0.4 | 77.8 ± 0.8 | 70.7 ± 0.3 |
 | coupled oscillator network (gain = 1), seeded | 91.3 ± 0.4 | 77.6 ± 0.4 | 70.9 ± 0.4 |
@@ -214,7 +214,7 @@ Rerun on the Apple GPU, the projection tier's unseeded cells against Tier 1's on
 
 ### order
 
-| | clean | 0 dB | +5 dB |
+| | clean | 0 dB | −5 dB |
 |---|---|---|---|
 | coupled oscillator network (gain = 1), fixed | 97.7 ± 0.6 | 96.2 ± 0.4 | 95.5 ± 0.7 |
 | coupled oscillator network (gain = 1), seeded | 97.9 ± 0.3 | 95.6 ± 0.6 | 95.0 ± 0.7 |
@@ -233,7 +233,7 @@ Rerun on the Apple GPU, the projection tier's unseeded cells against Tier 1's on
 | leaky-integrator bank, width-matched (gain = 2), fixed | 99.8 ± 0.0 | 99.6 ± 0.1 | 99.0 ± 0.1 |
 | leaky-integrator bank, width-matched (gain = 2), seeded | 99.7 ± 0.0 | 99.5 ± 0.1 | 98.9 ± 0.1 |
 
-| | clean | 0 dB | +5 dB |
+| | clean | 0 dB | −5 dB |
 |---|---|---|---|
 | recognition: leaky-integrator bank, state-matched: seeded minus fixed projection (gain = 1) | -0.83 ± 0.65 [-1.15, -0.52] | -0.19 ± 0.80 [-0.79, +0.43] | -0.42 ± 1.00 [-1.07, +0.26] |
 | recognition: leaky-integrator bank, state-matched: seeded minus fixed projection (gain = 2) | -1.29 ± 0.80 [-1.66, -0.93] | +0.36 ± 1.15 [-0.25, +0.99] | +0.66 ± 1.36 [-0.01, +1.33] |
@@ -270,7 +270,7 @@ Rerun on the Apple GPU, the projection tier's unseeded cells against Tier 1's on
 
 ## Sweep: restoring strength, coupling ceiling and gain beyond Tier 2's, each minus its reference
 
-| | 0 dB, gain = 1 | 0 dB, gain = 2 | 0 dB, gain = 3 | 0 dB, gain = 4 | 0 dB, gain = 5 | 0 dB, gain = 6 | 0 dB, gain = 8 | 0 dB, gain = 10 | 0 dB, gain = 12 | +5 dB, gain = 1 | +5 dB, gain = 2 | +5 dB, gain = 3 | +5 dB, gain = 4 | +5 dB, gain = 5 | +5 dB, gain = 6 | +5 dB, gain = 8 | +5 dB, gain = 10 | +5 dB, gain = 12 |
+| | 0 dB, gain = 1 | 0 dB, gain = 2 | 0 dB, gain = 3 | 0 dB, gain = 4 | 0 dB, gain = 5 | 0 dB, gain = 6 | 0 dB, gain = 8 | 0 dB, gain = 10 | 0 dB, gain = 12 | −5 dB, gain = 1 | −5 dB, gain = 2 | −5 dB, gain = 3 | −5 dB, gain = 4 | −5 dB, gain = 5 | −5 dB, gain = 6 | −5 dB, gain = 8 | −5 dB, gain = 10 | −5 dB, gain = 12 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Kuramoto: restoring strength 0.5 minus 0.3 | +0.19 ± 0.78 [-0.23, +0.67] | +0.35 ± 0.20 [-0.08, +0.76] |  |  |  |  |  |  |  | +0.16 ± 0.16 [-0.30, +0.62] | +0.47 ± 0.84 [+0.06, +0.92] |  |  |  |  |  |  |  |
 | Kuramoto: restoring strength 0.8 minus 0.3 | +0.51 ± 1.26 [+0.02, +1.00] | +0.47 ± 0.56 [-0.02, +0.98] |  |  |  |  |  |  |  | +0.63 ± 0.58 [+0.16, +1.11] | +0.43 ± 1.23 [-0.11, +0.94] |  |  |  |  |  |  |  |
@@ -347,7 +347,7 @@ Rerun on the Apple GPU, the projection tier's unseeded cells against Tier 1's on
 
 ## Coil and cochlea: each minus a Tier 2 geometry, over matched configurations
 
-| | 0 dB, gain = 1 | 0 dB, gain = 2 | +5 dB, gain = 1 | +5 dB, gain = 2 |
+| | 0 dB, gain = 1 | 0 dB, gain = 2 | −5 dB, gain = 1 | −5 dB, gain = 2 |
 |---|---|---|---|---|
 | lattice geometry: coil minus torus | -0.22 ± 0.31 [-0.38, -0.07] | -0.15 ± 0.25 [-0.31, +0.03] | +0.01 ± 0.48 [-0.14, +0.16] | -0.06 ± 0.27 [-0.22, +0.11] |
 | lattice geometry: cochlea minus torus | -0.97 ± 0.06 [-1.17, -0.77] | -0.41 ± 0.11 [-0.64, -0.19] | -0.76 ± 0.53 [-0.96, -0.55] | -0.89 ± 0.20 [-1.09, -0.67] |
@@ -404,7 +404,7 @@ Rerun on the Apple GPU, the projection tier's unseeded cells against Tier 1's on
 
 ## Tier 3, quadrature pathway: each arm minus that pathway's baseline, and minus the same network on the spectrogram pathway
 
-| | 0 dB, gain = 1 | 0 dB, gain = 2 | +5 dB, gain = 1 | +5 dB, gain = 2 |
+| | 0 dB, gain = 1 | 0 dB, gain = 2 | −5 dB, gain = 1 | −5 dB, gain = 2 |
 |---|---|---|---|---|
 | quadrature pathway: coupled oscillator network (helix) minus the spectrogram-only baseline, whole clip | -23.18 ± 0.33 [-24.17, -22.15] | -22.31 ± 0.20 [-23.33, -21.30] | -16.48 ± 1.23 [-17.40, -15.55] | -15.76 ± 1.30 [-16.68, -14.84] |
 | quadrature pathway: coupled oscillator network (helix) minus the spectrogram-only baseline, from frame 16 | -13.94 ± 0.59 [-14.87, -12.99] | -13.07 ± 0.41 [-13.98, -12.16] | -9.99 ± 0.52 [-10.83, -9.21] | -9.27 ± 1.28 [-10.08, -8.48] |

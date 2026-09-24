@@ -166,7 +166,9 @@ def add_noise(waves: torch.Tensor, lens: torch.Tensor, clip_ids: torch.Tensor,
     """White noise at `noise_db` relative to each clip's speech RMS, over the padded window.
 
     The harness's convention: amplitude = speech RMS x 10^(dB/20), so 0 dB is
-    noise at speech-equal power and +5 dB is louder noise. Each clip's noise
+    noise at speech-equal power and +5 dB is noise 5 dB louder than the speech,
+    a signal-to-noise ratio of -5 dB, which is how the paper reports it
+    (summary.snr). The record keeps this level, since it seeds the noise. Each clip's noise
     comes from its own generator, seeded by its identity and the level, so it
     is the same noise whichever set, batch or process the clip turns up in.
     """

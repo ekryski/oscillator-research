@@ -348,17 +348,22 @@ def summary(cells: list[Cell] | None = None) -> dict:
 # The readable report: the primary cells
 # ---------------------------------------------------------------------------
 
-def _noise(n) -> str:
-    return "clean" if n is None else f"{n:+g} dB".replace("+0 dB", "0 dB")
+def snr(n) -> str:
+    """A noise level as reported: its signal-to-noise ratio. The record keeps the harness's
+    level of the noise relative to the speech (protocol.add_noise), so its 5 is an SNR of -5 dB."""
+    if n is None:
+        return "clean"
+    return "0 dB" if n == 0 else f"{-n:+g} dB".replace("-", "\u2212")
+
 
 
 def _by_noise(r: dict) -> tuple:
-    return (-1 if r["noise"] is None else r["noise"],), _noise(r["noise"])
+    return (-1 if r["noise"] is None else r["noise"],), snr(r["noise"])
 
 
 def _by_condition(r: dict) -> tuple:
     gain = f", gain = {r['gain']:g}" if r["gain"] is not None else ""
-    return (-1 if r["noise"] is None else r["noise"], r["gain"] or 0), _noise(r["noise"]) + gain
+    return (-1 if r["noise"] is None else r["noise"], r["gain"] or 0), snr(r["noise"]) + gain
 
 
 def _by_size(r: dict) -> tuple:
@@ -467,7 +472,7 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
         rows = [r for r in acc if r["tier"] == "tier1" and r["task"] == "recognition" and r["noise"] == noise
                 and r["read"] in ("windowed", "windowed@wholeclip") and r["width"] != "native"]
         rows.sort(key=_rank)
-        lines += [f"### {_noise(noise)}", ""]
+        lines += [f"### {snr(noise)}", ""]
         lines += _grid(rows, _arm, _by_size, _acc) + [""]
     lines += ["## Tier 1, recognition: width 4,096 minus 192", ""]
     lines += _grid([r for r in cmp if r["tier"] == "tier1" and r["task"] == "recognition" and r["n_train"] == n
