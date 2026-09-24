@@ -324,6 +324,9 @@ def _execute_streamed(spec: Spec, clips: Clips, model: torch.nn.Module, device: 
         p_tr, p_te, native = st.streamed_read(spec.arm, model, channel_batches(spec, clips, n, device), n,
                                               clips.layout.n_test, spec.widths, spec.task, device)
     t2 = time.perf_counter()
+    if max(spec.widths) >= native:
+        raise ValueError(f"a streamed read keeps no unprojected features, so every width must be below the "
+                         f"arm's {native:,}; got {spec.widths}")
     wanted = ro.wanted_widths(spec.widths, native, False)
     labels = torch.cat((clips.labels[:n], clips.labels[clips.layout.test]))
     layout = ro.Layout(n, 0, clips.layout.n_test)
