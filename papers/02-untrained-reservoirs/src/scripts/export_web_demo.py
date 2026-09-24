@@ -76,8 +76,8 @@ from harness.utils.constants import WARMUP_FRAMES
 SEED = 0
 WIDTH = 192
 SIZE = rn.PRIMARY_SIZE
-#: the demo clips: two per digit, from the test speakers, repetition 0
-DEMO_SPEAKERS = lambda d: (49 + d, 59 - d)  # noqa: E731
+#: the demo clips: two per digit, from two different test speakers (49-58 and 60-51), repetition 0
+DEMO_SPEAKERS = lambda d: (49 + d, 60 - d)  # noqa: E731
 DEMO_REP = 0
 NOISE_I16_SCALE = 4096.0
 CARRIER_GAIN = pl.CARRIER_GAIN
