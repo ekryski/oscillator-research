@@ -213,6 +213,15 @@ def pathways(cells: list[Cell]) -> list[dict]:
             for name, read in ((BASELINE_WHOLE, "windowed@wholeclip"), (BASELINE_16, "windowed")):
                 out += versus(cells, f"{terms.arm(label)} minus {name}", (label, "windowed"), ("baseline", read),
                               tier="tier3", task="recognition", pathway=pathway)
+    # the same network on the quadrature pathway against the spectrogram pathway: Tier 2 ran every Tier 3
+    # configuration with the same seeds, conditions and test clips
+    spectrogram = [c for c in cells if c.tier == "tier2" and c.read == "windowed"]
+    quadrature = [c for c in cells if c.tier == "tier3" and c.pathway == "quadrature" and c.read == "windowed"]
+    for label in sorted({c.label for c in quadrature} - {"baseline"}):
+        groups = matched([c for c in quadrature if c.label == label], [c for c in spectrogram if c.label == label])
+        out += [{"comparison": f"{terms.arm(label)}: quadrature minus spectrogram pathway", "tier": "tier3",
+                 "task": "recognition", "pathway": "quadrature", "noise": k[0], "gain": k[1], "width": k[2],
+                 "b_width": k[2], "n_train": k[3], **paired(v)} for k, v in sorted(groups.items(), key=str)]
     return out
 
 
