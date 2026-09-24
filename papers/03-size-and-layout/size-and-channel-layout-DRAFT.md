@@ -16,7 +16,7 @@ This paper asks it, for the previous study's networks and on its task, protocol 
 
 ## 2 Background
 
-Coupled oscillators synchronize, form clusters, lock to a drive or split into coherent and incoherent domains, depending on how they are coupled and arranged ([Pikovsky et al. 2001](https://doi.org/10.1017/CBO9780511755743); [Strogatz 2000](https://doi.org/10.1016/S0167-2789%2800%2900094-4); [Kuramoto & Battogtokh 2002](https://arxiv.org/abs/cond-mat/0210694)). Untrained and read by a trained linear readout, they are reservoirs in the sense of reservoir computing ([Jaeger 2001](https://www.ai.rug.nl/minds/uploads/EchoStatesTechRep.pdf); [Maass 2002](https://doi.org/10.1162/089976602760407955); [Tanaka 2019](https://doi.org/10.1016/j.neunet.2019.03.005)), where the reservoir's size is a primary design parameter ([Lukoševičius 2012](https://doi.org/10.1007/978-3-642-35289-8_36)). The previous study ([Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/)) gives the physics under test and its place in machine learning in full; this section restates what the size study needs.
+Coupled oscillators synchronize, form clusters, lock to a drive or split into coherent and incoherent domains, depending on how they are coupled and arranged ([Pikovsky et al. 2001](https://doi.org/10.1017/CBO9780511755743); [Strogatz 2000](https://doi.org/10.1016/S0167-2789%2800%2900094-4); [Kuramoto & Battogtokh 2002](https://arxiv.org/abs/cond-mat/0210694)). Untrained and read by a trained linear readout, they are reservoirs in the sense of reservoir computing ([Jaeger 2001](https://www.ai.rug.nl/minds/uploads/EchoStatesTechRep.pdf); [Maass et al. 2002](https://doi.org/10.1162/089976602760407955); [Tanaka et al. 2019](https://doi.org/10.1016/j.neunet.2019.03.005)), where the reservoir's size is a primary design parameter ([Lukoševičius 2012](https://doi.org/10.1007/978-3-642-35289-8_36)). The previous study ([Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/)) gives the physics under test and its place in machine learning in full; this section restates what the size study needs.
 
 The network here is C channels of a G × G lattice. Each channel is an independent copy: it receives the same input, has its own coupling kernel and natural frequencies, and does not act on any other channel, so channels are side by side like the heads of one attention layer, not stacked like layers (Appendix C). Within a channel every oscillator is coupled to every other through the kernel, and the lattice's rows follow frequency, row r driven by the r-th input band. A network therefore grows either by enlarging each channel's lattice, which adds coupled neighbours and input rows, or by adding channels, which adds independent copies driven alike.
 
@@ -26,7 +26,7 @@ Each oscillator's phase θᵢ evolves as θ̇ᵢ = ωᵢ + couplingᵢ + g·uᵢ
 
 | coupling function | coupling term | what it adds | in machine learning |
 |---|---|---|---|
-| **Kuramoto** | Σⱼ Kᵢⱼ sin(θⱼ − θᵢ) | pulls each oscillator toward the others' phases: the minimal model of synchronization ([Kuramoto 1975](https://doi.org/10.1007/BFb0013365)), and the reference | trained all-to-all in Un-0 ([unconv.ai 2026](https://unconv.ai/blog/introducing-un-0-generating-images-with-coupled-oscillators/)); a D-dimensional generalization in AKOrN ([Miyato 2025](https://openreview.net/forum?id=nwDRD4AMoN)) |
+| **Kuramoto** | Σⱼ Kᵢⱼ sin(θⱼ − θᵢ) | pulls each oscillator toward the others' phases: the minimal model of synchronization ([Kuramoto 1975](https://doi.org/10.1007/BFb0013365)), and the reference | trained all-to-all in Un-0 ([unconv.ai 2026](https://unconv.ai/blog/introducing-un-0-generating-images-with-coupled-oscillators/)); a D-dimensional generalization in AKOrN ([Miyato et al. 2025](https://openreview.net/forum?id=nwDRD4AMoN)) |
 | **Kuramoto–Sakaguchi** | Σⱼ Kᵢⱼ sin(θⱼ − θᵢ − α), α = π/4 | a phase lag that breaks the pull's symmetry and admits partial coherence ([Sakaguchi & Kuramoto 1986](https://doi.org/10.1143/PTP.76.576); [Abrams & Strogatz 2004](https://arxiv.org/abs/nlin/0407045)) | with Daido harmonics and a delay in FSN ([Nunley 2026](https://arxiv.org/abs/2606.18694)) |
 | **Second harmonic** | Kuramoto plus β Σⱼ Kᵢⱼ sin 2(θⱼ − θᵢ), β = 0.5 | favours two-cluster states, pairs in phase or in opposition ([Daido 1992](https://doi.org/10.1143/ptp/88.6.1213); [Hansel et al. 1993](https://doi.org/10.1103/PhysRevE.48.3470)) | none recorded |
 | **Winfree** | −sin θᵢ Σⱼ Kᵢⱼ (1 + cos θⱼ) | separates an oscillator's sensitivity, set by its own phase, from its influence, set by its neighbour's ([Winfree 1967](https://doi.org/10.1016/0022-5193%2867%2990051-3)) | generalized, with attention-defined coupling, in WONN ([Dai & Song 2026](https://arxiv.org/abs/2605.20922)) |
@@ -64,7 +64,7 @@ It runs in eight tiers of 10,029 runs (Appendix B), 150 of which are the previou
 
 ### 3.2 Task and data
 
-The task and data are the previous study's ([Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/)): the 30,000 recordings of AudioMNIST ([Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)), ten spoken digits by 60 speakers, resampled to 16 kHz, peak-normalized, trimmed of silence and capped at 1 s, in the same bank. Every result keeps speakers apart under its Protocol A: the arms are trained on speakers 1 to 48 and tested on all 6,000 recordings of speakers 49 to 60. A seed fixes a permutation of the training recordings, and the training set is its first 2,048. The previous study's second protocol, on the published speaker folds, and its temporal-order task are not repeated here.
+The task and data are the previous study's ([Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/)): the 30,000 recordings of AudioMNIST ([Becker et al. 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)), ten spoken digits by 60 speakers, resampled to 16 kHz, peak-normalized, trimmed of silence and capped at 1 s, in the same bank. Every result keeps speakers apart under its Protocol A: the arms are trained on speakers 1 to 48 and tested on all 6,000 recordings of speakers 49 to 60. A seed fixes a permutation of the training recordings, and the training set is its first 2,048. The previous study's second protocol, on the published speaker folds, and its temporal-order task are not repeated here.
 
 ### 3.3 Front end and band mapping
 
@@ -158,7 +158,7 @@ As in the previous study, no threshold decides a result. Every accuracy is repor
 
 ## Reproducibility statement {-}
 
-The code, the design document, and the complete run record (every run's specification, results, per-clip correctness and the device it ran on) will be released with the paper; AudioMNIST is public ([Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)). The runs taken from the previous study are in its own released record ([Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/)). From the record alone, one command regenerates every table and figure, and from the audio, the harness reruns any tier on the CPU, an NVIDIA GPU or the GPU of Apple Silicon, resuming without repeating a finished run. On the CPU, runs with the same seed are bit-identical, and so are the previous study's runs; on a GPU they are close but not identical. We welcome reproductions.
+The code, the design document, and the complete run record (every run's specification, results, per-clip correctness and the device it ran on) will be released with the paper; AudioMNIST is public ([Becker et al. 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)). The runs taken from the previous study are in its own released record ([Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/)). From the record alone, one command regenerates every table and figure, and from the audio, the harness reruns any tier on the CPU, an NVIDIA GPU or the GPU of Apple Silicon, resuming without repeating a finished run. On the CPU, runs with the same seed are bit-identical, and so are the previous study's runs; on a GPU they are close but not identical. We welcome reproductions.
 
 ## AI use statement {-}
 
@@ -177,7 +177,7 @@ This work was carried out by the author working with an AI coding agent, Claude 
 - [Abrams & Strogatz 2004](https://arxiv.org/abs/nlin/0407045): Chimera States for Coupled Oscillators.
 - [Adler 1946](https://doi.org/10.1109/JRPROC.1946.229930): A Study of Locking Phenomena in Oscillators.
 - [Aranson & Kramer 2002](https://doi.org/10.1103/RevModPhys.74.99): The world of the complex Ginzburg-Landau equation.
-- [Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038): AudioMNIST: Exploring Explainable Artificial Intelligence for audio analysis on a simple benchmark.
+- [Becker et al. 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038): AudioMNIST: Exploring Explainable Artificial Intelligence for audio analysis on a simple benchmark.
 - [Dai & Song 2026](https://arxiv.org/abs/2605.20922): Winfree Oscillatory Neural Network.
 - [Daido 1992](https://doi.org/10.1143/ptp/88.6.1213): Order Function and Macroscopic Mutual Entrainment in Uniformly Coupled Limit-Cycle Oscillators.
 - [Hairer et al. 1993](https://doi.org/10.1007/978-3-540-78862-1): Solving Ordinary Differential Equations I: Nonstiff Problems.
@@ -186,12 +186,12 @@ This work was carried out by the author working with an AI coding agent, Claude 
 - [Jaeger et al. 2007](https://doi.org/10.1016/j.neunet.2007.04.016): Optimization and applications of echo state networks with leaky-integrator neurons.
 - [Johnson & Lindenstrauss 1984](https://doi.org/10.1090/conm/026/737400): Extensions of Lipschitz mappings into a Hilbert space.
 - [Kryski 2026a](https://doi.org/10.2139/ssrn.7445198): From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning. Preprint.
-- [Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/): Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields. Preprint.
+- [Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/): Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Oscillator Networks. Preprint.
 - [Kuramoto & Battogtokh 2002](https://arxiv.org/abs/cond-mat/0210694): Coexistence of Coherence and Incoherence in Nonlocally Coupled Phase Oscillators.
 - [Kuramoto 1975](https://doi.org/10.1007/BFb0013365): Self-entrainment of a population of coupled non-linear oscillators.
 - [Lukoševičius 2012](https://doi.org/10.1007/978-3-642-35289-8_36): A Practical Guide to Applying Echo State Networks.
-- [Maass 2002](https://doi.org/10.1162/089976602760407955): Real-Time Computing Without Stable States: A New Framework for Neural Computation Based on Perturbations.
-- [Miyato 2025](https://openreview.net/forum?id=nwDRD4AMoN): Artificial Kuramoto Oscillatory Neurons.
+- [Maass et al. 2002](https://doi.org/10.1162/089976602760407955): Real-Time Computing Without Stable States: A New Framework for Neural Computation Based on Perturbations.
+- [Miyato et al. 2025](https://openreview.net/forum?id=nwDRD4AMoN): Artificial Kuramoto Oscillatory Neurons.
 - [Nunley 2026](https://arxiv.org/abs/2606.18694): Attention as Frustrated Synchronization.
 - [Pikovsky et al. 2001](https://doi.org/10.1017/CBO9780511755743): Synchronization: A Universal Concept in Nonlinear Sciences.
 - [Sakaguchi & Kuramoto 1986](https://doi.org/10.1143/PTP.76.576): A Soluble Active Rotator Model Showing Phase Transitions via Mutual Entrainment.
@@ -199,7 +199,7 @@ This work was carried out by the author working with an AI coding agent, Claude 
 - [Shepard 1982](https://doi.org/10.1037/0033-295X.89.4.305): Geometrical approximations to the structure of musical pitch.
 - [Strogatz 2000](https://doi.org/10.1016/S0167-2789%2800%2900094-4): From Kuramoto to Crawford: exploring the onset of synchronization in populations of coupled oscillators.
 - [Stuart 1960](https://doi.org/10.1017/S002211206000116X): On the non-linear mechanics of wave disturbances in stable and unstable parallel flows Part 1. The basic behaviour in plane Poiseuille flow.
-- [Tanaka 2019](https://doi.org/10.1016/j.neunet.2019.03.005): Recent advances in physical reservoir computing: A review.
+- [Tanaka et al. 2019](https://doi.org/10.1016/j.neunet.2019.03.005): Recent advances in physical reservoir computing: A review.
 - [unconv.ai 2026](https://unconv.ai/blog/introducing-un-0-generating-images-with-coupled-oscillators/): Introducing Un-0: Generating Images with Coupled Oscillators.
 - [Winfree 1967](https://doi.org/10.1016/0022-5193%2867%2990051-3): Biological rhythms and the behavior of populations of coupled oscillators.
 
@@ -220,7 +220,7 @@ The terms as this paper uses them, carried over from [Kryski 2026b](https://gith
 | **Band energy** | The log energy in one mel band, one value per frame: the signal the front end produces for that band. |
 | **Mel spectrogram** | A clip's band energies together, frame by frame. The spectrogram-only baseline reads it directly; every reservoir is driven by it. |
 | **Frame** | One 16 ms step of the front end, 62.5 per second, the same at every band count. |
-| **Reservoir** | An untrained dynamical system between the front end and the readout: here the coupled and uncoupled oscillator networks and the leaky-integrator bank. The term is reservoir computing's ([Jaeger 2001](https://www.ai.rug.nl/minds/uploads/EchoStatesTechRep.pdf); [Maass 2002](https://doi.org/10.1162/089976602760407955)). |
+| **Reservoir** | An untrained dynamical system between the front end and the readout: here the coupled and uncoupled oscillator networks and the leaky-integrator bank. The term is reservoir computing's ([Jaeger 2001](https://www.ai.rug.nl/minds/uploads/EchoStatesTechRep.pdf); [Maass et al. 2002](https://doi.org/10.1162/089976602760407955)). |
 | **Readout** | The reader shared by every arm, and the only fitted part of an untrained arm: one linear layer from 192 features to 10 digit scores (1,930 weights), fitted by ridge regression, that is least squares with an L2 penalty, solved in closed form. The penalty is chosen from four values on the last eighth of the training clips, then the readout is refit on all of them. It is the same for every arm at every size, so it is held constant across comparisons: as a network grows, its readout does not. |
 | **Untrained** | Parameters drawn at random once, from the seed, and never updated. In an untrained arm only the readout is fitted. |
 | **Input gain** | The factor that scales the input before it drives a reservoir: 1 here (32 for the carrier pathway). It applies only to the reservoirs: the spectrogram-only baseline has no dynamics for it to act on, and a trained baseline learns its own input scale. |
@@ -287,7 +287,7 @@ Defined in Section 2.2, where they are drawn at 16 × 16.
 | **Width** | The number of features the readout sees: 192, 1,024 or 4,096, reached by a random projection. An arm's native width is its feature count before projection, 24 per oscillator for the network (two signals, three statistics, four windows): 24,576 for the previous paper's network and 6,291,456 for a 128 × 128 network of 16 channels. No arm is read wider than its native width. |
 | **Channel-by-channel read** | How an arm of more than 4,096 states is read, since its features do not fit in memory: each channel is run alone, its features standardized with its own training statistics and projected, and the projections added. Because channels do not act on each other and standardization is per feature, this is the same read as holding every feature at once, up to the order of floating-point sums; its projection is drawn channel by channel, with the same distribution. |
 | **Primary cell** | Width 192, 2,048 training clips, and the four-window read. |
-| **Protocol A** | Train on speakers 1 to 48 and test on the 6,000 clips of speakers 49 to 60 of AudioMNIST ([Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)). |
+| **Protocol A** | Train on speakers 1 to 48 and test on the 6,000 clips of speakers 49 to 60 of AudioMNIST ([Becker et al. 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)). |
 | **Noise level** | White noise added to each clip at a level relative to its speech. Every run here is at 0 dB, noise as loud as the speech. |
 
 ## B Experimental design
