@@ -68,3 +68,39 @@ def test_the_estimate_covers_every_tier_and_lattice():
     assert {r["tier"] for r in rows} == set(plan.TIERS)
     assert sum(r["runs"] for r in rows) == sum(COUNTS.values())
     assert all(r["cpu_hours"] >= 0 and r["peak_gb"] > 0 for r in rows)
+
+
+def _cell(read, width, effective, acc, projection=None):
+    c = {"read": read, "n_train": 2048, "width": width, "effective_width": effective, "acc": acc}
+    return c if projection is None else {**c, "projection": projection}
+
+
+def test_paper_02s_untagged_cells_and_its_projection_tier_are_read_together(tmp_path, monkeypatch):
+    import json
+    monkeypatch.setattr(plan, "PAPER02_RECORD", tmp_path)
+    s = rn.Spec("size", "recognition", "envelope", 0.0, 1.0, 0, Arm("field"), reads=("windowed",))
+    old = {"native_widths": {"windowed": 24576, "pooled": 6144},
+           "cells": [_cell("windowed", 192, 192, 0.78), _cell("windowed", "native", 24576, 0.81),
+                     _cell("pooled", 192, 192, 0.70)]}
+    (tmp_path / "tier1-recognition-envelope.json").write_text(json.dumps({"runs": {s.run_id(): old}}))
+    rec = plan.paper02_run(s)
+    assert [c["projection"] for c in rec["cells"]] == ["fixed", "none", "fixed"]
+    assert not plan.paper02_complete(s, rec), "paper 02's tier 1 alone has no seeded projection"
+    again = {"cells": [_cell("windowed", 192, 192, 0.78, "fixed"), _cell("windowed", 192, 192, 0.77, "seeded"),
+                       _cell("windowed", "native", 24576, 0.81, "none")]}
+    (tmp_path / "projection-recognition-envelope.json").write_text(json.dumps({"runs": {s.run_id(): again}}))
+    rec = plan.paper02_run(s)
+    assert sorted((c["read"], str(c["width"]), c["projection"]) for c in rec["cells"]) == [
+        ("pooled", "192", "fixed"), ("windowed", "192", "fixed"), ("windowed", "192", "seeded"),
+        ("windowed", "native", "none")]
+    assert plan.paper02_complete(s, rec)
+    assert plan.pending([s]) == []
+
+
+def test_a_paper_02_run_with_no_projected_read_needs_no_seeded_cell(tmp_path, monkeypatch):
+    import json
+    monkeypatch.setattr(plan, "PAPER02_RECORD", tmp_path)
+    s = rn.Spec("size", "recognition", "envelope", 0.0, None, 0, Arm("floor"), reads=("windowed",))
+    old = {"native_widths": {"windowed": 192}, "cells": [_cell("windowed", 192, 192, 0.78)]}
+    (tmp_path / "tier1-recognition-envelope.json").write_text(json.dumps({"runs": {s.run_id(): old}}))
+    assert plan.paper02_complete(s, plan.paper02_run(s))

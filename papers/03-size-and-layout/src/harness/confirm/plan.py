@@ -28,7 +28,9 @@ from collections.abc import Iterator
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import get_context
 
+from harness.confirm import arms as am
 from harness.confirm import protocol as pr
+from harness.confirm import readout as ro
 from harness.confirm import run as rn
 from harness.confirm.arms import Arm
 from harness.utils.device import DEVICES, resolve
@@ -220,6 +222,8 @@ PAPER02_RECORD = PAPER02_ROOT / "results" / "confirmatory"
 
 TIER1, QUAD02, CARRIER02 = ("tier1-recognition-envelope", "tier3-recognition-quadrature",
                              "tier3-recognition-carrier")
+#: paper 02's projection tier: its record files are f"{PAPER02_PROJECTION}-{task}-{drive}"
+PAPER02_PROJECTION = "projection"
 
 
 def paper02_group(spec: rn.Spec) -> str | None:
@@ -262,15 +266,45 @@ def reused(spec: rn.Spec) -> bool:
     return paper02_group(spec) is not None
 
 
-def paper02_run(spec: rn.Spec) -> dict | None:
-    """Paper 02's recorded run for a reused spec, or None if paper 02 has not recorded it (yet)."""
-    group = paper02_group(spec)
-    if group is None:
-        return None
+def _paper02_record(group: str, run_id: str) -> dict | None:
     path = PAPER02_RECORD / f"{group}.json"
-    if not path.exists():
+    return json.loads(path.read_text())["runs"].get(run_id) if path.exists() else None
+
+
+def paper02_run(spec: rn.Spec) -> dict | None:
+    """Paper 02's recorded run for a reused spec, with every cell tagged by its projection, or None if
+    paper 02 has not recorded it (yet).
+
+    Paper 02's earlier tiers recorded only the fixed projection and tagged
+    nothing: an untagged cell is read as fixed, or as "none" where it was read
+    unprojected. Its projection tier re-reads the reference reservoirs of its
+    tier 1 (recognition and the order task) under both projections, tagging
+    each cell "fixed", "seeded" or "none", under the same run identities; its
+    seeded cells are added to the run here.
+    """
+    group = paper02_group(spec)
+    rec = None if group is None else _paper02_record(group, spec.run_id())
+    if rec is None:
         return None
-    return json.loads(path.read_text())["runs"].get(spec.run_id())
+    cells = [{**c, "projection": ro.projection_of(c, rec)} for c in rec["cells"]]
+    again = _paper02_record(f"{PAPER02_PROJECTION}-{spec.task}-{spec.drive}", spec.run_id())
+    if again is not None:
+        cells += [c for c in again["cells"] if c.get("projection") == "seeded"]
+    return {**rec, "cells": cells}
+
+
+def paper02_complete(spec: rn.Spec, rec: dict | None) -> bool:
+    """Whether paper 02's run carries every cell paper 03 reports for the spec: each projected read
+    it records (at the primary size, in the reads the spec asks for) under the seeded projection as
+    well as the fixed one. Paper 02's cells that are unprojected need no seeded counterpart."""
+    if rec is None:
+        return False
+    wanted = set(spec.reads) if spec.reads else set(am.reads(spec.arm, spec.task))
+
+    def cells(projection: str) -> set:
+        return {(c["read"], c["width"]) for c in rec["cells"] if c["projection"] == projection
+                and c["n_train"] == rn.PRIMARY_SIZE and c["read"] in wanted}
+    return bool(cells("fixed") | cells("none")) and cells("fixed") <= cells("seeded")
 
 
 # ---------------------------------------------------------------------------
@@ -420,19 +454,12 @@ def planned(names: list[str], grids=(), channels=()) -> list[rn.Spec]:
     return specs
 
 
-def paper02_complete(rec: dict | None) -> bool:
-    """Whether a paper 02 run carries every cell paper 03 reports: its projected reads under the seeded
-    projection as well as the fixed one. Paper 02's runs recorded before it adopted the seeded
-    projection (2026-09-24) carry only the fixed one."""
-    return rec is not None and any(c.get("projection") == "seeded" for c in rec["cells"])
-
-
 def pending(specs: list[rn.Spec]) -> list[rn.Spec]:
     """Specs not yet recorded here, and not recorded completely by paper 02. A reused spec whose paper 02
     run is missing (a paper 02 tier that has not run) or lacks the seeded projection is run here
     instead, and that run is the one reported; its fixed cells equal paper 02's (the reuse gate)."""
     done = {g: rn.recorded_ids(g) for g in {s.group() for s in specs}}
-    return sorted((s for s in specs if s.run_id() not in done[s.group()] and not paper02_complete(paper02_run(s))),
+    return sorted((s for s in specs if s.run_id() not in done[s.group()] and not paper02_complete(s, paper02_run(s))),
                   key=seconds, reverse=True)
 
 
@@ -508,7 +535,7 @@ def drive(names: list[str], workers: int, threads: int, device: str, dry_run: bo
     device = resolve(device)
     specs = planned(names, grids, channels)
     todo = pending(specs)
-    n_reused = sum(paper02_complete(run) for run in map(paper02_run, specs))
+    n_reused = sum(paper02_complete(s, paper02_run(s)) for s in specs)
     cost = "mps" if device == "mps" else "cpu"
     hours = sum(seconds(s, cost) for s in todo) / 3600
     print(f"=== {' + '.join(names)}: {len(specs)} runs planned, {n_reused} from paper 02, "

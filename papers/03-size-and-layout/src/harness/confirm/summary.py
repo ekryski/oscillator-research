@@ -34,7 +34,7 @@ import numpy as np
 
 from harness.confirm import plan, terms
 from harness.confirm import run as rn
-from harness.confirm.readout import unpack
+from harness.confirm.readout import projection_of, unpack
 from harness.measurement.features import PROJECTIONS
 
 PRIMARY_WIDTH, PRIMARY_SIZE = 192, rn.PRIMARY_SIZE
@@ -82,14 +82,6 @@ class Cell:
     @property
     def size(self) -> tuple[int, int, int]:
         return self.grid, self.bands, self.channels
-
-
-def projection_of(cell: dict, rec: dict) -> str:
-    """A cell's projection: its tag, or for a cell recorded before tags, "none" if it was read
-    unprojected and paper 02's fixed matrix otherwise."""
-    if "projection" in cell:
-        return cell["projection"]
-    return "none" if cell["effective_width"] >= rec["native_widths"][cell["read"]] else "fixed"
 
 
 def _cells(tier: str, rec: dict, run_id: str, source: str) -> list[Cell]:

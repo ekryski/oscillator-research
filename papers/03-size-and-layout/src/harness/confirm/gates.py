@@ -29,7 +29,7 @@ import torch
 from harness.confirm import plan
 from harness.confirm import run as rn
 from harness.confirm.arms import Arm
-from harness.confirm.summary import projection_of
+from harness.confirm.readout import projection_of
 
 CHANCE = 0.1
 #: one reused run per record file and arm kind: (tier maker's spec fields)

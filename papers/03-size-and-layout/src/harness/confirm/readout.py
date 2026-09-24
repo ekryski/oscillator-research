@@ -69,6 +69,15 @@ class Layout:
         return slice(self.n_train + self.n_val, self.n_train + self.n_val + self.n_test)
 
 
+def projection_of(cell: dict, rec: dict) -> str:
+    """A recorded cell's projection: its tag ("fixed", "seeded" or "none"), or, for a cell recorded
+    before paper 02 tagged them, "none" where it was read unprojected (its effective width is the
+    arm's native width) and paper 02's fixed matrix otherwise."""
+    if "projection" in cell:
+        return cell["projection"]
+    return "none" if cell["effective_width"] >= rec["native_widths"][cell["read"]] else "fixed"
+
+
 def pack(correct: torch.Tensor) -> str:
     """Per-clip correctness as base64 bits, so a verdict can be bootstrapped later."""
     return base64.b64encode(np.packbits(correct.cpu().numpy().astype(np.uint8)).tobytes()).decode()
