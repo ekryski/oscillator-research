@@ -2,40 +2,21 @@
  "abrams2004": [
   "Abrams & Strogatz 2004"
  ],
- "abreu-araujo2020": [
-  "Abreu Araujo et al. 2020"
- ],
  "adler1946": [
   "Adler 1946"
  ],
  "aranson2002": [
   "Aranson & Kramer 2002"
  ],
- "assaneo2020": [
-  "Assaneo et al. 2020"
- ],
  "becker2024": [
   "Becker 2018",
   "Becker 2024"
- ],
- "caranzano": [
-  "Caranzano et al.",
-  "Caranzano et al. 2025"
- ],
- "chandravadia2026": [
-  "Chandravadia & Imam 2026"
  ],
  "dai2026": [
   "Dai & Song 2026"
  ],
  "daido1992": [
   "Daido 1992"
- ],
- "doelling2023": [
-  "Doelling et al. 2023"
- ],
- "dogonasheva2026": [
-  "Dogonasheva et al. 2026"
  ],
  "hairer1993": [
   "Hairer et al. 1993"
@@ -49,8 +30,8 @@
  "jaeger2007": [
   "Jaeger et al. 2007"
  ],
- "keller2023": [
-  "Keller & Welling 2023"
+ "johnson1984": [
+  "Johnson & Lindenstrauss 1984"
  ],
  "kryski2026a": [
   "Kryski 2026a"
@@ -63,10 +44,6 @@
  ],
  "kuramoto2002": [
   "Kuramoto & Battogtokh 2002"
- ],
- "lostanlen": [
-  "Lostanlen et al.",
-  "Lostanlen et al. 2023"
  ],
  "lukosevicius2012": [
   "Luko\u0161evi\u010dius 2012"
@@ -83,17 +60,14 @@
  "pikovsky2001": [
   "Pikovsky et al. 2001"
  ],
- "pittman-polletta2021": [
-  "Pittman-Polletta et al. 2021"
- ],
- "rusch2021": [
-  "Rusch 2021"
- ],
- "saadatmand2026": [
-  "Saadatmand et al. 2026"
- ],
  "sakaguchi1986": [
   "Sakaguchi & Kuramoto 1986"
+ ],
+ "sakaguchi1987": [
+  "Sakaguchi et al. 1987"
+ ],
+ "shepard1982": [
+  "Shepard 1982"
  ],
  "strogatz2000": [
   "Strogatz 2000"
@@ -104,17 +78,10 @@
  "tanaka2019": [
   "Tanaka 2019"
  ],
- "torrejon2017": [
-  "Torrejon 2017"
- ],
  "unconv-ai2026": [
   "unconv.ai 2026"
  ],
  "winfree1967": [
   "Winfree 1967"
- ],
- "zeghidour": [
-  "Zeghidour et al.",
-  "Zeghidour et al. 2021"
  ]
 }
