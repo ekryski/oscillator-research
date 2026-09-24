@@ -87,31 +87,47 @@ def channel_projection(native: int, c: int, rows: int, width: int, seed: int | N
 
 def streamed_read(arm: am.Arm, model: torch.nn.Module, blocks: Callable[[int, int], Iterator],
                   n_train: int, n_test: int, widths: tuple[int, ...], task: str, seed: int, device: str = "cpu",
-                  projection: Callable[..., torch.Tensor] | None = None,
-                  ) -> tuple[dict[str, tuple[torch.Tensor, torch.Tensor]], int]:
-    """({projection: (projected training features, projected test features)}, native width) for one read.
+                  projection: Callable[..., torch.Tensor] | None = None, read: str | None = None,
+                  drive: str | None = None,
+                  ) -> tuple[dict[str, tuple[torch.Tensor, torch.Tensor]], int, dict[str, torch.Tensor]]:
+    """One read of a large arm: ({projection: (projected training features, projected test
+    features)}, native width, {instrument: per test clip}).
 
-    `blocks(c, part)` yields (rows, valid frames, slice) batches of the
-    training clips (part 0, the first `n_train`) or the test clips (part 1),
-    in readout order; the batch size is the caller's. `projection(native, c,
-    rows, width, seed)` gives channel c's rows of the fixed (seed None) or the
-    seeded matrix; the default is the streamed read's own draw, and a test
-    passes paper 02's rows instead.
+    `read` is one of the arm's reads (`arms.reads`), its primary one by
+    default; a composite read such as "windowed+rate" concatenates, channel by
+    channel, the blocks it names. `blocks(c, part)` yields (rows, valid
+    frames, slice) batches of the training clips (part 0, the first
+    `n_train`) or the test clips (part 1), in readout order; the batch size is
+    the caller's. `projection(native, c, rows, width, seed)` gives channel c's
+    rows of the fixed (seed None) or the seeded matrix; the default is the
+    streamed read's own draw, and a test passes paper 02's rows instead. With
+    `drive` given and a network arm, the network's instruments
+    (`arms.field_instruments`) are recorded over the test clips, channel by
+    channel; they do not touch the read.
     """
     projection = channel_projection if projection is None else projection
     if arm.kind not in ("field", "bank"):
         raise ValueError(f"only an untrained network or bank is read channel by channel, not {arm.kind}")
+    read = read or am.PRIMARY_READ[task]
+    keys = am.reads(arm, task)[read]
     seeds = {"fixed": None, "seeded": seed}
     out: dict[str, tuple[torch.Tensor, torch.Tensor]] = {}
+    instruments: dict[str, torch.Tensor] = {}
     per_channel = top = native = None
+
+    def features(one, sub, rows, tvalid):
+        sig = am.frozen_signals(one, sub, rows.to(device))
+        f = am.frozen_features(one, sig, tvalid.to(device), task)
+        return sig, torch.cat([f[k] for k in keys], dim=1)
+
     with ThreadPoolExecutor(len(seeds)) as pool:
         for c in range(arm.channels):
             one, sub = am.channel(arm, model, c)
             # the channel's training features, kept on the CPU: its statistics need all of them
             x_tr = None
             for rows, tvalid, where in blocks(c, 0):
-                sig = am.frozen_signals(one, sub, rows.to(device))
-                f = am.frozen_features(one, sig, tvalid.to(device), task)[am.PRIMARY_READ[task]].cpu()
+                _, f = features(one, sub, rows, tvalid)
+                f = f.cpu()
                 if not out:                          # the first batch of the first channel sizes everything
                     per_channel = f.shape[1]
                     native = per_channel * arm.channels
@@ -127,9 +143,12 @@ def streamed_read(arm: am.Arm, model: torch.nn.Module, blocks: Callable[[int, in
                 out[k][0].add_(ro._projected([x_tr], slice(0, n_train), mean, sd, top, p, device))
             del x_tr
             for rows, tvalid, where in blocks(c, 1):
-                sig = am.frozen_signals(one, sub, rows.to(device))
-                f = am.frozen_features(one, sig, tvalid.to(device), task)[am.PRIMARY_READ[task]]
+                sig, f = features(one, sub, rows, tvalid)
                 for k, p in ps.items():
                     out[k][1][where] += ro._projected([f], slice(0, len(f)), mean, sd, top, p, device)
+                if drive is not None and arm.kind == "field":
+                    # channels are equal in size, so a channel mean over channels is the network's mean
+                    for name, v in am.field_instruments(sig, rows.to(device), drive, 1, arm.grid).items():
+                        instruments.setdefault(name, torch.zeros(n_test))[where] += v.cpu() / arm.channels
             del ps
-    return out, native
+    return out, native, instruments

@@ -43,10 +43,11 @@ import torch
 from torch import nn
 
 from harness.measurement import features as ft
+from harness.measurement.instruments import analytic_row_phase
 from harness.models.baselines import CNNBaseline, GRUBaseline, S4DBaseline, TCNBaseline, TransformerBaseline
 from harness.models.field import OscillatorField, physics_block, tonotopic_omega
 from harness.models.leaky_bank import LeakyBank
-from harness.utils.constants import ALPHA, BETA, WARMUP_FRAMES
+from harness.utils.constants import ALPHA, BETA, PLV_LOCK_THRESH, WARMUP_FRAMES
 
 GRID = 16
 #: paper 02's analysis window, in samples
@@ -272,6 +273,42 @@ def frozen_features(arm: Arm, signals: torch.Tensor, tvalid: torch.Tensor, task:
         if arm.kind == "field":
             out[f"{name}:rate"] = ft.rotation_rate(signals, windows, lo=WARMUP_FRAMES, hi=hi)
     return out
+
+
+def drive_phase(rows: torch.Tensor, drive: str) -> torch.Tensor:
+    """[B, T, G]: the phase of each band's own delivered drive, the reference an oscillator can lock to.
+
+    The quadrature pathway carries its phase explicitly; the band energies and
+    the carrier's band waveforms have none, so theirs is the analytic phase.
+    """
+    if drive == "quadrature":
+        return torch.atan2(rows[..., 1], rows[..., 0])
+    return analytic_row_phase(rows)
+
+
+def field_instruments(signals: torch.Tensor, rows: torch.Tensor, drive: str, channels: int,
+                      grid: int = GRID, lo: int = WARMUP_FRAMES) -> dict[str, torch.Tensor]:
+    """Per clip, over the read's frames: how synchronized the network is and how locked to its input.
+
+    Paper 02's instruments. R is the global order parameter |<e^{i theta}>| of
+    each channel, averaged over channels and frames. plv is each oscillator's
+    phase-locking value to its own row's drive, |<e^{i(theta - phi)}>| over
+    frames, averaged over oscillators, and entrained the share of oscillators
+    whose value exceeds PLV_LOCK_THRESH. amplitude is the mean |z|: 1 for a
+    phase core, free for a Stuart-Landau one. Diagnostics only: nothing here
+    reaches the readout.
+    """
+    b, t, _ = signals.shape
+    n = channels * grid * grid
+    s = signals[:, lo:, :n].reshape(b, t - lo, channels, grid, grid)
+    c = signals[:, lo:, n:2 * n].reshape(b, t - lo, channels, grid, grid)
+    amp = torch.sqrt(s * s + c * c)
+    theta = torch.atan2(s, c)
+    r = torch.sqrt(torch.cos(theta).mean((-2, -1)) ** 2 + torch.sin(theta).mean((-2, -1)) ** 2).mean((1, 2))
+    diff = theta - drive_phase(rows, drive)[:, lo:t, None, :, None]
+    plv = torch.sqrt(torch.cos(diff).mean(1) ** 2 + torch.sin(diff).mean(1) ** 2).flatten(1)
+    return {"R": r, "plv": plv.mean(1), "entrained": (plv > PLV_LOCK_THRESH).float().mean(1),
+            "amplitude": amp.mean((1, 2, 3, 4))}
 
 
 def meta(arm: Arm, model: nn.Module | None) -> dict:

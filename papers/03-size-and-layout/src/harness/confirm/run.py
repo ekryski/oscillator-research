@@ -313,6 +313,18 @@ def _store(buffers: dict, feats: dict, where: slice, total: int) -> None:
         buffers[key][where] = value.cpu()
 
 
+def instrument_summary(per_clip: dict[str, torch.Tensor], labels: torch.Tensor) -> dict:
+    """A network's instruments over the test clips: mean, spread, and (with one label per clip) the mean
+    per class."""
+    out = {}
+    for name, v in per_clip.items():
+        v = v.double()
+        out[name] = {"mean": v.mean().item(), "sd": v.std().item()}
+        if labels.dim() == 1:
+            out[name]["by_class"] = [v[labels == k].mean().item() for k in range(int(labels.max()) + 1)]
+    return out
+
+
 def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
     """Run one spec and return its record (not yet written). `device` may be "auto" (harness.utils.device)."""
     t0 = time.perf_counter()
@@ -355,12 +367,21 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
         keep = {k for read, keys in am.reads(arm, spec.task).items() if not spec.reads or read in spec.reads
                 for k in keys}
         t1 = time.perf_counter()
+        per_clip: dict[str, torch.Tensor] = {}
         with torch.no_grad():
             for rows, tvalid, where in batches(spec, clips, device):
                 sig = am.frozen_signals(arm, model, rows.to(device))
+                if arm.kind == "field":
+                    for name, v in am.field_instruments(sig, rows.to(device), spec.drive, arm.channels,
+                                                        arm.grid).items():
+                        per_clip.setdefault(name, torch.zeros(total))[where] = v.cpu()
                 feats = am.frozen_features(arm, sig, tvalid.to(device), spec.task, spec.span)
                 _store(buffers, {k: v for k, v in feats.items() if k in keep}, where, total)
         timing["simulate_s"] = time.perf_counter() - t1
+        if per_clip:
+            test = clips.layout.test
+            extra["instruments"] = instrument_summary({k: v[test] for k, v in per_clip.items()},
+                                                      clips.labels[test])
 
     t2 = time.perf_counter()
     read_blocks = {read: [buffers[k] for k in keys] for read, keys in am.reads(arm, spec.task).items()
@@ -377,36 +398,48 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
 
 
 def _execute_streamed(spec: Spec, clips: Clips, model: torch.nn.Module, device: str, t0: float) -> dict:
-    """An arm too large to hold, read channel by channel (harness.confirm.stream)."""
+    """An arm too large to hold, read channel by channel (harness.confirm.stream), one read at a time.
+
+    Each read simulates the channels again, so that only one read's features
+    and matrices are held at once; a network's instruments are recorded on
+    the first read's pass.
+    """
+    own = am.reads(spec.arm, spec.task)
+    reads = list(spec.reads) if spec.reads else list(own)
     if (len(spec.sizes) != 1 or spec.native_sizes or spec.span != "fixed"
-            or spec.reads not in ((), (am.PRIMARY_READ[spec.task],))):
-        raise ValueError("the streamed read fits one training size, the fixed span and the task's primary "
-                         "read, with no native cell")
+            or any(r not in own or "@" in r for r in reads)):
+        raise ValueError("the streamed read fits one training size, the fixed span and the arm's own reads, "
+                         "with no native cell")
     n = spec.sizes[0]
-    t1 = time.perf_counter()
-    with torch.no_grad():
-        projected, native = st.streamed_read(spec.arm, model, channel_batches(spec, clips, n, device), n,
-                                             clips.layout.n_test, spec.widths, spec.task, spec.seed, device)
-    t2 = time.perf_counter()
-    if max(spec.widths) >= native:
-        raise ValueError(f"a streamed read keeps no unprojected features, so every width must be below the "
-                         f"arm's {native:,}; got {spec.widths}")
-    wanted = ro.wanted_widths(spec.widths, native, False)
     labels = torch.cat((clips.labels[:n], clips.labels[clips.layout.test]))
     layout = ro.Layout(n, 0, clips.layout.n_test)
-    read = am.PRIMARY_READ[spec.task]
     positions = [None] if labels.dim() == 1 else list(range(labels.shape[1]))
-    cells = []
-    for projection, (p_tr, p_te) in projected.items():
-        for p in positions:
-            y = labels if p is None else labels[:, p]
-            fitted = ro.fit_widths(read, n, wanted, native, (p_tr, p_te, None), None, y, layout,
-                                   clips.n_classes, keep_bits(spec), projection)
-            cells += fitted if p is None else [{**c, "position": p} for c in fitted]
-    timing = {"simulate_and_project_s": t2 - t1, "readout_s": time.perf_counter() - t2,
-              "total_s": time.perf_counter() - t0}
+    cells, natives, extra, simulate_s, readout_s = [], {}, {}, 0.0, 0.0
+    for k, read in enumerate(reads):
+        t1 = time.perf_counter()
+        with torch.no_grad():
+            projected, native, instruments = st.streamed_read(
+                spec.arm, model, channel_batches(spec, clips, n, device), n, clips.layout.n_test, spec.widths,
+                spec.task, spec.seed, device, read=read, drive=spec.drive if k == 0 else None)
+        t2 = time.perf_counter()
+        if max(spec.widths) >= native:
+            raise ValueError(f"a streamed read keeps no unprojected features, so every width must be below the "
+                             f"arm's {native:,}; got {spec.widths}")
+        natives[read] = native
+        wanted = ro.wanted_widths(spec.widths, native, False)
+        for projection, (p_tr, p_te) in projected.items():
+            for p in positions:
+                y = labels if p is None else labels[:, p]
+                fitted = ro.fit_widths(read, n, wanted, native, (p_tr, p_te, None), None, y, layout,
+                                       clips.n_classes, keep_bits(spec), projection)
+                cells += fitted if p is None else [{**c, "position": p} for c in fitted]
+        if instruments:
+            extra["instruments"] = instrument_summary(instruments, clips.labels[clips.layout.test])
+        simulate_s += t2 - t1
+        readout_s += time.perf_counter() - t2
+    timing = {"simulate_and_project_s": simulate_s, "readout_s": readout_s, "total_s": time.perf_counter() - t0}
     return {"spec": spec.as_dict(), "arm_meta": am.meta(spec.arm, model), "read": "streamed by channel",
-            "native_widths": {read: native}, "n_test": clips.layout.n_test, "cells": cells, "health": None,
+            "native_widths": natives, "n_test": clips.layout.n_test, "cells": cells, "health": None, **extra,
             "timing": timing, "env": environment(device)}
 
 

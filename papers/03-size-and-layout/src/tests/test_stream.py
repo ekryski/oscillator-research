@@ -21,7 +21,7 @@ from harness.measurement.features import projection_matrix
 from .test_confirm_run import bank, spec  # noqa: F401  (the synthetic bank fixture)
 
 
-def _global_rows(arm: am.Arm, c: int, windows: int = 4) -> torch.Tensor:
+def _global_rows(arm: am.Arm, c: int, windows: int = 4, read: str = "windowed") -> torch.Tensor:
     """Where channel c's features sit in the in-memory read's feature order.
 
     In memory a read is ordered by window, statistic, then signal; the signals
@@ -38,13 +38,21 @@ def _global_rows(arm: am.Arm, c: int, windows: int = 4) -> torch.Tensor:
             for half in range(halves):
                 start = j * 3 * per_signal_block + s * per_signal_block + half * arm.channels * sites + c * sites
                 idx.append(torch.arange(start, start + sites))
+    if read.endswith("+rate"):
+        # the rotation rates follow the statistics: per window, cos of every oscillator, then sin
+        offset, n = windows * 3 * per_signal_block, arm.channels * sites
+        for j in range(windows):
+            for h in range(2):
+                start = offset + j * 2 * n + h * n + c * sites
+                idx.append(torch.arange(start, start + sites))
     return torch.cat(idx)
 
 
 def paper02_rows(arm: am.Arm):
-    """Channel c's rows of the in-memory read's fixed (seed None) or seeded matrix."""
+    """Channel c's rows of the in-memory read's fixed (seed None) or seeded matrix, for either read."""
     def rows(native: int, c: int, n_rows: int, width: int, seed: int | None = None) -> torch.Tensor:
-        idx = _global_rows(arm, c)
+        plain = _global_rows(arm, c)
+        idx = plain if len(plain) == n_rows else _global_rows(arm, c, read="windowed+rate")
         assert len(idx) == n_rows
         return projection_matrix(native, width, seed)[idx]
     return rows
@@ -74,7 +82,8 @@ def test_a_channel_alone_runs_exactly_as_it_does_among_the_others(arm):
 
 @pytest.mark.parametrize("arm", ARMS, ids=lambda a: a.label())
 def test_with_paper_02s_matrix_the_streamed_read_is_the_in_memory_read(bank, arm, monkeypatch):  # noqa: F811
-    s = spec(arm, sizes=(128,), widths=(64, 256, 1024), native_sizes=(), reads=("windowed",))
+    reads = ("windowed", "windowed+rate") if arm.kind == "field" else ("windowed",)
+    s = spec(arm, sizes=(128,), widths=(64, 256, 1024), native_sizes=(), reads=reads)
     monkeypatch.setattr(st, "STREAM_STATES", 10**9)
     held = rn.execute(s, bank=bank)
     monkeypatch.setattr(st, "STREAM_STATES", 0)
@@ -85,6 +94,7 @@ def test_with_paper_02s_matrix_the_streamed_read_is_the_in_memory_read(bank, arm
     key = lambda c: (c["read"], c["width"], c["projection"])  # noqa: E731
     mine = {key(c): c for c in streamed["cells"]}
     assert {c["projection"] for c in held["cells"]} == {"fixed", "seeded"} and len(mine) == len(held["cells"])
+    assert {c["read"] for c in held["cells"]} == set(reads)
     for c in held["cells"]:
         assert mine[key(c)]["acc"] == c["acc"] and mine[key(c)]["lam"] == c["lam"], key(c)
         assert mine[key(c)]["correct"] == c["correct"]
@@ -103,8 +113,9 @@ def test_the_projected_features_agree_to_float32_rounding(bank, monkeypatch):  #
     n, test = 128, clips.layout.test
     mean, sd = ro._stats(held[:n])
     with torch.no_grad():
-        streamed, native = st.streamed_read(arm, model, rn.channel_batches(s, clips, n), n, clips.layout.n_test,
-                                            (64, 256), "recognition", 2, projection=paper02_rows(arm))
+        streamed, native, _ = st.streamed_read(arm, model, rn.channel_batches(s, clips, n), n,
+                                               clips.layout.n_test, (64, 256), "recognition", 2,
+                                               projection=paper02_rows(arm))
     assert native == held.shape[1]
     for projection, seed in (("fixed", None), ("seeded", 2)):
         p = projection_matrix(native, 256, seed)
@@ -139,3 +150,16 @@ def test_with_no_input_the_streamed_read_is_chance(bank, monkeypatch):  # noqa: 
                           native_sizes=(), reads=("windowed",)), bank=bank)
     assert rec["read"] == "streamed by channel"
     assert {c["acc"] for c in rec["cells"]} == {0.1}
+
+
+def test_a_network_records_its_instruments_the_same_way_streamed_and_held(bank, monkeypatch):  # noqa: F811
+    arm = am.Arm("field", channels=3, grid=8)
+    s = spec(arm, sizes=(128,), widths=(64,), native_sizes=(), reads=("windowed",))
+    monkeypatch.setattr(st, "STREAM_STATES", 10**9)
+    held = rn.execute(s, bank=bank)["instruments"]
+    monkeypatch.setattr(st, "STREAM_STATES", 0)
+    streamed = rn.execute(s, bank=bank)["instruments"]
+    assert set(held) == set(streamed) == {"R", "plv", "entrained", "amplitude"}
+    for name in held:
+        assert streamed[name]["mean"] == pytest.approx(held[name]["mean"], abs=1e-5)
+        assert streamed[name]["by_class"] == pytest.approx(held[name]["by_class"], abs=1e-5)
