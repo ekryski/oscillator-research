@@ -25,6 +25,25 @@ Each item gives the claim, what is known, and what would settle it.
 
 Every other row in the tables below is unverified and keeps the search's own confidence label.
 
+### Verified on 24 September 2026
+
+Each item below was checked against its full text (publisher page, PMC or arXiv) on 24 September 2026, and the paper's claims were brought in line with it.
+
+- **Torrejon et al. 2017** (Nature 547:428): one time-multiplexed spin-torque oscillator; TI-46, 500 clips from five female speakers, the same speakers in training and test; up to 99.6% with cochlear features, up to 80% with a linear spectrogram, where the readout alone is at chance.
+- **Abreu Araujo et al. 2020**: item 2 above is resolved: the 99.8% is in its Table 2 (experimental oscillator, MFCC). It also tests on AURORA-2 with the training speakers disjoint from the test speakers and noise at 20, 15 and 10 dB (simulated, single oscillator), reporting every result as a gain over the front end alone.
+- **Romera et al. 2018** (Nature 563:230, doi:10.1038/s41586-018-0632-y): four coupled spin-torque oscillators in hardware, trained by tuning their frequencies, seven vowels from formant pairs, 88% test.
+- **Appeltant et al. 2011** (Nat. Commun. 2:468): one nonlinear node with delayed feedback, electronic; TI-46 with shared speakers, 0.2% word error rate; the node is not self-oscillating.
+- **Shougat et al. 2023** (Sci. Rep. 13:8719): one analog Hopf-oscillator circuit feeding a trained CNN; about 97% on 1,000 FSDD clips; the split is 80/20 and **how clips were assigned is not stated** (the "random split" above is not in the paper).
+- **Chandravadia & Imam 2026**: re-confirmed as above.
+- **Beoletto et al. 2026**: a single passive spiral elastic metamaterial resonator, not an array of coupled oscillators; the noise figures are from simulation (a linear filter-bank model), and speakers are shared across folds.
+- **Buckley et al. 2026**: a PZT cube, a material reservoir rather than an oscillator; 88.2% against 88.1% for logistic regression on the same input; no speaker control.
+- **Saadatmand et al. 2026**: Hydra reads 97.3% (Table 3); the MONSTER AudioMNIST folds are divided by speaker (Dempster et al. 2025, arXiv:2502.15122, §3.1.1). Item 1 above is resolved.
+- **Zhou et al. 2026**: simulated 128-node network of protonic nickelate devices (not oscillators); the first 3,000 AudioMNIST clips, 5-fold 80/20; above its uncoupled and no-processing baselines. Its supplement's "six speakers" is wrong for AudioMNIST.
+- **Hikasa et al. 2026**: 95.2% is cochleagram plus reservoir (cochleagram alone 85.8%); 29.0% is the reservoir on raw audio.
+- **Ahmadi 2026** (arXiv:2604.10272): simulated nine-oscillator Kuramoto network trained by equilibrium propagation, two vowels from formants.
+- **Untrained coupled-oscillator networks on spoken digits, found in a search of about 90 queries:** Opala et al. 2019 (Phys. Rev. Applied 11:064029), a simulated Ginzburg–Landau lattice, and Coulombe et al. 2017 (PLOS ONE 12:e0178663), a simulated chain of 400 Duffing oscillators, both on TI-46 with shared speakers, no added audio noise and no input-only or uncoupled control. Also Zheng et al. 2021 (two coupled MEMS resonators) and Kimura et al. 2025 (a ring-oscillator lattice, with an input-only control), both TI-46 with shared speakers. None found on AudioMNIST, with held-out speakers, or with added noise at 0 or +5 dB.
+- **"Spoken-digit recognition is the one task an oscillator has run in hardware" is false:** oscillator hardware has also recognized vowels (Romera 2018; Dutta et al. 2019), classified waveforms and radio signals, recognized patterns (Abernot et al. 2021; Corti et al. 2020) and solved optimization problems (Moy et al. 2022).
+
 ## Headline
 
 No published AudioMNIST result combines a speaker-disjoint split with additive noise, or with a small training set. The published numbers are loose upper context, never head-to-head comparisons.
