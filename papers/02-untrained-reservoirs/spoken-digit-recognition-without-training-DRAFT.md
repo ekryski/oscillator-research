@@ -125,19 +125,19 @@ An untrained coupled oscillator network, read by a linear readout at a common wi
 
 ## Reproducibility statement {-}
 
-The code and the complete run record (every run's specification, results and per-clip correctness) are in the anonymized supplementary material and will be released with the paper; AudioMNIST is public ([Becker et al. 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)). From the record alone, one command regenerates every table and figure in this paper, and from the audio, the harness reruns any experiment, resuming without repeating a finished run. Every run records its code version, hardware and library versions. The leak check and the controls and design experiments ran on the CPU of an Apple M1 Max, where runs with the same seed are bit-identical. The later experiments simulated the reservoirs on its GPU, which reproduced 1,262 of 1,296 of the controls experiment's cells exactly and all but one within two test clips (Section 3.5); the trained baselines train on the CPU on every device. We welcome reproductions.
+The code and the complete run record (every run's specification, results and per-clip correctness) are in the anonymized supplementary material and will be released with the paper; AudioMNIST is public ([Becker et al. 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)). Scripts and a README with instructions on how to reproduce the data and figures are included in the supplementary material. Every run records its code version, hardware and library versions. The leak check and the controls and design experiments ran on the CPU of an Apple M1 Max, where runs with the same seed are bit-identical. The later experiments simulated the reservoirs on its GPU, which reproduced 1,262 of 1,296 of the controls experiment's cells exactly and all but one within two test clips (Section 3.5); the trained baselines train on the CPU on every device. The experiment harness has been set up to be able to be run on NVIDIA GPUs and Apple Silicon in a Linux or macOS environment. We welcome reproductions.
 
 ## AI use statement {-}
 
-This work was carried out by the author working with an AI coding agent, Claude (Anthropic), throughout. The disclosure covers both the uses ICLR requires to be disclosed and those it recommends.
+This work was carried out by the authors working with an AI coding agent, Claude (Anthropic), for the following purposes:
 
-**Implementing methods and running experiments.** Under the author's direction the agent wrote most of the experiment harness, the sweep driver, the scoring code and the test suite, launched and scored runs, and kept the dated experiment logs from which this paper's numbers are drawn.
+**Implementing code and tests.** Under the authors' direction the agent wrote most of the experiment harness and the test suite. The authors verified and independently reviewed, refactored and ran the code.
 
-**Designing experiments and interpreting results.** The author set the research questions and directed the work. The agent contributed to the design of controls, flagged flaws in experimental designs, and wrote first-draft interpretations of results, which the author reviewed and accepted, revised or rejected.
+**Refining experiments and summarizing results.** The authors set the research questions and directed the work. The agent contributed to flagging flaws in experimental designs, and wrote first-draft interpretations of raw result data, which the authors reviewed and accepted, revised or rejected.
 
-**Writing.** The agent drafted sections of this paper, including the abstract, from the experiment logs, and edited the text for readability; it also helped find and check related literature and built the tooling that produces the paper's formats and checks its bibliography.
+**Drafting.** The agent drafted sections of this paper and assisted in finding and checking correct citation format of related literature. The authors independently verified, reviewed and revised, where appropriate, all citations and referenced literature.
 
-**Verification.** Every number in the paper is regenerated from the committed record by a script rather than transcribed. The harness carries tests for each mechanism the paper relies on, and same-seed runs on the CPU are bit-identical. The author takes responsibility for the final content of this work.
+The authors take responsibility for the final content of this work.
 
 <!-- appendix -->
 
