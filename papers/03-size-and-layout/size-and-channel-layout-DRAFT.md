@@ -8,96 +8,199 @@
 
 ## 1 Introduction
 
+Coupled oscillators are being revisited as a substrate for machine learning, and a previous study asked what their dynamics contribute when nothing about them is trained ([Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/)). It read one untrained coupled oscillator network, 1,024 oscillators in four channels of a 16 × 16 lattice with 2,048 parameters, by a linear readout on speaker-disjoint spoken-digit recognition, against the same readout applied to the input alone, the same network uncoupled, banks of leaky integrators of the same size and five trained networks of the same parameter count. It varied the coupling function, the lattice geometry and the way the audio enters the network, and held the network's size fixed.
+
+Size is where that study stops, and where the literature is thinnest. A survey of oscillator networks in machine learning ([Kryski 2026a](https://doi.org/10.2139/ssrn.7445198)) found that geometry and capacity, though separable in principle, had been varied together by one system and "none has varied either alone", and that no published scaling study of trained oscillator networks exists along parameters or oscillator count against a conventional reference; untrained networks have not been scaled that way either. Reservoir computing treats the size of the reservoir as a primary parameter ([Lukoševičius 2012](https://doi.org/10.1007/978-3-642-35289-8_36)), but an oscillator network can grow in two ways: each of its lattices can be made larger, or more lattices can be added beside the first. The two give the same number of oscillators in different arrangements, and whether the arrangement matters has not been asked.
+
+This paper asks it, for the previous study's networks and on its task, protocol and readout, so that its 16 × 16, four-channel cells are that study's own. The study states questions rather than hypotheses, and applies no decision bar. How does the network's accuracy change with its number of oscillators, from 64 to 262,144, when the readout does not grow with it? Does its margin over an uncoupled copy of itself, over a leaky-integrator bank of the same size and over its input alone change with size? At a fixed number of oscillators, does it matter whether they form a few large lattices or many small ones? Does it matter whether each lattice row is driven by a mel band of its own or shares one with its neighbours? How do trained networks of the same parameter count compare as both grow, and are untrained oscillators more useful than trained networks at the smallest sizes? And do the previous study's effects of coupling function, geometry and input pathway depend on size?
+
 ## 2 Background
 
-### 2.1 Size in reservoirs and oscillator networks
+Coupled oscillators synchronize, form clusters, lock to a drive or split into coherent and incoherent domains, depending on how they are coupled and arranged ([Pikovsky et al. 2001](https://doi.org/10.1017/CBO9780511755743); [Strogatz 2000](https://doi.org/10.1016/S0167-2789%2800%2900094-4); [Kuramoto & Battogtokh 2002](https://arxiv.org/abs/cond-mat/0210694)). Untrained and read by a trained linear readout, they are reservoirs in the sense of reservoir computing ([Jaeger 2001](https://www.ai.rug.nl/minds/uploads/EchoStatesTechRep.pdf); [Maass 2002](https://doi.org/10.1162/089976602760407955); [Tanaka 2019](https://doi.org/10.1016/j.neunet.2019.03.005)), where the reservoir's size is a primary design parameter ([Lukoševičius 2012](https://doi.org/10.1007/978-3-642-35289-8_36)). The previous study ([Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/)) gives the physics under test and its place in machine learning in full; this section restates what the size study needs.
 
-### 2.2 Channels and layout
+The network here is C channels of a G × G lattice. Each channel is an independent copy: it receives the same input, has its own coupling kernel and natural frequencies, and does not act on any other channel, so channels are side by side like the heads of one attention layer, not stacked like layers (Appendix C). Within a channel every oscillator is coupled to every other through the kernel, and the lattice's rows follow frequency, row r driven by the r-th input band. A network therefore grows either by enlarging each channel's lattice, which adds coupled neighbours and input rows, or by adding channels, which adds independent copies driven alike.
 
-## 3 The system under test
+### 2.1 Coupling functions
 
-## 4 Methods
+Each oscillator's phase θᵢ evolves as θ̇ᵢ = ωᵢ + couplingᵢ + g·uᵢ − λ sin θᵢ: its natural frequency, the coupling from the other oscillators of its channel, the input and a restoring pull toward phase 0. The six coupling functions are the previous study's and differ only in the coupling term; the survey found no study that compares them ([Kryski 2026a](https://doi.org/10.2139/ssrn.7445198)). Appendix D draws how each pushes an oscillator.
 
-### 4.1 Experimental design
+| coupling function | coupling term | what it adds | in machine learning |
+|---|---|---|---|
+| **Kuramoto** | Σⱼ Kᵢⱼ sin(θⱼ − θᵢ) | pulls each oscillator toward the others' phases: the minimal model of synchronization ([Kuramoto 1975](https://doi.org/10.1007/BFb0013365)), and the reference | trained all-to-all in Un-0 ([unconv.ai 2026](https://unconv.ai/blog/introducing-un-0-generating-images-with-coupled-oscillators/)); a D-dimensional generalization in AKOrN ([Miyato 2025](https://openreview.net/forum?id=nwDRD4AMoN)) |
+| **Kuramoto–Sakaguchi** | Σⱼ Kᵢⱼ sin(θⱼ − θᵢ − α), α = π/4 | a phase lag that breaks the pull's symmetry and admits partial coherence ([Sakaguchi & Kuramoto 1986](https://doi.org/10.1143/PTP.76.576); [Abrams & Strogatz 2004](https://arxiv.org/abs/nlin/0407045)) | with Daido harmonics and a delay in FSN ([Nunley 2026](https://arxiv.org/abs/2606.18694)) |
+| **Second harmonic** | Kuramoto plus β Σⱼ Kᵢⱼ sin 2(θⱼ − θᵢ), β = 0.5 | favours two-cluster states, pairs in phase or in opposition ([Daido 1992](https://doi.org/10.1143/ptp/88.6.1213); [Hansel et al. 1993](https://doi.org/10.1103/PhysRevE.48.3470)) | none recorded |
+| **Winfree** | −sin θᵢ Σⱼ Kᵢⱼ (1 + cos θⱼ) | separates an oscillator's sensitivity, set by its own phase, from its influence, set by its neighbour's ([Winfree 1967](https://doi.org/10.1016/0022-5193%2867%2990051-3)) | generalized, with attention-defined coupling, in WONN ([Dai & Song 2026](https://arxiv.org/abs/2605.20922)) |
+| **Stuart–Landau** | Σⱼ Kᵢⱼ (zⱼ − zᵢ), z = x + iy | amplitude as well as phase: each oscillator relaxes to a cycle of unit radius ([Stuart 1960](https://doi.org/10.1017/S002211206000116X); [Aranson & Kramer 2002](https://doi.org/10.1103/RevModPhys.74.99)) | one graph network |
+| **Stuart–Landau, fixed amplitude** | the same, amplitude held at 1 | the phase-only limit, which reduces to Kuramoto: separates what the amplitude adds | none recorded |
 
-| tier | question | arms | varied | fixed | runs |
-|---|---|---|---|---|---|
-| gate | Does the pipeline leak at every size? | the coupled and uncoupled oscillator networks and the state-matched leaky-integrator bank, with no input | lattice 8 × 8 to 128 × 128; 1 and 16 channels | input gain 0; 0 dB; seed 0 | 30 |
-| size | How do the number of oscillators and their layout move accuracy, against controls of the same size? | coupled oscillator network, uncoupled oscillator network, state-matched leaky-integrator bank; the spectrogram-only baseline on each lattice's rows | lattice 8 × 8, 16 × 16, 32 × 32, 64 × 64 and 128 × 128; 1, 2, 4, 8 and 16 channels (64 to 262,144 oscillators); band mapping: one mel band per row, or 16 bands mapped onto the rows; seeds 0–2 | Kuramoto coupling, torus, random natural frequencies, restoring strength 0.3, coupling ceiling 1 met exactly; band-energy pathway; 0 dB; input gain 1 | 432 |
-| trained | How do trained baselines of the same parameter count compare as both grow, and are oscillators more useful at the smallest sizes? | GRU, TCN, CNN, transformer and S4D, each sized to every network of the size tier (128 to 524,288 parameters) and driven by its rows | as the size tier | trained end to end; 0 dB | 675 |
-| design | Do coupling function and lattice geometry matter differently at different sizes? | coupled oscillator network | 6 coupling functions × 6 lattice geometries, the Stuart–Landau functions on the torus only; every lattice, channel count and band mapping; seeds 0–2 | as the size tier | 3,375 |
-| quadrature | Does the quadrature pathway's standing change with size? | coupled and uncoupled oscillator networks; the pathway's spectrogram-only baseline | as the size tier | quadrature pathway; 0 dB; input gain 1 | 297 |
-| carrier | Does the carrier pathway's standing change with size? | coupled and uncoupled oscillator networks, state-matched leaky-integrator bank; the pathway's spectrogram-only baseline | lattice 8 × 8 to 32 × 32; every channel count and band mapping; seeds 0–2 | carrier pathway at 16 kHz; 0 dB; input gain 32 | 240 |
-| design-quadrature | Design at size, on the quadrature pathway | coupled oscillator network | the 4 phase coupling functions × 6 lattice geometries; as the quadrature tier | as the quadrature tier | 3,105 |
-| design-carrier | Design at size, on the carrier pathway | coupled oscillator network | the design tier's configurations; as the carrier tier | as the carrier tier | 1,875 |
+Table: The six coupling functions, as in [Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/). Kᵢⱼ is the kernel weight between oscillators i and j, positive or negative, and each term is summed over the other oscillators of the channel. Machine-learning uses are those recorded by the survey of [Kryski 2026a](https://doi.org/10.2139/ssrn.7445198). The Stuart–Landau functions run on the torus only.
 
-Table: The experimental design (draft registration, not frozen). Every run is one arm at one lattice, channel count, band mapping, input pathway and seed, at 0 dB and input gain 1 (32 on the carrier pathway), fitted on 2,048 training clips of speakers 1 to 48, read at widths 192, 1,024 and 4,096 under a fixed and a seeded projection, and scored on the 6,000 test clips of speakers 49 to 60. The size study is the ablation of oscillator count, parameter count and channel layout that [Kryski 2026a](https://doi.org/10.2139/ssrn.7445198) found no published oscillator network had run. The 16 × 16, 4-channel runs, 150 of the 10,029, are those of [Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/), read from its record. Appendix A defines every term.
+### 2.2 Lattice geometries
 
-### 4.2 Task and data
+Every channel stores its G² oscillators as a G × G grid whose row r is driven by the r-th input band. A lattice geometry changes only which oscillators are neighbours, that is, how the grid's edges are glued; each channel is a separate copy of the same shape, and the kernel, the parameters and the oscillators are the same under every geometry, so a comparison between geometries varies one thing at every size. The six are the previous study's: they vary the number of wrapped axes (sheet, cylinder, torus), the dimension (the cube, which shortens the paths between oscillators) and how frequency is laid out, the cylinder and the sphere leaving the frequency axis open as the cochlea does and the helix putting rows a quarter of the band range apart next to each other, as the pitch helix of music perception puts octaves ([Shepard 1982](https://doi.org/10.1037/0033-295X.89.4.305)). Oscillator lattices are a long-studied setting in physics ([Sakaguchi et al. 1987](https://doi.org/10.1143/PTP.77.1005)); the survey found geometry varied in four machine-learning systems, "and in none of them as a single variable" ([Kryski 2026a](https://doi.org/10.2139/ssrn.7445198)).
 
-### 4.3 Front end and band mapping
+| geometry | how the grid is glued |
+|---|---|
+| **Torus** | Both axes wrap: the top row is coupled to the bottom, and the left column to the right. The reference geometry. |
+| **Cylinder** | Columns wrap, rows do not: the frequency axis is open, so the highest band is not coupled around to the lowest. |
+| **Sheet** | Neither axis wraps, and coupling stops at every edge. |
+| **Helix** | The G² sites read as one closed ring, G/4 rows per turn, so an offset of one turn joins rows a quarter of the band range apart. |
+| **Cube** | Each row's G oscillators read as an a × b slab, giving a G × a × b lattice that wraps on all three axes. The slab is as nearly square as the row allows: 4 × 4 and 8 × 8 at 16 and 64 (the previous study's is 4 × 4), and 2 × 4, 4 × 8 and 8 × 16 at 8, 32 and 128, where G is not a square. |
+| **Sphere** | Rows as latitudes with open poles and columns as longitudes that wrap, each oscillator's influence weighted by the cosine of its latitude: an approximation to a sphere, not exact spherical coupling. |
 
-### 4.4 Lattice size, channels and parameter count
+Table: The six lattice geometries, at a lattice of G × G.
 
-### 4.5 Coupling kernels and the coupling ceiling
+![Lattice geometries, drawn at 16 × 16. Every channel stores its oscillators the same way, as a grid whose row r is driven by the r-th input band (colour, lowest band dark). A geometry changes only which oscillators are neighbours, that is, how the grid's edges are glued, and each of a network's channels is a separate copy of the same shape. For each geometry, left: the grid, with glued edges marked by a shared colour and arrow, open edges dark, one oscillator (star) and its nearest neighbours (dots); right: the shape the gluing makes, with the same oscillator and neighbours. At other lattice sizes only the number of rows and columns changes, and the cube's slab (Section 2.2).](resources/figures/a2-lattice-geometries.png)
 
-### 4.6 Controls matched in size
+## 3 Methods
 
-### 4.7 The read at scale
+### 3.1 Experimental design
 
-### 4.8 Reporting and uncertainty
+The study asks six questions (Section 1): how accuracy changes with the number of oscillators; whether the network's margins over its controls change with size; whether the layout of a fixed number of oscillators matters; whether the band mapping matters; how trained networks of the same parameter count compare, at the smallest sizes in particular; and whether the effects of coupling function, lattice geometry and input pathway depend on size. The design was written down in a registration before any run (in draft while this paper is), and every change to it will be logged with its date.
 
-## 5 Results
+It runs in eight tiers of 10,029 runs (Appendix B), 150 of which are the previous study's own runs at 16 × 16 with four channels, taken from its record rather than run again (Section 3.10). Every run is one arm, one of the systems compared, at one lattice size, channel count, band mapping, input pathway and random seed, and every run is at a noise level of 0 dB and input gain 1 (32 on the carrier pathway). The lattice is 8 × 8, 16 × 16, 32 × 32, 64 × 64 or 128 × 128, the channel count 1, 2, 4, 8 or 16, and every lattice other than 16 × 16 is driven under two band mappings (Figure 2). Each arm's signals are summarized, brought to a common width and classified by the same linear readout (Section 3.6), each condition is run at three seeds, and every accuracy is measured on speakers held out from training (Section 3.2). Runs use a GPU where one is available and the CPU otherwise (Section 3.10). Appendix A defines every term.
 
-### 5.1 Number of oscillators
+![What the size study varies. (a) Lattice size against channel count: each cell gives the network's number of oscillators, C · G², and parameters, 2 · C · G²; equal shades hold equally many oscillators in different layouts, the purple cell is the previous study's network, and dotted cells, above 4,096 states, are read channel by channel (Section 3.6). (b) Band mapping: a lattice of G rows is driven by G mel bands, one per row, or by 16 bands mapped onto its rows, each band on G/16 adjacent rows of a larger lattice and each row of an 8 × 8 lattice the mean of two bands; rows are coloured by the band or bands that drive them.](resources/figures/a4-size-and-band-mapping.png)
 
-### 5.2 Layout at a fixed number of oscillators
+### 3.2 Task and data
 
-### 5.3 Band mapping
+The task and data are the previous study's ([Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/)): the 30,000 recordings of AudioMNIST ([Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)), ten spoken digits by 60 speakers, resampled to 16 kHz, peak-normalized, trimmed of silence and capped at 1 s, in the same bank. Every result keeps speakers apart under its Protocol A: the arms are trained on speakers 1 to 48 and tested on all 6,000 recordings of speakers 49 to 60. A seed fixes a permutation of the training recordings, and the training set is its first 2,048. The previous study's second protocol, on the published speaker folds, and its temporal-order task are not repeated here.
 
-### 5.4 Trained baselines of the same size
+### 3.3 Front end and band mapping
 
-### 5.5 Coupling function and lattice geometry across sizes
+Every arm hears the audio through the previous study's fixed front end: a log-mel spectrogram from a 512-sample (32 ms) Hann window every 256 samples (16 ms, 62.5 frames a second), rescaled by a fixed affine map, with nothing learned and no per-utterance normalization. Here its number of mel bands follows the lattice. A lattice of G rows is driven in one of two ways (Figure 2b): by G mel bands, one per row, or by the previous study's 16 bands mapped onto its rows, each band driving G/16 adjacent rows of a larger lattice and each row of the 8 × 8 lattice taking the mean of two adjacent bands. At 16 × 16 the two coincide. The first gives a larger lattice a finer input; the second holds the input fixed and varies only the network, so that between them the effect of the network's size can be told from the effect of the input's resolution. Nothing in either mapping is fitted.
 
-### 5.6 Input pathways across sizes
+At 8, 16 and 32 bands the front end is the previous study's exactly: a 512-point transform, 257 frequency bins. At 64 and 128 bands the narrowest mel filters fall between those bins, and at 128 bands one filter would be empty and 25 would touch a single bin. From 64 bands the transform is therefore zero-padded, to 1,024 points at 64 bands and 2,048 at 128, the lengths at which the narrowest filter spans three bins as the 32-band one does at 512. The window stays 512 samples and is aligned with the previous study's frames, so every band count has the previous study's frames, 61 for a 1 s clip, at the same times. Zero-padding samples the same windowed spectrum more finely and adds no frequency resolution, so neighbouring low bands at 64 and 128 carry strongly correlated energies; a longer window would resolve them, at the cost of time resolution and of a different frame count, which would change the read. Narrower bands hold less energy, so the drive's level falls slightly with band count: its mean at 0 dB is 1.38, 1.32, 1.24, 1.23 and 1.22 from 8 to 128 bands, on a range of 0 to about 1.6, and is not corrected. Whether to keep this front end at 64 and 128 bands, or to drive those lattices only with the 16 mapped bands, is an open decision of the registration.
 
-### 5.7 Readout width
+### 3.4 Network size: lattices, channels and the coupling ceiling
 
-## 6 Discussion
+A network of C channels on a G × G lattice has C · G² oscillators and 2 · C · G² parameters: a coupling kernel of one weight per offset and a natural frequency per oscillator, per channel. With G from 8 to 128 and C from 1 to 16 it ranges from 64 oscillators and 128 parameters to 262,144 oscillators and 524,288 parameters. Because doubling G and quartering C leaves the count unchanged, nine counts, from 256 to 65,536 oscillators, are each reached by two or three layouts; 1,024 oscillators, for example, are 8 × 8 at 16 channels, 16 × 16 at 4 (the previous study's network) and 32 × 32 at 1.
 
-## 7 Related work
+Everything else about the network is the previous study's reference configuration: Kuramoto coupling on the torus, natural frequencies drawn per oscillator from N(1, 0.1²), restoring strength λ = 0.3, coupling ceiling 1, and one Euler step of 0.1 per frame, with every seed drawing the kernels and natural frequencies exactly as the previous study drew them. The natural frequencies' distribution does not depend on the lattice. The kernel's weights are drawn from N(0, 0.05²) at every size and each channel's kernel is then scaled, all its weights by one factor, so that the peak of its spectrum, the largest gain it applies to any spatial pattern of phases across the channel, equals the coupling ceiling. The previous study only lowered a kernel to the ceiling. At 16 × 16 that is the same rule, since a random kernel's peak there is always above it (1.42 to 2.54 over every geometry, seed and channel either study draws), and every 16 × 16 network is bit-identical under the two rules. At 8 × 8 it is not: the peak is usually below the ceiling (median 0.80), so lowering alone would have left the smallest networks with weaker coupling than the rest, for a reason that has nothing to do with size. Scaling to the ceiling exactly, up or down, holds the strongest coupling gain fixed at every size. What still changes with size is how that gain is spread: a random kernel's peak grows with the lattice (medians 0.80, 1.84, 4.0, 9.1 and 20.0 on the torus from 8 × 8 to 128 × 128), so a larger lattice's individual weights end up smaller, and the typical gain over all spatial patterns, the root mean square of the kernel's spectrum, drifts from 0.50 to 0.32.
 
-## 8 Reproducibility
+### 3.5 Controls matched in size
+
+Every network is compared with controls of its own size. The uncoupled oscillator network is the same network with its kernels set to zero; with no coupling term it does not depend on the coupling function or the geometry. The state-matched leaky-integrator bank is the previous study's bank at C channels of a G × G lattice: C · G² independent leaky integrators, each with a leak rate and an input weight (2 · C · G² parameters), band r driving every unit of row r, time constants spaced logarithmically from 16 ms to 1 s across the units of a row. The previous study's width-matched bank, with twice the units to match the network's two signals per oscillator, is the state-matched bank of twice the channels, which the size study runs up to 8 channels. The spectrogram-only baseline reads exactly the rows a lattice's networks are driven by.
+
+The five trained baselines are the previous study's architectures and training recipe, each sized to the network it is compared with. Each has one width knob and the rest of its design fixed: the GRU's hidden size, the TCN's and the CNN's hidden channels, the transformer's model width with two heads, and the S4D's width, with as many states per channel as its width. The width is the widest whose parameter count does not exceed the network's; the CNN, which is the TCN's form, takes the narrowest that reaches it, so the two stay one width apart. At 2,048 parameters on 16 rows this gives the previous study's baselines exactly (1,840 to 2,109 parameters), and from 2,048 parameters up every baseline is within 15% of its network, with widths up to 358 at 524,288 parameters. Below 2,048 parameters the steps between widths are coarse, and in 10 of the 45 lattice, band-mapping and channel settings one or more baselines fall up to 52% under the network's count or 33% over it. Those runs are kept and flagged in the record, because the smallest sizes are where the study asks whether untrained oscillators are more useful than trained networks. A trained baseline is driven by exactly the rows its network is driven by. Whether the S4D's state count should grow with its width, which makes it the slowest baseline at the largest sizes, is an open decision of the registration.
+
+### 3.6 Readout
+
+Every arm is read the previous study's way. Each of its signals (a band energy, the sine or cosine of an oscillator's phase, a leaky integrator's state, or a trained baseline's hidden unit) is summarized by three statistics, its mean, its standard deviation and its mean absolute change from frame to frame, over each of four equal windows of frames 16 to 61, after a 16-frame warm-up, the same frames for every clip. The spectrogram-only baseline is also read from frame 0, over the whole clip, its primary read. The arms' summaries range from 96 numbers (8 band energies) to 6,291,456 (a 128 × 128 network of 16 channels), so that readout capacity cannot pass for dynamics every arm is brought to the same width: its summaries are standardized with the training set's own statistics and multiplied by a random Gaussian matrix to 192 features, and to 1,024 and 4,096 as secondary widths, a projection that approximately preserves distances between feature vectors ([Johnson & Lindenstrauss 1984](https://doi.org/10.1090/conm/026/737400)). An arm is never read wider than its own number of features; at or above it, it is read unprojected.
+
+A single linear layer then maps the 192 features to ten digit scores, fitted by ridge regression, least squares with an L2 penalty solved in closed form, with the penalty chosen from four values on the last eighth of the training clips ([Jaeger 2001](https://www.ai.rug.nl/minds/uploads/EchoStatesTechRep.pdf); [Lukoševičius 2012](https://doi.org/10.1007/978-3-642-35289-8_36)). The readout's 1,930 weights are the same at every size: the network grows and its reader does not, so a gain with size belongs to the network. The trained baselines are trained end to end through a learned linear layer on the same statistics and then read by the same readout.
+
+The projection matrix is drawn two ways, and every projected read is recorded under both. The fixed projection is the previous study's single draw, the same for every seed; the seeded projection is drawn afresh from each run's seed, so that the spread over seeds includes the projection's own variability, which a single draw leaves out. Both are reported.
+
+A network of more than 4,096 states (from 32 × 32 at 8 channels) is too large to read at once: a 128 × 128 network of 16 channels has 6,291,456 features per clip, 202 GB for a run's 8,048 clips, and its projection matrix would be 103 GB. Because the channels do not act on each other and the standardization is per feature, the read splits exactly by channel: each channel is simulated alone, its training features are standardized with their own statistics and projected, and the projections are added, the test clips a batch at a time. Given the same matrix this reproduces the in-memory read's accuracies exactly in every tested case, the projected features agreeing to floating-point rounding. The matrix rows each channel meets are drawn from seeds of their own, with the same distribution and scale, since reaching a channel's rows of a single draw would mean drawing all of it. Networks of 4,096 states or fewer, including every run taken from the previous study, are read in memory with its code.
+
+### 3.7 Input pathways
+
+The audio drives a reservoir in the previous study's three ways ([Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/)). **Band-energy**: each band energy adds to the rotation rate of the oscillators in its row, θ̇ᵢ += g·Aᵣ(t); the size, trained and design tiers use it. **Quadrature**: each band's energy together with the phase of its signal relative to the band's centre frequency, entering as a phase-referenced push g·Aᵣ sin(φᵣ − θᵢ) ([Adler 1946](https://doi.org/10.1109/JRPROC.1946.229930)); at 64 and 128 bands the phase is taken from the zero-padded transform, referenced to the start of the same window. **Carrier**: the band-filtered waveform itself at the full 16 kHz, in G log-spaced bands that span the same four octaves at every band count, 96 to 1,536 Hz, as the previous study's 16 do. The leaky-integrator bank has no phase for the quadrature pathway to act on and is not run on it. Each pathway's spectrogram-only baseline reads that pathway's own front end. The carrier pathway integrates 16,000 steps per clip, and is run on lattices up to 32 × 32 only, an open decision of the registration.
+
+### 3.8 Noise protocol
+
+White noise is added to every clip, in training and in test alike, at 0 dB: as loud as the clip's own speech. Each clip's noise is drawn from a generator seeded by the clip's identity, so every arm hears exactly the same noisy clip. The previous study also ran clean audio, on which the task nearly saturates, and noise 5 dB louder; the size study runs 0 dB alone, the lower of the previous study's two noise levels, chosen there in pilot runs to keep its strongest untrained arm between 70% and 90%, so that the design stays affordable across its lattice sizes.
+
+### 3.9 Input gain and the integrator-validity bound
+
+Input gain scales the input before it drives a reservoir, and applies only to the reservoirs, as in the previous study. Every reservoir here runs at gain 1 on the band-energy and quadrature pathways, where the band energies push with about the magnitude of the natural frequencies, and at gain 32 on the carrier pathway, whose waveform is about 60 times smaller than the band energies. The spectrogram-only baseline has no dynamics for a gain to act on, and a trained baseline learns its own input scale.
+
+The network advances in steps of 0.1, and the phase an oscillator gains in one step must stay below π for the step to be valid ([Hairer et al. 1993](https://doi.org/10.1007/978-3-540-78862-1)). At gain 1 the input adds at most about 0.15 radian a step. The coupling adds at most 0.1 radian a step in root mean square over a channel at every lattice size, because exact scaling holds the kernel's largest gain at the ceiling of 1; without a ceiling, a random kernel's gain would grow with the lattice, as its spectral peak does (Section 3.4). The forward pass stays finite on every geometry and coupling function at 8 × 8 and 64 × 64, as tested.
+
+### 3.10 Computation: CPU and GPU
+
+Every run can use an NVIDIA GPU, the GPU of Apple Silicon or the CPU, and records which it used. The front end's rows are computed on the CPU, so every device is driven by the same input; the untrained arms are built on the CPU from their seed, so every device runs the same kernels and natural frequencies, and are then simulated on the device; a trained baseline is built on the CPU and trained on the device; and the readout projects on the device and solves its ridge regression on the CPU in double precision. On each device the coupling runs either through the fast Fourier transform or as the same operator written as a dense matrix, whichever measured faster there.
+
+Only the CPU reproduces the previous study bit for bit. A GPU's floating-point results are close to the CPU's but not identical, because its transforms, matrix products and reductions sum in other orders. On the Apple GPU, the previous study's network at 0 dB, gain 1 and seed 0 scored the accuracies that study recorded on its CPU, to two decimals of a percent, at every width. The 150 runs taken from the previous study are those recorded on its CPUs; a re-run of a sample of them with this study's code, on the CPU, reproduced every recorded accuracy and every test clip's result, and any of them this study has to run itself runs on the CPU. By a cost model measured on both, the whole design is about 1,800 hours on the Apple M1 Max's GPU against about 34,900 on one CPU thread, most of it the design tiers on the carrier pathway.
+
+### 3.11 Reporting and uncertainty
+
+As in the previous study, no threshold decides a result. Every accuracy is reported as its mean over three seeds, with the sample standard deviation and each seed's value, under the fixed and under the seeded projection. A seed sets an arm's random parameters, which training clips it draws and, under the seeded projection, the projection. Every comparison between two arms is paired: both are scored on the same 6,000 test clips at the same lattice, band mapping, channel count, seed and projection, and it is reported as the mean difference in accuracy, the standard deviation of that difference over seeds, and a 95% interval from resampling the test clips 2,000 times. The standard deviation over seeds is how much a result moves when the random draws change; the interval is how precisely the fixed test set measures a difference. The primary cell for every comparison is width 192, 2,048 training clips and the four-window read. Accuracy is reported against the number of oscillators and against parameters, with the layouts of equal size marked. The runs taken from the previous study are marked wherever they appear.
+
+## 4 Results
+
+### 4.1 Number of oscillators
+
+<!-- TODO: Add the size tier's results when they are ready: accuracy of the coupled oscillator network against the number of oscillators, at the primary cell, under both projections. Don't make judgments. Just the facts. -->
+
+### 4.2 Layout at a fixed number of oscillators
+
+<!-- TODO: Add the layouts of equal size (Figure 2a) when they are ready. Don't make judgments. Just the facts. -->
+
+### 4.3 Band mapping
+
+<!-- TODO: Add each lattice under its own bands and under the 16 mapped bands when they are ready. Don't make judgments. Just the facts. -->
+
+### 4.4 Trained baselines of the same size
+
+<!-- TODO: Add the trained tier's results when they are ready, including the flagged runs below 2,048 parameters and each baseline's achieved parameter count. Don't make judgments. Just the facts. -->
+
+### 4.5 Coupling function and lattice geometry across sizes
+
+<!-- TODO: Add the design tier's results when they are ready. Don't make judgments. Just the facts. -->
+
+### 4.6 Input pathways across sizes
+
+<!-- TODO: Add the quadrature and carrier tiers' results when they are ready. Don't make judgments. Just the facts. -->
+
+### 4.7 Readout width and projection
+
+<!-- TODO: Add widths 1,024 and 4,096 beside 192, and the fixed projection beside the seeded one, when they are ready. Don't make judgments. Just the facts. -->
+
+## 5 Discussion
+
+<!-- TODO: The interpretation of the results, their limits and future directions. Sources of variation to cover: the number of seeds; the device (the CPU and the GPU differ in rounding, and only the CPU reproduces the previous study); the projection's draw (fixed against seeded); the read's switch to channel-by-channel above 4,096 states; parameter matching across architectures, coarse below 2,048 parameters; the S4D's growing state count; the front end at 64 and 128 bands; the coupling's weights shrinking as the lattice grows under a fixed ceiling; noise at 0 dB and gain 1 only. -->
+
+## 6 Conclusion
+
+<!-- TODO: Brief conclusion of what was done, results, and future directions. -->
+
+## Reproducibility statement {-}
+
+The code, the registration with its dated change log, and the complete run record (every run's specification, results, per-clip correctness and the device it ran on) will be released with the paper; AudioMNIST is public ([Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)). The runs taken from the previous study are in its own released record ([Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/)). From the record alone, one command regenerates every table and figure, and from the audio, the harness reruns any tier on the CPU, an NVIDIA GPU or the GPU of Apple Silicon, resuming without repeating a finished run. On the CPU, runs with the same seed are bit-identical, and so are the previous study's runs; on a GPU they are close but not identical. We welcome reproductions.
 
 ## AI use statement {-}
 
 This work was carried out by the author working with an AI coding agent, Claude (Anthropic), throughout, as was the paper it extends. The disclosure covers the uses that machine-learning venues require to be disclosed and those they recommend.
 
-**Implementing methods and running experiments.** Under the author's direction the agent adapted the previous paper's experiment harness to this one, wrote the planner, the cost model, the channel-by-channel read, the summary code and the test suite, and measured the timings the cost estimates rest on.
+**Implementing methods and running experiments.** Under the author's direction the agent adapted the previous paper's experiment harness to this one, wrote the planner, the cost model, the channel-by-channel read, the code that runs every part of a run on a GPU, the summary code and the test suite, and measured the timings the cost estimates rest on.
 
-**Designing experiments and interpreting results.** The author set the research question and the scope of the study: the lattices, channel counts and band mappings, the crossing with every coupling function, lattice geometry and input pathway, controls matched in size, and exact scaling of the coupling kernels. The agent proposed the read for networks too large to hold in memory, the front end at 64 and 128 bands, the rule that sizes the trained baselines, the staging of the tiers, and the running of every part of a run on a GPU, each for the author to accept, revise or reject before the registration is frozen; the study's questions are the author's. It will write first-draft interpretations of results, which the author will review.
+**Designing experiments and interpreting results.** The author set the research questions and the scope of the study: the lattices, channel counts and band mappings, the crossing with every coupling function, lattice geometry and input pathway, controls matched in size, exact scaling of the coupling kernels, the fixed and seeded projections, and running on GPUs. The agent proposed the read for networks too large to hold in memory, the front end at 64 and 128 bands, the rule that sizes the trained baselines and the staging of the tiers, each for the author to accept, revise or reject before the registration is frozen. It will write first-draft interpretations of results, which the author will review.
 
-**Writing.** The agent drafted the registration, the tier plan, this paper's abstract, section structure, design table and glossary, and adapted the glossary from the previous paper's.
+**Writing.** The agent drafted the registration, the tier plan, and this paper's abstract, introduction, background and methods, adapted its structure, tables, figures and glossary from the previous paper's, and drew the figure of what the size study varies.
 
-**Verification.** The design is recorded before any run. The harness carries contract tests for each mechanism the paper relies on, including that every 16 × 16 network is bit-identical to the previous paper's, that the channel-by-channel read gives the in-memory read's accuracies, and that the front end is the previous paper's up to 32 bands; the cells taken from the previous paper are re-run and checked against its record before they are used. The author takes responsibility for the final content of this work.
+**Verification.** The design is recorded before any run. The harness carries contract tests for each mechanism the paper relies on, including that every 16 × 16 network is bit-identical to the previous paper's on the CPU, that the channel-by-channel read gives the in-memory read's accuracies, that the front end is the previous paper's up to 32 bands, and that every model, front end and trained baseline gives the CPU's results on a GPU to rounding; the runs taken from the previous paper are re-run on the CPU and checked against its record before they are used. The author takes responsibility for the final content of this work.
 
 ## References {-}
 
+- [Abrams & Strogatz 2004](https://arxiv.org/abs/nlin/0407045): Chimera States for Coupled Oscillators.
 - [Adler 1946](https://doi.org/10.1109/JRPROC.1946.229930): A Study of Locking Phenomena in Oscillators.
 - [Aranson & Kramer 2002](https://doi.org/10.1103/RevModPhys.74.99): The world of the complex Ginzburg-Landau equation.
 - [Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038): AudioMNIST: Exploring Explainable Artificial Intelligence for audio analysis on a simple benchmark.
+- [Dai & Song 2026](https://arxiv.org/abs/2605.20922): Winfree Oscillatory Neural Network.
 - [Daido 1992](https://doi.org/10.1143/ptp/88.6.1213): Order Function and Macroscopic Mutual Entrainment in Uniformly Coupled Limit-Cycle Oscillators.
+- [Hairer et al. 1993](https://doi.org/10.1007/978-3-540-78862-1): Solving Ordinary Differential Equations I: Nonstiff Problems.
 - [Hansel et al. 1993](https://doi.org/10.1103/PhysRevE.48.3470): Clustering and slow switching in globally coupled phase oscillators.
 - [Jaeger 2001](https://www.ai.rug.nl/minds/uploads/EchoStatesTechRep.pdf): The "echo state" approach to analysing and training recurrent neural networks.
 - [Jaeger et al. 2007](https://doi.org/10.1016/j.neunet.2007.04.016): Optimization and applications of echo state networks with leaky-integrator neurons.
-- [Kryski 2026a](https://doi.org/10.2139/ssrn.7445198): From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning.
-- [Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/): Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields.
+- [Johnson & Lindenstrauss 1984](https://doi.org/10.1090/conm/026/737400): Extensions of Lipschitz mappings into a Hilbert space.
+- [Kryski 2026a](https://doi.org/10.2139/ssrn.7445198): From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning. Preprint.
+- [Kryski 2026b](https://github.com/ekryski/oscillator-research/blob/main/papers/02-untrained-reservoirs/): Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields. Preprint.
+- [Kuramoto & Battogtokh 2002](https://arxiv.org/abs/cond-mat/0210694): Coexistence of Coherence and Incoherence in Nonlocally Coupled Phase Oscillators.
 - [Kuramoto 1975](https://doi.org/10.1007/BFb0013365): Self-entrainment of a population of coupled non-linear oscillators.
 - [Lukoševičius 2012](https://doi.org/10.1007/978-3-642-35289-8_36): A Practical Guide to Applying Echo State Networks.
 - [Maass 2002](https://doi.org/10.1162/089976602760407955): Real-Time Computing Without Stable States: A New Framework for Neural Computation Based on Perturbations.
+- [Miyato 2025](https://openreview.net/forum?id=nwDRD4AMoN): Artificial Kuramoto Oscillatory Neurons.
+- [Nunley 2026](https://arxiv.org/abs/2606.18694): Attention as Frustrated Synchronization.
 - [Pikovsky et al. 2001](https://doi.org/10.1017/CBO9780511755743): Synchronization: A Universal Concept in Nonlinear Sciences.
 - [Sakaguchi & Kuramoto 1986](https://doi.org/10.1143/PTP.76.576): A Soluble Active Rotator Model Showing Phase Transitions via Mutual Entrainment.
+- [Sakaguchi et al. 1987](https://doi.org/10.1143/PTP.77.1005): Local and Global Self-Entrainments in Oscillator Lattices.
+- [Shepard 1982](https://doi.org/10.1037/0033-295X.89.4.305): Geometrical approximations to the structure of musical pitch.
+- [Strogatz 2000](https://doi.org/10.1016/S0167-2789%2800%2900094-4): From Kuramoto to Crawford: exploring the onset of synchronization in populations of coupled oscillators.
 - [Stuart 1960](https://doi.org/10.1017/S002211206000116X): On the non-linear mechanics of wave disturbances in stable and unstable parallel flows Part 1. The basic behaviour in plane Poiseuille flow.
+- [Tanaka 2019](https://doi.org/10.1016/j.neunet.2019.03.005): Recent advances in physical reservoir computing: A review.
+- [unconv.ai 2026](https://unconv.ai/blog/introducing-un-0-generating-images-with-coupled-oscillators/): Introducing Un-0: Generating Images with Coupled Oscillators.
 - [Winfree 1967](https://doi.org/10.1016/0022-5193%2867%2990051-3): Biological rhythms and the behavior of populations of coupled oscillators.
 
 <!-- appendix -->
@@ -157,36 +260,20 @@ The terms as this paper uses them, carried over from [Kryski 2026b](https://gith
 | **Lattice** | The G × G grid a channel's oscillators sit on. Rows follow frequency: the input to row r comes from the r-th band, from lowest to highest. |
 | **Row** | The G oscillators of one channel that one input row drives. The only grouping built into the network. |
 | **Band mapping** | How a front end's mel bands drive a lattice's rows. One band per row: a G × G lattice is driven by G mel bands. Mapped: the 16 bands of the previous paper drive the rows, each band G/16 adjacent rows of a larger lattice, each row of an 8 × 8 lattice the mean of two adjacent bands. At 16 × 16 the two are the same. Nothing in the mapping is fitted. |
-| **Channel** | One independent G × G lattice of oscillators, with its own coupling kernel and natural frequencies. Every channel receives the same input, and channels do not act on each other: they are parallel copies, like the heads of one attention layer, read side by side, not layers stacked one on another. The name follows the channels of a convolutional network, where each channel likewise has its own kernel. |
+| **Channel** | One independent G × G lattice of oscillators, with its own coupling kernel and natural frequencies. Every channel receives the same input, and channels do not act on each other: they are parallel copies, like the heads of one attention layer, read side by side, not layers stacked one on another (Appendix C). The name follows the channels of a convolutional network, where each channel likewise has its own kernel. |
 | **Coupling kernel** | A channel's table of coupling weights: a G × G array whose entry at an offset of so many rows and columns sets how strongly an oscillator is acted on by the one at that offset. The same table applies at every site, so the coupling is a convolution, and "kernel" is meant as in a convolutional network, not as a GPU compute kernel. It covers every offset, so each oscillator is coupled to every other in its channel. The weights are drawn from N(0, 0.05²) and the kernel is then scaled to the coupling ceiling: a positive weight pulls a pair toward the same phase, a negative one pushes it apart. |
-| **Coupling function** | How the phases of two coupled oscillators turn into a push on one of them (A.5). |
+| **Coupling function** | How the phases of two coupled oscillators turn into a push on one of them (Section 2.1). |
 | **Coupling ceiling** | Each channel's overall coupling strength, 1: the largest factor by which its kernel amplifies any spatial pattern of phases across the channel (the peak of the kernel's spectrum). Every channel's kernel is scaled, all weights by one factor, so that its peak equals the ceiling exactly, raised or lowered as needed; the strongest coupling gain is therefore the same at every size. It does not cap individual pairs, neighbours or regions, and since a random kernel's peak grows with the lattice, the individual weights of a larger lattice end up smaller. The previous paper only lowered a kernel to the ceiling; random 16 × 16 kernels always exceed it, so on that lattice the two rules are the same. |
 | **Restoring strength λ** | The strength of a pull on every oscillator back toward phase 0, the term −λ sin θ, 0.3. It has the form of the restoring torque that returns a pendulum to rest, but the oscillators have no inertia, so nothing swings back past 0: an oscillator whose natural frequency is below λ is held in place, or locked ([Adler 1946](https://doi.org/10.1109/JRPROC.1946.229930)), and a faster one keeps rotating, slowed where the pull opposes it. For Stuart–Landau oscillators it is a pull toward phase 0 at unit amplitude. |
 | **Cluster** | A group of oscillators that move together, in phase or in fixed opposition, because of the dynamics rather than the wiring. Nothing in a kernel assigns an oscillator to a cluster; clusters form, or do not, as the network runs ([Pikovsky et al. 2001](https://doi.org/10.1017/CBO9780511755743)). |
 
 ### A.5 Coupling functions
 
-Each is the coupling term in θ̇ᵢ = ωᵢ + couplingᵢ + g·uᵢ − λ sin θᵢ, where the sum runs over the oscillators j of oscillator i's channel and Kᵢⱼ is the kernel weight at their offset.
-
-| Term | As used in this paper |
-|---|---|
-| **Kuramoto** | Σⱼ Kᵢⱼ sin(θⱼ − θᵢ). Each oscillator is pulled toward the phases of the others, in proportion to the kernel weight: the minimal model of synchronization ([Kuramoto 1975](https://doi.org/10.1007/BFb0013365)), and the reference. |
-| **Kuramoto–Sakaguchi** | Σⱼ Kᵢⱼ sin(θⱼ − θᵢ − α), with α = π/4. A phase lag that breaks the pull's symmetry and admits travelling waves ([Sakaguchi & Kuramoto 1986](https://doi.org/10.1143/PTP.76.576)). |
-| **Second harmonic** | Kuramoto plus β Σⱼ Kᵢⱼ sin 2(θⱼ − θᵢ), with β = 0.5. The second harmonic favours two-cluster states, pairs in phase or in opposition ([Daido 1992](https://doi.org/10.1143/ptp/88.6.1213); [Hansel et al. 1993](https://doi.org/10.1103/PhysRevE.48.3470)). |
-| **Winfree** | −sin θᵢ Σⱼ Kᵢⱼ (1 + cos θⱼ). How strongly an oscillator responds depends on its own phase, and how strongly it acts on the others on its phase ([Winfree 1967](https://doi.org/10.1016/0022-5193%2867%2990051-3)). |
-| **Stuart–Landau** | Each oscillator is a complex amplitude z = x + iy that relaxes to a cycle of unit radius, and coupling is diffusive, Σⱼ Kᵢⱼ (zⱼ − zᵢ), so amplitude as well as phase carries the state ([Stuart 1960](https://doi.org/10.1017/S002211206000116X); [Aranson & Kramer 2002](https://doi.org/10.1103/RevModPhys.74.99)). The readout sees y and x in place of sin θ and cos θ. Run on the torus only. |
-| **Stuart–Landau, fixed amplitude** | The same with the amplitude held at 1: the phase-only limit, which reduces to Kuramoto. It separates what the amplitude adds. |
+Defined in Section 2.1 and drawn in Appendix D.
 
 ### A.6 Lattice geometries
 
-| Term | As used in this paper |
-|---|---|
-| **Torus** | Both lattice axes wrap around: the top row is coupled to the bottom, and the left column to the right. The reference geometry. |
-| **Cylinder** | Columns wrap, rows do not: the frequency axis is open, as in the cochlea, so the highest band is not coupled around to the lowest. |
-| **Sheet** | Neither axis wraps, and coupling stops at every edge. With the cylinder and the torus it varies the number of wrapped axes from zero to two. |
-| **Helix** | The G² sites read as one closed ring, G/4 rows per turn (four at 16 × 16, as in the previous paper), so an offset of one turn joins rows a quarter of the band range apart: an octave of the carrier pathway's log-spaced bands. |
-| **Cube** | Each row's G oscillators read as an a × b slab, giving a G × a × b lattice that wraps on all three axes: the same oscillators, with shorter paths between them. The slab is as nearly square as the row allows: 4 × 4 and 8 × 8 at 16 and 64, and 2 × 4, 4 × 8 and 8 × 16 at 8, 32 and 128, where G is not a square. |
-| **Sphere** | Rows as latitudes with open poles and columns as longitudes that wrap, each oscillator's influence weighted by the cosine of its latitude: an approximation to a sphere, not exact spherical coupling. |
+Defined in Section 2.2, where they are drawn at 16 × 16.
 
 ### A.7 The read and the evaluation
 
@@ -202,3 +289,28 @@ Each is the coupling term in θ̇ᵢ = ωᵢ + couplingᵢ + g·uᵢ − λ sin 
 | **Primary cell** | Width 192, 2,048 training clips, and the four-window read. |
 | **Protocol A** | Train on speakers 1 to 48 and test on the 6,000 clips of speakers 49 to 60 of AudioMNIST ([Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)). |
 | **Noise level** | White noise added to each clip at a level relative to its speech. Every run here is at 0 dB, noise as loud as the speech. |
+
+## B Experimental design
+
+The tiers of the study, with their run counts, as the draft registration sets them. Every run is at 0 dB and input gain 1 (32 on the carrier pathway), is fitted on 2,048 training clips of speakers 1 to 48, is read at widths 192, 1,024 and 4,096 under the fixed and the seeded projection, and is scored on the 6,000 test clips of speakers 49 to 60. The 150 runs at 16 × 16 with four channels that the previous study recorded are taken from its record.
+
+| tier | question | arms | varied | fixed | runs |
+|---|---|---|---|---|---|
+| gate | Does the pipeline leak at every size? | the coupled and uncoupled oscillator networks and the state-matched leaky-integrator bank, with no input | lattice 8 × 8 to 128 × 128; 1 and 16 channels | input gain 0; 0 dB; seed 0 | 30 |
+| size | How do the number of oscillators and their layout move accuracy, against controls of the same size? | coupled oscillator network, uncoupled oscillator network, state-matched leaky-integrator bank; the spectrogram-only baseline on each lattice's rows | lattice 8 × 8, 16 × 16, 32 × 32, 64 × 64 and 128 × 128; 1, 2, 4, 8 and 16 channels (64 to 262,144 oscillators); band mapping: one mel band per row, or 16 bands mapped onto the rows; seeds 0–2 | Kuramoto coupling, torus, random natural frequencies, restoring strength 0.3, coupling ceiling 1 met exactly; band-energy pathway; 0 dB; input gain 1 | 432 |
+| trained | How do trained baselines of the same parameter count compare as both grow, and are oscillators more useful at the smallest sizes? | GRU, TCN, CNN, transformer and S4D, each sized to every network of the size tier (128 to 524,288 parameters) and driven by its rows | as the size tier | trained end to end; 0 dB | 675 |
+| design | Do coupling function and lattice geometry matter differently at different sizes? | coupled oscillator network | 6 coupling functions × 6 lattice geometries, the Stuart–Landau functions on the torus only; every lattice, channel count and band mapping; seeds 0–2 | as the size tier | 3,375 |
+| quadrature | Does the quadrature pathway's standing change with size? | coupled and uncoupled oscillator networks; the pathway's spectrogram-only baseline | as the size tier | quadrature pathway; 0 dB; input gain 1 | 297 |
+| carrier | Does the carrier pathway's standing change with size? | coupled and uncoupled oscillator networks, state-matched leaky-integrator bank; the pathway's spectrogram-only baseline | lattice 8 × 8 to 32 × 32; every channel count and band mapping; seeds 0–2 | carrier pathway at 16 kHz; 0 dB; input gain 32 | 240 |
+| design-quadrature | Design at size, on the quadrature pathway | coupled oscillator network | the 4 phase coupling functions × 6 lattice geometries; as the quadrature tier | as the quadrature tier | 3,105 |
+| design-carrier | Design at size, on the carrier pathway | coupled oscillator network | the design tier's configurations; as the carrier tier | as the carrier tier | 1,875 |
+
+**Arms.** The spectrogram-only baseline is the front end and the readout with nothing between them, on exactly the rows a lattice's networks are driven by. The coupled oscillator network is C channels of a G × G lattice, C · G² untrained oscillators with 2 · C · G² parameters, exposing sin θ and cos θ of each oscillator; the previous study's network is 4 channels of 16 × 16. The uncoupled oscillator network is the same network with its coupling kernels set to zero. The state-matched leaky-integrator bank has the network's C · G² states and 2 · C · G² parameters at every size. These are the reservoirs. The five trained baselines are trained end to end and sized to the network's parameter count (Section 3.5). Input gain applies only to the reservoirs (Section 3.9).
+
+## C Channels and layers
+
+![Layers and channels. (a) A deep network or a transformer stacks layers: each transforms the output of the one before it, so layers add depth. (b) The coupled oscillator network's channels sit side by side: each is a G × G lattice driven by the same mel spectrogram, the r-th band driving row r, with its own coupling kernel and natural frequencies and no coupling to the other channels, so channels add width. The readout reads the signals of all C channels together, as the outputs of the attention heads in one transformer layer are combined. The lattices are drawn with 16 rows.](resources/figures/a1-channels-and-layers.png)
+
+## D Coupling functions
+
+![Coupling functions, each for one neighbour j with a positive kernel weight, as drawn for the previous study. Left: the push an oscillator would feel at each phase around the circle while j sits at the top; arrows point the way it is pushed. Right: that push against the phase difference θⱼ − θᵢ, with filled dots where a pair rests stably and open dots where it rests but is unstable or neutral. Kuramoto pulls each oscillator along the circle toward its neighbour. Kuramoto–Sakaguchi aims α = π/4 behind it, admitting partial coherence. The second harmonic (β = 0.5) strengthens the pull and removes the push away from opposite phase. Winfree pushes every oscillator toward phase 0, the neighbour's phase setting only how hard. Stuart–Landau pulls each oscillator straight toward its neighbour in the plane, so out-of-phase neighbours also shrink each other's amplitude; at fixed amplitude only the pull along the circle is left, which is Kuramoto. A negative kernel weight reverses every arrow, and each oscillator feels the sum over every other oscillator in its channel.](resources/figures/a3-coupling-functions.png)
