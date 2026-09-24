@@ -219,6 +219,8 @@ Each is the coupling term in θ̇ᵢ = ωᵢ + couplingᵢ + g·uᵢ − λ sin 
 
 ### A.5 Lattice geometries
 
+Every channel stores its oscillators as the same 16 × 16 grid; a geometry changes only which of them are neighbours, that is, how the grid's edges are glued. Appendix C draws each one.
+
 | Term | As used in this paper |
 |---|---|
 | **Torus** | Both lattice axes wrap around: the top row is coupled to the bottom, and the left column to the right. The reference geometry. |
@@ -245,3 +247,7 @@ Each is the coupling term in θ̇ᵢ = ωᵢ + couplingᵢ + g·uᵢ − λ sin 
 ## B Channels and layers
 
 ![Layers and channels. (a) A deep network or a transformer stacks layers: each transforms the output of the one before it, so layers add depth. (b) The coupled oscillator network's channels sit side by side: each is a 16 × 16 lattice driven by the same mel spectrogram, mel band r driving row r, with its own coupling kernel and natural frequencies and no coupling to the other channels, so channels add width. The readout reads the signals of all four channels together, as the outputs of the attention heads in one transformer layer are combined.](resources/figures/a1-channels-and-layers.png)
+
+## C Lattice geometries
+
+![Lattice geometries. Every channel stores its 256 oscillators the same way, as a 16 × 16 grid whose row r is driven by mel band r (colour, lowest band dark). A geometry changes only which oscillators are neighbours, that is, how the grid's edges are glued, and each of a network's four channels is a separate copy of the same shape. For each geometry, left: the grid, with glued edges marked by a shared colour and arrow, open edges dark, one oscillator (star) and its nearest neighbours (dots); right: the shape the gluing makes, with the same oscillator and neighbours. On the torus the highest band's row meets the lowest; on the cylinder and the sphere the frequency axis is open; the helix threads all 256 sites into one closed ring, one octave per turn; the cube folds each row into a 4 × 4 slab and wraps all three axes.](resources/figures/a2-lattice-geometries.png)
