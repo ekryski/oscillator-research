@@ -8,13 +8,13 @@ How the number of oscillators and their arrangement affect spoken-digit recognit
 
 Paper 02 ([Spoken-Digit Recognition Without Training](../02-untrained-reservoirs/)) read one untrained coupled oscillator network, 1,024 oscillators in 4 channels of a 16 × 16 lattice with 2,048 parameters, by a linear readout on speaker-disjoint AudioMNIST, against a spectrogram-only baseline, an uncoupled copy of the network, leaky-integrator banks and trained baselines of the same size. Paper 01 ([From Synchronization Physics to Trained Dynamics](../01-evidence-audit/)), a survey of oscillator networks in machine learning, found that no published system had ablated its oscillator or parameter count or its channel layout.
 
-Paper 03 runs that ablation for paper 02's networks. The lattice runs from 8 × 8 to 128 × 128 and the channel count from 1 to 16, so the network has 64 to 262,144 oscillators and 128 to 524,288 parameters, and every lattice is driven either by its own number of mel bands, one per row, or by paper 02's 16 bands mapped onto its rows. At every size the network is compared with the same controls as in paper 02, matched in size: its uncoupled copy, a leaky-integrator bank with its states and parameters, the spectrogram-only baseline on the same rows, and five trained baselines (GRU, TCN, CNN, transformer, S4D) sized to its parameter count. The readout stays at paper 02's 192 features, so whatever changes with size is the network's. The size study then crosses paper 02's six coupling functions, six lattice geometries and three input pathways.
+Paper 03 runs that ablation for paper 02's networks. The lattice runs from 8 × 8 to 128 × 128 and the channel count from 1 to 16, so the network has 64 to 262,144 oscillators and 128 to 524,288 parameters, and every lattice is driven either by its own number of mel bands, one per row, or by paper 02's 16 bands mapped onto its rows. At every size the network is compared with the same controls as in paper 02, matched in size: its uncoupled copy, a leaky-integrator bank with its states and parameters, the spectrogram-only baseline on the same rows, and five trained baselines (GRU, TCN, CNN, transformer, S4D) sized to its parameter count. The readout stays at paper 02's 192 features, so whatever changes with size is the network's, and every projected read is recorded under paper 02's fixed projection and under one seeded by the run's seed. The size study then crosses paper 02's six coupling functions, six lattice geometries and three input pathways, all at 0 dB and input gain 1. The study asks questions and states no hypotheses. It runs on a CUDA GPU, on Apple Silicon's GPU or on the CPU; only the CPU is bit-identical to paper 02.
 
 ## How it builds on papers 01 and 02
 
 - **The gap** it fills is one paper 01 names: parameter and oscillator count, and channel layout, had not been ablated.
 - **The task, data, protocol, noise, read and readout** are paper 02's, unchanged, and so is every arm at 16 × 16.
-- **Paper 02's cells are reused**, not rerun: its 16 × 16, 4-channel runs (477 of the 32,223 planned) are read from its record and cited to it. Scaling every coupling kernel exactly to the coupling ceiling, which paper 03 introduces because a random 8 × 8 kernel usually falls short of it, leaves every 16 × 16 network bit-identical to paper 02's; a reuse gate re-runs a sample and requires every cell to match.
+- **Paper 02's cells are reused**, not rerun: its 16 × 16, 4-channel runs (150 of the 10,029 planned) are read from its record and cited to it. Scaling every coupling kernel exactly to the coupling ceiling, which paper 03 introduces because a random 8 × 8 kernel usually falls short of it, leaves every 16 × 16 network bit-identical to paper 02's; a reuse gate re-runs a sample and requires every cell to match.
 - **The size tier** began as paper 02's widened tier 4, which the author moved into this paper.
 
 ## What is here
@@ -34,7 +34,7 @@ Paper 03 runs that ablation for paper 02's networks. The lattice runs from 8 × 
 ```bash
 cd src && uv sync
 uv run pytest                                    # the contract tests, no data needed
-uv run python -m harness.confirm.plan estimate   # runs, CPU-hours and memory for every tier and lattice
+uv run python -m harness.confirm.plan estimate   # runs, CPU- and GPU-hours and memory for every tier and lattice
 ```
 
 Running the tiers needs paper 02's digit bank; see [src/data/README.md](src/data/README.md).
