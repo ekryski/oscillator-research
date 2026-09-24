@@ -1,4 +1,4 @@
-"""Draw the appendix schematic of the six lattice geometries.
+"""Draw the appendix schematic of the eight lattice geometries.
 
     uv run python scripts/draw_geometries_figure.py
 
@@ -100,6 +100,24 @@ def on_helix(r, c):
     return 4 * math.cos(t), 4 * math.sin(t), p / 64 * 3.2
 
 
+#: the coil's radius at the apex, as a share of the base's (the cochlea's curvature weighting)
+APEX_RADIUS = 0.25
+
+
+def _coil_neighbours() -> list[tuple[int, int]]:
+    """Coil distance 1, and one turn either way, on the open coil: past either end there is nothing."""
+    p = ORIGIN[0] * G + ORIGIN[1]
+    return [divmod(q, G) for q in (p + 1, p - 1, p + 64, p - 64) if 0 <= q < G * G]
+
+
+def on_coil(r, c):
+    """A snail shell: the apex (lowest band, p = 0) at the centre and top, the base on the outside."""
+    p = r * G + c
+    t = 2 * math.pi * p / 64
+    radius = 4 * APEX_RADIUS ** (1 - p / (G * G - 1))
+    return radius * math.cos(t), radius * math.sin(t), (1 - p / (G * G - 1)) * 2.5
+
+
 def on_cube(r, c):
     a, b = divmod(c, 4)
     return a + 0.5, b + 0.5, r * 0.55 + 0.25
@@ -177,6 +195,21 @@ def draw_helix(ax, neighbours):
     mark(ax, on_helix, neighbours)
 
 
+def draw_coil(ax, neighbours, cochlea: bool = False):
+    """The open coil, coloured by band; the cochlea's line thickens with curvature toward the apex, and its
+    arrows point the way influence runs most strongly, from base to apex."""
+    n = G * G
+    pts = np.array([on_coil(*divmod(q, G)) for q in range(n)])
+    for i in range(n - 1):
+        w = APEX_RADIUS ** (i / (n - 1)) if cochlea else 1.0          # 1 at the apex, a quarter at the base
+        ax.plot(*pts[i:i + 2].T, color=BAND((i // G) / (G - 1)), lw=1.0 + 2.6 * w if cochlea else 2.2)
+    if cochlea:
+        for q in (228, 196, 160, 128):                           # on the outer turns, where they show
+            a, b = pts[q], pts[q - 5]
+            ax.quiver(*a, *(b - a), color=INK, arrow_length_ratio=0.45, lw=1.3)
+    mark(ax, on_coil, neighbours)
+
+
 def draw_cube(ax, neighbours):
     for r in range(G):
         colour = BAND(r / (G - 1))
@@ -197,17 +230,22 @@ GEOMETRIES = (
      _helix_neighbours(), None, None, on_helix, "helix", (15, -60)),
     ("Cube", "each row's 16 columns fold into a 4 × 4 slab; all three axes wrap",
      _cube_neighbours(), True, None, on_cube, "cube", (20, -55)),
+    ("Coil", "all 256 sites in one open line, apex (lowest band) to base (highest), one octave per turn",
+     _coil_neighbours(), None, None, on_coil, "coil", (35, -60)),
+    ("Cochlea", "the coil; influence runs base to apex three to one, and coupling grows with curvature toward the apex",
+     _coil_neighbours(), None, None, on_coil, "cochlea", (35, -60)),
 )
 
 NOTES = {
     "Helix": "each row runs on into the next; one turn joins bands an octave apart (±64 sites)",
     "Cube": "columns 0–3, 4–7, 8–11 and 12–15 are the four lines of each row's slab",
+    "Coil": "each row runs on into the next; one turn (±64 sites) joins adjacent turns; the ends never meet",
 }
 
 
 def main() -> None:
-    fig = plt.figure(figsize=(12.5, 11.5))
-    grid = fig.add_gridspec(3, 4, width_ratios=[1, 1.25, 1, 1.25], hspace=0.22, wspace=0.05)
+    fig = plt.figure(figsize=(12.5, 15.3))
+    grid = fig.add_gridspec(4, 4, width_ratios=[1, 1.25, 1, 1.25], hspace=0.22, wspace=0.05)
     for i, (name, blurb, nb, glue_rows, glue_cols, place, kind, view) in enumerate(GEOMETRIES):
         row, col = divmod(i, 2)
         ax_flat = fig.add_subplot(grid[row, 2 * col])
@@ -219,6 +257,8 @@ def main() -> None:
             mark(ax_3d, place, nb)
         elif kind == "helix":
             draw_helix(ax_3d, nb)
+        elif kind in ("coil", "cochlea"):
+            draw_coil(ax_3d, nb, cochlea=(kind == "cochlea"))
         else:
             draw_cube(ax_3d, nb)
         shape_axes(ax_3d, view)
