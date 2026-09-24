@@ -4,6 +4,7 @@
     uv run python scripts/export_web_demo.py --out <dir> --part base --part envelope     # some of it
     uv run python scripts/export_web_demo.py --out <dir> --smoke                         # a fast dry run
     uv run python scripts/export_web_demo.py --out <dir> --record-only                   # refresh the record's numbers
+    uv run python scripts/export_web_demo.py --out <dir> --part carrier --device cuda    # the carrier, on a GPU
 
 The post runs paper 02's arms in the browser, one clip at a time. Everything it
 needs comes from here, and all of it is computed by the harness's own code:
@@ -218,7 +219,8 @@ def export_record(out: Path) -> dict:
 # Features, exactly as a registered run computes them
 # ---------------------------------------------------------------------------
 
-def arm_features(cfg: Config, bank: dict, clips: rn.Clips, reads: tuple[str, ...], train_only: bool):
+def arm_features(cfg: Config, bank: dict, clips: rn.Clips, reads: tuple[str, ...], train_only: bool,
+                 device: str = "cpu"):
     """(read blocks, model, net state) over the run's clips, as `run.execute` builds them."""
     spec = cfg.spec()
     arm = cfg.arm
@@ -250,13 +252,13 @@ def arm_features(cfg: Config, bank: dict, clips: rn.Clips, reads: tuple[str, ...
         model, net = backbone, {"health": health}
     else:
         rate = rn.CARRIER_RATE_HZ if cfg.drive == "carrier" else None
-        model = am.build_frozen(arm, cfg.gain if cfg.gain is not None else 0.0, SEED, "cpu", rate)
+        model = am.build_frozen(arm, cfg.gain if cfg.gain is not None else 0.0, SEED, device, rate)
         with torch.no_grad():
-            for rows, tvalid, where in rn.batches(spec, clips):
+            for rows, tvalid, where in rn.batches(spec, clips, device):
                 if where.start >= total:
                     break
-                sig = am.frozen_signals(arm, model, rows)
-                keep(am.frozen_features(arm, sig, tvalid, "recognition"), where)
+                sig = am.frozen_signals(arm, model, rows.to(device))
+                keep(am.frozen_features(arm, sig, tvalid.to(device), "recognition"), where)
     blocks = {read: [buffers[k] for k in keys] for read, keys in am.reads(arm, "recognition").items()
               if read in reads}
     return blocks, model, net
@@ -516,7 +518,8 @@ def export_config(cfg: Config, out: Path, bank: dict, args, projections: dict) -
                          [n_tr, n_te], torch.cat((clips.labels[:n_tr], clips.labels[SIZE:SIZE + n_te])),
                          ro.Layout(n_tr, 0, n_te), clips.n_classes)
     with_test = not args.no_test and cfg.drive != "carrier"
-    blocks, model, net = arm_features(cfg, bank, clips, cfg.reads, train_only=not with_test)
+    device = args.device if cfg.arm.kind != "ann" else "cpu"
+    blocks, model, net = arm_features(cfg, bank, clips, cfg.reads, train_only=not with_test, device=device)
     t_sim = time.perf_counter() - t0
 
     # the demo clips, run the same way, for the page to check itself against
@@ -531,9 +534,9 @@ def export_config(cfg: Config, out: Path, bank: dict, args, projections: dict) -
             if cfg.arm.kind == "ann":
                 parts.append(am.ann_blocks(model, rows, tv, "recognition"))
             else:
-                parts.append(am.frozen_features(cfg.arm, am.frozen_signals(cfg.arm, model, rows), tv,
-                                                "recognition"))
-    feats = {k: torch.cat([p[k] for p in parts]) for k in parts[0]}
+                sig = am.frozen_signals(cfg.arm, model, rows.to(device))
+                parts.append(am.frozen_features(cfg.arm, sig, tv.to(device), "recognition"))
+    feats = {k: torch.cat([p[k].cpu() for p in parts]) for k in parts[0]}
     demo = {read: [feats[k] for k in keys] for read, keys in am.reads(cfg.arm, "recognition").items()
             if read in cfg.reads}
 
@@ -608,6 +611,7 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--part", action="append", choices=PARTS, help="repeatable; default: all")
     ap.add_argument("--only", action="append", default=[], help="export only config ids containing this")
     ap.add_argument("--threads", type=int, default=2)
+    ap.add_argument("--device", default="cpu", help="where the untrained arms run; the carrier wants cuda")
     ap.add_argument("--smoke", action="store_true", help="short training and test sets, for development")
     ap.add_argument("--smoke-train", type=int, default=384)
     ap.add_argument("--smoke-test", type=int, default=256)
