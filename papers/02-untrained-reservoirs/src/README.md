@@ -40,7 +40,7 @@ uv run python -m harness.experiment.summary                 # every accuracy and
 uv run python -m harness.experiment.figures                 # the paper's figures and their tables
 ```
 
-`plan run <tier> --dry-run` prints what would run. Every run is recorded under an identity derived from its specification, so a sweep stopped at any point restarts where it left off, and `--task order` or `--task recognition` lets two machines split a tier without sharing a file. `--device mps` or `--device cuda` simulates the untrained arms on a GPU; the readout is closed-form and runs on the CPU. The carrier tier integrates at 16 kHz and wants a CUDA GPU; `scripts/pod_run.sh <AudioMNIST checkout> [tier ...]` runs it, or any tier, on a RunPod pod from the pushed branch. Set `OSC_RESULTS_DIR` to write a reproduction into a fresh folder instead of the committed record.
+`plan run <tier> --dry-run` prints what would run. Every run is recorded under an identity derived from its specification, so a sweep stopped at any point restarts where it left off, and `--task order` or `--task recognition` lets two machines split a tier without sharing a file. `--device mps` or `--device cuda` simulates the untrained arms on a GPU; the readout is closed-form and runs on the CPU, and the trained baselines always train on the CPU. A GPU rounds differently from the CPU, so its cells can differ from the CPU's by a test clip or two. The carrier tier integrates at 16 kHz and wants a CUDA GPU; `scripts/pod_run.sh <AudioMNIST checkout> [tier ...]` runs it, or any tier, on a RunPod pod from the pushed branch. Set `OSC_RESULTS_DIR` to write a reproduction into a fresh folder instead of the committed record.
 
 | module | what it owns |
 |---|---|
@@ -90,7 +90,7 @@ uv run pytest tests/test_geometries.py # one module
 uv run pytest -q -k order
 ```
 
-One file per module. They are contract tests: each pins a property some claim in the paper depends on, such as that a run's identity comes from its specification alone, that an untrained arm with no input reads exactly chance, that cached rows equal the rows a run would compute, that the instruments change no cell, that uncoupling zeroes the coupling and nothing else, and that the Apple GPU reads an untrained arm exactly as the CPU does.
+One file per module. They are contract tests: each pins a property some claim in the paper depends on, such as that a run's identity comes from its specification alone, that an untrained arm with no input reads exactly chance, that cached rows equal the rows a run would compute, that the instruments change no cell, that uncoupling zeroes the coupling and nothing else, and that the Apple GPU reads an untrained arm exactly as the CPU does on a small synthetic bank (on the real data the two agree within two test clips in all but one of 1,296 cells; see the summary).
 
 ### Adding a geometry
 

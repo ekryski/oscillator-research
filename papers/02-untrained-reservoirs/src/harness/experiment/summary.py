@@ -252,12 +252,35 @@ def projections(cells: list[Cell]) -> list[dict]:
     return out
 
 
+def reproduction(cells: list[Cell]) -> dict:
+    """The projection tier's unseeded cells against Tier 1's, cell for cell: the same runs, re-executed.
+
+    Tier 1 ran on the CPU and the projection tier simulated its reservoirs on the Apple GPU, so this is
+    how far the two devices' floating point moves a recorded cell. A cell counts as identical only if its
+    per-clip correctness is identical too.
+    """
+    def key(c: Cell) -> tuple:
+        return (c.task, c.label, c.read, c.width, c.n_train, c.noise, c.gain, c.seed, c.pair)
+    tier1 = {key(c): c for c in cells if c.tier == "tier1"}
+    pairs = [(c, tier1[key(c)]) for c in cells
+             if c.tier == "projection" and c.projection != "seeded" and key(c) in tier1]
+    if not pairs:
+        return {}
+    clips = [round(abs(a.acc - b.acc) * a.n_test) for a, b in pairs]
+    return {"cells": len(pairs),
+            "identical": sum(a.acc == b.acc and a.bits == b.bits for a, b in pairs),
+            "within_two_clips": sum(n <= 2 for n in clips),
+            "largest_points": 100 * max(abs(a.acc - b.acc) for a, b in pairs),
+            "largest_clips": max(clips)}
+
+
 def summary(cells: list[Cell] | None = None) -> dict:
     cells = rec.load() if cells is None else cells
     return {"accuracy": accuracies(cells),
             "comparisons": (tier1(cells) + _against_network(cells, "becker", "recognition") + design(cells)
                             + pathways(cells) + projections(cells)),
-            "order_baseline_at_chance": rec.baseline_at_chance(cells)}
+            "order_baseline_at_chance": rec.baseline_at_chance(cells),
+            "projection_reproduces_tier1": reproduction(cells)}
 
 
 # ---------------------------------------------------------------------------
@@ -403,13 +426,10 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
     proj = [r for r in acc if r["tier"] == "projection" and r["width"] == w and r["n_train"] == n]
     lines += ["", "## Tier 1's reservoirs under the fixed and the seeded projection", ""]
     if proj:
-        base = {(r["task"], r["arm"], r["read"], r["noise"], r["gain"], str(r["pair"]), r["width"], r["n_train"]): r
-                for r in acc if r["tier"] == "tier1"}
-        drift = [abs(r["mean"] - base[k]["mean"]) for r in proj if r["projection"] == "fixed"
-                 and (k := (r["task"], r["arm"], r["read"], r["noise"], r["gain"], str(r["pair"]), r["width"],
-                            r["n_train"])) in base]
-        lines += [f"The fixed cells reproduce Tier 1's: largest difference {max(drift, default=0):.4f} points "
-                  f"over {len(drift)} cells.", ""]
+        rp = s["projection_reproduces_tier1"]
+        lines += [f"Rerun on the Apple GPU, the projection tier's unseeded cells against Tier 1's on the CPU: "
+                  f"{rp['identical']:,} of {rp['cells']:,} identical, {rp['within_two_clips']:,} within two test "
+                  f"clips, largest difference {rp['largest_points']:.2f} points ({rp['largest_clips']} clips).", ""]
     for task in ("recognition", "order"):
         rows = [r for r in proj if r["task"] == task]
         rows = _pooled_projection(rows) if task == "order" else rows
