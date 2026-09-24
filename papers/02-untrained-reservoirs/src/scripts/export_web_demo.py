@@ -9,9 +9,11 @@ The post runs paper 02's arms in the browser, one clip at a time. Everything it
 needs comes from here, and all of it is computed by the harness's own code:
 
     manifest.json        the front end's constants, the seed-0 physics, the
-                         clips, and one entry per config: which readout, the
-                         record's accuracies for that cell, and reference
-                         logits the browser checks itself against
+                         clips, and one entry per config: which readout and
+                         the record's accuracies for that cell
+    references.json      per config, the scores the harness gives each demo
+                         clip, for the page's parity check (never loaded by
+                         the page itself)
     readouts/<id>.bin    one fitted readout per config: the first standardization's
                          scales, its means folded into one shift per projected
                          feature, the second standardization and the ridge
@@ -617,7 +619,14 @@ def main(argv: list[str] | None = None) -> None:
     out = args.out
     out.mkdir(parents=True, exist_ok=True)
     manifest_path = out / "manifest.json"
+    refs_path = out / "references.json"
     manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {"configs": {}}
+    refs = json.loads(refs_path.read_text()) if refs_path.exists() else {}
+
+    def save() -> None:
+        # compact: every visitor downloads the manifest; the references are for the parity check only
+        manifest_path.write_text(json.dumps(manifest, separators=(",", ":")) + "\n")
+        refs_path.write_text(json.dumps(refs, separators=(",", ":")) + "\n")
 
     if args.record_only:
         for e in manifest["configs"].values():
@@ -626,12 +635,12 @@ def main(argv: list[str] | None = None) -> None:
             e["record"] = record_cell(cfg, e["read"])
         manifest["record"] = export_record(out)
         manifest["record_refreshed"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
-        manifest_path.write_text(json.dumps(manifest, indent=1) + "\n")
+        save()
         return
 
     if "record" in parts:
         manifest["record"] = export_record(out)
-        manifest_path.write_text(json.dumps(manifest, indent=1) + "\n")
+        save()
     bank = pr.load_bank()
     if "base" in parts or "frontend" not in manifest:
         manifest.update(export_base(out, bank))
@@ -642,6 +651,7 @@ def main(argv: list[str] | None = None) -> None:
         if args.only and not any(s in cfg.cid() for s in args.only):
             continue
         for e in export_config(cfg, out, bank, args, projections):
+            refs[e["id"]] = e.pop("demo")
             manifest["configs"][e["id"]] = e
         manifest["projections"] = {str(k): {kk: vv for kk, vv in v.items() if kk != "p16"}
                                    for k, v in projections.items()}
@@ -654,7 +664,7 @@ def main(argv: list[str] | None = None) -> None:
             "note": "Untrained arms at seed 0; each readout is the registered primary cell, refitted here "
                     "and checked against the record. Trained baselines are retrained here at seed 0.",
         }
-        manifest_path.write_text(json.dumps(manifest, indent=1) + "\n")   # after every config: resumable
+        save()   # after every config: resumable
 
 
 if __name__ == "__main__":
