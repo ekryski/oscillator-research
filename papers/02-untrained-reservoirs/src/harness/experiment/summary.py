@@ -28,6 +28,7 @@ import numpy as np
 from harness.experiment import plan, terms
 from harness.experiment import record as rec
 from harness.experiment import run as rn
+from harness.experiment.arms import Arm
 from harness.experiment.record import Cell
 
 COUPLED = rec.COUPLED_LABEL
@@ -179,6 +180,16 @@ def design(cells: list[Cell]) -> list[dict]:
             out += [{"comparison": name, "tier": "tier2", "task": "recognition",
                      "pathway": "spectrogram", "noise": k[0], "gain": k[1], "width": k[2], "b_width": k[2],
                      "n_train": k[3], **paired(v)} for k, v in sorted(groups.items(), key=str)]
+    # each coupling function at the reference configuration against the whole-clip baseline; Tier 2's
+    # cells share Tier 1's test clips and training draws, so they pair with Tier 1's baseline
+    base = [c for c in cells if c.tier == "tier1" and c.task == "recognition" and c.label == "baseline"
+            and c.read == "windowed@wholeclip"]
+    for coupling in plan.PHASE_COUPLINGS + plan.AMPLITUDE_COUPLINGS:
+        label = Arm("network", coupling=coupling).label()
+        groups = matched([c for c in prim if c.label == label], base)
+        out += [{"comparison": f"{terms.arm(label)} minus {BASELINE_WHOLE}", "tier": "tier2", "task": "recognition",
+                 "pathway": "spectrogram", "noise": k[0], "gain": k[1], "width": k[2], "b_width": k[2],
+                 "n_train": k[3], **paired(v)} for k, v in sorted(groups.items(), key=str)]
     # rotation rates, over every design configuration
     idx = {(c.label, c.noise, c.gain, c.width, c.n_train, replicate(c)): c for c in prim}
     groups = defaultdict(list)
@@ -340,7 +351,7 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
 
     def prim_cmp(tier, n_train=n, prefix=""):
         return [r for r in cmp if r["tier"] == tier and r["width"] == w and r["n_train"] == n_train
-                and r["comparison"].startswith(prefix) and "width" not in r["comparison"]]
+                and r["comparison"].startswith(prefix) and "width 4,096 minus" not in r["comparison"]]
 
     def by_gain(r):
         return r["comparison"] + (f" (gain = {r['gain']:g})" if r["gain"] is not None else "")
@@ -367,7 +378,7 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
         lines += _grid(rows, _arm, _by_size, _acc) + [""]
     lines += ["## Tier 1, recognition: width 4,096 minus 192", ""]
     lines += _grid([r for r in cmp if r["tier"] == "tier1" and r["task"] == "recognition" and r["n_train"] == n
-                    and "width" in r["comparison"]], by_gain, _by_noise, _diff)
+                    and "width 4,096 minus" in r["comparison"]], by_gain, _by_noise, _diff)
     lines += ["", "## Tier 1, order task: accuracy, averaged over the five pairs", ""]
     lines += _grid(sorted(_pooled(prim_acc("tier1", "order")), key=_rank), _arm, _by_noise, _acc)
     lines += ["", "## Tier 1, order task: differences, pooled over the five pairs", ""]

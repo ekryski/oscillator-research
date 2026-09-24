@@ -107,6 +107,69 @@ def recognition_figure(acc: dict[tuple, dict], stem: str, gains: tuple[float, ..
     print(f"wrote {path}.{{pdf,png}}")
 
 
+#: Tier 2's conditions, in plotting order: (noise, gain, legend, colour, marker)
+CONDITIONS = ((0.0, 1.0, "0 dB, gain = 1", "#534AB7", "o"), (0.0, 2.0, "0 dB, gain = 2", "#A9A4DB", "o"),
+              (5.0, 1.0, "+5 dB, gain = 1", "#D85A30", "s"), (5.0, 2.0, "+5 dB, gain = 2", "#EFA98F", "s"))
+
+
+def design_differences() -> list[dict]:
+    """Tier 2's level-minus-reference differences at the primary cell, in the summary's order."""
+    cells = rec.load(None)
+    return [r for r in sm.design(cells) if r["width"] == rec.PRIMARY_WIDTH and r["n_train"] == rec.PRIMARY_SIZE
+            and "ci95" in r and "baseline" not in r["comparison"]]
+
+
+def design_table(rows: list[dict]) -> str:
+    """Every design difference in every condition, mean ± standard deviation over seeds; the intervals are
+    in the figure."""
+    names = list(dict.fromkeys(r["comparison"] for r in rows))
+    by = {(r["comparison"], r["noise"], r["gain"]): r for r in rows}
+    lines = ["| level minus reference | " + " | ".join(c[2] for c in CONDITIONS) + " |",
+             "|---" * (len(CONDITIONS) + 1) + "|"]
+    for name in names:
+        cells = [by[(name, noise, gain)] for noise, gain, *_ in CONDITIONS]
+        lines.append(f"| {name.split(': ', 1)[1]} | " + " | ".join(
+            f"{c['mean']:+.2f} ± {c['sd']:.2f}".replace("-", "−") for c in cells) + " |")
+    return "\n".join(lines)
+
+
+def design_figure(rows: list[dict], stem: str = "c4-design-differences") -> None:
+    """Each design level minus its reference: the mean over seeds and the paired 95% interval, per condition."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    names = list(dict.fromkeys(r["comparison"] for r in rows))
+    by = {(r["comparison"], r["noise"], r["gain"]): r for r in rows}
+    fig, ax = plt.subplots(figsize=(8.0, 0.42 * len(names) + 1.4))
+    for i, (noise, gain, legend, colour, marker) in enumerate(CONDITIONS):
+        offset = (i - 1.5) * 0.17
+        for j, name in enumerate(names):
+            r = by[(name, noise, gain)]
+            y = j + offset
+            ax.plot(r["ci95"], [y, y], color=colour, linewidth=1.2)
+            ax.plot(r["mean"], y, marker=marker, color=colour, markersize=4.5, linestyle="none",
+                    label=legend if j == 0 else None)
+    ax.axvline(0, color="#333333", linewidth=0.8, linestyle=":")
+    ax.set_yticks(range(len(names)), [n.split(": ", 1)[1] for n in names], fontsize=8)
+    for j, name in enumerate(names):
+        if j == 0 or name.split(":")[0] != names[j - 1].split(":")[0]:
+            ax.text(1.01, j, name.split(":")[0], transform=ax.get_yaxis_transform(), fontsize=7.5,
+                    color="#555555", va="center")
+    ax.invert_yaxis()
+    ax.set_xlabel("difference in test accuracy (points), level minus reference")
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.legend(frameon=False, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.9 / (0.42 * len(names) + 1.4)),
+              ncol=4)
+    fig.tight_layout()
+    path = FIGURES_DIR / stem
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 200})):
+        fig.savefig(path.with_suffix(suffix), bbox_inches="tight", **kwargs)
+    plt.close(fig)
+    print(f"wrote {path}.{{pdf,png}}")
+
+
 TRAINED = ("trained-gru", "trained-tcn", "trained-cnn", "trained-transformer", "trained-s4d")
 
 
@@ -143,6 +206,10 @@ def main(argv: list[str] | None = None) -> None:
     for gains in ((1.0,), (2.0,)):
         print(f"\ngain {gains[0]:g}\n" + recognition_table(acc, gains))
     print("\ntrained baselines\n" + trained_table(acc))
+    rows = design_differences()
+    if rows:
+        design_figure(rows)
+        print("\ndesign\n" + design_table(rows))
 
 
 if __name__ == "__main__":
