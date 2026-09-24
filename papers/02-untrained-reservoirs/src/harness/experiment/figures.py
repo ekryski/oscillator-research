@@ -1,37 +1,37 @@
-"""The confirmatory figures, and the tables printed beside them, drawn from the record.
+"""The figures, and the tables printed beside them, drawn from the record.
 
-    uv run python -m harness.confirm.figures      # write the figures, print the paper's tables
+    uv run python -m harness.experiment.figures      # write the figures, print the paper's tables
 
 Every number in a figure and in its table comes from the same accuracies that
-`harness.confirm.summary` reports, so the paper cannot drift from the record.
+`harness.experiment.summary` reports, so the paper cannot drift from the record.
 """
 
 from __future__ import annotations
 
 import argparse
 
-from harness.confirm import record as rec
-from harness.confirm import summary as sm
-from harness.confirm import terms
+from harness.experiment import record as rec
+from harness.experiment import summary as sm
+from harness.experiment import terms
 from harness.utils.paths import FIGURES_DIR
 
 NOISES = ((None, "clean"), (0.0, "0 dB"), (5.0, "+5 dB"))
 
 #: Tier 1 recognition arms: (arm, read, table label, legend label, colour); gain is set per figure
-FLOOR = ("floor", "windowed@wholeclip",
+BASELINE = ("baseline", "windowed@wholeclip",
          "**Spectrogram-only baseline**: the readout reads the 16 mel band energies directly; no reservoir",
          "Spectrogram-only baseline: no reservoir", "#8C8C8C")
-FIELD = (sm.FIELD, "windowed", "**Coupled oscillator network**{gain}: 1,024 oscillators, untrained",
+COUPLED = (sm.COUPLED, "windowed", "**Coupled oscillator network**{gain}: 1,024 oscillators, untrained",
          "Coupled oscillator network{gain}", "#534AB7")
-SEVERED = (sm.SEVERED, "windowed", "**Uncoupled oscillator network**{gain}: the same network with its coupling removed",
-           "Uncoupled oscillator network{gain}", "#A9A4DB")
-BANK_A = ("bank-c4", "windowed",
-          "**Leaky-integrator bank, state-matched**{gain}: 1,024 leaky integrators with the network's states and "
-          "parameters, untrained",
-          "Leaky-integrator bank, state-matched{gain}", "#D85A30")
-TRANSFORMER = ("ann-transformer", "windowed", "**Transformer**: a trained baseline, 1,968 parameters, trained end to end",
+UNCOUPLED = (sm.UNCOUPLED, "windowed", "**Uncoupled oscillator network**{gain}: the same network with its coupling removed",
+             "Uncoupled oscillator network{gain}", "#A9A4DB")
+BANK_STATE = ("bank-state", "windowed",
+              "**Leaky-integrator bank, state-matched**{gain}: 1,024 leaky integrators with the network's states and "
+              "parameters, untrained",
+              "Leaky-integrator bank, state-matched{gain}", "#D85A30")
+TRANSFORMER = ("trained-transformer", "windowed", "**Transformer**: a trained baseline, 1,968 parameters, trained end to end",
                "Transformer: trained baseline", "#0F6E56")
-DYNAMICAL = (FIELD, SEVERED, BANK_A)
+DYNAMICAL = (COUPLED, UNCOUPLED, BANK_STATE)
 
 
 def _bars(gains: tuple[float, ...]) -> list[tuple]:
@@ -44,7 +44,7 @@ def _bars(gains: tuple[float, ...]) -> list[tuple]:
         arm, read, table, legend, colour = spec
         tag = "" if gain is None else f" (gain = {gain:g})"
         return (arm, read, gain, table.format(gain=tag), legend.format(gain=tag), colour, gain == 2.0)
-    return ([one(FLOOR, None)] + [one(spec, g) for spec in DYNAMICAL for g in gains]
+    return ([one(BASELINE, None)] + [one(spec, g) for spec in DYNAMICAL for g in gains]
             + [one(TRANSFORMER, None)])
 
 
@@ -55,7 +55,7 @@ FIGURES = (("c1-recognition-gain1", (1.0,)), ("c2-recognition-gain2", (2.0,)),
 
 def recognition_cells() -> dict[tuple, dict]:
     """(arm, read, gain, noise) -> the accuracy record at the primary cell."""
-    cells = rec.load(["tier1-recognition-envelope"])
+    cells = rec.load(["tier1-recognition-spectrogram"])
     return {(r["arm"], r["read"], r["gain"], r["noise"]): r for r in sm.accuracies(cells)
             if r["width"] == rec.PRIMARY_WIDTH and r["n_train"] == rec.PRIMARY_SIZE}
 
@@ -107,7 +107,7 @@ def recognition_figure(acc: dict[tuple, dict], stem: str, gains: tuple[float, ..
     print(f"wrote {path}.{{pdf,png}}")
 
 
-TRAINED = ("ann-gru", "ann-tcn", "ann-cnn", "ann-transformer", "ann-s4d")
+TRAINED = ("trained-gru", "trained-tcn", "trained-cnn", "trained-transformer", "trained-s4d")
 
 
 def trained_table(acc: dict[tuple, dict]) -> str:
@@ -115,8 +115,8 @@ def trained_table(acc: dict[tuple, dict]) -> str:
     import json
     from collections import Counter
 
-    from harness.confirm import run as rn
-    record = json.loads((rn.record_root() / "tier1-recognition-envelope.json").read_text())["runs"]
+    from harness.experiment import run as rn
+    record = json.loads((rn.record_root() / "tier1-recognition-spectrogram.json").read_text())["runs"]
     params, failed, total = {}, Counter(), Counter()
     for run_id, entry in record.items():
         label = run_id.split("/")[-2]

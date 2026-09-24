@@ -1,13 +1,13 @@
-"""One confirmatory run: one arm, one condition, one seed, read at every size and width.
+"""One run: one arm, one condition, one seed, read at every size and width.
 
 A run streams its clips through the arm in batches, keeps each feature block
 once, hands them to the shared readout, and records every cell with its
-per-clip correctness where the registration asks for it. The training block
+per-clip correctness where the spec asks for it. The training block
 and the test block are batched separately, so a test clip's features are
 computed in the same batch in every tier that uses it.
 
-The record lives under results/confirmatory/, one file per tier, task and
-drive, and never touches the exploratory record beside it. A run's identity is
+The record lives under results/, one file per tier, task and input pathway.
+A run's identity is
 derived from its specification alone, so a sweep can be stopped and restarted
 and each run lands in the same place exactly once.
 """
@@ -28,20 +28,20 @@ from pathlib import Path
 
 import torch
 
-from harness.confirm import arms as am
-from harness.confirm import protocol as pr
-from harness.confirm import readout as ro
+from harness.experiment import arms as am
+from harness.experiment import protocol as pr
+from harness.experiment import readout as ro
 from harness.utils.paths import RESULTS_DIR
 
-#: the registered common widths; an arm is never read wider than its native width
+#: the common widths; an arm is never read wider than its native width
 WIDTHS = (192, 1024, 4096)
 #: the training size of the primary cell
 PRIMARY_SIZE = 2048
 PRIMARY_STAT = {"recognition": "windowed", "order": "pooled"}
-#: clips per batch, by task and drive; the carrier runs at 16 kHz, so its batches
+#: clips per batch, by task and pathway; the carrier runs at 16 kHz, so its batches
 #: are small, and a GPU holds four times as many of its 16,000-frame trajectories
 BATCH = {"recognition": 512, "order": 256, "carrier": 8, "carrier-cuda": 32}
-#: the carrier path drives the field at the audio sample rate
+#: the carrier pathway drives a reservoir at the audio sample rate
 CARRIER_RATE_HZ = 16000.0
 
 
@@ -50,7 +50,7 @@ class Spec:
     """Everything that decides a run's numbers, and nothing else."""
     tier: str
     task: str                      # recognition | order
-    drive: str                     # envelope | quadrature | carrier
+    pathway: str                   # spectrogram | quadrature | carrier
     noise_db: float | None         # None is clean audio
     gain: float | None             # None for arms that read the rows as they are
     seed: int
@@ -62,14 +62,14 @@ class Spec:
     widths: tuple = WIDTHS
     native_sizes: tuple = (PRIMARY_SIZE,)
     bits: str = "all"              # all | primary
-    span: str = "fixed"            # fixed | clip (the exploratory per-clip span, a diagnostic)
+    span: str = "fixed"            # fixed | clip (a per-clip span, a diagnostic)
     reads: tuple = ()              # the reads to record; empty records every read the arm has
     projection: str = "fixed"      # fixed | both: also read through the seeded projection (cells tagged
                                    # fixed, seeded, or none where the read is not projected)
 
     def group(self) -> str:
-        name = f"{self.tier}-{self.task}-{self.drive}"
-        return f"{name}-{self.arm.physics}" if self.tier == "tier2" else name
+        name = f"{self.tier}-{self.task}-{self.pathway}"
+        return f"{name}-{self.arm.coupling}" if self.tier == "tier2" else name
 
     def run_id(self) -> str:
         parts = [f"B{self.fold}" if self.protocol == "B" else "A"]
@@ -79,7 +79,7 @@ class Spec:
         if self.gain is not None:
             parts.append(f"g{self.gain:g}")
         parts += [f"s{self.seed}", self.arm.label()]
-        if self.arm.kind == "ann":
+        if self.arm.kind == "trained":
             parts.append(f"n{self.sizes[0]}")
         if self.span != "fixed":
             parts.append(f"{self.span}span")
@@ -97,7 +97,7 @@ class Spec:
 
 def record_root() -> Path:
     """Where the record lives, read per call: OSC_RESULTS_DIR redirects it, e.g. to reproduce into a fresh tree."""
-    return Path(os.environ.get("OSC_RESULTS_DIR", RESULTS_DIR)) / "confirmatory"
+    return Path(os.environ.get("OSC_RESULTS_DIR", RESULTS_DIR))
 
 
 def group_path(group: str) -> Path:
@@ -168,20 +168,20 @@ def _order_block(bank: dict, spec: Spec, pool: torch.Tensor, n: int, code: int):
 
     def make(a, b):
         waves, lens = pr.order_clips(bank, first[a:b], second[a:b], spec.pair, code, a, spec.noise_db)
-        return pr.front_end(waves, spec.drive), pr.valid_frames(lens, spec.drive)
+        return pr.front_end(waves, spec.pathway), pr.valid_frames(lens, spec.pathway)
     return make, labels
 
 
 def _recognition_block(bank: dict, spec: Spec, idx: torch.Tensor):
-    """Rows maker for bank clips `idx`, from the drive's cache when there is one."""
-    cache = (pr.load_rows(pr.rows_path(spec.drive, spec.noise_db), len(bank["labels"]))
-             if spec.drive in pr.CACHED_DRIVES else None)
+    """Rows maker for bank clips `idx`, from the pathway's cache when there is one."""
+    cache = (pr.load_rows(pr.rows_path(spec.pathway, spec.noise_db), len(bank["labels"]))
+             if spec.pathway in pr.CACHED_PATHWAYS else None)
     if cache is not None:
         return lambda a, b: (cache["rows"][idx[a:b]], cache["tvalid"][idx[a:b]])
 
     def make(a, b):
         waves, lens, _ = pr.recognition_clips(bank, idx[a:b], spec.noise_db)
-        return pr.front_end(waves, spec.drive), pr.valid_frames(lens, spec.drive)
+        return pr.front_end(waves, spec.pathway), pr.valid_frames(lens, spec.pathway)
     return make
 
 
@@ -209,7 +209,7 @@ def assemble(spec: Spec, bank: dict) -> Clips:
 def batches(spec: Spec, clips: Clips, device: str = "cpu") -> Iterator[tuple[torch.Tensor, torch.Tensor, slice]]:
     """(rows, valid frames, rows' place in the readout order), block by block."""
     carrier = "carrier-cuda" if device.startswith("cuda") else "carrier"
-    size = BATCH[carrier] if spec.drive == "carrier" else BATCH[spec.task]
+    size = BATCH[carrier] if spec.pathway == "carrier" else BATCH[spec.task]
     at = 0
     for make, n in zip(clips.blocks, clips.sizes):
         for a in range(0, n, size):
@@ -257,7 +257,7 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
     arm, timing, health, extra = spec.arm, {}, None, {}
     buffers: dict[str, torch.Tensor] = {}
 
-    if arm.kind == "ann":
+    if arm.kind == "trained":
         rows, tvalid = [], []
         for r, tv, _ in batches(spec, clips):
             rows.append(r)
@@ -265,30 +265,30 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
         rows, tvalid = torch.cat(rows), torch.cat(tvalid)
         n_tr = spec.sizes[0]
         t1 = time.perf_counter()
-        backbone, head, health = am.train_ann(arm, rows[:n_tr], tvalid[:n_tr], clips.labels[:n_tr],
+        backbone, head, health = am.train_baseline(arm, rows[:n_tr], tvalid[:n_tr], clips.labels[:n_tr],
                                               spec.task, spec.seed, clips.n_classes, span=spec.span)
         timing["train_s"] = time.perf_counter() - t1
         with torch.no_grad():
             for a in range(0, total, BATCH[spec.task]):
                 b = min(a + BATCH[spec.task], total)
-                _store(buffers, am.ann_blocks(backbone, rows[a:b], tvalid[a:b], spec.task, spec.span),
+                _store(buffers, am.trained_blocks(backbone, rows[a:b], tvalid[a:b], spec.task, spec.span),
                        slice(a, b), total)
             primary = buffers[PRIMARY_STAT[spec.task]]
             test = clips.layout.test
             extra["head_acc"] = (head(primary[test]).argmax(1) == clips.labels[test]).double().mean().item()
         model = backbone
     else:
-        rate = CARRIER_RATE_HZ if spec.drive == "carrier" else None
-        model = am.build_frozen(arm, spec.gain if spec.gain is not None else 0.0, spec.seed, device, rate)
+        rate = CARRIER_RATE_HZ if spec.pathway == "carrier" else None
+        model = am.build_untrained(arm, spec.gain if spec.gain is not None else 0.0, spec.seed, device, rate)
         t1 = time.perf_counter()
         per_clip: dict[str, torch.Tensor] = {}
         with torch.no_grad():
             for rows, tvalid, where in batches(spec, clips, device):
-                sig = am.frozen_signals(arm, model, rows.to(device))
-                if arm.kind == "field":
-                    for name, value in am.field_instruments(sig, rows.to(device), spec.drive, arm.channels).items():
+                sig = am.untrained_signals(arm, model, rows.to(device))
+                if arm.kind == "network":
+                    for name, value in am.network_instruments(sig, rows.to(device), spec.pathway, arm.channels).items():
                         per_clip.setdefault(name, torch.zeros(total))[where] = value.cpu()
-                _store(buffers, am.frozen_features(arm, sig, tvalid.to(device), spec.task, spec.span),
+                _store(buffers, am.untrained_features(arm, sig, tvalid.to(device), spec.task, spec.span),
                        where, total)
         timing["simulate_s"] = time.perf_counter() - t1
         if per_clip:

@@ -1,4 +1,4 @@
-"""The confirmatory data protocol: which recordings, which noise, which splits.
+"""The data protocol: which recordings, which noise, which splits.
 
 Every clip is a fixed object. Its recording comes from the 50-repetition bank,
 and its noise from a generator seeded by the clip's own identity and the noise
@@ -15,8 +15,7 @@ Protocol B, for comparison with published results only: the five speaker folds
 of Becker et al., copied verbatim from the corpus's own preprocess_data.py.
 
 The order task joins two recordings, digit a then digit b or b then a, behind a
-silent leader and across a 100 ms gap, exactly as the exploratory task did. Its
-labels alternate, so both classes are equally common in every set.
+silent leader and across a 100 ms gap. Its labels alternate, so both classes are equally common in every set.
 """
 
 from __future__ import annotations
@@ -39,11 +38,11 @@ from harness.stimuli.digits import (
 from harness.utils.paths import AUDIOMNIST_DIR, CACHE_DIR
 
 BANK_PATH = CACHE_DIR / "digits_v2.pt"
-#: every repetition AudioMNIST has; the exploratory bank kept 20
+#: every repetition AudioMNIST has
 REPS = 50
 SPEAKERS = tuple(range(1, 61))
 DIGITS = tuple(range(10))
-#: int16 back to float, the scale the exploratory samplers used
+#: int16 back to float
 INT16_SCALE = 32767.0
 
 TRAIN_SPEAKERS = tuple(range(1, 49))
@@ -99,8 +98,7 @@ NOISE_LEVEL_OFFSET, NOISE_LEVEL_SCALE, NOISE_UID_STRIDE = 1000, 10, 10_007
 def build_bank(root: Path = AUDIOMNIST_DIR, out: Path = BANK_PATH, reps: int = REPS) -> dict:
     """AudioMNIST -> one tensor of clips, in canonical speaker, digit, rep order.
 
-    Each recording is processed by `load_clip`, the exploratory bank's own
-    function, so a recording in both banks is bit-identical in both.
+    Each recording is trimmed, normalized and padded by `load_clip`.
     """
     n = len(SPEAKERS) * len(DIGITS) * reps
     waves = torch.zeros(n, DIGIT_MAX_SAMPLES, dtype=torch.int16)
@@ -125,7 +123,7 @@ def load_bank(path: Path = BANK_PATH) -> dict:
     """Memory-mapped, so parallel workers share one copy of the clips."""
     if not path.exists():
         raise FileNotFoundError(f"{path} not found: build it with "
-                                "`uv run python -m harness.confirm.protocol --build-bank`")
+                                "`uv run python -m harness.experiment.protocol --build-bank`")
     return torch.load(path, mmap=True, weights_only=True)
 
 
@@ -183,20 +181,20 @@ def add_noise(waves: torch.Tensor, lens: torch.Tensor, clip_ids: torch.Tensor,
     return waves + noise * (rms * 10.0 ** (noise_db / 20.0))[:, None]
 
 
-def front_end(waves: torch.Tensor, drive: str, grid: int = 16) -> torch.Tensor:
-    """The fixed, parameter-free front end of each drive pathway."""
-    if drive == "envelope":
+def front_end(waves: torch.Tensor, pathway: str, grid: int = 16) -> torch.Tensor:
+    """The fixed, parameter-free front end of each input pathway."""
+    if pathway == "spectrogram":
         return hop_rows(waves, grid)
-    if drive == "quadrature":
+    if pathway == "quadrature":
         return hop_rows_quad(waves, grid)
-    if drive == "carrier":
+    if pathway == "carrier":
         return bandpass_rows(waves, grid)
-    raise ValueError(f"unknown drive '{drive}'")
+    raise ValueError(f"unknown pathway '{pathway}'")
 
 
-def valid_frames(lens: torch.Tensor, drive: str) -> torch.Tensor:
+def valid_frames(lens: torch.Tensor, pathway: str) -> torch.Tensor:
     """How many of each clip's rows hold speech: hop frames, or samples for the carrier."""
-    if drive == "carrier":
+    if pathway == "carrier":
         return lens.clone()
     return torch.tensor([hop_num_frames(int(n)) for n in lens])
 
@@ -257,7 +255,7 @@ def order_clips(bank: dict, first: torch.Tensor, second: torch.Tensor, pair: tup
 # ---------------------------------------------------------------------------
 #
 # A clip's front-end rows depend only on the clip and the noise level, so they
-# are computed once per (drive, level), saved, and memory-mapped by every run.
+# are computed once per (pathway, level), saved, and memory-mapped by every run.
 # That saves each run its noise draws and front end, and it means every run
 # reads bit-identical rows: nothing depends on how a run happened to batch.
 # The carrier's rows are 16,000 frames a clip and are always computed on the fly.
@@ -265,15 +263,15 @@ def order_clips(bank: dict, first: torch.Tensor, second: torch.Tensor, pair: tup
 ROWS_DIR = CACHE_DIR / "rows"
 #: clips per batch while building a cache
 CACHE_BATCH = 1024
-CACHED_DRIVES = ("envelope", "quadrature")
+CACHED_PATHWAYS = ("spectrogram", "quadrature")
 
 
 def level_name(noise_db: float | None) -> str:
     return "clean" if noise_db is None else f"{noise_db:g}db"
 
 
-def rows_path(drive: str, noise_db: float | None) -> Path:
-    return ROWS_DIR / f"{drive}-{level_name(noise_db)}.pt"
+def rows_path(pathway: str, noise_db: float | None) -> Path:
+    return ROWS_DIR / f"{pathway}-{level_name(noise_db)}.pt"
 
 
 def order_rows_path(pair: tuple[int, int], set_code: int, noise_db: float | None) -> Path:
@@ -287,20 +285,20 @@ def _save(out: Path, rows: torch.Tensor, tvalid: torch.Tensor, **meta) -> None:
     tmp.replace(out)                    # atomic: a reader never sees half a cache
 
 
-def build_rows(bank: dict, drive: str, noise_db: float | None) -> Path:
+def build_rows(bank: dict, pathway: str, noise_db: float | None) -> Path:
     """Front-end rows for every clip in the bank, in canonical order."""
     n = len(bank["labels"])
     rows = tvalid = None
     for a in range(0, n, CACHE_BATCH):
         idx = torch.arange(a, min(a + CACHE_BATCH, n))
         waves, lens, _ = recognition_clips(bank, idx, noise_db)
-        r = front_end(waves, drive)
+        r = front_end(waves, pathway)
         if rows is None:
             rows = torch.empty((n, *r.shape[1:]))
             tvalid = torch.empty(n, dtype=torch.long)
-        rows[idx], tvalid[idx] = r, valid_frames(lens, drive)
-    out = rows_path(drive, noise_db)
-    _save(out, rows, tvalid, n_clips=n, drive=drive, noise_db=noise_db)
+        rows[idx], tvalid[idx] = r, valid_frames(lens, pathway)
+    out = rows_path(pathway, noise_db)
+    _save(out, rows, tvalid, n_clips=n, pathway=pathway, noise_db=noise_db)
     return out
 
 
@@ -313,8 +311,8 @@ def build_order_rows(bank: dict, pair: tuple[int, int], set_code: int, noise_db:
     for a in range(0, n, CACHE_BATCH):
         waves, lens = order_clips(bank, first[a:a + CACHE_BATCH], second[a:a + CACHE_BATCH],
                                   pair, set_code, a, noise_db)
-        rows.append(front_end(waves, "envelope"))
-        tvalid.append(valid_frames(lens, "envelope"))
+        rows.append(front_end(waves, "spectrogram"))
+        tvalid.append(valid_frames(lens, "spectrogram"))
     out = order_rows_path(pair, set_code, noise_db)
     _save(out, torch.cat(rows), torch.cat(tvalid), labels=labels, n_clips=n)
     return out
@@ -330,7 +328,7 @@ def load_rows(path: Path, n_clips: int) -> dict | None:
 
 def _main(argv: list[str] | None = None) -> None:
     import argparse
-    ap = argparse.ArgumentParser(description="build the confirmatory 50-repetition bank")
+    ap = argparse.ArgumentParser(description="build the 50-repetition bank")
     ap.add_argument("--build-bank", action="store_true")
     ap.add_argument("--corpus", type=Path, default=AUDIOMNIST_DIR)
     a = ap.parse_args(argv)

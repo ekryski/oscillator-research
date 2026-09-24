@@ -47,7 +47,7 @@ def test_environment_overrides_redirect_both_roots(monkeypatch, tmp_path):
 
 def test_the_committed_results_tree_is_where_the_paper_points():
     assert paths.RESULTS_DIR.is_dir(), "the committed per-run results should be present"
-    assert (paths.RESULTS_DIR / "confirmatory").is_dir()
+    assert (paths.RESULTS_DIR / "tier1-recognition-spectrogram.json").is_file()
     assert (paths.PAPER_ROOT / "resources" / "figures").is_dir()
     drafts = list(paths.PAPER_ROOT.glob("*-DRAFT.md"))
     assert len(drafts) == 1, f"expected exactly one manuscript, found {drafts}"

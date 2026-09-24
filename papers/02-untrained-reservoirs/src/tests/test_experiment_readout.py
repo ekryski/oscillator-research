@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from harness.confirm import readout as ro
+from harness.experiment import readout as ro
 from harness.measurement.features import projection_matrix
 
 

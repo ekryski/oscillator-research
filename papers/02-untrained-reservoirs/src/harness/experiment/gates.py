@@ -1,6 +1,6 @@
-"""The integrity gate, checked before any result is read.
+"""The integrity check, run before any result is read.
 
-    uv run python -m harness.confirm.gates check    # every recorded g = 0 cell reads chance
+    uv run python -m harness.experiment.gates check    # every recorded g = 0 cell reads chance
 
 With no input a reservoir's state carries nothing about the clip, so every
 cell of a zero-gain run must read exactly chance. Anything else would mean
@@ -12,23 +12,22 @@ from __future__ import annotations
 import argparse
 import json
 
-from harness.confirm import run as rn
+from harness.experiment import run as rn
 
 CHANCE = 0.1
 
 
 def check() -> dict:
-    """Every recorded g = 0 cell must read exactly chance."""
-    runs = rn.load_group("gate-recognition-envelope")["runs"]
+    """Every recorded g = 0 cell should read exactly chance."""
+    runs = rn.load_group("gate-recognition-spectrogram")["runs"]
     zero = {rid: r for rid, r in runs.items() if "/g0/" in rid and not rid.endswith("clipspan")}
-    report = {"g0_runs": len(zero), "passed": bool(zero), "off_chance": []}
+    report = {"g0_runs": len(zero), "all_at_chance": bool(zero), "off_chance": []}
     for rid, r in zero.items():
         for c in r["cells"]:
             if c["acc"] != CHANCE:
-                report["passed"] = False
+                report["all_at_chance"] = False
                 report["off_chance"].append({"run": rid, "read": c["read"], "width": c["width"], "acc": c["acc"]})
-    print(f"{'PASS' if report['passed'] else 'FAIL'}: {len(zero)} g = 0 run(s), "
-          f"{len(report['off_chance'])} cell(s) off chance")
+    print(f"{len(zero)} g = 0 run(s), {len(report['off_chance'])} cell(s) off chance")
     _save("g0", report)
     return report
 
@@ -42,10 +41,10 @@ def _save(name: str, report: dict) -> None:
 
 
 def main(argv: list[str] | None = None) -> None:
-    p = argparse.ArgumentParser(description="the integrity gate")
+    p = argparse.ArgumentParser(description="the integrity check")
     p.add_argument("gate", choices=("check",))
     p.parse_args(argv)
-    ok = check()["passed"]
+    ok = check()["all_at_chance"]
     raise SystemExit(0 if ok else 1)
 
 

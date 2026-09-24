@@ -1,7 +1,7 @@
 """Spoken digits: one AudioMNIST recording, processed the way every bank processes it.
 
 `load_clip` resamples, normalizes and trims a recording; the study's bank and
-its order-task sequences are built from it in harness.confirm.protocol. The
+its order-task sequences are built from it in harness.experiment.protocol. The
 order task's silent leader is load-bearing: it absorbs the featurization
 warm-up, so the read window stays order-symmetric.
 """
@@ -37,8 +37,7 @@ DIGIT_TRIM_FRAC = 0.01             # trim below 1% of clip peak |x|
 def load_clip(path: Path) -> torch.Tensor:
     """One AudioMNIST recording, processed exactly as every bank processes it:
     48 kHz -> 16 kHz, peak-normalized to 0.5, energy-trimmed below 1% of the
-    peak, capped at 1 s, stored as int16. Shared by the exploratory bank and
-    the confirmatory one, so a recording in both is bit-identical in both."""
+    peak, capped at 1 s, stored as int16."""
     import torchaudio
     x, sr = read_wav(path)
     x = torchaudio.functional.resample(x[None], sr, DIGIT_SR)[0]

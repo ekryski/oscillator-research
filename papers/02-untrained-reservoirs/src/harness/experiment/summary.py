@@ -1,6 +1,6 @@
 """Every accuracy and every comparison in the record, with its spread.
 
-    uv run python -m harness.confirm.summary      # write summary.json and summary.md
+    uv run python -m harness.experiment.summary      # write summary.json and summary.md
 
 No threshold decides anything here. An accuracy is reported as its mean over
 replicates (three seeds under Protocol A, five folds under Protocol B), the
@@ -25,13 +25,13 @@ from collections import defaultdict
 
 import numpy as np
 
-from harness.confirm import plan, terms
-from harness.confirm import record as rec
-from harness.confirm import run as rn
-from harness.confirm.record import Cell
+from harness.experiment import plan, terms
+from harness.experiment import record as rec
+from harness.experiment import run as rn
+from harness.experiment.record import Cell
 
-FIELD = rec.FIELD_LABEL
-SEVERED = FIELD.replace("field-", "severed-", 1)
+COUPLED = rec.COUPLED_LABEL
+UNCOUPLED = COUPLED.replace("coupled-", "uncoupled-", 1)
 READ = {"recognition": "windowed", "order": "pooled"}
 #: the reference level of each design factor: the Tier 1 network's own
 REFERENCE = terms.REFERENCE
@@ -87,10 +87,10 @@ def accuracies(cells: list[Cell]) -> list[dict]:
     """One record per arm, read, condition, width and size, over its replicates."""
     groups = defaultdict(dict)
     for c in cells:
-        key = (c.tier, c.task, c.drive, c.label, c.read, c.noise, c.gain, c.pair, c.width, c.n_train, c.projection)
+        key = (c.tier, c.task, c.pathway, c.label, c.read, c.noise, c.gain, c.pair, c.width, c.n_train, c.projection)
         groups[key][replicate(c)] = c.acc
-    fields = ("tier", "task", "drive", "arm", "read", "noise", "gain", "pair", "width", "n_train", "projection")
-    return [{**dict(zip(fields, k, strict=True)), "name": terms.arm(k[3]), "pathway": terms.PATHWAYS[k[2]],
+    fields = ("tier", "task", "pathway", "arm", "read", "noise", "gain", "pair", "width", "n_train", "projection")
+    return [{**dict(zip(fields, k, strict=True)), "name": terms.arm(k[3]),
              "pair": list(k[7]) or None, **spread(v)} for k, v in sorted(groups.items(), key=str)]
 
 
@@ -119,29 +119,29 @@ def matched(a_cells: list[Cell], b_cells: list[Cell], widths: tuple | None = Non
 
 
 def versus(cells: list[Cell], name: str, a: tuple[str, str], b: tuple[str, str], *, tier: str, task: str,
-           drive: str = "envelope", widths: tuple | None = None, projection: str = "fixed") -> list[dict]:
+           pathway: str = "spectrogram", widths: tuple | None = None, projection: str = "fixed") -> list[dict]:
     """a minus b, each an (arm, read), in one tier and under one projection."""
-    mine = [c for c in cells if c.tier == tier and c.task == task and c.drive == drive and c.projection == projection]
+    mine = [c for c in cells if c.tier == tier and c.task == task and c.pathway == pathway and c.projection == projection]
     groups = matched([c for c in mine if (c.label, c.read) == a], [c for c in mine if (c.label, c.read) == b], widths)
-    return [{"comparison": name, "a": " ".join(a), "b": " ".join(b), "tier": tier, "task": task, "drive": drive,
+    return [{"comparison": name, "a": " ".join(a), "b": " ".join(b), "tier": tier, "task": task, "pathway": pathway,
              "noise": k[0], "gain": k[1], "width": k[2], "b_width": widths[1] if widths else k[2],
              "n_train": k[3], "projection": projection, **paired(v)} for k, v in sorted(groups.items(), key=str)]
 
 
 BASELINE_WHOLE = "the spectrogram-only baseline, whole clip"
 BASELINE_16 = "the spectrogram-only baseline, from frame 16"
-NETWORK = terms.arm(FIELD)
+NETWORK = terms.arm(COUPLED)
 
 
 def _against_network(cells: list[Cell], tier: str, task: str) -> list[dict]:
     r = READ[task]
-    others = [(BASELINE_WHOLE, ("floor", r + "@wholeclip")), (BASELINE_16, ("floor", r)),
-              ("the " + terms.arm(SEVERED), (SEVERED, r)), ("the " + terms.arm("bank-c4"), ("bank-c4", r)),
-              ("the " + terms.arm("bank-c8"), ("bank-c8", r))]
-    others += [(f"the {terms.arm('ann-' + arch)}", (f"ann-{arch}", r)) for arch in plan.ANN_ARCHS]
+    others = [(BASELINE_WHOLE, ("baseline", r + "@wholeclip")), (BASELINE_16, ("baseline", r)),
+              ("the " + terms.arm(UNCOUPLED), (UNCOUPLED, r)), ("the " + terms.arm("bank-state"), ("bank-state", r)),
+              ("the " + terms.arm("bank-width"), ("bank-width", r))]
+    others += [(f"the {terms.arm('trained-' + arch)}", (f"trained-{arch}", r)) for arch in plan.TRAINED_ARCHS]
     out = []
     for name, b in others:
-        out += versus(cells, f"{NETWORK} minus {name}", (FIELD, r), b, tier=tier, task=task)
+        out += versus(cells, f"{NETWORK} minus {name}", (COUPLED, r), b, tier=tier, task=task)
     return out
 
 
@@ -151,11 +151,11 @@ def tier1(cells: list[Cell]) -> list[dict]:
     for task in ("recognition", "order"):
         r = READ[task]
         out += _against_network(cells, "tier1", task)
-        out += versus(cells, f"{NETWORK}, with rotation rates minus without", (FIELD, r + "+rate"), (FIELD, r),
+        out += versus(cells, f"{NETWORK}, with rotation rates minus without", (COUPLED, r + "+rate"), (COUPLED, r),
                       tier="tier1", task=task)
         for label in sorted({c.label for c in cells if c.tier == "tier1" and c.task == task}):
-            read = r + "@wholeclip" if label == "floor" else r
-            name = terms.arm(label) + (", whole clip" if label == "floor" else "")
+            read = r + "@wholeclip" if label == "baseline" else r
+            name = terms.arm(label) + (", whole clip" if label == "baseline" else "")
             out += versus(cells, f"{name}: width 4,096 minus 192", (label, read), (label, read),
                           tier="tier1", task=task, widths=(4096, 192))
     return out
@@ -177,7 +177,7 @@ def design(cells: list[Cell]) -> list[dict]:
                     groups[(c.noise, c.gain, c.width, c.n_train)].append((c, refs[match(c)]))
             name = f"{terms.FACTORS[factor]}: {terms.level(level)} minus {terms.level(ref)}"
             out += [{"comparison": name, "tier": "tier2", "task": "recognition",
-                     "drive": "envelope", "noise": k[0], "gain": k[1], "width": k[2], "b_width": k[2],
+                     "pathway": "spectrogram", "noise": k[0], "gain": k[1], "width": k[2], "b_width": k[2],
                      "n_train": k[3], **paired(v)} for k, v in sorted(groups.items(), key=str)]
     # rotation rates, over every design configuration
     idx = {(c.label, c.noise, c.gain, c.width, c.n_train, replicate(c)): c for c in prim}
@@ -189,19 +189,19 @@ def design(cells: list[Cell]) -> list[dict]:
                 groups[(c.noise, c.gain, c.width, c.n_train)].append((c, other))
     out += [{"comparison": "with rotation rates minus without, every design configuration", "tier": "tier2",
              "task": "recognition",
-             "drive": "envelope", "noise": k[0], "gain": k[1], "width": k[2], "b_width": k[2], "n_train": k[3],
+             "pathway": "spectrogram", "noise": k[0], "gain": k[1], "width": k[2], "b_width": k[2], "n_train": k[3],
              **paired(v)} for k, v in sorted(groups.items(), key=str)]
     return out
 
 
-def drives(cells: list[Cell]) -> list[dict]:
-    """Every arm on the quadrature and carrier pathways, minus that pathway's own spectrogram-only baseline."""
+def pathways(cells: list[Cell]) -> list[dict]:
+    """Every arm on the quadrature and carrier pathways, minus that pathway's own baseline."""
     out = []
-    for drive in ("quadrature", "carrier"):
-        for label in sorted({c.label for c in cells if c.tier == "tier3" and c.drive == drive} - {"floor"}):
+    for pathway in ("quadrature", "carrier"):
+        for label in sorted({c.label for c in cells if c.tier == "tier3" and c.pathway == pathway} - {"baseline"}):
             for name, read in ((BASELINE_WHOLE, "windowed@wholeclip"), (BASELINE_16, "windowed")):
-                out += versus(cells, f"{terms.arm(label)} minus {name}", (label, "windowed"), ("floor", read),
-                              tier="tier3", task="recognition", drive=drive)
+                out += versus(cells, f"{terms.arm(label)} minus {name}", (label, "windowed"), ("baseline", read),
+                              tier="tier3", task="recognition", pathway=pathway)
     return out
 
 
@@ -220,10 +220,10 @@ def projections(cells: list[Cell]) -> list[dict]:
             out += [{"comparison": f"{terms.arm(label)}: seeded minus fixed projection", "tier": "projection",
                      "task": task, "noise": k[0], "gain": k[1], "width": k[2], "n_train": k[3],
                      **paired(v)} for k, v in sorted(groups.items(), key=str)]
-        network = [c for c in seeded if c.label == FIELD]
-        controls = [(BASELINE_WHOLE, [c for c in cells if c.tier == "tier1" and c.task == task and c.label == "floor"
+        network = [c for c in seeded if c.label == COUPLED]
+        controls = [(BASELINE_WHOLE, [c for c in cells if c.tier == "tier1" and c.task == task and c.label == "baseline"
                                       and c.read == r + "@wholeclip"])]
-        controls += [("the " + terms.arm(lab), [c for c in seeded if c.label == lab]) for lab in (SEVERED, "bank-c4", "bank-c8")]
+        controls += [("the " + terms.arm(lab), [c for c in seeded if c.label == lab]) for lab in (UNCOUPLED, "bank-state", "bank-width")]
         for name, b_cells in controls:
             groups = matched(network, b_cells)
             out += [{"comparison": f"{NETWORK} minus {name}, seeded projection", "tier": "projection", "task": task,
@@ -236,7 +236,7 @@ def summary(cells: list[Cell] | None = None) -> dict:
     cells = rec.load() if cells is None else cells
     return {"accuracy": accuracies(cells),
             "comparisons": (tier1(cells) + _against_network(cells, "becker", "recognition") + design(cells)
-                            + drives(cells) + projections(cells)),
+                            + pathways(cells) + projections(cells)),
             "order_baseline_at_chance": rec.baseline_at_chance(cells)}
 
 
@@ -293,7 +293,7 @@ def _pooled(records: list[dict]) -> list[dict]:
 
 
 #: the order arms are listed in: the baseline, the reservoirs, then the trained baselines
-ORDER = ["floor", FIELD, SEVERED, "bank-c4", "bank-c8"] + [f"ann-{a}" for a in ("transformer", "gru", "s4d", "cnn", "tcn")]
+ORDER = ["baseline", COUPLED, UNCOUPLED, "bank-state", "bank-width"] + [f"trained-{a}" for a in ("transformer", "gru", "s4d", "cnn", "tcn")]
 
 
 def _rank(r: dict) -> tuple:
@@ -311,7 +311,7 @@ def _pooled_projection(records: list[dict]) -> list[dict]:
 
 def _arm(r: dict) -> str:
     name = terms.arm(r["arm"])
-    if r["arm"] == "floor":
+    if r["arm"] == "baseline":
         name += ", whole clip" if r["read"].endswith("@wholeclip") else ", from frame 16"
     return name + (f" (gain = {r['gain']:g})" if r.get("gain") is not None else "")
 
@@ -345,8 +345,8 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
     def by_gain(r):
         return r["comparison"] + (f" (gain = {r['gain']:g})" if r["gain"] is not None else "")
 
-    lines = ["# Confirmatory results", "",
-             "Generated by `uv run python -m harness.confirm.summary` from the record in this folder; every number "
+    lines = ["# Results", "",
+             "Generated by `uv run python -m harness.experiment.summary` from the record in this folder; every number "
              "here and more (every width, size, pair and read) is in `summary.json`. Accuracies are mean ± "
              "standard deviation over replicates (three seeds; five folds in Tier B), in percent. Differences "
              "are paired, mean ± standard deviation over replicates, with the 95% interval from resampling test "
@@ -403,7 +403,7 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
     lines += ["", "## Tier B: differences", ""]
     lines += _grid(prim_cmp("becker", plan.BECKER_TRAIN), by_gain, _by_noise, _diff)
     lines += ["", "## Tier 3, quadrature and carrier pathways: each arm minus that pathway's baseline", ""]
-    lines += _grid([r for r in prim_cmp("tier3")], lambda r: f"{terms.PATHWAYS[r['drive']]} pathway: {r['comparison']}",
+    lines += _grid([r for r in prim_cmp("tier3")], lambda r: f"{terms.PATHWAYS[r['pathway']]} pathway: {r['comparison']}",
                    _by_condition, _diff)
     return "\n".join(lines) + "\n"
 

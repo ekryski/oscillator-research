@@ -4,9 +4,9 @@ Geometry, coupling, and drive effects in oscillator networks.
 
 **[Read the paper →](spoken-digit-recognition-without-training-DRAFT.md)**
 
-An untrained coupled oscillator network (1,024 oscillators, 2,048 parameters) is read by a linear readout on spoken-digit recognition (AudioMNIST, speaker-disjoint) and compared with a spectrogram-only baseline, an uncoupled oscillator network, two leaky-integrator banks and five trained baselines of about the same size, every arm read the same way. A registered confirmatory run varies the coupling function, lattice geometry, natural frequencies, restoring strength, coupling ceiling, input pathway, input gain, noise level, readout width and training-set size, on recognition and on a temporal-order task.
+An untrained coupled oscillator network (1,024 oscillators, 2,048 parameters) is read by a linear readout on spoken-digit recognition (AudioMNIST, speaker-disjoint) and compared with a spectrogram-only baseline, an uncoupled oscillator network, two leaky-integrator banks and five trained baselines of about the same size, every arm read the same way. The study varies the coupling function, lattice geometry, natural frequencies, restoring strength, coupling ceiling, input pathway, input gain, noise level, readout width and training-set size, on recognition and on a temporal-order task.
 
-What each tier runs is in [TIERS.md](TIERS.md), the design, with its decision log, in [DESIGN.md](DESIGN.md), and the results, as the tiers finish, in `results/confirmatory/summary.md`. The paper is being rewritten from those results, so this page states none yet; the terms are defined in the paper's glossary (Appendix A).
+What each tier runs is in [TIERS.md](TIERS.md), the design, with its decision log, in [DESIGN.md](DESIGN.md), and the results, as the tiers finish, in [`results/summary.md`](results/summary.md). The paper is being rewritten from those results, so this page states none yet; the terms are defined in the paper's glossary (Appendix A).
 
 ## What is here
 
@@ -16,28 +16,25 @@ What each tier runs is in [TIERS.md](TIERS.md), the design, with its decision lo
 | [`…-DRAFT.pdf`](spoken-digit-recognition-without-training-DRAFT.pdf) · [`.html`](spoken-digit-recognition-without-training-DRAFT.html) · [`.epub`](spoken-digit-recognition-without-training-DRAFT.epub) · [`.docx`](spoken-digit-recognition-without-training-DRAFT.docx) | the same paper to read or download |
 | [`…-DRAFT-tmlr.pdf`](spoken-digit-recognition-without-training-DRAFT-tmlr.pdf) | the TMLR submission build, anonymous, in the journal's own style |
 | [`…-DRAFT-iclr.pdf`](spoken-digit-recognition-without-training-DRAFT-iclr.pdf) | the ICLR 2027 submission build, anonymous and line-numbered, in ICLR's own style |
-| [`…-DRAFT-iclr-preprint.pdf`](spoken-digit-recognition-without-training-DRAFT-iclr-preprint.pdf) | the same build with the author named and no venue claimed |
+| [`…-DRAFT-preprint.pdf`](spoken-digit-recognition-without-training-DRAFT-preprint.pdf) | the preprint build, with the author named and no venue claimed |
 | [`…-DRAFT-arxiv.tar.gz`](spoken-digit-recognition-without-training-DRAFT-arxiv.tar.gz) | LaTeX source, style files, bibliography and figures, ready to upload |
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
 | [`src/`](src/) | the experiment harness, the sweep driver, and the tests — [start here](src/README.md) |
-| [`TIERS.md`](TIERS.md) · [`DESIGN.md`](DESIGN.md) | what each tier of the confirmatory run tests, and its design |
-| `results/confirmatory/` | the confirmatory record, one file per tier, task and input pathway, with `summary.md` |
-| `results/` | the exploratory record: 1,940 runs, grouped one file per drive variant and coupling law |
+| [`TIERS.md`](TIERS.md) · [`DESIGN.md`](DESIGN.md) | what each tier of the study tests, and its design |
+| [`results/`](results/) | the record, one file per tier, task and input pathway, with `summary.md`; every number in the paper comes from it |
 | `resources/figures/` | the paper's figures |
-| `resources/audio/` | noise-calibration and order-task audio examples |
 
 ## Checking the numbers
 
 No corpus needed; the committed results are enough:
 
 ```bash
-cd src && uv sync && uv run python -m harness.confirm.summary
+cd src && uv sync && uv run python -m harness.experiment.summary
 ```
 
 Every accuracy and paired difference prints with its spread over seeds and a
-95% interval over test clips. `uv run python -m harness.measurement.score all`
-does the same for the exploratory record, against its bars.
+95% interval over test clips.
 [`src/README.md`](src/README.md) covers getting the data, the code layout, the
 tests, and re-running the experiments from scratch.
 

@@ -6,14 +6,14 @@ import numpy as np
 import pytest
 import torch
 
-from harness.confirm import readout as ro
-from harness.confirm import record as rec
-from harness.confirm import summary as sm
+from harness.experiment import readout as ro
+from harness.experiment import record as rec
+from harness.experiment import summary as sm
 
 N_TEST = 400
-FIELD = {"kind": "field", "physics": "kuramoto", "boundary": "torus", "omega": "random", "damping": 0.3,
-         "clamp": 1.0, "channels": 4, "severed": False, "arch": ""}
-FLOOR = {**FIELD, "kind": "floor"}
+COUPLED = {"kind": "network", "coupling": "kuramoto", "geometry": "torus", "frequencies": "random",
+           "restoring": 0.3, "ceiling": 1.0, "channels": 4, "coupled": True, "arch": ""}
+BASELINE = {**COUPLED, "kind": "baseline"}
 
 
 def bits(acc: float, seed: int) -> str:
@@ -23,7 +23,7 @@ def bits(acc: float, seed: int) -> str:
 
 
 def run(arm, noise, gain, seed, acc, read, tier="tier1", fold=-1):
-    spec = {"tier": tier, "task": "recognition", "drive": "envelope", "noise_db": noise, "gain": gain,
+    spec = {"tier": tier, "task": "recognition", "pathway": "spectrogram", "noise_db": noise, "gain": gain,
             "seed": seed, "arm": arm, "pair": [], "span": "fixed", "fold": fold}
     cells = [{"read": read, "width": 192, "n_train": 2048, "acc": acc, "correct": bits(acc, 7 * seed + fold + 2)}]
     return {"spec": spec, "cells": cells, "n_test": N_TEST}
@@ -35,14 +35,13 @@ def recorded(tmp_path, monkeypatch):
     runs = {}
     for noise in (0.0, 5.0):
         for seed in (0, 1, 2):
-            runs[f"A/{noise:g}db/s{seed}/floor"] = run(FLOOR, noise, None, seed, 0.70, "windowed@wholeclip")
+            runs[f"A/{noise:g}db/s{seed}/baseline"] = run(BASELINE, noise, None, seed, 0.70, "windowed@wholeclip")
             for gain in (1.0, 2.0):
                 acc = 0.78 + 0.01 * seed
-                runs[f"A/{noise:g}db/g{gain:g}/s{seed}/{rec.FIELD_LABEL}"] = run(FIELD, noise, gain, seed, acc,
-                                                                                  "windowed")
-    root = tmp_path / "confirmatory"
-    root.mkdir(parents=True)
-    (root / "tier1-recognition-envelope.json").write_text(json.dumps({"runs": runs}))
+                runs[f"A/{noise:g}db/g{gain:g}/s{seed}/{rec.COUPLED_LABEL}"] = run(COUPLED, noise, gain, seed, acc,
+                                                                                    "windowed")
+    root = tmp_path
+    (root / "tier1-recognition-spectrogram.json").write_text(json.dumps({"runs": runs}))
     return root
 
 
@@ -63,9 +62,9 @@ def test_the_network_is_compared_with_the_gainless_baseline_at_every_gain(record
 
 
 def test_folds_are_replicates_and_their_test_clips_are_pooled_not_averaged():
-    a = [rec.Cell("becker", "recognition", "envelope", None, 1.0, 0, FIELD, "f", (), "windowed", 192, 18000,
+    a = [rec.Cell("becker", "recognition", "spectrogram", None, 1.0, 0, COUPLED, "f", (), "windowed", 192, 18000,
                  acc, bits(acc, f), N_TEST, f) for f, acc in enumerate((0.80, 0.90))]
-    b = [rec.Cell("becker", "recognition", "envelope", None, None, 0, FLOOR, "floor", (), "windowed", 192, 18000,
+    b = [rec.Cell("becker", "recognition", "spectrogram", None, None, 0, BASELINE, "baseline", (), "windowed", 192, 18000,
                  0.75, bits(0.75, 10 + f), N_TEST, f) for f in range(2)]
     r = sm.paired(list(zip(a, b, strict=True)))
     assert r["values"] == pytest.approx({"fold0": 5.0, "fold1": 15.0}) and r["mean"] == pytest.approx(10.0)

@@ -1,23 +1,23 @@
 {
- "group": "gate-recognition-envelope",
+ "group": "gate-recognition-spectrogram",
  "runs": {
-  "A/0db/g0/s0/bank-c4": {
+  "A/0db/g0/s0/bank-state": {
    "spec": {
     "tier": "gate",
     "task": "recognition",
-    "drive": "envelope",
+    "pathway": "spectrogram",
     "noise_db": 0.0,
     "gain": 0.0,
     "seed": 0,
     "arm": {
      "kind": "bank",
-     "physics": "kuramoto",
-     "boundary": "torus",
-     "omega": "random",
-     "damping": 0.3,
-     "clamp": 1.0,
+     "coupling": "kuramoto",
+     "geometry": "torus",
+     "frequencies": "random",
+     "restoring": 0.3,
+     "ceiling": 1.0,
      "channels": 4,
-     "severed": false,
+     "coupled": true,
      "arch": ""
     },
     "protocol": "A",
@@ -154,23 +154,23 @@
     "dirty": false
    }
   },
-  "A/0db/g0/s0/bank-c8": {
+  "A/0db/g0/s0/bank-width": {
    "spec": {
     "tier": "gate",
     "task": "recognition",
-    "drive": "envelope",
+    "pathway": "spectrogram",
     "noise_db": 0.0,
     "gain": 0.0,
     "seed": 0,
     "arm": {
      "kind": "bank",
-     "physics": "kuramoto",
-     "boundary": "torus",
-     "omega": "random",
-     "damping": 0.3,
-     "clamp": 1.0,
+     "coupling": "kuramoto",
+     "geometry": "torus",
+     "frequencies": "random",
+     "restoring": 0.3,
+     "ceiling": 1.0,
      "channels": 8,
-     "severed": false,
+     "coupled": true,
      "arch": ""
     },
     "protocol": "A",
@@ -307,23 +307,23 @@
     "dirty": false
    }
   },
-  "A/0db/g0/s0/field-kuramoto-torus-random-lam0.3-clamp1": {
+  "A/0db/g0/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
     "tier": "gate",
     "task": "recognition",
-    "drive": "envelope",
+    "pathway": "spectrogram",
     "noise_db": 0.0,
     "gain": 0.0,
     "seed": 0,
     "arm": {
-     "kind": "field",
-     "physics": "kuramoto",
-     "boundary": "torus",
-     "omega": "random",
-     "damping": 0.3,
-     "clamp": 1.0,
+     "kind": "network",
+     "coupling": "kuramoto",
+     "geometry": "torus",
+     "frequencies": "random",
+     "restoring": 0.3,
+     "ceiling": 1.0,
      "channels": 4,
-     "severed": false,
+     "coupled": true,
      "arch": ""
     },
     "protocol": "A",
@@ -550,23 +550,23 @@
     "dirty": false
    }
   },
-  "A/0db/g0/s0/field-kuramoto-torus-random-lam0.3-clamp1/clipspan": {
+  "A/0db/g0/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1/clipspan": {
    "spec": {
     "tier": "gate",
     "task": "recognition",
-    "drive": "envelope",
+    "pathway": "spectrogram",
     "noise_db": 0.0,
     "gain": 0.0,
     "seed": 0,
     "arm": {
-     "kind": "field",
-     "physics": "kuramoto",
-     "boundary": "torus",
-     "omega": "random",
-     "damping": 0.3,
-     "clamp": 1.0,
+     "kind": "network",
+     "coupling": "kuramoto",
+     "geometry": "torus",
+     "frequencies": "random",
+     "restoring": 0.3,
+     "ceiling": 1.0,
      "channels": 4,
-     "severed": false,
+     "coupled": true,
      "arch": ""
     },
     "protocol": "A",
@@ -793,23 +793,23 @@
     "dirty": false
    }
   },
-  "A/0db/g0/s0/severed-kuramoto-torus-random-lam0.3-clamp1": {
+  "A/0db/g0/s0/uncoupled-kuramoto-torus-random-restoring0.3-ceiling1": {
    "spec": {
     "tier": "gate",
     "task": "recognition",
-    "drive": "envelope",
+    "pathway": "spectrogram",
     "noise_db": 0.0,
     "gain": 0.0,
     "seed": 0,
     "arm": {
-     "kind": "field",
-     "physics": "kuramoto",
-     "boundary": "torus",
-     "omega": "random",
-     "damping": 0.3,
-     "clamp": 1.0,
+     "kind": "network",
+     "coupling": "kuramoto",
+     "geometry": "torus",
+     "frequencies": "random",
+     "restoring": 0.3,
+     "ceiling": 1.0,
      "channels": 4,
-     "severed": true,
+     "coupled": false,
      "arch": ""
     },
     "protocol": "A",
@@ -1037,23 +1037,23 @@
     "dirty": false
    }
   },
-  "A/0db/g0/s1/field-kuramoto-torus-random-lam0.3-clamp1/clipspan": {
+  "A/0db/g0/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1/clipspan": {
    "spec": {
     "tier": "gate",
     "task": "recognition",
-    "drive": "envelope",
+    "pathway": "spectrogram",
     "noise_db": 0.0,
     "gain": 0.0,
     "seed": 1,
     "arm": {
-     "kind": "field",
-     "physics": "kuramoto",
-     "boundary": "torus",
-     "omega": "random",
-     "damping": 0.3,
-     "clamp": 1.0,
+     "kind": "network",
+     "coupling": "kuramoto",
+     "geometry": "torus",
+     "frequencies": "random",
+     "restoring": 0.3,
+     "ceiling": 1.0,
      "channels": 4,
-     "severed": false,
+     "coupled": true,
      "arch": ""
     },
     "protocol": "A",
@@ -1280,23 +1280,23 @@
     "dirty": false
    }
   },
-  "A/0db/g0/s2/field-kuramoto-torus-random-lam0.3-clamp1/clipspan": {
+  "A/0db/g0/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1/clipspan": {
    "spec": {
     "tier": "gate",
     "task": "recognition",
-    "drive": "envelope",
+    "pathway": "spectrogram",
     "noise_db": 0.0,
     "gain": 0.0,
     "seed": 2,
     "arm": {
-     "kind": "field",
-     "physics": "kuramoto",
-     "boundary": "torus",
-     "omega": "random",
-     "damping": 0.3,
-     "clamp": 1.0,
+     "kind": "network",
+     "coupling": "kuramoto",
+     "geometry": "torus",
+     "frequencies": "random",
+     "restoring": 0.3,
+     "ceiling": 1.0,
      "channels": 4,
-     "severed": false,
+     "coupled": true,
      "arch": ""
     },
     "protocol": "A",
@@ -1523,23 +1523,23 @@
     "dirty": false
    }
   },
-  "A/0db/g1/s0/field-kuramoto-torus-random-lam0.3-clamp1/clipspan": {
+  "A/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1/clipspan": {
    "spec": {
     "tier": "gate",
     "task": "recognition",
-    "drive": "envelope",
+    "pathway": "spectrogram",
     "noise_db": 0.0,
     "gain": 1.0,
     "seed": 0,
     "arm": {
-     "kind": "field",
-     "physics": "kuramoto",
-     "boundary": "torus",
-     "omega": "random",
-     "damping": 0.3,
-     "clamp": 1.0,
+     "kind": "network",
+     "coupling": "kuramoto",
+     "geometry": "torus",
+     "frequencies": "random",
+     "restoring": 0.3,
+     "ceiling": 1.0,
      "channels": 4,
-     "severed": false,
+     "coupled": true,
      "arch": ""
     },
     "protocol": "A",
@@ -1766,23 +1766,23 @@
     "dirty": false
    }
   },
-  "A/0db/g1/s1/field-kuramoto-torus-random-lam0.3-clamp1/clipspan": {
+  "A/0db/g1/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1/clipspan": {
    "spec": {
     "tier": "gate",
     "task": "recognition",
-    "drive": "envelope",
+    "pathway": "spectrogram",
     "noise_db": 0.0,
     "gain": 1.0,
     "seed": 1,
     "arm": {
-     "kind": "field",
-     "physics": "kuramoto",
-     "boundary": "torus",
-     "omega": "random",
-     "damping": 0.3,
-     "clamp": 1.0,
+     "kind": "network",
+     "coupling": "kuramoto",
+     "geometry": "torus",
+     "frequencies": "random",
+     "restoring": 0.3,
+     "ceiling": 1.0,
      "channels": 4,
-     "severed": false,
+     "coupled": true,
      "arch": ""
     },
     "protocol": "A",
@@ -2009,23 +2009,23 @@
     "dirty": false
    }
   },
-  "A/0db/g1/s2/field-kuramoto-torus-random-lam0.3-clamp1/clipspan": {
+  "A/0db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1/clipspan": {
    "spec": {
     "tier": "gate",
     "task": "recognition",
-    "drive": "envelope",
+    "pathway": "spectrogram",
     "noise_db": 0.0,
     "gain": 1.0,
     "seed": 2,
     "arm": {
-     "kind": "field",
-     "physics": "kuramoto",
-     "boundary": "torus",
-     "omega": "random",
-     "damping": 0.3,
-     "clamp": 1.0,
+     "kind": "network",
+     "coupling": "kuramoto",
+     "geometry": "torus",
+     "frequencies": "random",
+     "restoring": 0.3,
+     "ceiling": 1.0,
      "channels": 4,
-     "severed": false,
+     "coupled": true,
      "arch": ""
     },
     "protocol": "A",
@@ -2252,23 +2252,23 @@
     "dirty": false
    }
   },
-  "A/0db/g2/s0/field-kuramoto-torus-random-lam0.3-clamp1/clipspan": {
+  "A/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1/clipspan": {
    "spec": {
     "tier": "gate",
     "task": "recognition",
-    "drive": "envelope",
+    "pathway": "spectrogram",
     "noise_db": 0.0,
     "gain": 2.0,
     "seed": 0,
     "arm": {
-     "kind": "field",
-     "physics": "kuramoto",
-     "boundary": "torus",
-     "omega": "random",
-     "damping": 0.3,
-     "clamp": 1.0,
+     "kind": "network",
+     "coupling": "kuramoto",
+     "geometry": "torus",
+     "frequencies": "random",
+     "restoring": 0.3,
+     "ceiling": 1.0,
      "channels": 4,
-     "severed": false,
+     "coupled": true,
      "arch": ""
     },
     "protocol": "A",
@@ -2495,23 +2495,23 @@
     "dirty": false
    }
   },
-  "A/0db/g2/s1/field-kuramoto-torus-random-lam0.3-clamp1/clipspan": {
+  "A/0db/g2/s1/coupled-kuramoto-torus-random-restoring0.3-ceiling1/clipspan": {
    "spec": {
     "tier": "gate",
     "task": "recognition",
-    "drive": "envelope",
+    "pathway": "spectrogram",
     "noise_db": 0.0,
     "gain": 2.0,
     "seed": 1,
     "arm": {
-     "kind": "field",
-     "physics": "kuramoto",
-     "boundary": "torus",
-     "omega": "random",
-     "damping": 0.3,
-     "clamp": 1.0,
+     "kind": "network",
+     "coupling": "kuramoto",
+     "geometry": "torus",
+     "frequencies": "random",
+     "restoring": 0.3,
+     "ceiling": 1.0,
      "channels": 4,
-     "severed": false,
+     "coupled": true,
      "arch": ""
     },
     "protocol": "A",
@@ -2738,23 +2738,23 @@
     "dirty": false
    }
   },
-  "A/0db/g2/s2/field-kuramoto-torus-random-lam0.3-clamp1/clipspan": {
+  "A/0db/g2/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1/clipspan": {
    "spec": {
     "tier": "gate",
     "task": "recognition",
-    "drive": "envelope",
+    "pathway": "spectrogram",
     "noise_db": 0.0,
     "gain": 2.0,
     "seed": 2,
     "arm": {
-     "kind": "field",
-     "physics": "kuramoto",
-     "boundary": "torus",
-     "omega": "random",
-     "damping": 0.3,
-     "clamp": 1.0,
+     "kind": "network",
+     "coupling": "kuramoto",
+     "geometry": "torus",
+     "frequencies": "random",
+     "restoring": 0.3,
+     "ceiling": 1.0,
      "channels": 4,
-     "severed": false,
+     "coupled": true,
      "arch": ""
     },
     "protocol": "A",

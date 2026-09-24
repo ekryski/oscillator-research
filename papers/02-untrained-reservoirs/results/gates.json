@@ -1,7 +1,7 @@
 {
  "g0": {
   "g0_runs": 4,
-  "passed": true,
+  "all_at_chance": true,
   "off_chance": []
  }
 }
