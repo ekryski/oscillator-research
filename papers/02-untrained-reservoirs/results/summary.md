@@ -8,6 +8,8 @@ Leak check: with no input, 48 of the 48 cells of the 4 zero-gain runs read exact
 
 ## Controls, recognition: accuracy (Section 4.1, 4.2)
 
+Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 61); tested on the 6,000 clips of speakers 49 to 60; mean ± standard deviation over seeds 0 to 2, in percent. The spectrogram-only baseline is read both over the whole clip and, as every other arm is, from frame 16. An arm with more than 192 signals is projected down to 192; one with fewer is read as it is.
+
 | | clean | 0 dB | −5 dB |
 |---|---|---|---|
 | spectrogram-only baseline, whole clip | 93.6 ± 0.3 | 78.0 ± 0.6 | 71.6 ± 1.6 |
@@ -27,6 +29,8 @@ Leak check: with no input, 48 of the 48 cells of the 4 zero-gain runs read exact
 | TCN | 97.0 ± 0.7 | 82.6 ± 1.3 | 76.2 ± 0.4 |
 
 ## Controls, recognition: the coupled network minus each other arm (Section 4.1, 4.2)
+
+The cells of the table above, paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points. The gain in brackets is the coupled network's, and the other arm's when it takes one.
 
 | | clean | 0 dB | −5 dB |
 |---|---|---|---|
@@ -54,6 +58,8 @@ Leak check: with no input, 48 of the 48 cells of the 4 zero-gain runs read exact
 | coupled oscillator network, with rotation rates minus without (gain = 2) | +0.97 ± 0.67 [+0.63, +1.31] | +1.18 ± 1.06 [+0.74, +1.61] | +1.36 ± 0.55 [+0.97, +1.81] |
 
 ## Controls, recognition: accuracy by readout width and training size (Section 4.6)
+
+Each column is a training size (n clips, nested: each set contains the smaller) and a readout width (w); the four-window read, tested on the 6,000 clips of speakers 49 to 60; mean ± standard deviation over seeds 0 to 2, in percent. At each width an arm with more signals is projected down to it, and one with fewer is read as it is.
 
 ### 0 dB
 
@@ -97,6 +103,8 @@ Leak check: with no input, 48 of the 48 cells of the 4 zero-gain runs read exact
 
 ## Controls, recognition: readout width 4,096 minus 192 (Section 4.6)
 
+Each arm at width 4,096 minus itself at 192, both at 2,048 training clips, paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points.
+
 | | clean | 0 dB | −5 dB |
 |---|---|---|---|
 | leaky-integrator bank, state-matched: width 4,096 minus 192 (gain = 1) | +1.31 ± 0.52 [+0.94, +1.68] | +5.46 ± 0.15 [+4.81, +6.12] | +5.35 ± 0.27 [+4.63, +6.08] |
@@ -115,6 +123,8 @@ Leak check: with no input, 48 of the 48 cells of the 4 zero-gain runs read exact
 | uncoupled oscillator network: width 4,096 minus 192 (gain = 2) | +3.97 ± 1.13 [+3.50, +4.46] | +1.92 ± 0.34 [+1.49, +2.37] | +1.32 ± 0.41 [+0.91, +1.72] |
 
 ## Controls, order task: accuracy, averaged over the five digit pairs (Section 4.7)
+
+Readout width 192 and 2,048 training sequences per digit pair, the whole-span read (frames 16 to 147); tested on 2,048 sequences per pair from speakers 49 to 60; each seed's accuracy averaged over the five pairs, then mean ± standard deviation over seeds 0 to 2, in percent. An arm with more than 192 signals is projected down to 192; one with fewer is read as it is. Chance is 50%.
 
 | | clean | 0 dB | −5 dB |
 |---|---|---|---|
@@ -135,6 +145,8 @@ Leak check: with no input, 48 of the 48 cells of the 4 zero-gain runs read exact
 | TCN | 99.9 ± 0.1 | 95.0 ± 0.4 | 91.1 ± 0.3 |
 
 ## Controls, order task: the coupled network minus each other arm, pooled over the five pairs (Section 4.7)
+
+The cells of the table above, paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points; the pairs' test clips are pooled.
 
 | | clean | 0 dB | −5 dB |
 |---|---|---|---|
@@ -165,6 +177,8 @@ Order task, the spectrogram-only baseline's 95% interval contains chance (50%) i
 
 ## Design: each level minus its reference, over matched configurations (Section 4.3)
 
+Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 61); tested on the 6,000 clips of speakers 49 to 60. Each level minus its reference over every configuration identical in the other factors, paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points.
+
 | | 0 dB, gain = 1 | 0 dB, gain = 2 | −5 dB, gain = 1 | −5 dB, gain = 2 |
 |---|---|---|---|---|
 | coupling function: Kuramoto–Sakaguchi minus Kuramoto | -0.05 ± 0.23 [-0.11, +0.02] | -0.01 ± 0.25 [-0.10, +0.07] | +0.04 ± 0.07 [-0.03, +0.11] | -0.09 ± 0.09 [-0.18, -0.00] |
@@ -190,6 +204,12 @@ Order task, the spectrogram-only baseline's 95% interval contains chance (50%) i
 | with rotation rates minus without, every design configuration | +0.13 ± 0.00 | +0.47 ± 0.09 | +0.17 ± 0.07 | +0.49 ± 0.09 |
 
 ## Projection: the controls experiment's reservoirs under the fixed and a seeded projection (Section 4.6)
+
+What the projection does: every arm's standardized summary statistics are multiplied by a random Gaussian matrix that maps them to the common readout width, so an arm with thousands of signals and one with 192 are read by readouts of the same size. The fixed projection is one draw, shared by every run and seed; the seeded projection is drawn afresh from each run's seed. Seeded minus fixed therefore measures how far the particular draw moves a result, which the spread over seeds otherwise leaves out.
+
+Readout width 192 and 2,048 training clips or sequences per pair, each reservoir read through the fixed projection and through one drawn from the run's seed; recognition with the four-window read, the order task with the whole-span read, averaged over the five pairs; mean ± standard deviation over seeds 0 to 2, in percent.
+
+Seeded minus fixed, the reservoirs moved by -1.29 to +0.88 points on recognition (the 95% interval contains zero in 19 of its 24 comparisons) and by -0.63 to +1.22 points on the order task (the 95% interval contains zero in 16 of its 24 comparisons). Under the seeded projection, every one of the 48 differences between the coupled network and its controls keeps the sign it has under the fixed one.
 
 Rerun on the Apple GPU, the projection experiment's fixed-projection cells against the controls experiment's on the CPU: 1,262 of 1,296 identical, 1,295 within two test clips, largest difference 0.63 points (13 clips).
 
@@ -272,6 +292,8 @@ Rerun on the Apple GPU, the projection experiment's fixed-projection cells again
 
 ## Sweep: restoring strength, coupling ceiling and gain beyond the design experiment's, each minus its reference (Section 4.4)
 
+Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 61); tested on the 6,000 clips of speakers 49 to 60. Each coupling function at the reference configuration, paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points.
+
 | | 0 dB, gain = 1 | 0 dB, gain = 2 | 0 dB, gain = 3 | 0 dB, gain = 4 | 0 dB, gain = 5 | 0 dB, gain = 6 | 0 dB, gain = 8 | 0 dB, gain = 10 | 0 dB, gain = 12 | −5 dB, gain = 1 | −5 dB, gain = 2 | −5 dB, gain = 3 | −5 dB, gain = 4 | −5 dB, gain = 5 | −5 dB, gain = 6 | −5 dB, gain = 8 | −5 dB, gain = 10 | −5 dB, gain = 12 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Kuramoto: restoring strength 0.5 minus 0.3 | +0.19 ± 0.78 [-0.23, +0.67] | +0.35 ± 0.20 [-0.08, +0.76] |  |  |  |  |  |  |  | +0.16 ± 0.16 [-0.30, +0.62] | +0.47 ± 0.84 [+0.06, +0.92] |  |  |  |  |  |  |  |
@@ -349,6 +371,8 @@ Rerun on the Apple GPU, the projection experiment's fixed-projection cells again
 
 ## Cochlea: the coil and the cochlea, each minus another geometry, over matched configurations (Section 4.3)
 
+Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 61); tested on the 6,000 clips of speakers 49 to 60. Matched on coupling function and natural frequencies, paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points.
+
 | | 0 dB, gain = 1 | 0 dB, gain = 2 | −5 dB, gain = 1 | −5 dB, gain = 2 |
 |---|---|---|---|---|
 | lattice geometry: coil minus torus | -0.22 ± 0.31 [-0.38, -0.07] | -0.15 ± 0.25 [-0.31, +0.03] | +0.01 ± 0.48 [-0.14, +0.16] | -0.06 ± 0.27 [-0.22, +0.11] |
@@ -360,6 +384,8 @@ Rerun on the Apple GPU, the projection experiment's fixed-projection cells again
 | lattice geometry: cochlea minus cochlea-matched | -0.28 ± 0.12 [-0.45, -0.12] | -0.34 ± 0.16 [-0.51, -0.18] | -0.37 ± 0.47 [-0.53, -0.20] | -0.71 ± 0.32 [-0.88, -0.52] |
 
 ## Becker folds: accuracy on Becker et al.'s five speaker folds, clean (Section 4.1)
+
+Readout width 192 and 18,000 training clips from 36 speakers per fold, the ridge penalty chosen on the fold's 12 validation speakers, the four-window read; tested on the fold's 6,000 clips of 12 other speakers; mean ± standard deviation over the five folds, in percent. An arm with more than 192 signals is projected down to 192; one with fewer is read as it is.
 
 | | clean |
 |---|---|
@@ -380,6 +406,8 @@ Rerun on the Apple GPU, the projection experiment's fixed-projection cells again
 | TCN | 98.2 ± 0.7 |
 
 ## Becker folds: the coupled network minus each other arm
+
+The cells of the table above, paired on the same test clips and folds: mean ± standard deviation over the five folds, with the 95% interval from resampling test clips in brackets, in points.
 
 | | clean |
 |---|---|
@@ -405,6 +433,8 @@ Rerun on the Apple GPU, the projection experiment's fixed-projection cells again
 | coupled oscillator network minus the S4D (gain = 2) | -8.78 ± 2.36 [-9.12, -8.44] |
 
 ## Quadrature: each network minus the quadrature front end's own baseline, and minus the same network on the spectrogram pathway (Section 4.5)
+
+Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 61); tested on the 6,000 clips of speakers 49 to 60. Paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points.
 
 | | 0 dB, gain = 1 | 0 dB, gain = 2 | −5 dB, gain = 1 | −5 dB, gain = 2 |
 |---|---|---|---|---|
