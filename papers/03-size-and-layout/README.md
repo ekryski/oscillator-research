@@ -2,7 +2,7 @@
 
 How the number of oscillators and their arrangement affect spoken-digit recognition, against controls of the same size.
 
-**[Read the draft →](size-and-channel-layout-DRAFT.md)** · **Status: design and harness only. The registration is a draft, not frozen, and no run has been made.**
+**[Read the draft →](size-and-channel-layout-DRAFT.md)** · **Status: design and harness only; no run has been made.**
 
 ## What it asks
 
@@ -22,7 +22,7 @@ Paper 03 runs that ablation for paper 02's networks. The lattice runs from 8 × 
 | path | contents |
 |---|---|
 | [`size-and-channel-layout-DRAFT.md`](size-and-channel-layout-DRAFT.md) | the manuscript, in paper 02's outline: a draft abstract, the introduction, background and methods, results left to write, and appendices (glossary, experimental design, channels and layers, coupling functions) |
-| [`REGISTRATION.md`](REGISTRATION.md) | the draft pre-registration: questions, data, arms and size matching, the read, the tiers, what is taken from paper 02, reporting |
+| [`DESIGN.md`](DESIGN.md) | the design: questions, data, arms and size matching, the read, the tiers, what is taken from paper 02, reporting, and the open questions |
 | [`TIERS.md`](TIERS.md) | what each tier runs, its run count, its cost in CPU-hours and memory, and the stages to run it in |
 | [`references/`](references/) | the bibliography and citation map |
 | [`metadata/`](metadata/) | the front matter |

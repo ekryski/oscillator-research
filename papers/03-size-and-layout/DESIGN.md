@@ -1,8 +1,6 @@
-# Registration: paper 03
+# Design: paper 03
 
-**Status: DRAFT, NOT FROZEN. Proposed on 2026-09-23 and revised on 2026-09-24 with the author's decisions (section 11). No run has been made under it.**
-
-Freezing will mean one commit that changes the status line above to FROZEN, made and pushed before any run of the tiers below starts, so that the hosting service's timestamp corroborates the local one. After freezing, the body is not edited: deviations go in the change log at the end, dated, with the reason. Until then everything here is a proposal.
+The current design of paper 03, and its open questions (section 11). No run has been made.
 
 Everything below is implemented in `src/harness/confirm/` and tested in `src/tests/`; where this text and the code could disagree, the tier definitions in `harness/confirm/plan.py` are the plan. [TIERS.md](TIERS.md) gives each tier's cost.
 
@@ -14,7 +12,7 @@ Paper 02's widened tier 4 (commit dd60fed: lattices of 8 × 8, 16 × 16 and 32 �
 
 ## 2. Questions
 
-The questions are the author's. The study states no hypotheses and applies no decision bar: as paper 02 does since its change log of 2026-09-23 20:04, every accuracy and every paired difference is reported with its spread (section 10) and no verdict is drawn from a threshold.
+The questions are the author's. The study states no hypotheses and applies no decision bar: as in paper 02, every accuracy and every paired difference is reported with its spread (section 10) and no verdict is drawn from a threshold.
 
 - **Q1, size.** How does the coupled oscillator network's accuracy change with its number of oscillators, C · G², at a fixed readout?
 - **Q2, size against controls.** Does the network's margin over its uncoupled copy, its state-matched leaky-integrator bank and the spectrogram-only baseline on the same rows change with size?
@@ -25,7 +23,7 @@ The questions are the author's. The study states no hypotheses and applies no de
 
 ## 3. Data
 
-Paper 02's data, unchanged: its 50-repetition AudioMNIST bank (30,000 clips, 60 speakers, 10 digits, 16 kHz), its Protocol A (speakers 1 to 48 train, speakers 49 to 60 test; the test set is all 6,000 test clips in one fixed order; a seed permutes the training pool and the training set is its first 2,048 clips), and its noise protocol (white noise relative to each clip's speech power, drawn from a generator seeded by the clip's identity, so a clip sounds the same in every arm, seed and tier). **Every run is at 0 dB**, noise as loud as the speech (the author, 2026-09-24): paper 02 also ran +5 dB and clean audio, where the task saturates. Paper 02's Protocol B (Becker et al.'s folds) and its order task are not carried over; the calibration against Becker et al. is paper 02's.
+Paper 02's data, unchanged: its 50-repetition AudioMNIST bank (30,000 clips, 60 speakers, 10 digits, 16 kHz), its Protocol A (speakers 1 to 48 train, speakers 49 to 60 test; the test set is all 6,000 test clips in one fixed order; a seed permutes the training pool and the training set is its first 2,048 clips), and its noise protocol (white noise relative to each clip's speech power, drawn from a generator seeded by the clip's identity, so a clip sounds the same in every arm, seed and tier). **Every run is at 0 dB**, noise as loud as the speech: paper 02 also ran +5 dB and clean audio, where the task saturates. Paper 02's Protocol B (Becker et al.'s folds) and its order task are not carried over; the calibration against Becker et al. is paper 02's.
 
 **The front end at other band counts.** Paper 02's front end is a 512-point transform (257 bins, 32 ms Hann window) every 256 samples, mel filters, the log of each band's energy and a fixed rescaling. At 8, 16 and 32 bands paper 03 uses it exactly (tested against paper 02's formula). At 64 and 128 bands the narrowest mel filters fall between the 257 bins (at 128 bands one filter is empty and 25 touch a single bin), so the transform is zero-padded to 1,024 and 2,048 points, the lengths at which the narrowest filter spans three bins as the 32-band one does at 512. The window stays 512 samples and is shifted back onto paper 02's frames, so the frame count (61 for a 1 s clip) and every frame's timing are paper 02's; tested with a click that lands in the same two frames at 16, 64 and 128 bands. Zero-padding samples the same windowed spectrum more finely and adds no frequency resolution: the lowest bands at 64 and 128 are narrower than the window can resolve, so neighbouring low bands carry strongly correlated energies. The quadrature pathway takes its per-band phase from the same zero-padded transform, referenced to the start of paper 02's window, so it equals the unpadded phase wherever the two transforms share a bin. The alternative, a longer window, would give real frequency resolution at the cost of time resolution and a different frame count, which would change the read's windows; it is not used. Narrower bands hold less energy, so the drive's level falls slightly with band count; measured on 200 clips of the bank at 0 dB, the mean drive is 1.38, 1.32, 1.24, 1.23 and 1.22 at 8, 16, 32, 64 and 128 bands (the drive runs from 0 to about 1.6), the zero-padding's finer sampling offsetting the narrowing above 32 bands. It is not corrected.
 
@@ -45,7 +43,7 @@ Every arm sits in paper 02's slot: front end, then the arm, then the shared read
 | leaky-integrator bank, state-matched | C · G² independent leaky integrators, band r driving row r | C · G² | 2 · C · G² |
 | GRU, TCN, CNN, transformer, S4D | trained end to end, sized to the network | | at or near 2 · C · G², trained |
 
-**Input gain** is 1 for every reservoir on the band-energy and quadrature pathways and 32 on the carrier pathway, paper 02's calibrated carrier gain (the author, 2026-09-24; paper 02 also ran gain 2). It does not apply to the spectrogram-only baseline or the trained baselines, as in paper 02.
+**Input gain** is 1 for every reservoir on the band-energy and quadrature pathways and 32 on the carrier pathway, paper 02's calibrated carrier gain. It does not apply to the spectrogram-only baseline or the trained baselines, as in paper 02.
 
 **Channels** are parallel copies, like the heads of one attention layer, not stacked layers: every channel receives the same input, has its own coupling kernel and natural frequencies, and no channel acts on another. The readout reads all channels side by side.
 
@@ -60,7 +58,7 @@ Every arm sits in paper 02's slot: front end, then the arm, then the shared read
 
 **The state-matched leaky-integrator bank** is paper 02's bank at C channels of a G × G lattice, matched to the network by construction at every size: C · G² units, each with a leak rate and an input weight (2 · C · G² parameters), band r driving every unit of row r, time constants log-spaced from 16 ms to 1 s across the C · G units of a row. Paper 02's width-matched bank, with twice the units to match the network's two signals per oscillator, is the state-matched bank of 2C channels on the same lattice, which the size tier runs for C up to 8.
 
-**The trained baselines** are paper 02's architectures and recipe (AdamW, 3e-3 annealed to 3e-4, 30 epochs, batches of 64, a learned linear head on the shared statistics, the ridge readout on the same statistics). Each has one width knob and the rest of its design fixed: the GRU's hidden size, the TCN's and the CNN's hidden channels, the transformer's model width (two heads), the S4D's width with as many states per channel as its width. The width is the widest whose parameter count does not exceed the network's 2 · C · G², except for the CNN, which is the TCN's form and takes the narrowest width that reaches it, so the two stay one width apart. This gives paper 02's widths (18, 12, 13, 16, 16) and parameter counts (1,944, 1,948, 2,109, 1,968, 1,840) at 2,048 parameters on 16 rows, and every count within 15% of the network's from 2,048 parameters up, with widths up to 358 (GRU) at 524,288 parameters. Below 2,048 the steps between widths are coarse: in 10 of the 45 size cells, all at 8 × 8 with 1 to 8 channels or 16 × 16 with 1 or 2, one or more baselines fall 15% to 52% under the budget or up to 33% over it. Those cells are kept (the author, 2026-09-24), since they are where Q5 asks whether oscillators are more useful than trained networks at small sizes, and the record flags each with its achieved count. A trained baseline is driven by exactly the rows its network is driven by, so it sees the same band mapping. Input gain does not apply to it, as in paper 02.
+**The trained baselines** are paper 02's architectures and recipe (AdamW, 3e-3 annealed to 3e-4, 30 epochs, batches of 64, a learned linear head on the shared statistics, the ridge readout on the same statistics). Each has one width knob and the rest of its design fixed: the GRU's hidden size, the TCN's and the CNN's hidden channels, the transformer's model width (two heads), the S4D's width with as many states per channel as its width. The width is the widest whose parameter count does not exceed the network's 2 · C · G², except for the CNN, which is the TCN's form and takes the narrowest width that reaches it, so the two stay one width apart. This gives paper 02's widths (18, 12, 13, 16, 16) and parameter counts (1,944, 1,948, 2,109, 1,968, 1,840) at 2,048 parameters on 16 rows, and every count within 15% of the network's from 2,048 parameters up, with widths up to 358 (GRU) at 524,288 parameters. Below 2,048 the steps between widths are coarse: in 10 of the 45 size cells, all at 8 × 8 with 1 to 8 channels or 16 × 16 with 1 or 2, one or more baselines fall 15% to 52% under the budget or up to 33% over it. Those cells are kept, since they are where Q5 asks whether oscillators are more useful than trained networks at small sizes, and the record flags each with its achieved count. A trained baseline is driven by exactly the rows its network is driven by, so it sees the same band mapping. Input gain does not apply to it, as in paper 02.
 
 ## 5. The read
 
@@ -72,7 +70,7 @@ Paper 02's read, unchanged: one function reads every arm, the mean, standard dev
 
 Paper 02's readout: standardize with the training set's own statistics, project by a fixed Gaussian matrix to a common width (each narrower width is the leading columns of the widest), and fit a closed-form ridge per class, its penalty chosen from {0.001, 0.01, 0.1, 1} on the last eighth of the training set.
 
-**Two projections** (the author, 2026-09-24; paper 02 adopts the same rule). Every projected read is recorded twice, and each cell is tagged with its projection:
+**Two projections.** Every projected read is recorded twice, and each cell is tagged with its projection:
 
 - *fixed*: paper 02's matrix, `torch.randn(native, 4096, generator=torch.Generator().manual_seed(4242)) / sqrt(native)`, the same for every seed;
 - *seeded*: the same draw from generator seed 4242 + 1 + s for run seed s, so the matrix changes with the seed as the arms' own draws do.
@@ -81,7 +79,7 @@ Paper 02's matrix is fixed across seeds, so the spread over seeds omits the proj
 
 **Widths.** 192, 1,024 and 4,096, never wider than the arm itself; the unprojected read is also fitted for arms of 1,024 states or fewer, as in paper 02's widened tier 4. **The primary cell is width 192 and 2,048 training clips**, under each projection, so the readout has the same 1,930 weights at every size: the network grows, the readout does not, and any gain with size is the network's. Widths 1,024 and 4,096 are reported as secondary, to show whether a larger network needs a wider readout to show what it holds. A spectrogram-only baseline is never read wider than its own features: 96 at 8 rows (read unprojected there, beside networks read at 192), 192 at 16, and projected from 384, 768 and 1,536 above.
 
-**Devices** (the author, 2026-09-24: GPU first). Every run takes `--device auto|cpu|mps|cuda`: `auto` is CUDA if present, else Apple Silicon's GPU (torch "mps"), else the CPU. The device each run used, and which GPU, is recorded in its environment. What runs where:
+**Devices.** Every run takes `--device auto|cpu|mps|cuda`: `auto` is CUDA if present, else Apple Silicon's GPU (torch "mps"), else the CPU. The device each run used, and which GPU, is recorded in its environment. What runs where:
 
 - The front-end rows are computed on the CPU and cached, so every device is driven by bit-identical input.
 - The untrained arms are built on the CPU from their seed, so every device runs the same kernels and natural frequencies, then moved to the device and simulated there, with their statistics; a trained baseline is built on the CPU and trained on the device.
@@ -103,7 +101,7 @@ Paper 02's matrix is fixed across seeds, so the spread over seeds omits the proj
 | design-quadrature | the 23 other phase coupling-function and geometry configurations on the quadrature pathway at every size | 3,105 |
 | design-carrier | the 25 other configurations on the carrier pathway up to 32 × 32; gain 32 | 1,875 |
 
-Every run is at 0 dB and, except on the carrier pathway, input gain 1. 10,029 runs in all, 150 of them paper 02's (section 8): about 34,900 hours on one CPU thread, or about 1,800 hours on the M1 Max's GPU, by the cost model measured on each (TIERS.md, which has the cost per tier, lattice and stage). Most of it is the design tiers on the carrier pathway (1,147 GPU-hours) and the design tiers at 64 × 64 and 128 × 128 (about 480); the size and trained tiers are 35 GPU-hours. **Running order:** gate, size and trained on lattices 8 to 32 (stage A), then on 64 and 128 (stage B), then design and quadrature (C, D), carrier (E), and the design tiers on the other pathways (F). Whether the later stages run, and at what scale, is decided by compute and the author's choice before freezing, not by results; any tier that does not run is reported as not run.
+Every run is at 0 dB and, except on the carrier pathway, input gain 1. 10,029 runs in all, 150 of them paper 02's (section 8): about 34,900 hours on one CPU thread, or about 1,800 hours on the M1 Max's GPU, by the cost model measured on each (TIERS.md, which has the cost per tier, lattice and stage). Most of it is the design tiers on the carrier pathway (1,147 GPU-hours) and the design tiers at 64 × 64 and 128 × 128 (about 480); the size and trained tiers are 35 GPU-hours. **Running order:** gate, size and trained on lattices 8 to 32 (stage A), then on 64 and 128 (stage B), then design and quadrature (C, D), carrier (E), and the design tiers on the other pathways (F). Whether the later stages run, and at what scale, is decided by compute, not by results; any tier that does not run is reported as not run.
 
 ## 8. What is taken from paper 02
 
@@ -117,7 +115,7 @@ Paper 02 ran the 16 × 16 lattice, one band per row, at 4 channels. Wherever a p
 | quadrature, design-quadrature | the pathway's baseline; the diagonal of paper 02's tier 3 (the four phase coupling functions on the torus, Kuramoto on the helix) | `tier3-recognition-quadrature.json` (not yet run) | 18 |
 | carrier, design-carrier | the pathway's baseline; the 4-channel bank; the diagonal of paper 02's carrier tier (every coupling function on the torus, Kuramoto on the helix) | `tier3-recognition-carrier.json` (not yet run) | 27 |
 
-The reuse rests on three checks. Exact kernel scaling leaves every 16 × 16 network bit-identical to paper 02's (section 4). The arms involved have at most 4,096 states and are read by paper 02's own code. And before any tier runs, **the reuse gate** (`gates reuse`) re-runs a sample of ten reused runs, one per record file and arm kind, with paper 03's harness and requires every cell's accuracy and per-clip correctness to equal paper 02's; before this registration was drafted, and again after the device and projection changes of 2026-09-24, paper 02's and paper 03's harnesses gave identical trajectories and features on the CPU, bit for bit, on all 318 combinations of the 16 × 16 arms, three seeds, two gains and two pathways that were tried, and the five samples already recorded (paper 02's tier 1: the coupled and uncoupled networks, the 8-channel bank, the spectrogram-only baseline and the GRU) reproduced every recorded cell, accuracy and per-clip correctness alike. A reused cell is marked with its source in the record's summary and cited to paper 02 in the paper. A paper 02 run is used only if it carries the seeded projection as well as the fixed one; paper 02's runs recorded before it adopted the seeded projection carry only the fixed one. If paper 02 has not recorded a planned run completely when a tier runs, paper 03 runs it itself, on the CPU, and reports its own; its fixed cells equal paper 02's, which is what the reuse gate checks.
+The reuse rests on three checks. Exact kernel scaling leaves every 16 × 16 network bit-identical to paper 02's (section 4). The arms involved have at most 4,096 states and are read by paper 02's own code. And before any tier runs, **the reuse gate** (`gates reuse`) re-runs a sample of ten reused runs, one per record file and arm kind, with paper 03's harness and requires every cell's accuracy and per-clip correctness to equal paper 02's; before this design was drafted, and again after the device and projection changes of 2026-09-24, paper 02's and paper 03's harnesses gave identical trajectories and features on the CPU, bit for bit, on all 318 combinations of the 16 × 16 arms, three seeds, two gains and two pathways that were tried, and the five samples already recorded (paper 02's tier 1: the coupled and uncoupled networks, the 8-channel bank, the spectrogram-only baseline and the GRU) reproduced every recorded cell, accuracy and per-clip correctness alike. A reused cell is marked with its source in the record's summary and cited to paper 02 in the paper. A paper 02 run is used only if it carries the seeded projection as well as the fixed one; paper 02's runs recorded before it adopted the seeded projection carry only the fixed one. If paper 02 has not recorded a planned run completely when a tier runs, paper 03 runs it itself, on the CPU, and reports its own; its fixed cells equal paper 02's, which is what the reuse gate checks.
 
 ## 9. Integrity gates
 
@@ -130,7 +128,7 @@ A failed gate stops the reporting of whatever it guards until it is fixed and th
 
 ## 10. Reporting
 
-As paper 02 reports since its change log of 2026-09-23:
+As paper 02 reports:
 
 - Every accuracy is its mean over the three seeds, with the sample standard deviation and each seed's value, in points, under the fixed projection and under the seeded one, side by side.
 - Every comparison between two arms is paired: both scored on the same 6,000 test clips at the same lattice, band mapping, channel count, noise level, input gain, seed and projection, and reported as the mean difference, its standard deviation over seeds, and a 95% interval from resampling the test clips 2,000 times.
@@ -140,27 +138,7 @@ As paper 02 reports since its change log of 2026-09-23:
 - Arm parameters and readout weights are reported separately at every width.
 - Cells taken from paper 02 are marked as such wherever they appear, and every run's device is in the record.
 
-## 11. Decisions
+## 11. Open questions
 
-Open, for the author before freezing (explained to the author on 2026-09-24; left as built until decided):
-
-1. The front end at 64 and 128 bands: the zero-padded transform behind paper 02's window (as built, section 3), or only paper 02's 16 bands mapped onto those lattices.
-2. The S4D's state count grows with its width (to 284 states per channel at 524,288 parameters), which makes it the slowest trained baseline (2.6 hours on one CPU thread at the largest size, 7 minutes on MPS); a fixed 16 states would not reproduce paper 02's width at 2,048 parameters.
-3. The carrier pathway is planned up to 32 × 32 only; paper 02's secondary reads (rotation rates) and its order task are not carried over.
-4. Scale: which of stages C to F to run, and whether to slim the design tiers further (TIERS.md gives the cost of each option).
-
-Resolved:
-
-1. Exact kernel scaling, up as well as down (the author, 23 September).
-2. Lattices 8 to 128, channels 1 to 16, both band mappings, every geometry, coupling function and pathway, designed as the full extension with the staging explicit (the author, 23 September).
-3. The same controls as paper 02 at each size, with trained baselines sized to the network (the author, 23 September).
-4. No calibration against Becker et al. (the author, 23 September).
-5. Questions only: no hypotheses and no pass or fail bars (the author, 24 September).
-6. One noise level and one input gain: 0 dB and gain 1 (32 on the carrier pathway), in every tier (the author, 24 September).
-7. GPU first: runs on CUDA, MPS or the CPU, with the CPU the only device bit-identical to paper 02 (the author, 24 September).
-8. The trained-baseline cells below 2,048 parameters are kept and flagged (the author, 24 September).
-9. Every projected read under both the fixed and a seeded projection (the author, 24 September; paper 02 adopts the same rule).
-
-## Change log
-
-Entries are added only after freezing, each with a timestamp and a reason.
+1. Paper 02's secondary reads (rotation rates) are not recorded; whether to record them is undecided.
+2. Scale: which of stages C to F to run, and whether to slim the design tiers further (TIERS.md gives the cost of each option).

@@ -2,7 +2,7 @@
 
     uv run python -m harness.confirm.summary      # write summary.json and summary.md
 
-Reported as paper 02 reports (its REGISTRATION.md change log, 2026-09-23): an
+Reported as paper 02 reports: an
 accuracy is its mean over the three seeds, the sample standard deviation and
 each seed's value, in points; a comparison A minus B is paired, matched on
 lattice, band mapping, channel count, noise level, input gain and seed, and

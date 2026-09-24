@@ -6,7 +6,7 @@ from harness.confirm import plan
 from harness.confirm import run as rn
 from harness.confirm.arms import Arm
 
-#: the run counts TIERS.md and REGISTRATION.md state (slimmed to 0 dB and input gain 1 on 2026-09-24)
+#: the run counts TIERS.md and DESIGN.md state
 COUNTS = {"gate": 30, "size": 432, "trained": 675, "design": 3375, "quadrature": 297, "carrier": 240,
           "design-quadrature": 3105, "design-carrier": 1875}
 REUSED = {"gate": 0, "size": 15, "trained": 15, "design": 75, "quadrature": 6, "carrier": 9,

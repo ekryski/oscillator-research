@@ -1,6 +1,6 @@
 # Experiment code
 
-The harness for paper 03, derived from paper 02's confirmatory harness (`papers/02-untrained-reservoirs/src/harness/confirm/`) and copied rather than imported, so each paper's record is tied to the code that made it. What each tier runs is in [TIERS.md](../TIERS.md), the design in [REGISTRATION.md](../REGISTRATION.md) (a draft, not frozen).
+The harness for paper 03, derived from paper 02's confirmatory harness (`papers/02-untrained-reservoirs/src/harness/confirm/`) and copied rather than imported, so each paper's record is tied to the code that made it. What each tier runs is in [TIERS.md](../TIERS.md), the design in [DESIGN.md](../DESIGN.md).
 
 ## Quick start
 

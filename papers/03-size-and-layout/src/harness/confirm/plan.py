@@ -13,8 +13,7 @@ cell comes from paper 02's record (`reused`), and runs the costliest first so
 the pool drains evenly. A spec that fails is logged with its traceback and
 the sweep carries on; the failure log is part of the record.
 
-This is a DRAFT plan (REGISTRATION.md is not frozen): the author may drop
-gains, pathways, geometries or lattices before it is.
+DESIGN.md states the design these tiers implement, and its open questions.
 """
 
 from __future__ import annotations
