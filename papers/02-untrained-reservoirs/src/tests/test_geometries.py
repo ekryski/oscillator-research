@@ -250,3 +250,6 @@ def test_the_cochlea_couples_most_strongly_at_the_apex():
     w = build_geometry("cochlea", 16).curvature(torch.zeros(1))
     assert w[0].item() == pytest.approx(1.0) and w[-1].item() == pytest.approx(0.25)
     assert torch.all(w[1:] < w[:-1]) and build_geometry("coil", 16).curvature(torch.zeros(1)) is None
+    # the matched control: the same shape of weighting, at the coil's average coupling
+    m = build_geometry("cochlea-matched", 16).curvature(torch.zeros(1))
+    assert m.mean().item() == pytest.approx(1.0) and torch.allclose(m / m[0], w / w[0])

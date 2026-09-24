@@ -152,7 +152,7 @@ def cochlea() -> Iterator[rn.Spec]:
     for noise in DESIGN_NOISES:
         for gain in GAINS:
             for seed in SEEDS:
-                for geometry in ("coil", "cochlea"):
+                for geometry in ("coil", "cochlea", "cochlea-matched"):
                     for coupling in PHASE_COUPLINGS:
                         for frequencies in FREQUENCIES:
                             yield rn.Spec("cochlea", "recognition", "spectrogram", noise, gain, seed,

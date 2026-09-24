@@ -27,7 +27,8 @@ coil never closes on itself.
 
 Both scalings keep the coupling ceiling a true operator-norm bound: the
 direction is applied to the kernel before its spectrum is capped, and the
-curvature weights never exceed 1. Every coupling is still a random kernel tap:
+curvature weights never exceed 1 (except in `CochleaMatched`, the control that
+matches the coil's average coupling). Every coupling is still a random kernel tap:
 the coil fixes which pairs share a tap and where the line ends, not which pairs
 couple, as every other geometry here does.
 """
@@ -102,3 +103,23 @@ class Cochlea(Coil):
             p = torch.arange(self.n, dtype=torch.float64)
             return self.APEX_RADIUS ** (p / (self.n - 1))
         return self._constant("curvature", build, like)
+
+
+class CochleaMatched(Cochlea):
+    """The cochlea with its curvature weights rescaled to average 1 rather than peak at 1.
+
+    The cochlea's weights fall from 1 at the apex to APEX_RADIUS at the base, so its
+    average coupling is about half the coil's; this control keeps the same shape of
+    weighting and the same direction but matches the coil's average coupling, so a
+    difference between it and the coil is the cochlea's mechanics and not its weaker
+    coupling. The price: its apex couples up to 1 / mean(w), about 1.85 times the
+    ceiling, so here the ceiling bounds the average coupling rather than the strongest.
+    """
+    name = "cochlea-matched"
+
+    def curvature(self, like: torch.Tensor) -> torch.Tensor:
+        def build() -> torch.Tensor:
+            p = torch.arange(self.n, dtype=torch.float64)
+            w = self.APEX_RADIUS ** (p / (self.n - 1))
+            return w / w.mean()
+        return self._constant("curvature-matched", build, like)

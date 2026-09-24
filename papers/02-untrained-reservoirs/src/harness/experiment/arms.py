@@ -69,7 +69,7 @@ class Arm:
     """One arm, fully specified. The label is its identity in the record."""
     kind: str                       # baseline | network | bank | trained
     coupling: str = "kuramoto"      # a key of CORES
-    geometry: str = "torus"         # torus | cylinder | sheet | helix | cube | sphere | coil | cochlea
+    geometry: str = "torus"         # torus | cylinder | sheet | helix | cube | sphere | coil | cochlea | cochlea-matched
     frequencies: str = "random"     # random | tonotopic | identical
     restoring: float = 0.3          # the restoring strength, lambda
     ceiling: float = 1.0            # the coupling ceiling

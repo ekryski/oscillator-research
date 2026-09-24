@@ -42,7 +42,7 @@ REFERENCE = {"coupling": "kuramoto", "geometry": "torus", "frequencies": "random
 
 _NETWORK = re.compile(r"^(coupled|uncoupled)-"
                       r"(?P<coupling>kuramoto-sakaguchi|second-harmonic|stuart-landau-fixed|stuart-landau|[a-z]+)-"
-                      r"(?P<geometry>[a-z]+)-(?P<frequencies>[a-z]+)-restoring(?P<restoring>[0-9.]+)"
+                      r"(?P<geometry>[a-z-]+?)-(?P<frequencies>random|tonotopic|identical)-restoring(?P<restoring>[0-9.]+)"
                       r"-ceiling(?P<ceiling>[0-9.]+)(?:-ch(?P<channels>\d+))?$")
 
 

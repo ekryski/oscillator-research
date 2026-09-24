@@ -280,7 +280,8 @@ def cochlea(cells: list[Cell]) -> list[dict]:
     def key(c):
         return (c.arm["coupling"], c.arm["frequencies"], c.noise, c.gain, c.width, c.n_train, replicate(c))
     out = []
-    for a, b in (("coil", "torus"), ("cochlea", "torus"), ("cochlea", "coil"), ("coil", "helix")):
+    for a, b in (("coil", "torus"), ("cochlea", "torus"), ("cochlea", "coil"), ("coil", "helix"),
+                 ("cochlea-matched", "coil"), ("cochlea-matched", "torus"), ("cochlea", "cochlea-matched")):
         out += _rows(f"lattice geometry: {a} minus {b}", "cochlea", _pair_by(of(a), of(b), key))
     return out
 
