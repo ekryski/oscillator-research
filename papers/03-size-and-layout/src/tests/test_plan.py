@@ -25,7 +25,7 @@ def test_every_tier_runs_at_0_db_and_input_gain_1_except_the_carrier_at_its_cali
     assert {s.noise_db for s in specs} == {0.0}
     assert {s.gain for s in specs if s.tier != "gate"} == {None, 1.0, plan.CARRIER_GAIN}
     assert {s.gain for s in specs if s.gain == plan.CARRIER_GAIN} and all(
-        s.drive == "carrier" for s in specs if s.gain == plan.CARRIER_GAIN)
+        s.pathway == "carrier" for s in specs if s.gain == plan.CARRIER_GAIN)
 
 
 def test_the_lattices_are_nine_and_16x16_runs_once():
@@ -47,37 +47,38 @@ def test_the_size_tier_carries_paper_02s_order_task_and_the_sequence_tier_every_
     assert sum(map(plan.reused, order)) == 75                           # paper 02's tier 1 order runs
     seq = plan.planned(["sequence"])
     assert {s.length for s in seq} == set(plan.pr.SEQUENCE_LENGTHS) and {s.task for s in seq} == {"sequence"}
-    assert not any(s.arm.kind == "ann" for s in seq)
+    assert not any(s.arm.kind == "trained" for s in seq)
 
 
 def test_a_network_records_its_rotation_rates_and_the_baseline_its_whole_clip_read():
-    assert plan.reads_for(Arm("field"), "recognition") == ("windowed", "windowed+rate")
-    assert plan.reads_for(Arm("field"), "sequence") == ("pooled", "pooled+rate")
+    assert plan.reads_for(Arm("network"), "recognition") == ("windowed", "windowed+rate")
+    assert plan.reads_for(Arm("network"), "sequence") == ("pooled", "pooled+rate")
     assert plan.reads_for(Arm("bank"), "order") == ("pooled",)
-    assert plan.reads_for(Arm("floor"), "recognition") == ("windowed", "windowed@wholeclip")
+    assert plan.reads_for(Arm("baseline"), "recognition") == ("windowed", "windowed@wholeclip")
 
 
 def test_the_reused_cells_are_paper_02s_16x16_4_channel_runs_under_their_own_ids():
-    s = rn.Spec("size", "recognition", "envelope", 0.0, 1.0, 2, Arm("field"))
-    assert plan.paper02_group(s) == "tier1-recognition-envelope"
-    assert s.run_id() == "A/0db/g1/s2/field-kuramoto-torus-random-lam0.3-clamp1"
-    wide = rn.Spec("size", "recognition", "envelope", 0.0, 1.0, 2, Arm("bank", channels=8))
-    assert plan.paper02_group(wide) == "tier1-recognition-envelope"      # paper 02's width-matched bank
-    d = rn.Spec("design", "recognition", "envelope", 5.0, 2.0, 0, Arm("field", physics="harmonic2", boundary="helix"))
-    assert plan.paper02_group(d) == "tier2-recognition-envelope-harmonic2"
-    for arm in (Arm("field", channels=8), Arm("field", grid=32), Arm("field", severed=True, physics="winfree"),
-                Arm("bank", channels=2), Arm("ann", arch="gru", channels=8)):
-        assert plan.paper02_group(rn.Spec("size", "recognition", "envelope", 0.0, 1.0, 0, arm)) is None
-    q = rn.Spec("design-quadrature", "recognition", "quadrature", 0.0, 1.0, 0, Arm("field", physics="winfree"))
+    s = rn.Spec("size", "recognition", "spectrogram", 0.0, 1.0, 2, Arm("network"))
+    assert plan.paper02_group(s) == "tier1-recognition-spectrogram"
+    assert s.run_id() == "A/0db/g1/s2/coupled-kuramoto-torus-random-restoring0.3-ceiling1"
+    wide = rn.Spec("size", "recognition", "spectrogram", 0.0, 1.0, 2, Arm("bank", channels=8))
+    assert plan.paper02_group(wide) == "tier1-recognition-spectrogram"      # paper 02's width-matched bank
+    assert wide.run_id() == "A/0db/g1/s2/bank-width"
+    d = rn.Spec("design", "recognition", "spectrogram", 5.0, 2.0, 0, Arm("network", coupling="second-harmonic", geometry="helix"))
+    assert plan.paper02_group(d) == "tier2-recognition-spectrogram-second-harmonic"
+    for arm in (Arm("network", channels=8), Arm("network", grid=32), Arm("network", coupled=False, coupling="winfree"),
+                Arm("bank", channels=2), Arm("trained", arch="gru", channels=8)):
+        assert plan.paper02_group(rn.Spec("size", "recognition", "spectrogram", 0.0, 1.0, 0, arm)) is None
+    q = rn.Spec("design-quadrature", "recognition", "quadrature", 0.0, 1.0, 0, Arm("network", coupling="winfree"))
     assert plan.paper02_group(q) == "tier3-recognition-quadrature"
     assert plan.paper02_group(rn.Spec("design-quadrature", "recognition", "quadrature", 0.0, 1.0, 0,
-                                      Arm("field", physics="winfree", boundary="cube"))) is None
+                                      Arm("network", coupling="winfree", geometry="cube"))) is None
 
 
 def test_the_largest_arms_are_streamed_and_everything_paper_02_ran_is_not():
     specs = plan.planned(["size"])
     assert not any(s.streamed for s in specs if plan.reused(s))
-    assert all(s.streamed for s in specs if s.arm.kind != "floor" and s.arm.states > 4096)
+    assert all(s.streamed for s in specs if s.arm.kind != "baseline" and s.arm.states > 4096)
 
 
 def test_a_stage_selects_lattices_and_channels_without_changing_a_spec():
@@ -102,17 +103,17 @@ def _cell(read, width, effective, acc, projection=None):
 def test_paper_02s_untagged_cells_and_its_projection_tier_are_read_together(tmp_path, monkeypatch):
     import json
     monkeypatch.setattr(plan, "PAPER02_RECORD", tmp_path)
-    s = rn.Spec("size", "recognition", "envelope", 0.0, 1.0, 0, Arm("field"), reads=("windowed",))
+    s = rn.Spec("size", "recognition", "spectrogram", 0.0, 1.0, 0, Arm("network"), reads=("windowed",))
     old = {"native_widths": {"windowed": 24576, "pooled": 6144},
            "cells": [_cell("windowed", 192, 192, 0.78), _cell("windowed", "native", 24576, 0.81),
                      _cell("pooled", 192, 192, 0.70)]}
-    (tmp_path / "tier1-recognition-envelope.json").write_text(json.dumps({"runs": {s.run_id(): old}}))
+    (tmp_path / "tier1-recognition-spectrogram.json").write_text(json.dumps({"runs": {s.run_id(): old}}))
     rec = plan.paper02_run(s)
     assert [c["projection"] for c in rec["cells"]] == ["fixed", "none", "fixed"]
     assert not plan.paper02_complete(s, rec), "paper 02's tier 1 alone has no seeded projection"
     again = {"cells": [_cell("windowed", 192, 192, 0.78, "fixed"), _cell("windowed", 192, 192, 0.77, "seeded"),
                        _cell("windowed", "native", 24576, 0.81, "none")]}
-    (tmp_path / "projection-recognition-envelope.json").write_text(json.dumps({"runs": {s.run_id(): again}}))
+    (tmp_path / "projection-recognition-spectrogram.json").write_text(json.dumps({"runs": {s.run_id(): again}}))
     rec = plan.paper02_run(s)
     assert sorted((c["read"], str(c["width"]), c["projection"]) for c in rec["cells"]) == [
         ("pooled", "192", "fixed"), ("windowed", "192", "fixed"), ("windowed", "192", "seeded"),
@@ -124,9 +125,9 @@ def test_paper_02s_untagged_cells_and_its_projection_tier_are_read_together(tmp_
 def test_a_paper_02_run_with_no_projected_read_needs_no_seeded_cell(tmp_path, monkeypatch):
     import json
     monkeypatch.setattr(plan, "PAPER02_RECORD", tmp_path)
-    s = rn.Spec("size", "recognition", "envelope", 0.0, None, 0, Arm("floor"), reads=("windowed",))
+    s = rn.Spec("size", "recognition", "spectrogram", 0.0, None, 0, Arm("baseline"), reads=("windowed",))
     old = {"native_widths": {"windowed": 192}, "cells": [_cell("windowed", 192, 192, 0.78)]}
-    (tmp_path / "tier1-recognition-envelope.json").write_text(json.dumps({"runs": {s.run_id(): old}}))
+    (tmp_path / "tier1-recognition-spectrogram.json").write_text(json.dumps({"runs": {s.run_id(): old}}))
     assert plan.paper02_complete(s, plan.paper02_run(s))
 
 
@@ -135,12 +136,23 @@ def test_prepare_builds_every_row_cache_a_run_reads_and_no_other():
     wanted = set()
     for s in plan.planned([t for t in plan.TIERS if t != "gate"]):
         a = s.arm
-        if s.drive == "carrier":
+        if s.pathway == "carrier":
             continue
         if s.task == "recognition":
-            wanted.add(plan.pr.rows_path(s.drive, s.noise_db, a.n_bands, a.n_window))
+            wanted.add(plan.pr.rows_path(s.pathway, s.noise_db, a.n_bands, a.n_window))
         else:
             for code in (0, s.seed + 1):
                 wanted.add(plan.pr.order_rows_path(s.pair, code, s.noise_db, a.n_bands) if s.task == "order"
                            else plan.pr.sequence_rows_path(s.length, code, s.noise_db, a.n_bands))
     assert wanted == paths
+
+
+def test_paper_02s_own_record_is_read_under_its_labels_where_it_is_present():
+    """Against paper 02's record itself (papers/02-untrained-reservoirs/results/, or OSC_PAPER02_RESULTS)."""
+    if not (plan.PAPER02_RECORD / "tier1-recognition-spectrogram.json").exists():
+        pytest.skip("paper 02's renamed record is not here; set OSC_PAPER02_RESULTS to its results/")
+    for arm in (Arm("network"), Arm("network", coupled=False), Arm("bank", channels=8), Arm("baseline")):
+        s = rn.Spec("size", "recognition", "spectrogram", 0.0, None if arm.kind == "baseline" else 1.0, 0, arm)
+        rec = plan.paper02_run(s)
+        assert rec is not None and rec["spec"]["pathway"] == "spectrogram" and rec["spec"]["arm"]["kind"] == arm.kind
+        assert {c["projection"] for c in rec["cells"]} <= {"fixed", "seeded", "none"}

@@ -38,11 +38,11 @@ from harness.stimuli.frontend import HOP_N_FFT, hop_num_frames, hop_rows, hop_ro
 from harness.utils.paths import AUDIOMNIST_DIR, CACHE_DIR
 
 BANK_PATH = CACHE_DIR / "digits_v2.pt"
-#: every repetition AudioMNIST has; the exploratory bank kept 20
+#: every repetition AudioMNIST has
 REPS = 50
 SPEAKERS = tuple(range(1, 61))
 DIGITS = tuple(range(10))
-#: int16 back to float, the scale the exploratory samplers used
+#: int16 back to float
 INT16_SCALE = 32767.0
 
 TRAIN_SPEAKERS = tuple(range(1, 49))
@@ -85,8 +85,8 @@ NOISE_LEVEL_OFFSET, NOISE_LEVEL_SCALE, NOISE_UID_STRIDE = 1000, 10, 10_007
 def build_bank(root: Path = AUDIOMNIST_DIR, out: Path = BANK_PATH, reps: int = REPS) -> dict:
     """AudioMNIST -> one tensor of clips, in canonical speaker, digit, rep order.
 
-    Each recording is processed by `load_clip`, the exploratory bank's own
-    function, so a recording in both banks is bit-identical in both.
+    Each recording is trimmed, normalized and padded by `load_clip`, as paper 02 builds its bank, so the
+    two banks are the same file.
     """
     n = len(SPEAKERS) * len(DIGITS) * reps
     waves = torch.zeros(n, DIGIT_MAX_SAMPLES, dtype=torch.int16)
@@ -163,18 +163,18 @@ def add_noise(waves: torch.Tensor, lens: torch.Tensor, clip_ids: torch.Tensor,
     return waves + noise * (rms * 10.0 ** (noise_db / 20.0))[:, None]
 
 
-def front_end(waves: torch.Tensor, drive: str, grid: int = 16, window: int = HOP_N_FFT) -> torch.Tensor:
+def front_end(waves: torch.Tensor, pathway: str, grid: int = 16, window: int = HOP_N_FFT) -> torch.Tensor:
     """The fixed, parameter-free front end of each input pathway, at `grid` bands and an analysis
     window of `window` samples (the band-energy and quadrature pathways; the carrier has no window)."""
-    if drive == "envelope":
+    if pathway == "spectrogram":
         return hop_rows(waves, grid, window=window)
-    if drive == "quadrature":
+    if pathway == "quadrature":
         return hop_rows_quad(waves, grid, window=window)
-    if drive == "carrier":
+    if pathway == "carrier":
         if window != HOP_N_FFT:
             raise ValueError("the carrier pathway has no analysis window")
         return bandpass_rows(waves, grid)
-    raise ValueError(f"unknown drive '{drive}'")
+    raise ValueError(f"unknown pathway '{pathway}'")
 
 
 def to_rows(rows: torch.Tensor, grid: int) -> torch.Tensor:
@@ -196,9 +196,9 @@ def to_rows(rows: torch.Tensor, grid: int) -> torch.Tensor:
     raise ValueError(f"cannot map {bands} bands onto {grid} rows")
 
 
-def valid_frames(lens: torch.Tensor, drive: str) -> torch.Tensor:
+def valid_frames(lens: torch.Tensor, pathway: str) -> torch.Tensor:
     """How many of each clip's rows hold speech: hop frames, or samples for the carrier."""
-    if drive == "carrier":
+    if pathway == "carrier":
         return lens.clone()
     return torch.tensor([hop_num_frames(int(n)) for n in lens])
 
@@ -341,7 +341,7 @@ def recognition_clips(bank: dict, idx: torch.Tensor, noise_db: float | None):
 # ---------------------------------------------------------------------------
 #
 # A clip's front-end rows depend only on the clip and the noise level, so they
-# are computed once per (drive, level), saved, and memory-mapped by every run.
+# are computed once per (pathway, level), saved, and memory-mapped by every run.
 # That saves each run its noise draws and front end, and it means every run
 # reads bit-identical rows: nothing depends on how a run happened to batch.
 # The carrier's rows are 16,000 frames a clip and are always computed on the fly.
@@ -349,17 +349,17 @@ def recognition_clips(bank: dict, idx: torch.Tensor, noise_db: float | None):
 ROWS_DIR = CACHE_DIR / "rows"
 #: clips per batch while building a cache
 CACHE_BATCH = 1024
-CACHED_DRIVES = ("envelope", "quadrature")
+CACHED_PATHWAYS = ("spectrogram", "quadrature")
 
 
 def level_name(noise_db: float | None) -> str:
     return "clean" if noise_db is None else f"{noise_db:g}db"
 
 
-def rows_path(drive: str, noise_db: float | None, bands: int = 16, window: int = HOP_N_FFT) -> Path:
-    """The cache for a drive, level, band count and window; 16 bands keep paper 02's file name."""
+def rows_path(pathway: str, noise_db: float | None, bands: int = 16, window: int = HOP_N_FFT) -> Path:
+    """The cache for a pathway, level, band count and window; 16 bands keep paper 02's file name."""
     size = ("" if bands == 16 else f"-{bands}bands") + ("" if window == HOP_N_FFT else f"-w{window}")
-    return ROWS_DIR / f"{drive}{size}-{level_name(noise_db)}.pt"
+    return ROWS_DIR / f"{pathway}{size}-{level_name(noise_db)}.pt"
 
 
 def _save(out: Path, rows: torch.Tensor, tvalid: torch.Tensor, **meta) -> None:
@@ -369,20 +369,20 @@ def _save(out: Path, rows: torch.Tensor, tvalid: torch.Tensor, **meta) -> None:
     tmp.replace(out)                    # atomic: a reader never sees half a cache
 
 
-def build_rows(bank: dict, drive: str, noise_db: float | None, bands: int = 16, window: int = HOP_N_FFT) -> Path:
+def build_rows(bank: dict, pathway: str, noise_db: float | None, bands: int = 16, window: int = HOP_N_FFT) -> Path:
     """Front-end rows for every clip in the bank, in canonical order."""
     n = len(bank["labels"])
     rows = tvalid = None
     for a in range(0, n, CACHE_BATCH):
         idx = torch.arange(a, min(a + CACHE_BATCH, n))
         waves, lens, _ = recognition_clips(bank, idx, noise_db)
-        r = front_end(waves, drive, bands, window)
+        r = front_end(waves, pathway, bands, window)
         if rows is None:
             rows = torch.empty((n, *r.shape[1:]))
             tvalid = torch.empty(n, dtype=torch.long)
-        rows[idx], tvalid[idx] = r, valid_frames(lens, drive)
-    out = rows_path(drive, noise_db, bands, window)
-    _save(out, rows, tvalid, n_clips=n, drive=drive, noise_db=noise_db, bands=bands, window=window)
+        rows[idx], tvalid[idx] = r, valid_frames(lens, pathway)
+    out = rows_path(pathway, noise_db, bands, window)
+    _save(out, rows, tvalid, n_clips=n, pathway=pathway, noise_db=noise_db, bands=bands, window=window)
     return out
 
 
@@ -412,8 +412,8 @@ def build_order_rows(bank: dict, pair: tuple[int, int], set_code: int, noise_db:
     for a in range(0, n, CACHE_BATCH):
         waves, lens = order_clips(bank, first[a:a + CACHE_BATCH], second[a:a + CACHE_BATCH],
                                   pair, set_code, a, noise_db)
-        rows.append(front_end(waves, "envelope", bands))
-        tvalid.append(valid_frames(lens, "envelope"))
+        rows.append(front_end(waves, "spectrogram", bands))
+        tvalid.append(valid_frames(lens, "spectrogram"))
     out = order_rows_path(pair, set_code, noise_db, bands)
     _save(out, torch.cat(rows), torch.cat(tvalid), labels=labels, n_clips=n)
     return out
@@ -427,8 +427,8 @@ def build_sequence_rows(bank: dict, length: int, set_code: int, noise_db: float 
     rows, tvalid = [], []
     for a in range(0, n, CACHE_BATCH):
         waves, lens = sequence_clips(bank, idx[a:a + CACHE_BATCH], length, set_code, a, noise_db)
-        rows.append(front_end(waves, "envelope", bands))
-        tvalid.append(valid_frames(lens, "envelope"))
+        rows.append(front_end(waves, "spectrogram", bands))
+        tvalid.append(valid_frames(lens, "spectrogram"))
     out = sequence_rows_path(length, set_code, noise_db, bands)
     _save(out, torch.cat(rows), torch.cat(tvalid), labels=digits, n_clips=n)
     return out

@@ -1,61 +1,71 @@
 """The paper's terms for the record's labels, in one place.
 
-The record keeps paper 02's labels (`floor`, `field-...`, `severed-...`,
-`bank-c4`, `ann-gru`, `envelope`), because they are the runs' identities and
-because paper 03 takes cells from paper 02's record under the same ones.
-Everything people read (tables, figures, the summary report) names things
-with the terms the paper's glossary defines (Appendix A), and gets them from
-here. The same mapping is tabulated in src/README.md.
+The record's labels follow the paper's glossary (Appendix A) in short form,
+exactly as paper 02's do: `baseline`,
+`coupled-kuramoto-torus-random-restoring0.3-ceiling1`, `uncoupled-...`,
+`bank-state`, `bank-width`, `trained-gru`, the `spectrogram` pathway. Paper 03
+takes cells from paper 02's record under the same labels. Everything people
+read (tables, figures, the summary report) names things in full with the words
+defined here, so no two places can drift apart. The same mapping is tabulated
+in src/README.md.
 
-Paper 03's labels add four suffixes to paper 02's: `-c<C>` for a channel
-count other than 4, `-<G>x<G>` for a lattice other than 16 x 16, `-16bands`
-when paper 02's 16 mel bands are mapped onto the lattice's rows rather than
-one band driving each row, and `-w<N>` for an analysis window of N samples
-other than paper 02's 512. A trained baseline carries the suffixes of the
-network it is sized to.
+Paper 03's labels extend paper 02's with its size, in this order and only
+where it is not paper 02's: `-ch<C>` for a channel count other than 4 (a bank
+names its channels in its base label: `bank-state` is 4 channels, `bank-width`
+8, `bank-ch<C>` any other), `-<G>x<G>` for a lattice other than 16 x 16,
+`-16bands` when paper 02's 16 mel bands are mapped onto the lattice's rows
+rather than one band driving each row, and `-w<N>` for an analysis window of N
+samples other than paper 02's 512. A trained baseline carries the suffixes of
+the network it is sized to. So `coupled-kuramoto-torus-random-restoring0.3-
+ceiling1-ch16-64x64-w1024` is the reference network at 16 channels of a
+64 x 64 lattice, one band per row, under a 1,024-sample window.
 """
 
 from __future__ import annotations
 
 import re
 
-#: arms named by kind
+#: arms named by base label
 ARMS = {
-    "floor": "spectrogram-only baseline",
-    "ann-gru": "GRU",
-    "ann-tcn": "TCN",
-    "ann-cnn": "CNN",
-    "ann-transformer": "transformer",
-    "ann-s4d": "S4D",
+    "baseline": "spectrogram-only baseline",
+    "trained-gru": "GRU",
+    "trained-tcn": "TCN",
+    "trained-cnn": "CNN",
+    "trained-transformer": "transformer",
+    "trained-s4d": "S4D",
 }
 
 #: the design factors, as the Arm fields name them
-FACTORS = {"physics": "coupling function", "boundary": "lattice geometry", "omega": "natural frequencies",
-           "damping": "restoring strength", "clamp": "coupling ceiling", "channels": "channels",
-           "grid": "lattice", "bands": "band mapping"}
+FACTORS = {"coupling": "coupling function", "geometry": "lattice geometry", "frequencies": "natural frequencies",
+           "restoring": "restoring strength", "ceiling": "coupling ceiling", "channels": "channels",
+           "grid": "lattice", "bands": "band mapping", "window": "analysis window"}
 
 #: a factor's levels
 LEVELS = {
-    "kuramoto": "Kuramoto", "sakaguchi": "Kuramoto–Sakaguchi", "harmonic2": "second harmonic",
-    "winfree": "Winfree", "sl": "Stuart–Landau", "sl-fixedamp": "Stuart–Landau, fixed amplitude",
-    "random": "random", "designed": "tonotopic", "uniform": "identical",
+    "kuramoto": "Kuramoto", "kuramoto-sakaguchi": "Kuramoto–Sakaguchi", "second-harmonic": "second harmonic",
+    "winfree": "Winfree", "stuart-landau": "Stuart–Landau", "stuart-landau-fixed": "Stuart–Landau, fixed amplitude",
+    "random": "random", "tonotopic": "tonotopic", "identical": "identical",
 }
 
-#: the input pathways, as the record names them
-PATHWAYS = {"envelope": "band-energy", "quadrature": "quadrature", "carrier": "carrier"}
+#: the input pathways
+PATHWAYS = {"spectrogram": "spectrogram", "quadrature": "quadrature", "carrier": "carrier"}
 
 #: paper 02's reference configuration of the coupled network, and its size
-REFERENCE = {"physics": "kuramoto", "boundary": "torus", "omega": "random", "damping": 0.3, "clamp": 1.0}
+REFERENCE = {"coupling": "kuramoto", "geometry": "torus", "frequencies": "random", "restoring": 0.3, "ceiling": 1.0}
 CHANNELS, GRID = 4, 16
+#: a bank's channel count, by its base label
+BANK_CHANNELS = {"bank-state": 4, "bank-width": 8}
 
-_SUFFIX = re.compile(r"^(?P<base>.*?)(?:-c(?P<channels>\d+))?(?:-(?P<grid>\d+)x\d+)?(?:-(?P<bands>\d+)bands)?"
+_SUFFIX = re.compile(r"^(?P<base>.*?)(?:-ch(?P<channels>\d+))?(?:-(?P<grid>\d+)x\d+)?(?:-(?P<bands>\d+)bands)?"
                      r"(?:-w(?P<window>\d+))?$")
-_OSCILLATORS = re.compile(r"^(field|severed)-(?P<physics>sl-fixedamp|[a-z0-9]+)-(?P<boundary>[a-z]+)-"
-                          r"(?P<omega>[a-z]+)-lam(?P<damping>[0-9.]+)-clamp(?P<clamp>[0-9.]+)$")
+_NETWORK = re.compile(r"^(coupled|uncoupled)-"
+                      r"(?P<coupling>kuramoto-sakaguchi|second-harmonic|stuart-landau-fixed|stuart-landau|[a-z]+)-"
+                      r"(?P<geometry>[a-z]+)-(?P<frequencies>[a-z]+)-restoring(?P<restoring>[0-9.]+)"
+                      r"-ceiling(?P<ceiling>[0-9.]+)$")
 
 
 def level(value) -> str:
-    """A factor level in the paper's words: 'designed' -> 'tonotopic', 0.3 -> '0.3'."""
+    """A factor level in the paper's words: 'second-harmonic' -> 'second harmonic', 0.3 -> '0.3'."""
     return LEVELS.get(value, value) if isinstance(value, str) else f"{value:g}"
 
 
@@ -76,15 +86,18 @@ def rows_text(grid: int, bands: int | None) -> str:
 
 
 def split(label: str) -> tuple[str, int, int, int | None]:
-    """(base label, channels, grid, mapped bands or None) of a record label."""
+    """(base label, channels, grid, mapped bands or None) of a record label. A bank's base is "bank"."""
     m = _SUFFIX.match(label)
-    base = m["base"]
-    if m["window"]:
-        base = base.removesuffix(f"-w{m['window']}")
-    if base.startswith("bank") and m["channels"]:
-        return "bank", int(m["channels"]), int(m["grid"] or GRID), int(m["bands"]) if m["bands"] else None
-    return (base, int(m["channels"] or CHANNELS), int(m["grid"] or GRID),
-            int(m["bands"]) if m["bands"] else None)
+    base, channels = m["base"], int(m["channels"]) if m["channels"] else CHANNELS
+    if base in BANK_CHANNELS:                    # bank-state, bank-width; bank-ch<C> parses as it stands
+        base, channels = "bank", BANK_CHANNELS[base]
+    return base, channels, int(m["grid"] or GRID), int(m["bands"]) if m["bands"] else None
+
+
+def window_of(label: str) -> int | None:
+    """The analysis window a label names, in samples, or None for paper 02's 512."""
+    m = _SUFFIX.match(label)
+    return int(m["window"]) if m["window"] else None
 
 
 def _size(channels: int, grid: int, bands: int | None, always: bool = False) -> list[str]:
@@ -94,12 +107,6 @@ def _size(channels: int, grid: int, bands: int | None, always: bool = False) -> 
         parts.append(channels_text(channels))
         parts.append(lattice_text(grid, bands) if (grid != GRID or bands) else f"{GRID} × {GRID} lattice")
     return parts
-
-
-def window_of(label: str) -> int | None:
-    """The analysis window a label names, in samples, or None for paper 02's 512."""
-    m = _SUFFIX.match(label)
-    return int(m["window"]) if m["window"] else None
 
 
 def arm(label: str, tier: str | None = None) -> str:
@@ -118,27 +125,27 @@ def _arm(label: str) -> str:
     Paper 02's reference network at paper 02's size is named plainly; any
     other configuration names the factors where it departs from it. Every
     leaky-integrator bank in paper 03 is state-matched to the network with
-    its own channel count and lattice (paper 02's `bank-c8`, its width-matched
-    bank, is paper 03's state-matched bank at 8 channels). A trained baseline
-    is named with the network it is sized to.
+    its own channel count and lattice (`bank-width`, paper 02's width-matched
+    bank of the 4-channel network, is the state-matched bank of 8 channels). A
+    trained baseline is named with the network it is sized to.
     """
     base, channels, grid, bands = split(label)
     if base == "bank":
         return f"leaky-integrator bank, state-matched ({', '.join(_size(channels, grid, bands, always=True))})"
-    if base == "floor":
+    if base == "baseline":
         return ARMS[base] + (f" ({rows_text(grid, bands)})" if (grid != GRID or bands) else "")
     if base in ARMS:
         extra = _size(channels, grid, bands)
         return ARMS[base] + (f" (sized to {', '.join(extra)})" if extra else "")
-    m = _OSCILLATORS.match(base)
+    m = _NETWORK.match(base)
     if not m:
         return label
-    name = "uncoupled oscillator network" if label.startswith("severed") else "coupled oscillator network"
-    parts = [level(m["physics"]) if m["physics"] != REFERENCE["physics"] else "",
-             m["boundary"] if m["boundary"] != REFERENCE["boundary"] else "",
-             f"{level(m['omega'])} ω" if m["omega"] != REFERENCE["omega"] else "",
-             f"λ {m['damping']}" if float(m["damping"]) != REFERENCE["damping"] else "",
-             f"ceiling {m['clamp']}" if float(m["clamp"]) != REFERENCE["clamp"] else "",
+    name = "uncoupled oscillator network" if label.startswith("uncoupled") else "coupled oscillator network"
+    parts = [level(m["coupling"]) if m["coupling"] != REFERENCE["coupling"] else "",
+             m["geometry"] if m["geometry"] != REFERENCE["geometry"] else "",
+             f"{level(m['frequencies'])} ω" if m["frequencies"] != REFERENCE["frequencies"] else "",
+             f"λ {m['restoring']}" if float(m["restoring"]) != REFERENCE["restoring"] else "",
+             f"ceiling {m['ceiling']}" if float(m["ceiling"]) != REFERENCE["ceiling"] else "",
              *_size(channels, grid, bands)]
     parts = [p for p in parts if p]
     return name + (f" ({', '.join(parts)})" if parts else "")

@@ -27,14 +27,14 @@ SEEDS = (0, 1, 2)
 def _arms_16():
     """Every 16 x 16 network either paper runs: every coupling function, geometry, channel count and
     ceiling, and paper 02's restoring strengths and natural frequencies (they draw nothing extra)."""
-    for family, shape in plan.designs():
+    for coupling, geometry in plan.designs():
         for channels in plan.CHANNELS:
-            for clamp in (1.0, 0.5):
-                yield am.Arm("field", physics=family, boundary=shape, channels=channels, clamp=clamp)
+            for ceiling in (1.0, 0.5):
+                yield am.Arm("network", coupling=coupling, geometry=geometry, channels=channels, ceiling=ceiling)
 
 
 def _operator(arm: am.Arm, seed: int, scaling: str, impl: str) -> torch.Tensor:
-    net = am.build_frozen(arm, 1.0, seed, kernel_scaling=scaling)
+    net = am.build_untrained(arm, 1.0, seed, kernel_scaling=scaling)
     block = physics_block(net.core)
     if hasattr(block, "coupling_impl"):
         block.coupling_impl = impl
@@ -46,20 +46,20 @@ def _operator(arm: am.Arm, seed: int, scaling: str, impl: str) -> torch.Tensor:
 @pytest.mark.parametrize("arm", list(_arms_16()), ids=lambda a: a.label())
 def test_at_16x16_exact_scaling_is_paper_02s_bit_for_bit(arm):
     for seed in SEEDS:
-        net = am.build_frozen(arm, 1.0, seed)
-        assert (physics_block(net.core).peaks() > arm.clamp).all(), "the ceiling binds on every channel"
+        net = am.build_untrained(arm, 1.0, seed)
+        assert (physics_block(net.core).peaks() > arm.ceiling).all(), "the ceiling binds on every channel"
         for impl in ("matmul", "fft"):
             exact, cap = _operator(arm, seed, "exact", impl), _operator(arm, seed, "cap", impl)
             assert torch.equal(exact, cap), (arm.label(), seed, impl)
 
 
-@pytest.mark.parametrize("physics,boundary", [("kuramoto", "torus"), ("winfree", "sheet"), ("sl", "torus")])
-def test_at_16x16_the_whole_trajectory_is_paper_02s_bit_for_bit(physics, boundary):
-    arm = am.Arm("field", physics=physics, boundary=boundary)
+@pytest.mark.parametrize("coupling,geometry", [("kuramoto", "torus"), ("winfree", "sheet"), ("stuart-landau", "torus")])
+def test_at_16x16_the_whole_trajectory_is_paper_02s_bit_for_bit(coupling, geometry):
+    arm = am.Arm("network", coupling=coupling, geometry=geometry)
     rows = torch.rand(3, 30, 16, generator=torch.Generator().manual_seed(4)) * 1.5
     with torch.no_grad():
-        exact = am.build_frozen(arm, 2.0, 1)._scan(rows)
-        cap = am.build_frozen(arm, 2.0, 1, kernel_scaling="cap")._scan(rows)
+        exact = am.build_untrained(arm, 2.0, 1)._scan(rows)
+        cap = am.build_untrained(arm, 2.0, 1, kernel_scaling="cap")._scan(rows)
     assert torch.equal(exact, cap)
 
 
@@ -76,11 +76,11 @@ def test_on_8x8_the_old_rule_left_most_kernels_weaker_than_the_ceiling():
     peaks = []
     for channels in plan.CHANNELS:
         for seed in SEEDS:
-            peaks += physics_block(am.build_frozen(am.Arm("field", channels=channels, grid=8), 1.0, seed).core
+            peaks += physics_block(am.build_untrained(am.Arm("network", channels=channels, grid=8), 1.0, seed).core
                                    ).peaks().tolist()
     below = sum(p < 1.0 for p in peaks) / len(peaks)
     assert 0.5 < below < 1.0 and 0.7 < sorted(peaks)[len(peaks) // 2] < 0.9
-    arm = am.Arm("field", grid=8)
+    arm = am.Arm("network", grid=8)
     assert not torch.equal(_operator(arm, 0, "exact", "fft"), _operator(arm, 0, "cap", "fft"))
 
 

@@ -7,13 +7,11 @@ ridge whose penalty is chosen on the last eighth of the training set. An arm is
 never read wider than it is: a width at or above its native width reads it
 unprojected. The native read itself is also fitted, at the sizes a run asks for.
 
-The ridge is the exploratory one, `harness.measurement.probe.fit_ridge_probe`,
-restated so it scales: that one always solves the N x N kernel system, which at
-24,000 clips is a 4.6 GB matrix. This one solves whichever of the two
-equivalent systems is smaller, primal D x D or dual N x N, and is tested
-against the original for identical choices and accuracies.
+The ridge is paper 02's. It solves whichever of the two equivalent systems
+is smaller, primal D x D or dual N x N, so it never forms the N x N kernel
+matrix of a large training set (4.6 GB at 24,000 clips).
 
-A read may be a list of feature blocks (the field's statistics, then its
+A read may be a list of feature blocks (a network's statistics, then its
 rotation rates). Blocks are projected piecewise, so a composite read never has
 to be copied into one matrix.
 
@@ -38,7 +36,7 @@ import torch.nn.functional as F
 
 from harness.measurement.features import PROJECTIONS, projection_matrix
 
-#: ridge penalties, scaled by the number of fitted clips, as in the exploratory phase
+#: ridge penalties, scaled by the number of fitted clips, paper 02's
 LAMBDAS = (1e-3, 1e-2, 1e-1, 1.0)
 #: the share of a training set held out to choose the penalty
 VAL_FRAC = 0.125
@@ -79,7 +77,7 @@ def projection_of(cell: dict, rec: dict) -> str:
 
 
 def pack(correct: torch.Tensor) -> str:
-    """Per-clip correctness as base64 bits, so a verdict can be bootstrapped later."""
+    """Per-clip correctness as base64 bits, so a difference can be bootstrapped over clips later."""
     return base64.b64encode(np.packbits(correct.cpu().numpy().astype(np.uint8)).tobytes()).decode()
 
 
@@ -159,7 +157,7 @@ def _solve_dual(z: torch.Tensor, k: torch.Tensor, y1h: torch.Tensor, lam: float)
 def ridge(x_tr: torch.Tensor, y_tr: torch.Tensor, x_te: torch.Tensor, y_te: torch.Tensor,
           n_classes: int, x_val: torch.Tensor | None = None, y_val: torch.Tensor | None = None,
           lambdas: tuple[float, ...] = LAMBDAS, val_frac: float = VAL_FRAC) -> dict:
-    """The exploratory ridge, solved in whichever form is smaller.
+    """Paper 02's ridge, solved in whichever form is smaller.
 
     Standardize by the training rows' statistics; hold out the last `val_frac`
     of them (or use an explicit validation set) to choose the penalty, ties

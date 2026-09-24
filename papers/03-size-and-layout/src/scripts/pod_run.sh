@@ -15,10 +15,12 @@
 #
 # With tiers: the first argument is the AudioMNIST checkout on the attached
 # volume (the folder that holds data/01 ... data/60). The script builds the
-# bank and the row caches, runs the reuse gate (paper 02's 16 x 16 cells must
-# reproduce, on the CPU), then the tiers. Every step is resume-safe. Results
-# land in papers/03-size-and-layout/results/; the rsync lines to
-# copy them back are printed at the end.
+# bank and the row caches, runs the reuse check (paper 02's 16 x 16 cells
+# re-run on the CPU and compared with its record, read from the clone's
+# papers/02-untrained-reservoirs/results/ or from OSC_PAPER02_RESULTS), then
+# the tiers. Every step is resume-safe. Results land in
+# papers/03-size-and-layout/results/; the rsync lines to copy them back are
+# printed at the end.
 #
 # Pod: one GPU, 32 or more vCPUs, 64 GB or more RAM. 24 GB of GPU memory is
 # enough off the carrier pathway; a carrier batch of 32 clips at 1,024 states
@@ -75,7 +77,7 @@ fi
 if [ "${#TIERS[@]}" -gt 0 ]; then
     [ -f data/cache/digits_v2.pt ] || uv run python -m harness.experiment.protocol --build-bank
     uv run python -m harness.experiment.plan prepare --workers "$(( CPUS < 16 ? CPUS : 16 ))"
-    uv run python -m harness.experiment.gates reuse            # always on the CPU, the only device bit-identical to paper 02
+    uv run python -m harness.experiment.gates reuse            # on the CPU, the only device bit-identical to paper 02
     for tier in "${TIERS[@]}"; do
         case "$tier" in
             carrier|design-carrier) W=2; T=4 ;;                               # 16,000 steps a clip

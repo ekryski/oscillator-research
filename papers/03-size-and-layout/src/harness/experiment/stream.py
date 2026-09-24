@@ -88,7 +88,7 @@ def channel_projection(native: int, c: int, rows: int, width: int, seed: int | N
 def streamed_read(arm: am.Arm, model: torch.nn.Module, blocks: Callable[[int, int], Iterator],
                   n_train: int, n_test: int, widths: tuple[int, ...], task: str, seed: int, device: str = "cpu",
                   projection: Callable[..., torch.Tensor] | None = None, read: str | None = None,
-                  drive: str | None = None,
+                  pathway: str | None = None,
                   ) -> tuple[dict[str, tuple[torch.Tensor, torch.Tensor]], int, dict[str, torch.Tensor]]:
     """One read of a large arm: ({projection: (projected training features, projected test
     features)}, native width, {instrument: per test clip}).
@@ -101,12 +101,12 @@ def streamed_read(arm: am.Arm, model: torch.nn.Module, blocks: Callable[[int, in
     the caller's. `projection(native, c, rows, width, seed)` gives channel c's
     rows of the fixed (seed None) or the seeded matrix; the default is the
     streamed read's own draw, and a test passes paper 02's rows instead. With
-    `drive` given and a network arm, the network's instruments
-    (`arms.field_instruments`) are recorded over the test clips, channel by
+    `pathway` given and a network arm, the network's instruments
+    (`arms.network_instruments`) are recorded over the test clips, channel by
     channel; they do not touch the read.
     """
     projection = channel_projection if projection is None else projection
-    if arm.kind not in ("field", "bank"):
+    if arm.kind not in ("network", "bank"):
         raise ValueError(f"only an untrained network or bank is read channel by channel, not {arm.kind}")
     read = read or am.PRIMARY_READ[task]
     keys = am.reads(arm, task)[read]
@@ -116,8 +116,8 @@ def streamed_read(arm: am.Arm, model: torch.nn.Module, blocks: Callable[[int, in
     per_channel = top = native = None
 
     def features(one, sub, rows, tvalid):
-        sig = am.frozen_signals(one, sub, rows.to(device))
-        f = am.frozen_features(one, sig, tvalid.to(device), task)
+        sig = am.untrained_signals(one, sub, rows.to(device))
+        f = am.untrained_features(one, sig, tvalid.to(device), task)
         return sig, torch.cat([f[k] for k in keys], dim=1)
 
     with ThreadPoolExecutor(len(seeds)) as pool:
@@ -146,9 +146,9 @@ def streamed_read(arm: am.Arm, model: torch.nn.Module, blocks: Callable[[int, in
                 sig, f = features(one, sub, rows, tvalid)
                 for k, p in ps.items():
                     out[k][1][where] += ro._projected([f], slice(0, len(f)), mean, sd, top, p, device)
-                if drive is not None and arm.kind == "field":
+                if pathway is not None and arm.kind == "network":
                     # channels are equal in size, so a channel mean over channels is the network's mean
-                    for name, v in am.field_instruments(sig, rows.to(device), drive, 1, arm.grid).items():
+                    for name, v in am.network_instruments(sig, rows.to(device), pathway, 1, arm.grid).items():
                         instruments.setdefault(name, torch.zeros(n_test))[where] += v.cpu() / arm.channels
             del ps
     return out, native, instruments

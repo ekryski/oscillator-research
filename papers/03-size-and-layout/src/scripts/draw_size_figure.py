@@ -33,13 +33,13 @@ def size_panel(ax) -> None:
     """Rows: lattice side G; columns: channel count C; each cell the number of oscillators C * G * G."""
     ax.set_title("(a) Lattice size × channel count: the number of oscillators", fontsize=10, loc="left")
     grids, channels = plan.GRIDS, plan.CHANNELS
-    counts = [Arm("field", channels=c, grid=g).states for g in grids for c in channels]
+    counts = [Arm("network", channels=c, grid=g).states for g in grids for c in channels]
     lo, hi = math.log2(min(counts)), math.log2(max(counts))
     for i, g in enumerate(grids):
         y = len(grids) - 1 - i
         ax.text(-0.15, y + 0.5, f"{g} × {g}", ha="right", va="center", fontsize=8)
         for j, c in enumerate(channels):
-            arm = Arm("field", channels=c, grid=g)
+            arm = Arm("network", channels=c, grid=g)
             shade = 0.15 + 0.7 * (math.log2(arm.states) - lo) / (hi - lo)
             ax.add_patch(Rectangle((j, y), 1, 1, fc=SIZE(shade), ec="white", lw=1.5))
             color = "white" if shade > 0.55 else INK

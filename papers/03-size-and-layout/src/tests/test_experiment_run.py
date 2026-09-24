@@ -34,12 +34,12 @@ def bank():
             "reps": torch.zeros(600, dtype=torch.long), "sr": 16000, "version": 2}
 
 
-FIELD = am.Arm("field")
+FIELD = am.Arm("network")
 SIZES = (128, 256)
 
 
 def spec(arm, **kw):
-    base = dict(tier="size", task="recognition", drive="envelope", noise_db=0.0,
+    base = dict(tier="size", task="recognition", pathway="spectrogram", noise_db=0.0,
                 gain=2.0 if arm.uses_gain else None, seed=0, arm=arm, sizes=SIZES,
                 widths=(64, 256), native_sizes=(128,), bits="all")
     return rn.Spec(**{**base, **kw})
@@ -47,19 +47,19 @@ def spec(arm, **kw):
 
 def test_a_run_is_named_by_what_decides_its_numbers_in_paper_02s_form():
     a = spec(FIELD)
-    assert a.group() == "size-envelope-16x16"
-    assert a.run_id() == "A/0db/g2/s0/field-kuramoto-torus-random-lam0.3-clamp1"
-    assert spec(am.Arm("floor")).run_id() == "A/0db/s0/floor"                 # the floor has no gain
-    assert spec(am.Arm("ann", arch="gru"), sizes=(128,)).run_id().endswith("ann-gru/n128")
-    assert spec(am.Arm("field", physics="winfree", grid=64), tier="design").group() == "design-envelope-64x64-winfree"
+    assert a.group() == "size-recognition-spectrogram-16x16"
+    assert a.run_id() == "A/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1"
+    assert spec(am.Arm("baseline")).run_id() == "A/0db/s0/baseline"              # the baseline has no gain
+    assert spec(am.Arm("trained", arch="gru"), sizes=(128,)).run_id().endswith("trained-gru/n128")
+    assert spec(am.Arm("network", coupling="winfree", grid=64), tier="design").group() == "design-recognition-spectrogram-64x64-winfree"
     assert spec(FIELD, noise_db=None).run_id().startswith("A/clean/")
     ids = {spec(FIELD, seed=s, gain=g).run_id() for s in (0, 1) for g in (1.0, 2.0)}
     assert len(ids) == 4
 
 
-@pytest.mark.parametrize("arm", [am.Arm("floor"), FIELD, am.Arm("field", severed=True), am.Arm("bank")],
+@pytest.mark.parametrize("arm", [am.Arm("baseline"), FIELD, am.Arm("network", coupled=False), am.Arm("bank")],
                          ids=lambda a: a.label())
-def test_a_frozen_arm_is_read_at_every_size_and_width(bank, arm):
+def test_an_untrained_arm_is_read_at_every_size_and_width(bank, arm):
     rec = rn.execute(spec(arm), bank=bank)
     reads = am.reads(arm, "recognition")
     assert set(rec["native_widths"]) == set(reads)
@@ -78,40 +78,40 @@ def test_a_frozen_arm_is_read_at_every_size_and_width(bank, arm):
 
 
 def test_the_tones_are_learnable_so_the_readout_is_really_reading(bank):
-    rec = rn.execute(spec(am.Arm("floor"), noise_db=None), bank=bank)
+    rec = rn.execute(spec(am.Arm("baseline"), noise_db=None), bank=bank)
     best = max(c["acc"] for c in rec["cells"])
     assert best > 0.5
 
 
-def test_with_no_drive_a_frozen_arm_carries_nothing_and_reads_chance(bank):
+def test_with_no_input_an_untrained_arm_carries_nothing_and_reads_chance(bank):
     # the g = 0 sanity cell: the balanced test set makes chance exactly 1 in 10
     for arm in (FIELD, am.Arm("bank")):
         rec = rn.execute(spec(arm, gain=0.0), bank=bank)
         assert all(c["acc"] == pytest.approx(0.1) for c in rec["cells"])
 
 
-def test_a_per_clip_window_hands_an_undriven_field_the_clip_lengths(bank):
+def test_a_per_clip_window_hands_an_undriven_network_the_clip_lengths(bank):
     # why the window is fixed: read over each clip's own length, a field with no
     # input still differs clip to clip, because it keeps rotating
     x = torch.zeros(3, 61, 16)
     tvalid = torch.tensor([30, 45, 61])
-    field = am.build_frozen(FIELD, 0.0, seed=0)
+    field = am.build_untrained(FIELD, 0.0, seed=0)
     with torch.no_grad():
-        sig = am.frozen_signals(FIELD, field, x)
-        fixed = am.frozen_features(FIELD, sig, tvalid, "recognition", "fixed")["windowed"]
-        clip = am.frozen_features(FIELD, sig, tvalid, "recognition", "clip")["windowed"]
+        sig = am.untrained_signals(FIELD, field, x)
+        fixed = am.untrained_features(FIELD, sig, tvalid, "recognition", "fixed")["windowed"]
+        clip = am.untrained_features(FIELD, sig, tvalid, "recognition", "clip")["windowed"]
     assert torch.equal(fixed[0], fixed[1]) and torch.equal(fixed[1], fixed[2])
     assert not torch.allclose(clip[0], clip[1]) and not torch.allclose(clip[1], clip[2])
     assert spec(FIELD, span="clip").run_id().endswith("/clipspan")
 
 
 def test_severing_zeroes_the_coupling_and_nothing_else(bank):
-    field = am.build_frozen(FIELD, 2.0, seed=3)
-    severed = am.build_frozen(am.Arm("field", severed=True), 2.0, seed=3)
+    field = am.build_untrained(FIELD, 2.0, seed=3)
+    uncoupled = am.build_untrained(am.Arm("network", coupled=False), 2.0, seed=3)
     from harness.models.field import physics_block
-    a, b = physics_block(field.core), physics_block(severed.core)
+    a, b = physics_block(field.core), physics_block(uncoupled.core)
     assert torch.equal(a.natural_freqs, b.natural_freqs) and not b.kernel.any() and a.kernel.any()
-    assert am.meta(am.Arm("field", severed=True), severed)["effective_params"] == 1024
+    assert am.meta(am.Arm("network", coupled=False), uncoupled)["effective_params"] == 1024
 
 
 def test_every_projected_width_is_read_under_the_fixed_and_the_seeded_projection(bank):
@@ -131,7 +131,7 @@ def test_every_projected_width_is_read_under_the_fixed_and_the_seeded_projection
 
 
 def test_a_trained_network_is_read_at_its_own_training_size(bank):
-    rec = rn.execute(spec(am.Arm("ann", arch="gru"), sizes=(128,), native_sizes=(128,)), bank=bank)
+    rec = rn.execute(spec(am.Arm("trained", arch="gru"), sizes=(128,), native_sizes=(128,)), bank=bank)
     assert {c["n_train"] for c in rec["cells"]} == {128}
     assert rec["health"]["epochs"] == am.EPOCHS and 0.0 <= rec["head_acc"] <= 1.0
     assert rec["arm_meta"]["trained_params"] > 0
@@ -149,14 +149,14 @@ def test_a_smaller_run_reproduces_the_same_cell_of_a_larger_one(bank):
 
 def test_primary_bits_mode_keeps_bits_only_for_the_primary_read_at_the_primary_size(bank, monkeypatch):
     monkeypatch.setattr(rn, "PRIMARY_SIZE", 128)
-    rec = rn.execute(spec(am.Arm("floor"), bits="primary"), bank=bank)
+    rec = rn.execute(spec(am.Arm("baseline"), bits="primary"), bank=bank)
     for c in rec["cells"]:
         assert ("correct" in c) == (c["n_train"] == 128 and c["read"].split("@")[0] == "windowed")
 
 
 def test_a_run_is_recorded_once_and_found_again(bank, tmp_path, monkeypatch):
     monkeypatch.setenv("OSC_RESULTS_DIR", str(tmp_path))
-    s = spec(am.Arm("floor"))
+    s = spec(am.Arm("baseline"))
     rn.write(s, rn.execute(s, bank=bank))
     rn.write(s, rn.execute(s, bank=bank))
     assert rn.recorded_ids(s.group()) == {s.run_id()}
@@ -167,14 +167,14 @@ def test_a_run_is_recorded_once_and_found_again(bank, tmp_path, monkeypatch):
 
 def test_cached_rows_are_exactly_the_rows_a_run_would_compute(bank, tmp_path, monkeypatch):
     monkeypatch.setattr(pr, "ROWS_DIR", tmp_path)
-    s = spec(am.Arm("floor"), noise_db=5.0)
+    s = spec(am.Arm("baseline"), noise_db=5.0)
     without = rn.execute(s, bank=bank)
-    pr.build_rows(bank, "envelope", 5.0)
-    assert pr.load_rows(pr.rows_path("envelope", 5.0), len(bank["labels"])) is not None
+    pr.build_rows(bank, "spectrogram", 5.0)
+    assert pr.load_rows(pr.rows_path("spectrogram", 5.0), len(bank["labels"])) is not None
     with_cache = rn.execute(s, bank=bank)
     assert [c["acc"] for c in with_cache["cells"]] == [c["acc"] for c in without["cells"]]
     # a cache built for another bank is ignored rather than trusted
-    assert pr.load_rows(pr.rows_path("envelope", 5.0), len(bank["labels"]) + 1) is None
+    assert pr.load_rows(pr.rows_path("spectrogram", 5.0), len(bank["labels"]) + 1) is None
 
 
 def test_a_reads_filter_records_only_those_reads(bank):
@@ -183,14 +183,14 @@ def test_a_reads_filter_records_only_those_reads(bank):
 
 
 def test_adding_the_lattice_and_the_window_left_every_paper_02_label_as_it_was():
-    assert FIELD.label() == "field-kuramoto-torus-random-lam0.3-clamp1"
-    assert am.Arm("field", channels=16).label() == "field-kuramoto-torus-random-lam0.3-clamp1-c16"
-    assert (am.Arm("floor").label(), am.Arm("bank", channels=8).label()) == ("floor", "bank-c8")
-    assert am.Arm("field", grid=16, bands=16).label() == FIELD.label()       # a band per row is the default
-    assert am.Arm("bank", channels=2, grid=32, bands=16).label() == "bank-c2-32x32-16bands"
-    assert am.Arm("field", window=512).label() == FIELD.label()               # paper 02's window is the default
-    assert am.Arm("bank", channels=2, grid=64, window=1024).label() == "bank-c2-64x64-w1024"
-    assert pr.rows_path("envelope", 0.0).name == "envelope-0db.pt"
+    assert FIELD.label() == "coupled-kuramoto-torus-random-restoring0.3-ceiling1"
+    assert am.Arm("network", channels=16).label() == "coupled-kuramoto-torus-random-restoring0.3-ceiling1-ch16"
+    assert (am.Arm("baseline").label(), am.Arm("bank", channels=8).label()) == ("baseline", "bank-width")
+    assert am.Arm("network", grid=16, bands=16).label() == FIELD.label()       # a band per row is the default
+    assert am.Arm("bank", channels=2, grid=32, bands=16).label() == "bank-ch2-32x32-16bands"
+    assert am.Arm("network", window=512).label() == FIELD.label()               # paper 02's window is the default
+    assert am.Arm("bank", channels=2, grid=64, window=1024).label() == "bank-ch2-64x64-w1024"
+    assert pr.rows_path("spectrogram", 0.0).name == "spectrogram-0db.pt"
 
 
 def test_bands_map_onto_rows_in_frequency_order_without_anything_fitted():
@@ -202,22 +202,22 @@ def test_bands_map_onto_rows_in_frequency_order_without_anything_fitted():
         pr.to_rows(rows, 12)
 
 
-@pytest.mark.parametrize("arm", [am.Arm("field", channels=1, grid=8), am.Arm("bank", channels=2, grid=8, bands=16),
-                                 am.Arm("field", channels=1, grid=32, bands=16), am.Arm("floor", grid=32, bands=16)],
+@pytest.mark.parametrize("arm", [am.Arm("network", channels=1, grid=8), am.Arm("bank", channels=2, grid=8, bands=16),
+                                 am.Arm("network", channels=1, grid=32, bands=16), am.Arm("baseline", grid=32, bands=16)],
                          ids=lambda a: a.label())
 def test_a_lattice_of_another_size_runs_with_its_rows(bank, arm):
     rec = rn.execute(spec(arm, reads=("windowed",)), bank=bank)
-    signals = {"field": 2 * arm.states, "bank": arm.states, "floor": arm.grid}[arm.kind]
+    signals = {"network": 2 * arm.states, "bank": arm.states, "baseline": arm.grid}[arm.kind]
     assert rec["native_widths"] == {"windowed": 12 * signals}
-    assert rec["arm_meta"]["states"] == (arm.states if arm.kind != "floor" else 0)
+    assert rec["arm_meta"]["states"] == (arm.states if arm.kind != "baseline" else 0)
     assert all(0.0 <= c["acc"] <= 1.0 for c in rec["cells"])
 
 
 def test_paper_02s_labels_are_kept_and_paper_03s_sizes_extend_them():
-    assert am.Arm("ann", arch="gru").label() == "ann-gru"
-    assert am.Arm("ann", arch="s4d", channels=8, grid=32, bands=16).label() == "ann-s4d-c8-32x32-16bands"
-    assert am.Arm("field", channels=1, grid=128).label() == "field-kuramoto-torus-random-lam0.3-clamp1-c1-128x128"
-    assert am.Arm("field", channels=16, grid=8).budget == 2 * 16 * 8 * 8
+    assert am.Arm("trained", arch="gru").label() == "trained-gru"
+    assert am.Arm("trained", arch="s4d", channels=8, grid=32, bands=16).label() == "trained-s4d-ch8-32x32-16bands"
+    assert am.Arm("network", channels=1, grid=128).label() == "coupled-kuramoto-torus-random-restoring0.3-ceiling1-ch1-128x128"
+    assert am.Arm("network", channels=16, grid=8).budget == 2 * 16 * 8 * 8
 
 
 def test_quadrature_rows_map_onto_rows_along_the_band_axis():
@@ -226,35 +226,35 @@ def test_quadrature_rows_map_onto_rows_along_the_band_axis():
     assert pr.to_rows(rows, 8)[0, 0, 0].tolist() == [1.0, 2.0]          # the mean of bands 0 and 1
 
 
-@pytest.mark.parametrize("drive", ["quadrature", "carrier"])
-def test_the_other_pathways_run_on_another_lattice(bank, drive, monkeypatch):
+@pytest.mark.parametrize("pathway", ["quadrature", "carrier"])
+def test_the_other_pathways_run_on_another_lattice(bank, pathway, monkeypatch):
     monkeypatch.setitem(rn.BATCH, "carrier", 64)
-    arm = am.Arm("field", channels=1, grid=8, bands=16)
-    rec = rn.execute(spec(arm, drive=drive, gain=1.0, reads=("windowed",), sizes=(128,)), bank=bank)
+    arm = am.Arm("network", channels=1, grid=8, bands=16)
+    rec = rn.execute(spec(arm, pathway=pathway, gain=1.0, reads=("windowed",), sizes=(128,)), bank=bank)
     assert all(0.0 <= c["acc"] <= 1.0 for c in rec["cells"])
 
 
 def test_a_trained_baseline_is_sized_to_its_network_and_driven_by_its_rows(bank):
-    arm = am.Arm("ann", arch="gru", channels=1, grid=8)
+    arm = am.Arm("trained", arch="gru", channels=1, grid=8)
     rec = rn.execute(spec(arm, sizes=(128,), native_sizes=(128,)), bank=bank)
     assert rec["arm_meta"]["budget"] == 128 and rec["arm_meta"]["trained_params"] <= 128
-    assert rec["arm_meta"]["width"] == am.ann_width("gru", 8, 128)
+    assert rec["arm_meta"]["width"] == am.trained_width("gru", 8, 128)
 
 
 def test_a_network_records_how_synchronized_and_how_locked_it_is_and_nothing_else_does(bank):
-    for arm in (FIELD, am.Arm("field", severed=True), am.Arm("field", physics="sl")):
+    for arm in (FIELD, am.Arm("network", coupled=False), am.Arm("network", coupling="stuart-landau")):
         inst = rn.execute(spec(arm, reads=("windowed",)), bank=bank)["instruments"]
         assert set(inst) == {"R", "plv", "entrained", "amplitude"}
         for name in ("R", "plv", "entrained"):
             assert 0.0 <= inst[name]["mean"] <= 1.0 and len(inst[name]["by_class"]) == 10
-        if arm.physics != "sl":
+        if arm.coupling != "stuart-landau":
             assert inst["amplitude"]["mean"] == pytest.approx(1.0, abs=1e-4)   # a phase core stays on the circle
     assert "instruments" not in rn.execute(spec(am.Arm("bank"), reads=("windowed",)), bank=bank)
 
 
 def test_the_instruments_leave_every_cell_as_it_was(bank, monkeypatch):
     cells = rn.execute(spec(FIELD), bank=bank)["cells"]
-    monkeypatch.setattr(am, "field_instruments", lambda *a, **k: {})
+    monkeypatch.setattr(am, "network_instruments", lambda *a, **k: {})
     assert cells == rn.execute(spec(FIELD), bank=bank)["cells"]
 
 
@@ -263,7 +263,7 @@ def test_the_order_parameter_reads_one_for_a_locked_channel_and_near_zero_for_a_
     theta = torch.full((1, t, 1, g, g), 0.3)                  # every oscillator at one phase
     sig = torch.cat((theta.sin().flatten(2), theta.cos().flatten(2)), dim=2)
     rows = torch.rand(1, t, g)
-    assert am.field_instruments(sig, rows, "envelope", 1, g, lo=0)["R"].item() == pytest.approx(1.0)
+    assert am.network_instruments(sig, rows, "spectrogram", 1, g, lo=0)["R"].item() == pytest.approx(1.0)
     spread = torch.linspace(0, 2 * math.pi, g * g + 1)[:-1].view(1, 1, 1, g, g).expand(1, t, 1, g, g)
     sig = torch.cat((spread.sin().flatten(2), spread.cos().flatten(2)), dim=2)
-    assert am.field_instruments(sig, rows, "envelope", 1, g, lo=0)["R"].item() < 1e-5
+    assert am.network_instruments(sig, rows, "spectrogram", 1, g, lo=0)["R"].item() < 1e-5

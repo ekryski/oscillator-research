@@ -30,7 +30,7 @@ def _global_rows(arm: am.Arm, c: int, windows: int = 4, read: str = "windowed") 
     its own signals.
     """
     sites = arm.grid * arm.grid
-    halves = 2 if arm.kind == "field" else 1
+    halves = 2 if arm.kind == "network" else 1
     per_signal_block = halves * arm.channels * sites                 # D
     idx = []
     for j in range(windows):
@@ -58,21 +58,21 @@ def paper02_rows(arm: am.Arm):
     return rows
 
 
-ARMS = [am.Arm("field", channels=4, grid=8), am.Arm("field", channels=3, grid=8, physics="winfree", boundary="cube"),
-        am.Arm("field", channels=2, grid=8, severed=True), am.Arm("bank", channels=4, grid=8)]
+ARMS = [am.Arm("network", channels=4, grid=8), am.Arm("network", channels=3, grid=8, coupling="winfree", geometry="cube"),
+        am.Arm("network", channels=2, grid=8, coupled=False), am.Arm("bank", channels=4, grid=8)]
 
 
 @pytest.mark.parametrize("arm", ARMS, ids=lambda a: a.label())
 def test_a_channel_alone_runs_exactly_as_it_does_among_the_others(arm):
-    model = am.build_frozen(arm, 2.0, 1)
+    model = am.build_untrained(arm, 2.0, 1)
     rows = torch.rand(3, 30, arm.grid, generator=torch.Generator().manual_seed(2)) * 1.5
     with torch.no_grad():
-        full = am.frozen_signals(arm, model, rows)
+        full = am.untrained_signals(arm, model, rows)
         sites = arm.grid * arm.grid
         for c in range(arm.channels):
             one, sub = am.channel(arm, model, c)
-            alone = am.frozen_signals(one, sub, rows)
-            if arm.kind == "field":
+            alone = am.untrained_signals(one, sub, rows)
+            if arm.kind == "network":
                 cs = arm.channels * sites
                 mine = torch.cat((full[..., c * sites:(c + 1) * sites], full[..., cs + c * sites:cs + (c + 1) * sites]), -1)
             else:
@@ -82,7 +82,7 @@ def test_a_channel_alone_runs_exactly_as_it_does_among_the_others(arm):
 
 @pytest.mark.parametrize("arm", ARMS, ids=lambda a: a.label())
 def test_with_paper_02s_matrix_the_streamed_read_is_the_in_memory_read(bank, arm, monkeypatch):  # noqa: F811
-    reads = ("windowed", "windowed+rate") if arm.kind == "field" else ("windowed",)
+    reads = ("windowed", "windowed+rate") if arm.kind == "network" else ("windowed",)
     s = spec(arm, sizes=(128,), widths=(64, 256, 1024), native_sizes=(), reads=reads)
     monkeypatch.setattr(st, "STREAM_STATES", 10**9)
     held = rn.execute(s, bank=bank)
@@ -101,14 +101,14 @@ def test_with_paper_02s_matrix_the_streamed_read_is_the_in_memory_read(bank, arm
 
 
 def test_the_projected_features_agree_to_float32_rounding(bank, monkeypatch):  # noqa: F811
-    arm = am.Arm("field", channels=4, grid=8)
+    arm = am.Arm("network", channels=4, grid=8)
     s = spec(arm, sizes=(128,), widths=(64, 256), native_sizes=(), reads=("windowed",))
     clips = rn.assemble(s, bank)
-    model = am.build_frozen(arm, 2.0, 0)
+    model = am.build_untrained(arm, 2.0, 0)
     held = []
     with torch.no_grad():
         for rows, tvalid, _ in rn.batches(s, clips):
-            held.append(am.frozen_features(arm, am.frozen_signals(arm, model, rows), tvalid, "recognition")["windowed"])
+            held.append(am.untrained_features(arm, am.untrained_signals(arm, model, rows), tvalid, "recognition")["windowed"])
     held = torch.cat(held)
     n, test = 128, clips.layout.test
     mean, sd = ro._stats(held[:n])
@@ -138,22 +138,22 @@ def test_the_streamed_matrices_are_fixed_or_seeded_gaussians_scaled_like_paper_0
 
 
 def test_a_large_arm_is_streamed_and_one_paper_02_read_in_memory():
-    assert rn.Spec("size", "recognition", "envelope", 0.0, 1.0, 0, am.Arm("field", channels=16, grid=32)).streamed
-    assert not rn.Spec("size", "recognition", "envelope", 0.0, 1.0, 0, am.Arm("field", channels=16)).streamed
-    assert not rn.Spec("size", "recognition", "envelope", 0.0, 1.0, 0, am.Arm("field", grid=64, channels=1)).streamed
-    assert rn.Spec("size", "recognition", "envelope", 0.0, 1.0, 0, am.Arm("bank", grid=128, channels=1)).streamed
+    assert rn.Spec("size", "recognition", "spectrogram", 0.0, 1.0, 0, am.Arm("network", channels=16, grid=32)).streamed
+    assert not rn.Spec("size", "recognition", "spectrogram", 0.0, 1.0, 0, am.Arm("network", channels=16)).streamed
+    assert not rn.Spec("size", "recognition", "spectrogram", 0.0, 1.0, 0, am.Arm("network", grid=64, channels=1)).streamed
+    assert rn.Spec("size", "recognition", "spectrogram", 0.0, 1.0, 0, am.Arm("bank", grid=128, channels=1)).streamed
 
 
 def test_with_no_input_the_streamed_read_is_chance(bank, monkeypatch):  # noqa: F811
     monkeypatch.setattr(st, "STREAM_STATES", 0)
-    rec = rn.execute(spec(am.Arm("field", channels=2, grid=8), gain=0.0, sizes=(128,), widths=(64, 256),
+    rec = rn.execute(spec(am.Arm("network", channels=2, grid=8), gain=0.0, sizes=(128,), widths=(64, 256),
                           native_sizes=(), reads=("windowed",)), bank=bank)
     assert rec["read"] == "streamed by channel"
     assert {c["acc"] for c in rec["cells"]} == {0.1}
 
 
 def test_a_network_records_its_instruments_the_same_way_streamed_and_held(bank, monkeypatch):  # noqa: F811
-    arm = am.Arm("field", channels=3, grid=8)
+    arm = am.Arm("network", channels=3, grid=8)
     s = spec(arm, sizes=(128,), widths=(64,), native_sizes=(), reads=("windowed",))
     monkeypatch.setattr(st, "STREAM_STATES", 10**9)
     held = rn.execute(s, bank=bank)["instruments"]

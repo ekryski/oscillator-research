@@ -12,7 +12,7 @@ from harness.experiment import summary as sm
 from harness.experiment.arms import Arm
 
 N_TEST = 400
-FIELD_LABEL = "field-kuramoto-torus-random-lam0.3-clamp1"
+FIELD_LABEL = "coupled-kuramoto-torus-random-restoring0.3-ceiling1"
 
 
 def bits(acc: float, seed: int) -> str:
@@ -22,7 +22,7 @@ def bits(acc: float, seed: int) -> str:
 
 
 def run(arm: Arm, noise, gain, seed, acc, read, tier="size"):
-    spec = {"tier": tier, "task": "recognition", "drive": "envelope", "noise_db": noise, "gain": gain,
+    spec = {"tier": tier, "task": "recognition", "pathway": "spectrogram", "noise_db": noise, "gain": gain,
             "seed": seed, "arm": arm.as_dict(), "span": "fixed"}
     # recorded as paper 02 records: no projection tag, so the summary reads them as the fixed projection
     cells = [{"read": read, "width": 192, "effective_width": 192, "n_train": 2048, "acc": acc,
@@ -37,18 +37,18 @@ def recorded(tmp_path, monkeypatch):
     runs, old = {}, {}
     for noise in (0.0, 5.0):
         for seed in (0, 1, 2):
-            runs[f"A/{noise:g}db/s{seed}/floor-32x32"] = run(Arm("floor", grid=32), noise, None, seed, 0.70,
+            runs[f"A/{noise:g}db/s{seed}/baseline-32x32"] = run(Arm("baseline", grid=32), noise, None, seed, 0.70,
                                                               "windowed@wholeclip")
             for gain in (1.0, 2.0):
-                net = Arm("field", channels=8, grid=32)
+                net = Arm("network", channels=8, grid=32)
                 runs[f"A/{noise:g}db/g{gain:g}/s{seed}/{net.label()}"] = run(net, noise, gain, seed,
                                                                              0.78 + 0.01 * seed, "windowed")
                 # paper 02's 16 x 16, 4-channel network, recorded in its own tier 1 file
-                old[f"A/{noise:g}db/g{gain:g}/s{seed}/{FIELD_LABEL}"] = run(Arm("field"), noise, gain, seed, 0.75,
+                old[f"A/{noise:g}db/g{gain:g}/s{seed}/{FIELD_LABEL}"] = run(Arm("network"), noise, gain, seed, 0.75,
                                                                            "windowed", tier="tier1")
-    (tmp_path / "size-envelope-32x32.json").write_text(json.dumps({"runs": runs}))
+    (tmp_path / "size-recognition-spectrogram-32x32.json").write_text(json.dumps({"runs": runs}))
     (tmp_path / "paper02").mkdir()
-    (tmp_path / "paper02" / "tier1-recognition-envelope.json").write_text(json.dumps({"runs": old}))
+    (tmp_path / "paper02" / "tier1-recognition-spectrogram.json").write_text(json.dumps({"runs": old}))
     return tmp_path
 
 
@@ -89,8 +89,8 @@ def test_the_report_tabulates_lattices_against_channels(recorded):
 
 
 def _memory_run(arm: Arm, seed: int, task: str, cells: list[dict], **extra) -> dict:
-    spec = {"tier": "size" if task == "order" else "sequence", "task": task, "drive": "envelope", "noise_db": 0.0,
-            "gain": None if arm.kind == "floor" else 1.0, "seed": seed, "arm": arm.as_dict(), "span": "fixed",
+    spec = {"tier": "size" if task == "order" else "sequence", "task": task, "pathway": "spectrogram", "noise_db": 0.0,
+            "gain": None if arm.kind == "baseline" else 1.0, "seed": seed, "arm": arm.as_dict(), "span": "fixed",
             **extra}
     return {"spec": spec, "cells": cells, "n_test": N_TEST, "native_widths": {"pooled": 10**6}}
 
@@ -103,7 +103,7 @@ def _cell(acc, seed, read="pooled", **extra):
 def test_the_order_tasks_pairs_are_pooled_and_a_sequences_positions_taken_together(tmp_path, monkeypatch):
     monkeypatch.setenv("OSC_RESULTS_DIR", str(tmp_path))
     monkeypatch.setattr(plan, "PAPER02_RECORD", tmp_path / "paper02")
-    net = Arm("field", channels=2, grid=8)
+    net = Arm("network", channels=2, grid=8)
     order, seq = {}, {}
     for seed in (0, 1, 2):
         for i, pair in enumerate(plan.pr.PAIRS):
@@ -113,8 +113,8 @@ def test_the_order_tasks_pairs_are_pooled_and_a_sequences_positions_taken_togeth
         seq[f"A/seq3/0db/g1/s{seed}/{net.label()}"] = {**_memory_run(net, seed, "sequence", cells, length=3),
                                                        "instruments": {"R": {"mean": 0.2 + 0.1 * seed}}}
     root = tmp_path
-    (root / "size-order-envelope-8x8.json").write_text(json.dumps({"runs": order}))
-    (root / "sequence-sequence-envelope-8x8.json").write_text(json.dumps({"runs": seq}))
+    (root / "size-order-spectrogram-8x8.json").write_text(json.dumps({"runs": order}))
+    (root / "sequence-sequence-spectrogram-8x8.json").write_text(json.dumps({"runs": seq}))
     s = sm.summary()
     pooled = [r for r in s["accuracy"] if r["task"] == "order" and r["pair"] == "all"]
     assert len(pooled) == 1 and pooled[0]["mean"] == pytest.approx(64.0)
@@ -131,10 +131,10 @@ def test_the_order_tasks_pairs_are_pooled_and_a_sequences_positions_taken_togeth
 
 def test_a_longer_window_is_compared_with_the_same_lattices_own_window_and_nothing_else():
     def cell(arm, seed, acc):
-        return sm.Cell("size", "envelope", 0.0, 1.0, seed, arm.as_dict(), arm.label(), "windowed", 192, 2048, acc,
+        return sm.Cell("size", "spectrogram", 0.0, 1.0, seed, arm.as_dict(), arm.label(), "windowed", 192, 2048, acc,
                        bits(acc, seed), N_TEST)
-    long, short = Arm("field", grid=64, window=1024), Arm("field", grid=64)
-    mapped = Arm("field", grid=64, bands=16)
+    long, short = Arm("network", grid=64, window=1024), Arm("network", grid=64)
+    mapped = Arm("network", grid=64, bands=16)
     cells = [cell(a, s, acc) for s in (0, 1, 2) for a, acc in ((long, 0.8), (short, 0.7), (mapped, 0.6))]
     rows = [r for r in sm.size_comparisons(cells) if r["comparison"].endswith("the longer window minus paper 02's")]
     assert len(rows) == 1 and rows[0]["mean"] == pytest.approx(10.0) and rows[0]["window"] == 1024

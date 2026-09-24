@@ -214,7 +214,7 @@ def test_the_window_changes_nothing_at_its_default_and_is_refused_where_it_canno
 def test_a_window_is_part_of_an_arms_label_and_a_caches_name():
     from harness.experiment import protocol as pr
     from harness.experiment.arms import Arm
-    assert Arm("field", grid=64, window=1024).label().endswith("-64x64-w1024")
-    assert Arm("field", grid=64, window=512).label() == Arm("field", grid=64).label()
-    assert pr.rows_path("envelope", 0.0, 128, 2048).name == "envelope-128bands-w2048-0db.pt"
-    assert pr.rows_path("envelope", 0.0, 16).name == "envelope-0db.pt"
+    assert Arm("network", grid=64, window=1024).label().endswith("-64x64-w1024")
+    assert Arm("network", grid=64, window=512).label() == Arm("network", grid=64).label()
+    assert pr.rows_path("spectrogram", 0.0, 128, 2048).name == "spectrogram-128bands-w2048-0db.pt"
+    assert pr.rows_path("spectrogram", 0.0, 16).name == "spectrogram-0db.pt"

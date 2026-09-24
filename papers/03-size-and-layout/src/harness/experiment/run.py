@@ -44,7 +44,7 @@ WIDTHS = (192, 1024, 4096)
 #: the size every verdict is read at
 PRIMARY_SIZE = 2048
 PRIMARY_STAT = am.PRIMARY_READ
-#: clips per batch, by task and drive; the carrier runs at 16 kHz, so its batches
+#: clips per batch, by task and pathway; the carrier runs at 16 kHz, so its batches
 #: are small, and a GPU (CUDA or MPS) holds four times as many of its 16,000-frame trajectories
 BATCH = {"recognition": 512, "order": 256, "sequence": 128, "carrier": 8, "carrier-gpu": 32}
 #: a batch holds this many states' trajectories at the sizes above; larger arms (or channels) shrink it
@@ -53,7 +53,7 @@ BATCH_STATES = 1024
 LARGE_STATES = 4096
 #: the fewest clips a batch shrinks to
 MIN_BATCH = 16
-#: the carrier path drives the network at the audio sample rate
+#: the carrier pathway drives a reservoir at the audio sample rate
 CARRIER_RATE_HZ = 16000.0
 
 
@@ -62,7 +62,7 @@ class Spec:
     """Everything that decides a run's numbers, and nothing else."""
     tier: str
     task: str                      # recognition | order | sequence
-    drive: str                     # envelope | quadrature | carrier: the input pathway
+    pathway: str                   # spectrogram | quadrature | carrier: the input pathway
     noise_db: float | None         # None is clean audio
     gain: float | None             # None for arms that read the rows as they are
     seed: int
@@ -74,16 +74,15 @@ class Spec:
     widths: tuple = WIDTHS
     native_sizes: tuple = (PRIMARY_SIZE,)
     bits: str = "primary"          # all | primary
-    span: str = "fixed"            # fixed | clip (the exploratory per-clip span, a diagnostic)
+    span: str = "fixed"            # fixed | clip (a per-clip span, a diagnostic)
     reads: tuple = ()              # the reads to record; empty records every read the arm has
 
     def group(self) -> str:
-        """The record file: tier, task (unless recognition), pathway and lattice, and the coupling
-        function in the design tiers."""
+        """The record file: tier, task, pathway and lattice, as paper 02 names its files with the lattice
+        added, and the coupling function in the design tiers."""
         a = self.arm
-        task = "" if self.task == "recognition" else f"-{self.task}"
-        name = f"{self.tier}{task}-{self.drive}-{a.grid}x{a.grid}"
-        return f"{name}-{a.physics}" if self.tier.startswith("design") and a.kind == "field" else name
+        name = f"{self.tier}-{self.task}-{self.pathway}-{a.grid}x{a.grid}"
+        return f"{name}-{a.coupling}" if self.tier.startswith("design") and a.kind == "network" else name
 
     def run_id(self) -> str:
         parts = [self.protocol]
@@ -95,7 +94,7 @@ class Spec:
         if self.gain is not None:
             parts.append(f"g{self.gain:g}")
         parts += [f"s{self.seed}", self.arm.label()]
-        if self.arm.kind == "ann":
+        if self.arm.kind == "trained":
             parts.append(f"n{self.sizes[0]}")
         if self.span != "fixed":
             parts.append(f"{self.span}span")
@@ -104,7 +103,7 @@ class Spec:
     @property
     def streamed(self) -> bool:
         """Read channel by channel: an untrained network or bank above STREAM_STATES states."""
-        return self.arm.kind in ("field", "bank") and self.arm.states > st.STREAM_STATES
+        return self.arm.kind in ("network", "bank") and self.arm.states > st.STREAM_STATES
 
     def as_dict(self) -> dict:
         d = asdict(self)
@@ -186,13 +185,14 @@ class Clips:
 def _cached_or_built(spec: Spec, path, n: int, build):
     """Rows maker for a joined-clip set: from its cache when there is one, else built batch by batch."""
     bands, grid, window = spec.arm.n_bands, spec.arm.grid, spec.arm.n_window
-    cache = pr.load_rows(path, n) if window == am.WINDOW and spec.drive == "envelope" else None
+    cache = pr.load_rows(path, n) if window == am.WINDOW and spec.pathway == "spectrogram" else None
     if cache is not None:
         return lambda a, b: (pr.to_rows(cache["rows"][a:b], grid), cache["tvalid"][a:b])
 
     def make(a, b):
         waves, lens = build(a, b)
-        return pr.to_rows(pr.front_end(waves, spec.drive, bands, window), grid), pr.valid_frames(lens, spec.drive)
+        return (pr.to_rows(pr.front_end(waves, spec.pathway, bands, window), grid),
+                pr.valid_frames(lens, spec.pathway))
     return make
 
 
@@ -215,15 +215,15 @@ def _sequence_block(bank: dict, spec: Spec, pool: torch.Tensor, n: int, code: in
 def _recognition_block(bank: dict, spec: Spec, idx: torch.Tensor):
     """Rows maker for bank clips `idx`, from the pathway's cache when there is one."""
     bands, grid, window = spec.arm.n_bands, spec.arm.grid, spec.arm.n_window
-    cache = (pr.load_rows(pr.rows_path(spec.drive, spec.noise_db, bands, window), len(bank["labels"]))
-             if spec.drive in pr.CACHED_DRIVES else None)
+    cache = (pr.load_rows(pr.rows_path(spec.pathway, spec.noise_db, bands, window), len(bank["labels"]))
+             if spec.pathway in pr.CACHED_PATHWAYS else None)
     if cache is not None:
         return lambda a, b: (pr.to_rows(cache["rows"][idx[a:b]], grid), cache["tvalid"][idx[a:b]])
 
     def make(a, b):
         waves, lens, _ = pr.recognition_clips(bank, idx[a:b], spec.noise_db)
-        rows = pr.front_end(waves, spec.drive, bands, window)
-        return pr.to_rows(rows, grid), pr.valid_frames(lens, spec.drive)
+        rows = pr.front_end(waves, spec.pathway, bands, window)
+        return pr.to_rows(rows, grid), pr.valid_frames(lens, spec.pathway)
     return make
 
 
@@ -232,7 +232,7 @@ def assemble(spec: Spec, bank: dict) -> Clips:
         raise ValueError("paper 03 reads Protocol A only")
     train_pool, test_pool = pr.protocol_a(bank)
     if spec.task in ("order", "sequence"):
-        if spec.drive != "envelope":
+        if spec.pathway != "spectrogram":
             raise ValueError("the memory tasks run on the band-energy pathway")
         block, n_tr, n_te = ((_order_block, pr.ORDER_TRAIN, pr.ORDER_TEST) if spec.task == "order"
                              else (_sequence_block, pr.SEQUENCE_TRAIN, pr.SEQUENCE_TEST))
@@ -256,11 +256,11 @@ def batch_size(spec: Spec, device: str = "cpu", states: int | None = None) -> in
     `states` is what one pass simulates: the whole arm, or one channel of a streamed arm.
     """
     carrier = "carrier-gpu" if device.startswith(("cuda", "mps")) else "carrier"
-    size = BATCH[carrier] if spec.drive == "carrier" else BATCH[spec.task]
+    size = BATCH[carrier] if spec.pathway == "carrier" else BATCH[spec.task]
     states = spec.arm.states if states is None else states
-    if spec.drive != "carrier" and states > LARGE_STATES:
+    if spec.pathway != "carrier" and states > LARGE_STATES:
         size = max(MIN_BATCH, size * LARGE_STATES // states)      # bound a batch's trajectory memory
-    if spec.drive == "carrier" and states > BATCH_STATES:
+    if spec.pathway == "carrier" and states > BATCH_STATES:
         size = max(1, size * BATCH_STATES // states)
     return size
 
@@ -326,8 +326,12 @@ def instrument_summary(per_clip: dict[str, torch.Tensor], labels: torch.Tensor) 
     return out
 
 
-def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
-    """Run one spec and return its record (not yet written). `device` may be "auto" (harness.utils.device)."""
+def execute(spec: Spec, device: str = "cpu", bank: dict | None = None, trained_device: str = "cpu") -> dict:
+    """Run one spec and return its record (not yet written). `device` may be "auto" (harness.utils.device).
+
+    A trained baseline trains on `trained_device`, the CPU unless asked: paper 02 keeps its trained
+    baselines on the CPU on every machine, and DESIGN.md says when paper 03 moves them to a GPU.
+    """
     t0 = time.perf_counter()
     device = resolve(device)
     bank = pr.load_bank() if bank is None else bank
@@ -336,7 +340,8 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
     arm, timing, health, extra = spec.arm, {}, None, {}
     buffers: dict[str, torch.Tensor] = {}
 
-    if arm.kind == "ann":
+    if arm.kind == "trained":
+        device = resolve(trained_device)
         if clips.labels.dim() != 1:
             raise ValueError("the trained baselines are not run on the digit-sequence task")
         rows, tvalid = [], []
@@ -346,22 +351,22 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
         rows, tvalid = torch.cat(rows), torch.cat(tvalid)
         n_tr = spec.sizes[0]
         t1 = time.perf_counter()
-        backbone, head, health = am.train_ann(arm, rows[:n_tr], tvalid[:n_tr], clips.labels[:n_tr],
-                                              spec.task, spec.seed, clips.n_classes, span=spec.span, device=device)
+        backbone, head, health = am.train_baseline(arm, rows[:n_tr], tvalid[:n_tr], clips.labels[:n_tr], spec.task,
+                                                   spec.seed, clips.n_classes, span=spec.span, device=device)
         timing["train_s"] = time.perf_counter() - t1
         with torch.no_grad():
             for a in range(0, total, BATCH[spec.task]):
                 b = min(a + BATCH[spec.task], total)
-                _store(buffers, am.ann_blocks(backbone, rows[a:b].to(device), tvalid[a:b].to(device), spec.task,
-                                              spec.span), slice(a, b), total)
+                _store(buffers, am.trained_blocks(backbone, rows[a:b].to(device), tvalid[a:b].to(device),
+                                                  spec.task, spec.span), slice(a, b), total)
             primary = buffers[PRIMARY_STAT[spec.task]]
             test = clips.layout.test
             predicted = head(primary[test].to(device)).argmax(1).cpu()
             extra["head_acc"] = (predicted == clips.labels[test]).double().mean().item()
         model = backbone
     else:
-        rate = CARRIER_RATE_HZ if spec.drive == "carrier" else None
-        model = am.build_frozen(arm, spec.gain if spec.gain is not None else 0.0, spec.seed, device, rate)
+        rate = CARRIER_RATE_HZ if spec.pathway == "carrier" else None
+        model = am.build_untrained(arm, spec.gain if spec.gain is not None else 0.0, spec.seed, device, rate)
         if spec.streamed:
             return _execute_streamed(spec, clips, model, device, t0)
         # store only the blocks the recorded reads use: a large arm's unread blocks run to gigabytes
@@ -371,12 +376,12 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
         per_clip: dict[str, torch.Tensor] = {}
         with torch.no_grad():
             for rows, tvalid, where in batches(spec, clips, device):
-                sig = am.frozen_signals(arm, model, rows.to(device))
-                if arm.kind == "field":
-                    for name, v in am.field_instruments(sig, rows.to(device), spec.drive, arm.channels,
+                sig = am.untrained_signals(arm, model, rows.to(device))
+                if arm.kind == "network":
+                    for name, v in am.network_instruments(sig, rows.to(device), spec.pathway, arm.channels,
                                                         arm.grid).items():
                         per_clip.setdefault(name, torch.zeros(total))[where] = v.cpu()
-                feats = am.frozen_features(arm, sig, tvalid.to(device), spec.task, spec.span)
+                feats = am.untrained_features(arm, sig, tvalid.to(device), spec.task, spec.span)
                 _store(buffers, {k: v for k, v in feats.items() if k in keep}, where, total)
         timing["simulate_s"] = time.perf_counter() - t1
         if per_clip:
@@ -421,7 +426,7 @@ def _execute_streamed(spec: Spec, clips: Clips, model: torch.nn.Module, device: 
         with torch.no_grad():
             projected, native, instruments = st.streamed_read(
                 spec.arm, model, channel_batches(spec, clips, n, device), n, clips.layout.n_test, spec.widths,
-                spec.task, spec.seed, device, read=read, drive=spec.drive if k == 0 else None)
+                spec.task, spec.seed, device, read=read, pathway=spec.pathway if k == 0 else None)
         t2 = time.perf_counter()
         if max(spec.widths) >= native:
             raise ValueError(f"a streamed read keeps no unprojected features, so every width must be below the "
@@ -444,8 +449,8 @@ def _execute_streamed(spec: Spec, clips: Clips, model: torch.nn.Module, device: 
             "timing": timing, "env": environment(device)}
 
 
-def run(spec: Spec, device: str = "cpu", threads: int = 1) -> str:
+def run(spec: Spec, device: str = "cpu", threads: int = 1, trained_device: str = "cpu") -> str:
     """Execute and record one spec; returns where it landed."""
     torch.set_num_threads(threads)
-    write(spec, execute(spec, device))
+    write(spec, execute(spec, device, trained_device=trained_device))
     return f"{spec.group()}/{spec.run_id()}"

@@ -3,36 +3,36 @@
 An arm's only job is to expose signals over time, [B, T, D]. Everything after
 that is shared: the same statistics over the same frames (harness.measurement
 .features), the same projection and the same ridge (harness.experiment.readout).
-The record keeps paper 02's labels; `harness.experiment.terms` gives the paper's
-terms for them.
+The labels follow the paper's glossary in short form, as paper 02's do;
+`harness.experiment.terms` gives the words in full.
 
-    floor        the spectrogram-only baseline: the front-end rows themselves
-    field        the coupled oscillator network; `severed` is the uncoupled
-                 network, its coupling kernels set to zero and nothing else changed
-    bank         the leaky-integrator bank; at C channels of a G x G lattice it
-                 has the network's C * G * G states and 2 * C * G * G parameters
-    ann          a trained baseline, trained with a learned linear head on the
+    baseline     nothing: the front end's rows themselves (the spectrogram-only baseline)
+    network      the untrained coupled oscillator network; `coupled=False` zeroes
+                 its coupling kernels and changes nothing else (the uncoupled network)
+    bank         the untrained leaky-integrator bank; at C channels of a G x G
+                 lattice it has the network's C * G * G states and 2 * C * G * G parameters
+    trained      a trained baseline, trained with a learned linear head on the
                  very statistics the ridge will read, and sized to the network
                  whose lattice and channel count its label names
 
-Every arm has a lattice (grid x grid per channel), a channel count and a band
+Every arm has a lattice (grid x grid per channel), a channel count, a band
 mapping (`bands`: 0 drives each of the grid rows with its own mel band, 16
-maps paper 02's 16 bands onto the rows). Paper 02's arms are the 16 x 16,
-4-channel ones, and keep exactly the labels paper 02 recorded them under.
+maps paper 02's 16 bands onto the rows) and an analysis window (`window`: 0 is
+paper 02's 512 samples). Paper 02's arms are the 16 x 16, 4-channel ones with
+a band per row and its window, and keep exactly the labels paper 02 records
+them under.
 
 Every arm is read over one fixed window, the same frames for every clip: from
-the end of the integrator warm-up to the end of the padded clip. The floor is
-also read from the very first frame, the harder control, since it then sees
-everything the arms were driven with.
+the end of the integrator warm-up to the end of the padded clip. The baseline
+is also read from the very first frame, the harder control, since it then sees
+everything the reservoirs were driven with.
 
 The window is fixed because a per-clip window leaks. Read over each clip's own
-length, an undriven field still tells clips apart: it keeps rotating, and its
+length, an undriven network still tells clips apart: it keeps rotating, and its
 statistics over a span encode the span's length, which in speech carries the
-digit. That hands a duration code to an autonomous oscillator and to nothing
-else. Over a fixed window, an arm with no input reads exactly chance, and
+digit. Over a fixed window, an arm with no input reads exactly chance, and
 everything a read carries arrives through the arm's response to the input.
-`span="clip"` restores the per-clip window of the exploratory harness, for the
-diagnostic that measures how much it inflated the exploratory reads.
+`span="clip"` restores a per-clip window, for a diagnostic that measures the leak.
 """
 
 from __future__ import annotations
@@ -60,33 +60,40 @@ DT, SUBSTEPS = 0.1, 1
 WINDOWS = {"recognition": 4, "order": 1, "sequence": 1}
 #: each task's primary read: the four windows for recognition, the whole span, order-free, for the memory tasks
 PRIMARY_READ = {"recognition": "windowed", "order": "pooled", "sequence": "pooled"}
-ANNS = {"gru": GRUBaseline, "tcn": TCNBaseline, "cnn": CNNBaseline,
-        "transformer": TransformerBaseline, "s4d": S4DBaseline}
-#: the exploratory trained-head recipe (scripts/trained_head_baselines.py)
+TRAINED = {"gru": GRUBaseline, "tcn": TCNBaseline, "cnn": CNNBaseline,
+           "transformer": TransformerBaseline, "s4d": S4DBaseline}
+#: the trained baselines' recipe, paper 02's
 EPOCHS, BATCH, LR, CLIP, LR_FLOOR = 30, 64, 3e-3, 1.0, 0.1
-#: a trained arm that did not cut its loss by this much failed to optimize,
+#: a trained baseline that did not cut its loss by this much failed to train,
 #: which is a different claim from "cannot do the task"
 HEALTHY_LOSS_DROP = 0.20
-#: the seed offset paper 02 used for tonotopic natural frequencies
-DESIGNED_OMEGA_SEED = 8000
+#: the seed offset paper 02 used for the tonotopic frequencies' jitter
+TONOTOPIC_SEED = 8000
 #: paper 02's network: the channel count and lattice every unsuffixed label means
 CHANNELS = 4
 #: a trained baseline within this share of its budget is matched; the record flags any that is not
 BUDGET_TOLERANCE = 0.15
+#: the model layer's names for each coupling function: (core, phase coupling law)
+CORES = {"kuramoto": ("phase", "kuramoto"), "kuramoto-sakaguchi": ("phase", "sakaguchi"),
+         "second-harmonic": ("phase", "harmonic2"), "winfree": ("phase", "winfree"),
+         "stuart-landau": ("sl", "kuramoto"), "stuart-landau-fixed": ("sl-fixedamp", "kuramoto")}
+#: the bank's label by channel count, as paper 02 names its two banks (at 16 x 16 the state-matched and the
+#: width-matched bank of the 4-channel network; at every lattice, the banks of 4 and 8 channels)
+BANKS = {4: "bank-state", 8: "bank-width"}
 
 
 @dataclass(frozen=True)
 class Arm:
     """One arm, fully specified. The label is its identity in the record."""
-    kind: str                       # floor | field | bank | ann
-    physics: str = "kuramoto"       # kuramoto | sakaguchi | harmonic2 | winfree | sl | sl-fixedamp
-    boundary: str = "torus"
-    omega: str = "random"           # random | designed | uniform
-    damping: float = 0.3
-    clamp: float = 1.0
+    kind: str                       # baseline | network | bank | trained
+    coupling: str = "kuramoto"      # a key of CORES
+    geometry: str = "torus"         # torus | cylinder | sheet | helix | cube | sphere
+    frequencies: str = "random"     # random | tonotopic | identical
+    restoring: float = 0.3          # the restoring strength, lambda
+    ceiling: float = 1.0            # the coupling ceiling
     channels: int = CHANNELS
-    severed: bool = False
-    arch: str = ""
+    coupled: bool = True            # False: the uncoupled network, its coupling kernels zeroed
+    arch: str = ""                  # a trained baseline's architecture
     grid: int = GRID                # the lattice is grid x grid per channel
     bands: int = 0                  # mel bands in the front end; 0 is one per lattice row
     window: int = 0                 # the front end's analysis window in samples; 0 is paper 02's 512
@@ -106,22 +113,23 @@ class Arm:
         return out + ("" if self.n_window == WINDOW else f"-w{self.n_window}")
 
     def label(self) -> str:
-        if self.kind == "floor":
-            return "floor" + self._lattice()
+        """Paper 02's label, then the size where it is not paper 02's: `-ch<C>` for a channel count
+        other than 4 (a bank says its channels in its name), `-<G>x<G>`, `-16bands` and `-w<N>`."""
+        size = "" if self.channels == CHANNELS else f"-ch{self.channels}"
+        if self.kind == "baseline":
+            return "baseline" + self._lattice()
         if self.kind == "bank":
-            return f"bank-c{self.channels}" + self._lattice()
-        if self.kind == "ann":
+            return BANKS.get(self.channels, f"bank-ch{self.channels}") + self._lattice()
+        if self.kind == "trained":
             # the network it is sized to; paper 02's 4 channels of 16 x 16 keep the plain label
-            size = "" if self.channels == CHANNELS else f"-c{self.channels}"
-            return f"ann-{self.arch}{size}{self._lattice()}"
-        name = "severed" if self.severed else "field"
-        size = "" if self.channels == 4 else f"-c{self.channels}"
-        return (f"{name}-{self.physics}-{self.boundary}-{self.omega}"
-                f"-lam{self.damping:g}-clamp{self.clamp:g}{size}{self._lattice()}")
+            return f"trained-{self.arch}{size}{self._lattice()}"
+        name = "coupled" if self.coupled else "uncoupled"
+        return (f"{name}-{self.coupling}-{self.geometry}-{self.frequencies}"
+                f"-restoring{self.restoring:g}-ceiling{self.ceiling:g}{size}{self._lattice()}")
 
     @property
     def states(self) -> int:
-        return self.channels * self.grid * self.grid if self.kind in ("field", "bank") else 0
+        return self.channels * self.grid * self.grid if self.kind in ("network", "bank") else 0
 
     @property
     def budget(self) -> int:
@@ -132,8 +140,8 @@ class Arm:
 
     @property
     def uses_gain(self) -> bool:
-        """Gain scales the drive into a frozen dynamical arm; the floor and the networks read rows as they are."""
-        return self.kind in ("field", "bank")
+        """Gain scales the input into a reservoir; the baseline and the trained baselines read rows as they are."""
+        return self.kind in ("network", "bank")
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -148,60 +156,59 @@ def _statistics(task: str) -> tuple[tuple[str, int], ...]:
 def reads(arm: Arm, task: str) -> dict[str, list[str]]:
     """Each read a run records for an arm, as the feature blocks it concatenates.
 
-    The order task reads only the whole span, the order-free read. The field
-    adds each read with its rotation rates, the read that favours it. The floor
-    is read over the arms' span and over the whole clip. A block is stored once
+    The memory tasks read only the whole span, the order-free read. An
+    oscillator network adds each read with its rotation rates. The baseline is
+    read over the arms' span and over the whole clip. A block is stored once
     however many reads use it.
     """
     out: dict[str, list[str]] = {}
     for name, _ in _statistics(task):
         out[name] = [name]
-        if arm.kind == "floor":
+        if arm.kind == "baseline":
             out[f"{name}@wholeclip"] = [f"{name}@wholeclip"]
-        if arm.kind == "field":
+        if arm.kind == "network":
             out[f"{name}+rate"] = [name, f"{name}:rate"]
     return out
 
 
 # ---------------------------------------------------------------------------
-# Frozen arms
+# Untrained arms
 # ---------------------------------------------------------------------------
 
-def build_frozen(arm: Arm, gain: float, seed: int, device: str = "cpu",
-                 rate_hz: float | None = None, kernel_scaling: str = "exact") -> nn.Module | None:
+def build_untrained(arm: Arm, gain: float, seed: int, device: str = "cpu",
+                    rate_hz: float | None = None, kernel_scaling: str = "exact") -> nn.Module | None:
     """The untrained arm, built from its seed exactly as paper 02 built it.
 
     `kernel_scaling="cap"` rebuilds paper 02's network, whose kernels were only
     ever scaled down to the coupling ceiling; paper 03 scales every kernel to
     it exactly. At 16 x 16 and above the two are the same network, bit for bit.
     """
-    if arm.kind == "floor":
+    if arm.kind == "baseline":
         return None
     if arm.kind == "bank":
         extra = {} if rate_hz is None else {"rate_hz": rate_hz}
         return LeakyBank(channels=arm.channels, grid=arm.grid, gain=gain, seed=seed, **extra).to(device)
-    if arm.kind != "field":
+    if arm.kind != "network":
         raise ValueError(f"{arm.kind} is not an untrained arm")
-    core, coupling = ((arm.physics, "kuramoto") if arm.physics in ("sl", "sl-fixedamp")
-                      else ("phase", arm.physics))
+    core, coupling = CORES[arm.coupling]
     torch.manual_seed(seed)              # the kernel and natural-frequency draws
-    field = OscillatorField(
-        channels=arm.channels, grid=arm.grid, coupling=coupling, damping=arm.damping,
-        spectral_clamp=arm.clamp, substeps=SUBSTEPS, dt=DT, gain=gain, seed=seed, core=core,
-        boundary=arm.boundary, sakaguchi_alpha=ALPHA if arm.physics == "sakaguchi" else 0.0,
-        harmonic2_beta=BETA if arm.physics == "harmonic2" else 0.0, kernel_scaling=kernel_scaling)
-    block = physics_block(field.core)
+    network = OscillatorField(
+        channels=arm.channels, grid=arm.grid, coupling=coupling, damping=arm.restoring,
+        spectral_clamp=arm.ceiling, substeps=SUBSTEPS, dt=DT, gain=gain, seed=seed, core=core,
+        boundary=arm.geometry, sakaguchi_alpha=ALPHA if coupling == "sakaguchi" else 0.0,
+        harmonic2_beta=BETA if coupling == "harmonic2" else 0.0, kernel_scaling=kernel_scaling)
+    block = physics_block(network.core)
     with torch.no_grad():
-        if arm.omega == "designed":
+        if arm.frequencies == "tonotopic":
             block.natural_freqs.copy_(tonotopic_omega(
-                arm.channels, arm.grid, DT, SUBSTEPS, torch.Generator().manual_seed(DESIGNED_OMEGA_SEED + seed)))
-        elif arm.omega == "uniform":
+                arm.channels, arm.grid, DT, SUBSTEPS, torch.Generator().manual_seed(TONOTOPIC_SEED + seed)))
+        elif arm.frequencies == "identical":
             block.natural_freqs.fill_(1.0)
-        if arm.severed:
+        if not arm.coupled:
             block.kernel.zero_()
-    for p in field.parameters():
+    for p in network.parameters():
         p.requires_grad_(False)
-    return field.eval().to(device)
+    return network.eval().to(device)
 
 
 def channel(arm: Arm, model: nn.Module, c: int) -> tuple[Arm, nn.Module]:
@@ -219,8 +226,8 @@ def channel(arm: Arm, model: nn.Module, c: int) -> tuple[Arm, nn.Module]:
     if arm.channels == 1:
         return one, model
     with torch.random.fork_rng(devices=[]):
-        sub = build_frozen(one, getattr(model, "gain", 0.0), 0, "cpu", getattr(model, "rate_hz", None),
-                           _scaling(model))
+        sub = build_untrained(one, getattr(model, "gain", 0.0), 0, "cpu", getattr(model, "rate_hz", None),
+                              _scaling(model))
     full, part = model.state_dict(), sub.state_dict()
     sliced = {}
     for key, value in part.items():
@@ -245,11 +252,11 @@ def _scaling(model: nn.Module) -> str:
     return physics_block(core).kernel_scaling
 
 
-def frozen_signals(arm: Arm, model: nn.Module | None, rows: torch.Tensor) -> torch.Tensor:
-    """[B, T, D]: the rows (floor), the field's sin/cos state, or the bank's states."""
-    if arm.kind == "floor":
+def untrained_signals(arm: Arm, model: nn.Module | None, rows: torch.Tensor) -> torch.Tensor:
+    """[B, T, D]: the rows (baseline), the network's sin/cos state, or the bank's states."""
+    if arm.kind == "baseline":
         return rows.flatten(2)            # quadrature rows [B,T,G,2] read as 2G signals
-    if arm.kind == "field":
+    if arm.kind == "network":
         return model._scan(rows)
     return model.signals(rows)
 
@@ -261,33 +268,33 @@ def _end(tvalid: torch.Tensor, span: str) -> torch.Tensor | None:
     return tvalid if span == "clip" else None
 
 
-def frozen_features(arm: Arm, signals: torch.Tensor, tvalid: torch.Tensor, task: str,
-                    span: str = "fixed") -> dict[str, torch.Tensor]:
-    """One batch's feature blocks for a frozen arm, keyed as `reads` names them."""
+def untrained_features(arm: Arm, signals: torch.Tensor, tvalid: torch.Tensor, task: str,
+                       span: str = "fixed") -> dict[str, torch.Tensor]:
+    """One batch's feature blocks for an untrained arm, keyed as `reads` names them."""
     hi = _end(tvalid, span)
     out: dict[str, torch.Tensor] = {}
     for name, windows in _statistics(task):
         out[name] = ft.windowed(signals, windows, lo=WARMUP_FRAMES, hi=hi)
-        if arm.kind == "floor":
+        if arm.kind == "baseline":
             out[f"{name}@wholeclip"] = ft.windowed(signals, windows, lo=0, hi=hi)
-        if arm.kind == "field":
+        if arm.kind == "network":
             out[f"{name}:rate"] = ft.rotation_rate(signals, windows, lo=WARMUP_FRAMES, hi=hi)
     return out
 
 
-def drive_phase(rows: torch.Tensor, drive: str) -> torch.Tensor:
+def drive_phase(rows: torch.Tensor, pathway: str) -> torch.Tensor:
     """[B, T, G]: the phase of each band's own delivered drive, the reference an oscillator can lock to.
 
     The quadrature pathway carries its phase explicitly; the band energies and
     the carrier's band waveforms have none, so theirs is the analytic phase.
     """
-    if drive == "quadrature":
+    if pathway == "quadrature":
         return torch.atan2(rows[..., 1], rows[..., 0])
     return analytic_row_phase(rows)
 
 
-def field_instruments(signals: torch.Tensor, rows: torch.Tensor, drive: str, channels: int,
-                      grid: int = GRID, lo: int = WARMUP_FRAMES) -> dict[str, torch.Tensor]:
+def network_instruments(signals: torch.Tensor, rows: torch.Tensor, pathway: str, channels: int,
+                        grid: int = GRID, lo: int = WARMUP_FRAMES) -> dict[str, torch.Tensor]:
     """Per clip, over the read's frames: how synchronized the network is and how locked to its input.
 
     Paper 02's instruments. R is the global order parameter |<e^{i theta}>| of
@@ -305,7 +312,7 @@ def field_instruments(signals: torch.Tensor, rows: torch.Tensor, drive: str, cha
     amp = torch.sqrt(s * s + c * c)
     theta = torch.atan2(s, c)
     r = torch.sqrt(torch.cos(theta).mean((-2, -1)) ** 2 + torch.sin(theta).mean((-2, -1)) ** 2).mean((1, 2))
-    diff = theta - drive_phase(rows, drive)[:, lo:t, None, :, None]
+    diff = theta - drive_phase(rows, pathway)[:, lo:t, None, :, None]
     plv = torch.sqrt(torch.cos(diff).mean(1) ** 2 + torch.sin(diff).mean(1) ** 2).flatten(1)
     return {"R": r, "plv": plv.mean(1), "entrained": (plv > PLV_LOCK_THRESH).float().mean(1),
             "amplitude": amp.mean((1, 2, 3, 4))}
@@ -317,19 +324,19 @@ def meta(arm: Arm, model: nn.Module | None) -> dict:
         return {"states": 0, "stored_params": 0, "trained_params": 0}
     stored = sum(p.numel() for p in model.parameters())
     trained = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    states = arm.states if arm.kind in ("field", "bank") else None
+    states = arm.states if arm.kind in ("network", "bank") else None
     out = {"states": states, "stored_params": stored, "trained_params": trained, "budget": arm.budget}
-    if arm.kind == "ann":
-        out["width"] = ann_width(arm.arch, arm.grid, arm.budget)
+    if arm.kind == "trained":
+        out["width"] = trained_width(arm.arch, arm.grid, arm.budget)
         out["within_budget_tolerance"] = abs(trained / arm.budget - 1) <= BUDGET_TOLERANCE
-    if arm.severed:
+    if arm.kind == "network" and not arm.coupled:
         # the zeroed kernel is still stored, but it no longer does anything
         out["effective_params"] = stored - physics_block(model.core).kernel.numel()
     return out
 
 
 # ---------------------------------------------------------------------------
-# Trained arms
+# Trained baselines
 # ---------------------------------------------------------------------------
 
 #: each architecture's one width knob, the smallest width it takes, and the step between widths
@@ -344,13 +351,13 @@ def _kwargs(arch: str, width: int) -> dict:
     return {knob: width, "n_states": width} if arch == "s4d" else {knob: width}
 
 
-def ann_params(arch: str, rows: int, width: int) -> int:
+def trained_params(arch: str, rows: int, width: int) -> int:
     """Trainable parameters of a trained baseline on `rows` input rows at `width`, head excluded."""
     with torch.device("meta"):
-        return sum(p.numel() for p in ANNS[arch](grid=rows, **_kwargs(arch, width)).parameters())
+        return sum(p.numel() for p in TRAINED[arch](grid=rows, **_kwargs(arch, width)).parameters())
 
 
-def ann_width(arch: str, rows: int, budget: int) -> int:
+def trained_width(arch: str, rows: int, budget: int) -> int:
     """The width that sizes a trained baseline to the network's parameter count.
 
     Each architecture has one width knob (the GRU's hidden size, the TCN's and
@@ -363,7 +370,7 @@ def ann_width(arch: str, rows: int, budget: int) -> int:
     16. Parameter counts rise with width, so a bisection finds it.
     """
     _, lo, step = _WIDTH[arch]
-    count = lambda w: ann_params(arch, rows, w)  # noqa: E731
+    count = lambda w: trained_params(arch, rows, w)  # noqa: E731
     if count(lo) > budget:
         return lo
     hi = lo
@@ -378,32 +385,33 @@ def ann_width(arch: str, rows: int, budget: int) -> int:
     return lo
 
 
-def build_ann(arm: Arm) -> nn.Module:
+def build_trained(arm: Arm) -> nn.Module:
     """A trained baseline sized to the network its label names, on that network's rows."""
-    return ANNS[arm.arch](grid=arm.grid, **_kwargs(arm.arch, ann_width(arm.arch, arm.grid, arm.budget)))
-
-def ann_blocks(backbone: nn.Module, rows: torch.Tensor, tvalid: torch.Tensor, task: str,
-               span: str = "fixed") -> dict[str, torch.Tensor]:
-    """A trained network's feature blocks, keyed as `reads` names them."""
-    return {name: ann_features(backbone, rows, tvalid, windows, span) for name, windows in _statistics(task)}
+    return TRAINED[arm.arch](grid=arm.grid, **_kwargs(arm.arch, trained_width(arm.arch, arm.grid, arm.budget)))
 
 
-def ann_features(backbone: nn.Module, rows: torch.Tensor, tvalid: torch.Tensor, windows: int,
-                 span: str = "fixed") -> torch.Tensor:
+def trained_blocks(backbone: nn.Module, rows: torch.Tensor, tvalid: torch.Tensor, task: str,
+                   span: str = "fixed") -> dict[str, torch.Tensor]:
+    """A trained baseline's feature blocks, keyed as `reads` names them."""
+    return {name: trained_features(backbone, rows, tvalid, windows, span) for name, windows in _statistics(task)}
+
+
+def trained_features(backbone: nn.Module, rows: torch.Tensor, tvalid: torch.Tensor, windows: int,
+                     span: str = "fixed") -> torch.Tensor:
     """A network's hidden trajectory through the shared statistics.
 
     The baselines already drop the warm-up frames from their trajectories, so
-    the read starts at their first frame: the same frames every frozen arm is
-    read over.
+    the read starts at their first frame: the same frames every untrained arm
+    is read over.
     """
     hi = _end(tvalid, span)
     return ft.windowed(backbone._hidden(rows), windows, lo=0, hi=None if hi is None else hi - WARMUP_FRAMES)
 
 
-def train_ann(arm: Arm, rows: torch.Tensor, tvalid: torch.Tensor, labels: torch.Tensor,
-              task: str, seed: int, n_classes: int = N_CLASSES, epochs: int = EPOCHS,
-              span: str = "fixed", device: str = "cpu") -> tuple[nn.Module, nn.Module, dict]:
-    """Train a network end to end, with a learned linear head on the shared statistics.
+def train_baseline(arm: Arm, rows: torch.Tensor, tvalid: torch.Tensor, labels: torch.Tensor,
+                   task: str, seed: int, n_classes: int = N_CLASSES, epochs: int = EPOCHS,
+                   span: str = "fixed", device: str = "cpu") -> tuple[nn.Module, nn.Module, dict]:
+    """Train a baseline end to end, with a learned linear head on the shared statistics.
 
     Conventional practice is a learned head; putting that head on the same
     statistics the ridge will read means the network is trained for the read it
@@ -413,10 +421,10 @@ def train_ann(arm: Arm, rows: torch.Tensor, tvalid: torch.Tensor, labels: torch.
     time. Returns (backbone, head, health), on `device`.
     """
     torch.manual_seed(seed)
-    backbone = build_ann(arm)
+    backbone = build_trained(arm)
     windows = WINDOWS[task]
     with torch.no_grad():
-        width = ann_features(backbone, rows[:2], tvalid[:2], windows, span).shape[1]
+        width = trained_features(backbone, rows[:2], tvalid[:2], windows, span).shape[1]
     head = nn.Linear(width, n_classes)
     backbone, head = backbone.to(device), head.to(device)
     params = list(backbone.parameters()) + list(head.parameters())
@@ -432,7 +440,7 @@ def train_ann(arm: Arm, rows: torch.Tensor, tvalid: torch.Tensor, labels: torch.
         total = 0.0
         for i in range(0, len(rows), BATCH):
             idx = perm[i:i + BATCH]
-            logits = head(ann_features(backbone, rows[idx].to(device), tvalid[idx].to(device), windows, span))
+            logits = head(trained_features(backbone, rows[idx].to(device), tvalid[idx].to(device), windows, span))
             loss = nn.functional.cross_entropy(logits, labels[idx].to(device))
             if not torch.isfinite(loss):
                 raise FloatingPointError(f"{arm.label()} seed {seed}: non-finite loss")

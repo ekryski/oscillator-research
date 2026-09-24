@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import time
 import traceback
 from collections import defaultdict
@@ -48,10 +49,10 @@ MAPPINGS = (0, 16)
 NOISES = (0.0,)
 GAINS = (1.0,)
 SEEDS = (0, 1, 2)
-ANN_ARCHS = ("gru", "tcn", "cnn", "transformer", "s4d")
-PHASE_FAMILIES = ("kuramoto", "sakaguchi", "harmonic2", "winfree")
-AMPLITUDE_FAMILIES = ("sl", "sl-fixedamp")
-SHAPES = ("torus", "cylinder", "sheet", "helix", "cube", "sphere")
+TRAINED_ARCHS = ("gru", "tcn", "cnn", "transformer", "s4d")
+PHASE_COUPLINGS = ("kuramoto", "kuramoto-sakaguchi", "second-harmonic", "winfree")
+AMPLITUDE_COUPLINGS = ("stuart-landau", "stuart-landau-fixed")
+GEOMETRIES = ("torus", "cylinder", "sheet", "helix", "cube", "sphere")
 CARRIER_GAIN = 32.0                     # the carrier pathway's calibrated gain in paper 02
 CARRIER_NOISE = 0.0                     # paper 02 ran the carrier at 0 dB only
 #: the carrier integrates 16,000 steps a clip; it is planned at every lattice until a GPU benchmark
@@ -91,34 +92,34 @@ def reads_for(arm: Arm, task: str) -> tuple[str, ...]:
     """The reads recorded for an arm: the task's primary read; with the rotation rates for a network
     (paper 02's secondary read); from the first frame as well for the spectrogram-only baseline."""
     base = am.PRIMARY_READ[task]
-    if arm.kind == "floor":
+    if arm.kind == "baseline":
         return base, f"{base}@wholeclip"
-    return (base, f"{base}+rate") if arm.kind == "field" else (base,)
+    return (base, f"{base}+rate") if arm.kind == "network" else (base,)
 
 
-def _net(tier: str, drive: str, noise, gain, seed, arm: Arm, task: str = "recognition", **kw) -> rn.Spec:
-    return rn.Spec(tier, task, drive, noise, gain, seed, arm, native_sizes=_native(arm),
+def _net(tier: str, pathway: str, noise, gain, seed, arm: Arm, task: str = "recognition", **kw) -> rn.Spec:
+    return rn.Spec(tier, task, pathway, noise, gain, seed, arm, native_sizes=_native(arm),
                    reads=reads_for(arm, task), **kw)
 
 
-def _floor(tier: str, drive: str, noise, seed, grid: int, bands: int, window: int = 0,
-           task: str = "recognition", **kw) -> rn.Spec:
-    arm = Arm("floor", grid=grid, bands=bands, window=window)
-    return rn.Spec(tier, task, drive, noise, None, seed, arm, reads=reads_for(arm, task), **kw)
+def _baseline(tier: str, pathway: str, noise, seed, grid: int, bands: int, window: int = 0,
+              task: str = "recognition", **kw) -> rn.Spec:
+    arm = Arm("baseline", grid=grid, bands=bands, window=window)
+    return rn.Spec(tier, task, pathway, noise, None, seed, arm, reads=reads_for(arm, task), **kw)
 
 
 def _reservoirs(channels: int, grid: int, bands: int, window: int = 0, bank: bool = True) -> tuple[Arm, ...]:
     """The coupled and uncoupled networks (and the state-matched bank) of one size."""
-    arms = (Arm("field", channels=channels, grid=grid, bands=bands, window=window),
-            Arm("field", channels=channels, grid=grid, bands=bands, window=window, severed=True))
+    arms = (Arm("network", channels=channels, grid=grid, bands=bands, window=window),
+            Arm("network", channels=channels, grid=grid, bands=bands, window=window, coupled=False))
     return arms + ((Arm("bank", channels=channels, grid=grid, bands=bands, window=window),) if bank else ())
 
 
-def designs(families: tuple[str, ...] = PHASE_FAMILIES + AMPLITUDE_FAMILIES) -> Iterator[tuple[str, str]]:
+def designs(couplings: tuple[str, ...] = PHASE_COUPLINGS + AMPLITUDE_COUPLINGS) -> Iterator[tuple[str, str]]:
     """(coupling function, geometry), the Stuart-Landau functions on the torus only, as in paper 02."""
-    for family in families:
-        for shape in (("torus",) if family in AMPLITUDE_FAMILIES else SHAPES):
-            yield family, shape
+    for coupling in couplings:
+        for geometry in (("torus",) if coupling in AMPLITUDE_COUPLINGS else GEOMETRIES):
+            yield coupling, geometry
 
 
 # ---------------------------------------------------------------------------
@@ -129,9 +130,9 @@ def gate() -> Iterator[rn.Spec]:
     """No input, at every lattice: every read must be exactly chance. Exercises the streamed read."""
     for grid in GRIDS:
         for channels in (1, 16):
-            for arm in (Arm("field", channels=channels, grid=grid), Arm("field", channels=channels, grid=grid,
-                        severed=True), Arm("bank", channels=channels, grid=grid)):
-                yield _net("gate", "envelope", 0.0, 0.0, 0, arm)
+            for arm in (Arm("network", channels=channels, grid=grid), Arm("network", channels=channels, grid=grid,
+                        coupled=False), Arm("bank", channels=channels, grid=grid)):
+                yield _net("gate", "spectrogram", 0.0, 0.0, 0, arm)
 
 
 def size() -> Iterator[rn.Spec]:
@@ -141,31 +142,31 @@ def size() -> Iterator[rn.Spec]:
     for grid, bands, window in front_ends():
         for noise in NOISES:
             for seed in SEEDS:
-                yield _floor("size", "envelope", noise, seed, grid, bands, window)
+                yield _baseline("size", "spectrogram", noise, seed, grid, bands, window)
                 for channels in CHANNELS:
                     for gain in GAINS:
                         for arm in _reservoirs(channels, grid, bands, window):
-                            yield _net("size", "envelope", noise, gain, seed, arm)
+                            yield _net("size", "spectrogram", noise, gain, seed, arm)
     for grid, bands in lattices():
         for pair in pr.PAIRS:
             for noise in NOISES:
                 for seed in SEEDS:
-                    yield _floor("size", "envelope", noise, seed, grid, bands, task="order", pair=pair)
+                    yield _baseline("size", "spectrogram", noise, seed, grid, bands, task="order", pair=pair)
                     for channels in CHANNELS:
                         for gain in GAINS:
                             for arm in _reservoirs(channels, grid, bands):
-                                yield _net("size", "envelope", noise, gain, seed, arm, "order", pair=pair)
+                                yield _net("size", "spectrogram", noise, gain, seed, arm, "order", pair=pair)
 
 
 def trained() -> Iterator[rn.Spec]:
     """The five trained baselines, each sized to every network of the size tier, on its rows."""
     for grid, bands, window in front_ends():
         for channels in CHANNELS:
-            for arch in ANN_ARCHS:
+            for arch in TRAINED_ARCHS:
                 for noise in NOISES:
                     for seed in SEEDS:
-                        arm = Arm("ann", arch=arch, channels=channels, grid=grid, bands=bands, window=window)
-                        yield rn.Spec("trained", "recognition", "envelope", noise, None, seed, arm,
+                        arm = Arm("trained", arch=arch, channels=channels, grid=grid, bands=bands, window=window)
+                        yield rn.Spec("trained", "recognition", "spectrogram", noise, None, seed, arm,
                                       reads=reads_for(arm, "recognition"))
 
 
@@ -177,11 +178,11 @@ def sequence() -> Iterator[rn.Spec]:
         for length in pr.SEQUENCE_LENGTHS:
             for noise in NOISES:
                 for seed in SEEDS:
-                    yield _floor("sequence", "envelope", noise, seed, grid, bands, task="sequence", length=length)
+                    yield _baseline("sequence", "spectrogram", noise, seed, grid, bands, task="sequence", length=length)
                     for channels in CHANNELS:
                         for gain in GAINS:
                             for arm in _reservoirs(channels, grid, bands):
-                                yield _net("sequence", "envelope", noise, gain, seed, arm, "sequence",
+                                yield _net("sequence", "spectrogram", noise, gain, seed, arm, "sequence",
                                            length=length)
 
 
@@ -189,15 +190,15 @@ def design() -> Iterator[rn.Spec]:
     """Every other coupling function and geometry at every size, the coupled network only."""
     for grid, bands in lattices():
         for channels in CHANNELS:
-            for family, shape in designs():
-                if (family, shape) == REFERENCE:
+            for coupling, geometry in designs():
+                if (coupling, geometry) == REFERENCE:
                     continue
                 for gain in GAINS:
                     for noise in NOISES:
                         for seed in SEEDS:
-                            arm = Arm("field", physics=family, boundary=shape, channels=channels, grid=grid,
+                            arm = Arm("network", coupling=coupling, geometry=geometry, channels=channels, grid=grid,
                                       bands=bands)
-                            yield _net("design", "envelope", noise, gain, seed, arm)
+                            yield _net("design", "spectrogram", noise, gain, seed, arm)
 
 
 def quadrature() -> Iterator[rn.Spec]:
@@ -206,7 +207,7 @@ def quadrature() -> Iterator[rn.Spec]:
     for grid, bands, window in front_ends():
         for noise in NOISES:
             for seed in SEEDS:
-                yield _floor("quadrature", "quadrature", noise, seed, grid, bands, window)
+                yield _baseline("quadrature", "quadrature", noise, seed, grid, bands, window)
                 for channels in CHANNELS:
                     for gain in GAINS:
                         for arm in _reservoirs(channels, grid, bands, window, bank=False):
@@ -218,7 +219,7 @@ def carrier() -> Iterator[rn.Spec]:
     rate, and the pathway's own spectrogram-only baseline; 0 dB and gain 32, as in paper 02."""
     for grid, bands in lattices(CARRIER_GRIDS):
         for seed in SEEDS:
-            yield _floor("carrier", "carrier", CARRIER_NOISE, seed, grid, bands)
+            yield _baseline("carrier", "carrier", CARRIER_NOISE, seed, grid, bands)
             for channels in CHANNELS:
                 for arm in _reservoirs(channels, grid, bands):
                     yield _net("carrier", "carrier", CARRIER_NOISE, CARRIER_GAIN, seed, arm)
@@ -228,13 +229,13 @@ def quadrature_design() -> Iterator[rn.Spec]:
     """The phase coupling functions and geometries on the quadrature pathway, at every size."""
     for grid, bands in lattices():
         for channels in CHANNELS:
-            for family, shape in designs(PHASE_FAMILIES):
-                if (family, shape) == REFERENCE:
+            for coupling, geometry in designs(PHASE_COUPLINGS):
+                if (coupling, geometry) == REFERENCE:
                     continue
                 for gain in GAINS:
                     for noise in NOISES:
                         for seed in SEEDS:
-                            arm = Arm("field", physics=family, boundary=shape, channels=channels, grid=grid,
+                            arm = Arm("network", coupling=coupling, geometry=geometry, channels=channels, grid=grid,
                                       bands=bands)
                             yield _net("design-quadrature", "quadrature", noise, gain, seed, arm)
 
@@ -243,11 +244,11 @@ def carrier_design() -> Iterator[rn.Spec]:
     """Every coupling function and geometry on the carrier pathway, at every lattice."""
     for grid, bands in lattices(CARRIER_GRIDS):
         for channels in CHANNELS:
-            for family, shape in designs():
-                if (family, shape) == REFERENCE:
+            for coupling, geometry in designs():
+                if (coupling, geometry) == REFERENCE:
                     continue
                 for seed in SEEDS:
-                    arm = Arm("field", physics=family, boundary=shape, channels=channels, grid=grid, bands=bands)
+                    arm = Arm("network", coupling=coupling, geometry=geometry, channels=channels, grid=grid, bands=bands)
                     yield _net("design-carrier", "carrier", CARRIER_NOISE, CARRIER_GAIN, seed, arm)
 
 
@@ -266,16 +267,21 @@ TIERS = {"gate": gate, "size": size, "trained": trained, "sequence": sequence, "
 # cell is read from paper 02's record rather than run again. Exact kernel
 # scaling leaves every 16 x 16 network bit-identical to paper 02's
 # (tests/test_kernel_scaling.py), the read of an arm this size is paper 02's
-# own code, and `harness.experiment.gates reuse` re-runs a sample and requires
-# every accuracy to match.
+# own code, and `harness.experiment.gates reuse` re-runs a sample and compares
+# every accuracy with paper 02's.
+#
+# Paper 02's record is read from papers/02-untrained-reservoirs/results/, with
+# paper 02's labels, spec keys and run identities (which are paper 03's for
+# these runs). OSC_PAPER02_RESULTS points elsewhere: on a branch whose copy of
+# paper 02 predates that record, at paper 02's own checkout.
 
-PAPER02_RECORD = PAPER02_ROOT / "results"
+PAPER02_RECORD = Path(os.environ.get("OSC_PAPER02_RESULTS", PAPER02_ROOT / "results"))
 
 
-TIER1, QUAD02, CARRIER02 = ("tier1-recognition-envelope", "tier3-recognition-quadrature",
+TIER1, QUAD02, CARRIER02 = ("tier1-recognition-spectrogram", "tier3-recognition-quadrature",
                              "tier3-recognition-carrier")
-ORDER02 = "tier1-order-envelope"
-#: paper 02's projection tier: its record files are f"{PAPER02_PROJECTION}-{task}-{drive}"
+ORDER02 = "tier1-order-spectrogram"
+#: paper 02's projection tier: its record files are f"{PAPER02_PROJECTION}-{task}-{pathway}"
 PAPER02_PROJECTION = "projection"
 
 
@@ -284,8 +290,9 @@ def paper02_group(spec: rn.Spec) -> str | None:
 
     Paper 02 ran, at 16 x 16 with one band per row: the spectrogram-only
     baseline on every pathway; the reference network, its uncoupled copy and
-    both banks (4 and 8 channels, the second being paper 03's state-matched
-    bank at 8 channels) on the band-energy pathway; every coupling function
+    both banks (`bank-state` and `bank-width`, 4 and 8 channels, the second
+    being paper 03's state-matched bank at 8 channels) on the spectrogram
+    pathway; every coupling function
     and geometry at 4 channels (its tier 2); the trained baselines at 2,048
     parameters; and a diagonal of coupling functions and geometries on the
     quadrature and carrier pathways (its tier 3), with the 4-channel bank on
@@ -299,30 +306,30 @@ def paper02_group(spec: rn.Spec) -> str | None:
     if spec.task == "sequence":
         return None
     if spec.task == "order":
-        if a.kind == "ann" or (a.kind == "bank" and a.channels not in (4, 8)):
+        if a.kind == "trained" or (a.kind == "bank" and a.channels not in (4, 8)):
             return None
-        if a.kind == "field" and (a.channels != 4 or (a.physics, a.boundary) != REFERENCE
-                                  or (a.omega, a.damping, a.clamp) != ("random", 0.3, 1.0)):
+        if a.kind == "network" and (a.channels != 4 or (a.coupling, a.geometry) != REFERENCE
+                                    or (a.frequencies, a.restoring, a.ceiling) != ("random", 0.3, 1.0)):
             return None
         return ORDER02
-    if a.kind == "floor":
-        return {"envelope": TIER1, "quadrature": QUAD02, "carrier": CARRIER02}[spec.drive]
-    if a.kind == "ann":
-        return TIER1 if a.channels == 4 and spec.drive == "envelope" else None
+    if a.kind == "baseline":
+        return {"spectrogram": TIER1, "quadrature": QUAD02, "carrier": CARRIER02}[spec.pathway]
+    if a.kind == "trained":
+        return TIER1 if a.channels == 4 and spec.pathway == "spectrogram" else None
     if a.kind == "bank":
-        if spec.drive == "envelope" and a.channels in (4, 8):
+        if spec.pathway == "spectrogram" and a.channels in (4, 8):
             return TIER1
-        return CARRIER02 if spec.drive == "carrier" and a.channels == 4 else None
-    if a.channels != 4 or (a.omega, a.damping, a.clamp) != ("random", 0.3, 1.0):
+        return CARRIER02 if spec.pathway == "carrier" and a.channels == 4 else None
+    if a.channels != 4 or (a.frequencies, a.restoring, a.ceiling) != ("random", 0.3, 1.0):
         return None
-    design = (a.physics, a.boundary)
-    if spec.drive == "envelope":
+    design = (a.coupling, a.geometry)
+    if spec.pathway == "spectrogram":
         if design == REFERENCE:
             return TIER1
-        return None if a.severed else f"tier2-recognition-envelope-{a.physics}"
-    diagonal = not a.severed and (a.boundary == "torus" or design == ("kuramoto", "helix"))
-    if spec.drive == "quadrature":
-        return QUAD02 if diagonal and a.physics in PHASE_FAMILIES else None
+        return f"tier2-recognition-spectrogram-{a.coupling}" if a.coupled else None
+    diagonal = a.coupled and (a.geometry == "torus" or design == ("kuramoto", "helix"))
+    if spec.pathway == "quadrature":
+        return QUAD02 if diagonal and a.coupling in PHASE_COUPLINGS else None
     return CARRIER02 if diagonal else None
 
 
@@ -351,7 +358,7 @@ def paper02_run(spec: rn.Spec) -> dict | None:
     if rec is None:
         return None
     cells = [{**c, "projection": ro.projection_of(c, rec)} for c in rec["cells"]]
-    again = _paper02_record(f"{PAPER02_PROJECTION}-{spec.task}-{spec.drive}", spec.run_id())
+    again = _paper02_record(f"{PAPER02_PROJECTION}-{spec.task}-{spec.pathway}", spec.run_id())
     if again is not None:
         cells += [c for c in again["cells"] if c.get("projection") == "seeded"]
     return {**rec, "cells": cells}
@@ -376,7 +383,7 @@ def paper02_complete(spec: rn.Spec, rec: dict | None) -> bool:
 # ---------------------------------------------------------------------------
 #
 # Milliseconds per clip for ONE channel of the reference network (Kuramoto,
-# torus, band-energy pathway): simulating 61 frames, and computing the windowed
+# torus, spectrogram pathway): simulating 61 frames, and computing the windowed
 # statistics, on each device, with the coupling implementation `auto` picks
 # there (models/phase.py). Measured on this project's Mac, an M1 Max with 64 GB:
 #
@@ -397,17 +404,17 @@ FEAT_MS = {"cpu": {8: 0.3, 16: 0.5, 32: 2.4, 64: 7.5, 128: 27.0},
 #: relative simulation cost of each geometry and coupling function. CPU: measured at 64 x 64 (FFT). MPS:
 #: the dense operator (up to 64 x 64) does not depend on the geometry, and the second harmonic couples
 #: four fields instead of two; at 128 x 128 (FFT) the factors measured with FFT at 64 x 64.
-SHAPE_COST = {"cpu": {"torus": 1.0, "cylinder": 1.9, "sheet": 2.4, "helix": 0.74, "cube": 1.66, "sphere": 1.19},
+GEOMETRY_COST = {"cpu": {"torus": 1.0, "cylinder": 1.9, "sheet": 2.4, "helix": 0.74, "cube": 1.66, "sphere": 1.19},
               "mps-fft": {"torus": 1.0, "cylinder": 1.06, "sheet": 1.66, "helix": 0.21, "cube": 2.43,
                           "sphere": 1.08}}
-FAMILY_COST = {"cpu": {"kuramoto": 1.0, "sakaguchi": 1.2, "harmonic2": 2.6, "winfree": 2.2},
-               "mps": {"kuramoto": 1.0, "sakaguchi": 1.0, "harmonic2": 2.0, "winfree": 1.0},
-               "mps-fft": {"kuramoto": 1.0, "sakaguchi": 0.93, "harmonic2": 1.08, "winfree": 0.81}}
+COUPLING_COST = {"cpu": {"kuramoto": 1.0, "kuramoto-sakaguchi": 1.2, "second-harmonic": 2.6, "winfree": 2.2},
+               "mps": {"kuramoto": 1.0, "kuramoto-sakaguchi": 1.0, "second-harmonic": 2.0, "winfree": 1.0},
+               "mps-fft": {"kuramoto": 1.0, "kuramoto-sakaguchi": 0.93, "second-harmonic": 1.08, "winfree": 0.81}}
 #: the Stuart-Landau cores: relative to the reference on the CPU (FFT, as in paper 02), and measured
 #: outright on MPS (ms per channel and clip; dense up to 64 x 64, FFT at 128; 8 taken from 16, and 32
 #: the geometric mean of its neighbours; the fixed-amplitude core assumed the same)
-SL_COST = {"cpu": {"sl": 1.7, "sl-fixedamp": 0.9}}
-SL_MS_MPS = {8: 0.063, 16: 0.063, 32: 0.31, 64: 1.51, 128: 5.04}
+AMPLITUDE_COST = {"cpu": {"stuart-landau": 1.7, "stuart-landau-fixed": 0.9}}
+AMPLITUDE_MS_MPS = {8: 0.063, 16: 0.063, 32: 0.31, 64: 1.51, 128: 5.04}
 #: the bank, relative to the reference network (CPU), or measured (MPS; 8 and 32 interpolated)
 BANK_SIM = {"cpu": 0.35}
 BANK_MS_MPS = {8: 0.004, 16: 0.014, 32: 0.05, 64: 0.21, 128: 0.51}
@@ -419,19 +426,19 @@ RANDN_PER_S = 48e6                      # Gaussian draws per second on one CPU t
 TWO_THREADS = 1.65                      # measured speed-up drawing a channel's two matrices in two threads
 RIDGE_S = 10.0                          # one read's ridge fits at every width under one projection, CPU float64
 #: trained baselines, minutes to train at 2,048 clips and 30 epochs, measured per step at three budgets
-ANN_MIN = {"cpu": {"gru": (0.6, 0.5, 3.8), "tcn": (0.2, 3.1, 22.7), "cnn": (0.3, 3.4, 22.7),
+TRAINED_MIN = {"cpu": {"gru": (0.6, 0.5, 3.8), "tcn": (0.2, 3.1, 22.7), "cnn": (0.3, 3.4, 22.7),
                    "transformer": (0.7, 0.9, 2.0), "s4d": (0.5, 16.2, 154.2)},
            "mps": {"gru": (0.98, 1.12, 1.09), "tcn": (0.28, 0.81, 0.25), "cnn": (0.17, 0.16, 0.19),
                    "transformer": (0.23, 0.29, 0.46), "s4d": (0.61, 0.97, 6.9)}}
-ANN_BUDGETS = (2048, 65536, 524288)
+TRAINED_BUDGETS = (2048, 65536, 524288)
 CLIPS = rn.PRIMARY_SIZE + 6000
 COST_DEVICES = ("cpu", "mps")
 
 
-def _ann_minutes(arch: str, budget: int, device: str) -> float:
+def _trained_minutes(arch: str, budget: int, device: str) -> float:
     """Log-log interpolation between the measured budgets (flat below the smallest)."""
-    xs, ys = [math.log(b) for b in ANN_BUDGETS], [math.log(m) for m in ANN_MIN[device][arch]]
-    x = math.log(max(budget, ANN_BUDGETS[0]))
+    xs, ys = [math.log(b) for b in TRAINED_BUDGETS], [math.log(m) for m in TRAINED_MIN[device][arch]]
+    x = math.log(max(budget, TRAINED_BUDGETS[0]))
     i = 0 if x <= xs[1] else 1
     return math.exp(ys[i] + (ys[i + 1] - ys[i]) * (x - xs[i]) / (xs[i + 1] - xs[i]))
 
@@ -443,17 +450,17 @@ def _sim_feat_ms(spec: rn.Spec, device: str) -> tuple[float, float]:
     if a.kind == "bank":
         sim = sim * BANK_SIM["cpu"] if device == "cpu" else BANK_MS_MPS[grid]
         feat *= BANK_FEAT
-    elif a.physics in ("sl", "sl-fixedamp"):
-        sim = sim * SL_COST["cpu"][a.physics] if device == "cpu" else SL_MS_MPS[grid]
+    elif a.coupling in ("stuart-landau", "stuart-landau-fixed"):
+        sim = sim * AMPLITUDE_COST["cpu"][a.coupling] if device == "cpu" else AMPLITUDE_MS_MPS[grid]
     elif device == "cpu":
-        sim *= SHAPE_COST["cpu"][a.boundary] * FAMILY_COST["cpu"][a.physics]
+        sim *= GEOMETRY_COST["cpu"][a.geometry] * COUPLING_COST["cpu"][a.coupling]
     elif grid > 64:                                      # FFT on MPS
-        sim *= SHAPE_COST["mps-fft"][a.boundary] * FAMILY_COST["mps-fft"][a.physics]
+        sim *= GEOMETRY_COST["mps-fft"][a.geometry] * COUPLING_COST["mps-fft"][a.coupling]
     else:
-        sim *= FAMILY_COST["mps"][a.physics]
-    if spec.drive == "quadrature":
+        sim *= COUPLING_COST["mps"][a.coupling]
+    if spec.pathway == "quadrature":
         sim *= QUADRATURE_COST
-    if spec.drive == "carrier":
+    if spec.pathway == "carrier":
         sim, feat = sim * CARRIER_STEPS, feat * CARRIER_STEPS
     return sim, feat
 
@@ -465,21 +472,22 @@ def clips_and_frames(spec: rn.Spec) -> tuple[int, int]:
         return pr.ORDER_TRAIN + pr.ORDER_TEST, pr.joined_frames(2)
     if spec.task == "sequence":
         return pr.SEQUENCE_TRAIN + pr.SEQUENCE_TEST, pr.joined_frames(spec.length)
-    return CLIPS, (16000 if spec.drive == "carrier" else 61)
+    return CLIPS, (16000 if spec.pathway == "carrier" else 61)
 
 
 def features_per_state(arm: Arm, read: str) -> int:
     """Features per state for a read: 3 statistics per signal and window; a network has two signals per
     oscillator, and its rotation rates add two more per oscillator and window."""
     windows = am.WINDOWS["recognition"] if read.startswith("windowed") else 1
-    per = 3 * windows * (2 if arm.kind == "field" else 1)
+    per = 3 * windows * (2 if arm.kind == "network" else 1)
     return per + (2 * windows if read.endswith("+rate") else 0)
 
 
-def seconds(spec: rn.Spec, device: str = "cpu") -> float:
+def seconds(spec: rn.Spec, device: str = "cpu", trained_device: str = "cpu") -> float:
     """Estimated seconds for one run: on one CPU thread (`cpu`) or on the M1 Max's GPU (`mps`).
 
-    Both include what runs on the CPU either way: drawing the two projection
+    A trained baseline trains on `trained_device`, the CPU unless a run asks
+    otherwise (`plan run --trained-device`). Both include what runs on the CPU either way: drawing the two projection
     matrices, and the ridge readout under each projection, for every read (and,
     on the digit-sequence task, every position). The frame counts and the
     number of clips scale the per-clip times measured on recognition; a streamed
@@ -490,10 +498,11 @@ def seconds(spec: rn.Spec, device: str = "cpu") -> float:
     positions = spec.length if spec.task == "sequence" else 1
     ridge = RIDGE_S * len(reads) * 2 * positions             # the fixed and the seeded projection
     clips, frames = clips_and_frames(spec)
-    scale = frames / (16000 if spec.drive == "carrier" else 61)
-    if a.kind == "ann":
-        return 60 * _ann_minutes(a.arch, a.budget, device) * scale * clips / CLIPS + ridge
-    if a.kind == "floor":
+    scale = frames / (16000 if spec.pathway == "carrier" else 61)
+    if a.kind == "trained":
+        where = "mps" if trained_device == "mps" else "cpu"
+        return 60 * _trained_minutes(a.arch, a.budget, where) * scale * clips / CLIPS + ridge
+    if a.kind == "baseline":
         return 2.0 + ridge
     sim, feat = _sim_feat_ms(spec, device)
     sites = a.grid * a.grid
@@ -515,9 +524,9 @@ def memory_gb(spec: rn.Spec) -> float:
     one channel's training features and its rows of both matrices for the widest read (streamed), plus
     a batch of trajectories. On MPS this is the unified memory the CPU and GPU share."""
     a = spec.arm
-    if a.kind in ("floor", "ann"):
+    if a.kind in ("baseline", "trained"):
         return 1.0
-    signals = (2 if a.kind == "field" else 1) * a.grid * a.grid
+    signals = (2 if a.kind == "network" else 1) * a.grid * a.grid
     clips, frames = clips_and_frames(spec)
     reads = spec.reads or tuple(am.reads(a, spec.task))
     widest = max(features_per_state(a, r) for r in reads) * a.grid * a.grid
@@ -537,7 +546,7 @@ def memory_gb(spec: rn.Spec) -> float:
 
 def _select(specs, grids, channels) -> list[rn.Spec]:
     return [s for s in specs if (not grids or s.arm.grid in grids)
-            and (not channels or s.arm.kind in ("floor",) or s.arm.channels in channels)]
+            and (not channels or s.arm.kind == "baseline" or s.arm.channels in channels)]
 
 
 def planned(names: list[str], grids=(), channels=()) -> list[rn.Spec]:
@@ -599,15 +608,16 @@ def _print_estimate(rows: list[dict]) -> None:
 
 
 def cache_jobs(grids=GRIDS) -> list[tuple]:
-    """Every row cache the tiers read: the bank's rows on the band-energy and quadrature pathways at each
+    """Every row cache the tiers read: the bank's rows on the spectrogram and quadrature pathways at each
     band count and window, and each order-task and digit-sequence set (its test set and every seed's
     training set) at each band count. The carrier's rows are never cached."""
     counts = sorted({16} | {g for g, b in lattices(grids) if b == 0})
     windows = {(g, w) for g, b, w in front_ends(grids) if w}
     codes = (0, *(seed + 1 for seed in SEEDS))
-    jobs = [("rows", drive, noise, bands, pr.HOP_N_FFT) for drive in pr.CACHED_DRIVES for noise in NOISES
+    jobs = [("rows", pathway, noise, bands, pr.HOP_N_FFT) for pathway in pr.CACHED_PATHWAYS for noise in NOISES
             for bands in counts]
-    jobs += [("rows", drive, noise, g, w) for drive in pr.CACHED_DRIVES for noise in NOISES for g, w in sorted(windows)]
+    jobs += [("rows", pathway, noise, g, w) for pathway in pr.CACHED_PATHWAYS for noise in NOISES
+             for g, w in sorted(windows)]
     jobs += [("order", pair, code, noise, bands) for pair in pr.PAIRS for code in codes for noise in NOISES
              for bands in counts]
     jobs += [("sequence", length, code, noise, bands) for length in pr.SEQUENCE_LENGTHS for code in codes
@@ -648,27 +658,30 @@ def _build(job: tuple) -> str:
     return str(build(pr.load_bank(), *args).name)
 
 
-def _work(spec: rn.Spec, device: str, threads: int) -> tuple[str, float]:
+def _work(spec: rn.Spec, device: str, threads: int, trained_device: str = "cpu") -> tuple[str, float]:
     """One run. A paper 02 cell run here (paper 02 has not recorded it completely) runs on the CPU,
     the only device on which it is bit-identical to paper 02's."""
     t0 = time.perf_counter()
-    return rn.run(spec, "cpu" if reused(spec) else device, threads), time.perf_counter() - t0
+    if reused(spec):
+        device = trained_device = "cpu"
+    return rn.run(spec, device, threads, trained_device), time.perf_counter() - t0
 
 
 def drive(names: list[str], workers: int, threads: int, device: str, dry_run: bool,
-          grids=(), channels=()) -> None:
-    device = resolve(device)
+          grids=(), channels=(), trained_device: str = "cpu") -> None:
+    device, trained_device = resolve(device), resolve(trained_device)
     specs = planned(names, grids, channels)
     todo = pending(specs)
     n_reused = sum(paper02_complete(s, paper02_run(s)) for s in specs)
     cost = "mps" if device == "mps" else "cpu"
-    hours = sum(seconds(s, cost) for s in todo) / 3600
+    hours = sum(seconds(s, cost, trained_device) for s in todo) / 3600
     print(f"=== {' + '.join(names)}: {len(specs)} runs planned, {n_reused} from paper 02, "
           f"{len(specs) - len(todo) - n_reused} recorded, {len(todo)} to run on {workers} worker(s) x "
           f"{threads} thread(s), device {device}; ~{hours:.0f} {cost.upper()}-hours")
     if dry_run:
         for s in todo[:12]:
-            print(f"    {s.group()}/{s.run_id()}  ~{seconds(s, cost) / 60:.1f} min, ~{memory_gb(s):.1f} GB"
+            print(f"    {s.group()}/{s.run_id()}  ~{seconds(s, cost, trained_device) / 60:.1f} min, "
+                  f"~{memory_gb(s):.1f} GB"
                   + ("  (streamed)" if s.streamed else ""))
         if len(todo) > 12:
             print(f"    ... and {len(todo) - 12} more")
@@ -677,7 +690,7 @@ def drive(names: list[str], workers: int, threads: int, device: str, dry_run: bo
     failures.parent.mkdir(parents=True, exist_ok=True)
     t0, done, failed = time.perf_counter(), 0, 0
     with ProcessPoolExecutor(workers, mp_context=get_context("spawn")) as ex:
-        futures = {ex.submit(_work, s, device, threads): s for s in todo}
+        futures = {ex.submit(_work, s, device, threads, trained_device): s for s in todo}
         for f in as_completed(futures):
             spec = futures[f]
             try:
@@ -714,14 +727,18 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--device", default="auto", choices=DEVICES,
                    help="auto: CUDA if present, else Apple Silicon's GPU (mps), else the CPU; only cpu is "
                         "bit-identical to paper 02")
+    r.add_argument("--trained-device", default="cpu", choices=DEVICES,
+                   help="where the trained baselines train: the CPU (the default, as in paper 02) unless the "
+                        "benchmark shows a GPU faster for them")
     r.add_argument("--dry-run", action="store_true")
     b = sub.add_parser("benchmark", help="time one batch of each network on a device, and extrapolate every tier")
     b.add_argument("--device", default="auto", choices=DEVICES)
     b.add_argument("--grids", type=int, nargs="+", default=list(GRIDS))
     b.add_argument("--channels", type=int, nargs="+", default=list(CHANNELS))
-    b.add_argument("--pathways", nargs="+", default=["envelope", "carrier"],
-                   choices=["envelope", "quadrature", "carrier"])
+    b.add_argument("--pathways", nargs="+", default=["spectrogram", "carrier"],
+                   choices=["spectrogram", "quadrature", "carrier"])
     b.add_argument("--no-designs", action="store_true", help="skip timing the other coupling functions and geometries")
+    b.add_argument("--no-trained", action="store_true", help="skip timing the trained baselines' training steps")
     b.add_argument("--max-clips", type=int, default=512, help="clips per timed batch at most")
     b.add_argument("--out", type=Path, help="the JSON report")
     a = ap.parse_args(argv)
@@ -732,9 +749,10 @@ def main(argv: list[str] | None = None) -> None:
     elif a.command == "benchmark":
         from harness.experiment.benchmark import benchmark
         benchmark(a.device, tuple(a.grids), tuple(a.channels), tuple(a.pathways), not a.no_designs, a.max_clips,
-                  a.out)
+                  a.out, trained=not a.no_trained)
     else:
-        drive(a.tiers, a.workers, a.threads, a.device, a.dry_run, tuple(a.grids), tuple(a.channels))
+        drive(a.tiers, a.workers, a.threads, a.device, a.dry_run, tuple(a.grids), tuple(a.channels),
+              a.trained_device)
 
 
 if __name__ == "__main__":

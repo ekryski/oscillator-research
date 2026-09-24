@@ -92,18 +92,18 @@ def test_the_chance_levels_are_exact():
 
 
 def test_the_order_task_runs_on_balanced_sets_and_reads_only_the_whole_span(bank, small_sets):  # noqa: F811
-    s = spec(am.Arm("field", channels=2, grid=8), task="order", pair=(3, 7), sizes=(96,), native_sizes=(),
+    s = spec(am.Arm("network", channels=2, grid=8), task="order", pair=(3, 7), sizes=(96,), native_sizes=(),
              widths=(64,), reads=("pooled",))
-    assert s.group() == "size-order-envelope-8x8" and "/pair37/" in s.run_id()
+    assert s.group() == "size-order-spectrogram-8x8" and "/pair37/" in s.run_id()
     rec = rn.execute(s, bank=bank)
     assert {c["read"] for c in rec["cells"]} == {"pooled"} and rec["n_test"] == 64
     assert {c["projection"] for c in rec["cells"]} == {"fixed", "seeded"}
 
 
 def test_the_sequence_task_reads_one_readout_per_position(bank, small_sets):  # noqa: F811
-    s = spec(am.Arm("field", channels=2, grid=8), task="sequence", length=3, sizes=(120,), native_sizes=(),
+    s = spec(am.Arm("network", channels=2, grid=8), task="sequence", length=3, sizes=(120,), native_sizes=(),
              widths=(64,), reads=("pooled",))
-    assert s.group() == "size-sequence-envelope-8x8" and "/seq3/" in s.run_id()
+    assert s.group() == "size-sequence-spectrogram-8x8" and "/seq3/" in s.run_id()
     rec = rn.execute(s, bank=bank)
     assert rec["n_test"] == 80
     assert {(c["position"], c["projection"]) for c in rec["cells"]} == {
@@ -112,7 +112,7 @@ def test_the_sequence_task_reads_one_readout_per_position(bank, small_sets):  # 
 
 
 def test_the_spectrogram_only_baseline_reads_the_sequence_task_too(bank, small_sets):  # noqa: F811
-    s = spec(am.Arm("floor", grid=8), task="sequence", length=2, sizes=(120,), native_sizes=(120,),
+    s = spec(am.Arm("baseline", grid=8), task="sequence", length=2, sizes=(120,), native_sizes=(120,),
              widths=(64,), reads=("pooled", "pooled@wholeclip"))
     rec = rn.execute(s, bank=bank)
     assert {c["position"] for c in rec["cells"]} == {0, 1}
@@ -120,5 +120,5 @@ def test_the_spectrogram_only_baseline_reads_the_sequence_task_too(bank, small_s
 
 def test_a_trained_baseline_is_not_run_on_the_sequence_task(bank, small_sets):  # noqa: F811
     with pytest.raises(ValueError, match="not run on the digit-sequence task"):
-        rn.execute(spec(am.Arm("ann", arch="gru", channels=1, grid=8), task="sequence", length=2,
+        rn.execute(spec(am.Arm("trained", arch="gru", channels=1, grid=8), task="sequence", length=2,
                         sizes=(120,)), bank=bank)

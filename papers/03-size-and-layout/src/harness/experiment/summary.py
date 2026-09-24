@@ -7,8 +7,8 @@ accuracy is its mean over the three seeds, the sample standard deviation and
 each seed's value, in points; a comparison A minus B is paired, matched on
 lattice, band mapping, channel count, noise level, input gain and seed, and
 reported as each seed's difference, their mean and standard deviation, and a
-95% interval from resampling test clips. No threshold is applied and no
-verdict drawn.
+95% interval from resampling test clips. No threshold is applied to any of
+them.
 
 Every projected read is reported twice: under the fixed projection (paper
 02's matrix, the same for every seed) and under the projection seeded by the
@@ -28,7 +28,7 @@ positions ("mean": each clip's share of positions right) and every position
 right at once ("all"). Their intervals resample the clips.
 
 A network's instruments (how synchronized it is, and how locked to its drive;
-harness.experiment.arms.field_instruments) are reported beside its accuracies,
+harness.experiment.arms.network_instruments) are reported beside its accuracies,
 as the mean over its test clips, then over seeds. They are diagnostics: no
 cell depends on them.
 """
@@ -66,7 +66,7 @@ NOT_RUNS = ("gates.json", "summary.json")
 class Cell:
     """One recorded accuracy, with what it belongs to."""
     tier: str
-    drive: str
+    pathway: str
     noise: float | None
     gain: float | None
     seed: int
@@ -123,7 +123,7 @@ class Instruments:
     task: str
     pair: tuple
     length: int
-    drive: str
+    pathway: str
     noise: float | None
     gain: float | None
     seed: int
@@ -134,13 +134,13 @@ class Instruments:
 
 
 def _label(run_id: str, kind: str) -> str:
-    return run_id.split("/")[-1] if kind != "ann" else run_id.split("/")[-2]
+    return run_id.split("/")[-1] if kind != "trained" else run_id.split("/")[-2]
 
 
 def _cells(tier: str, rec: dict, run_id: str, source: str) -> list[Cell]:
     s = rec["spec"]
     label = _label(run_id, s["arm"]["kind"])
-    return [Cell(tier, s["drive"], s["noise_db"], s["gain"], s["seed"], s["arm"], label, c["read"], c["width"],
+    return [Cell(tier, s["pathway"], s["noise_db"], s["gain"], s["seed"], s["arm"], label, c["read"], c["width"],
                  c["n_train"], c["acc"], c.get("correct"), rec["n_test"], source, projection_of(c, rec),
                  s.get("task", "recognition"), tuple(s.get("pair", ())), s.get("length", 0), c.get("position"))
             for c in rec["cells"]]
@@ -151,7 +151,7 @@ def _instruments(tier: str, rec: dict, run_id: str, source: str) -> list[Instrum
     if "instruments" not in rec:
         return []
     return [Instruments(tier, s.get("task", "recognition"), tuple(s.get("pair", ())), s.get("length", 0),
-                        s["drive"], s["noise_db"], s["gain"], s["seed"], s["arm"], _label(run_id, s["arm"]["kind"]),
+                        s["pathway"], s["noise_db"], s["gain"], s["seed"], s["arm"], _label(run_id, s["arm"]["kind"]),
                         {k: v["mean"] for k, v in rec["instruments"].items()}, source)]
 
 
@@ -161,7 +161,7 @@ def _scores(c: Cell) -> np.ndarray:
 
 
 def _same_read(c: Cell) -> tuple:
-    return (c.tier, c.drive, c.noise, c.gain, c.seed, c.label, c.read, c.width, c.n_train, c.projection, c.task,
+    return (c.tier, c.pathway, c.noise, c.gain, c.seed, c.label, c.read, c.width, c.n_train, c.projection, c.task,
             c.length, c.source)
 
 
@@ -254,17 +254,17 @@ def accuracies(cells: list[Cell]) -> list[dict]:
     """One record per arm, read, condition, width and size, over its seeds."""
     groups, sources = defaultdict(dict), defaultdict(set)
     for c in cells:
-        key = (c.tier, c.task, c.pair, c.length, c.position, c.drive, c.label, c.read, c.noise, c.gain, c.width,
+        key = (c.tier, c.task, c.pair, c.length, c.position, c.pathway, c.label, c.read, c.noise, c.gain, c.width,
                c.n_train, c.projection)
         groups[key][f"seed{c.seed}"] = c.acc
         sources[key].add(c.source)
-    fields = ("tier", "task", "pair", "length", "position", "drive", "arm", "read", "noise", "gain", "width",
+    fields = ("tier", "task", "pair", "length", "position", "pathway", "arm", "read", "noise", "gain", "width",
               "n_train", "projection")
     out = []
     for k, v in sorted(groups.items(), key=str):
         base, channels, grid, bands = terms.split(k[6])
-        out.append({**dict(zip(fields, k, strict=True)), "name": terms.arm(k[6], k[0]),
-                    "pathway": terms.PATHWAYS[k[5]], "grid": grid, "bands": bands or 0,
+        out.append({**dict(zip(fields, k, strict=True)), "name": terms.arm(k[6], k[0]), "grid": grid,
+                    "bands": bands or 0,
                     "window": terms.window_of(k[6]) or 0, "channels": channels, "source": sorted(sources[k]),
                     **spread(v)})
     return out
@@ -275,15 +275,15 @@ def instruments(runs: list[Instruments]) -> list[dict]:
     clips). Values are as recorded, not in points."""
     groups, sources = defaultdict(lambda: defaultdict(dict)), defaultdict(set)
     for r in runs:
-        key = (r.tier, r.task, r.pair, r.length, r.drive, r.label, r.noise, r.gain)
+        key = (r.tier, r.task, r.pair, r.length, r.pathway, r.label, r.noise, r.gain)
         for name, v in r.values.items():
             groups[key][name][f"seed{r.seed}"] = v
         sources[key].add(r.source)
     out = []
     for k, by in sorted(groups.items(), key=str):
         base, channels, grid, bands = terms.split(k[5])
-        entry = {"tier": k[0], "task": k[1], "pair": k[2], "length": k[3], "drive": k[4], "arm": k[5],
-                 "name": terms.arm(k[5], k[0]), "pathway": terms.PATHWAYS[k[4]], "noise": k[6], "gain": k[7],
+        entry = {"tier": k[0], "task": k[1], "pair": k[2], "length": k[3], "pathway": k[4], "arm": k[5],
+                 "name": terms.arm(k[5], k[0]), "noise": k[6], "gain": k[7],
                  "grid": grid, "bands": bands or 0, "window": terms.window_of(k[5]) or 0, "channels": channels,
                  "source": sorted(sources[k])}
         for name, values in by.items():
@@ -300,14 +300,14 @@ def instruments(runs: list[Instruments]) -> list[dict]:
 
 def _kind(c: Cell) -> str:
     a = c.arm
-    if a["kind"] == "field":
-        return "severed" if a.get("severed") else "field"
+    if a["kind"] == "network":
+        return "network" if a.get("coupled", True) else "uncoupled"
     return a["kind"]
 
 
 def _is_reference(c: Cell) -> bool:
     a = c.arm
-    return (a.get("physics"), a.get("boundary")) == plan.REFERENCE
+    return (a.get("coupling"), a.get("geometry")) == plan.REFERENCE
 
 
 MATCH = ("grid", "bands", "window", "channels")
@@ -329,7 +329,7 @@ def compare(cells: list[Cell], name: str, a, b, *, per_channel: bool = True, ign
         return tuple(None if m in drop else getattr(c, m) for m in MATCH)
 
     def key(c: Cell, projection: str) -> tuple:
-        return (c.condition, c.drive, size(c), c.noise, c.gain if b_gain else None, c.width, c.n_train, c.seed,
+        return (c.condition, c.pathway, size(c), c.noise, c.gain if b_gain else None, c.width, c.n_train, c.seed,
                 projection)
     idx = {key(c, c.projection): c for c in bs}
     groups = defaultdict(list)
@@ -338,27 +338,27 @@ def compare(cells: list[Cell], name: str, a, b, *, per_channel: bool = True, ign
             continue
         other = idx.get(key(c, c.projection)) or idx.get(key(c, "none"))
         if other is not None:
-            groups[(c.condition, c.drive, c.size, c.noise, c.gain, c.width, c.n_train, c.projection)].append(
+            groups[(c.condition, c.pathway, c.size, c.noise, c.gain, c.width, c.n_train, c.projection)].append(
                 (c, other))
     out = []
     for k, v in sorted(groups.items(), key=str):
-        (task, pair, length, position), drive, (grid, bands, window, channels) = k[0], k[1], k[2]
+        (task, pair, length, position), pathway, (grid, bands, window, channels) = k[0], k[1], k[2]
         out.append({"comparison": name, **(extra or {}), "task": task, "pair": pair, "length": length,
-                    "position": position, "pathway": terms.PATHWAYS[drive], "grid": grid, "bands": bands,
+                    "position": position, "pathway": pathway, "grid": grid, "bands": bands,
                     "window": window, "channels": channels, "noise": k[3], "gain": k[4], "width": k[5],
                     "n_train": k[6], "projection": k[7], **paired(v)})
     return out
 
 
-def _sel(tier: str, kind: str, read: str | None = None, reference: bool | None = True, drive: str | None = None,
+def _sel(tier: str, kind: str, read: str | None = None, reference: bool | None = True, pathway: str | None = None,
          task: str = "recognition"):
     """Cells of one tier, arm kind and task; the task's primary read unless `read` names another."""
     read = read or am.PRIMARY_READ[task]
 
     def pick(c: Cell) -> bool:
         return (c.tier == tier and c.task == task and _kind(c) == kind and c.read == read
-                and (drive is None or c.drive == drive)
-                and (reference is None or kind not in ("field", "severed") or _is_reference(c) == reference))
+                and (pathway is None or c.pathway == pathway)
+                and (reference is None or kind not in ("network", "uncoupled") or _is_reference(c) == reference))
     return pick
 
 
@@ -369,25 +369,25 @@ WHOLE = "spectrogram-only baseline, whole clip"
 RATES = "with its rotation rates minus without"
 
 
-def _controls(cells: list[Cell], tier: str, task: str, drive: str = "envelope", suffix: str = "",
+def _controls(cells: list[Cell], tier: str, task: str, pathway: str = "spectrogram", suffix: str = "",
               bank: bool = True) -> list[dict]:
     """The network against the uncoupled network, the bank and the whole-clip baseline, each of those
     against the baseline too, and each network with its rotation rates against without."""
     read = am.PRIMARY_READ[task]
-    net, whole = _sel(tier, "field", drive=drive, task=task), _sel(tier, "floor", f"{read}@wholeclip", drive=drive,
-                                                                    task=task)
-    out = compare(cells, f"{NETWORK} minus the {UNCOUPLED}{suffix}", net, _sel(tier, "severed", drive=drive,
-                                                                               task=task))
-    kinds = [("field", NETWORK), ("severed", UNCOUPLED)]
+    net = _sel(tier, "network", pathway=pathway, task=task)
+    whole = _sel(tier, "baseline", f"{read}@wholeclip", pathway=pathway, task=task)
+    out = compare(cells, f"{NETWORK} minus the {UNCOUPLED}{suffix}", net,
+                  _sel(tier, "uncoupled", pathway=pathway, task=task))
+    kinds = [("network", NETWORK), ("uncoupled", UNCOUPLED)]
     if bank:
-        out += compare(cells, f"{NETWORK} minus the {BANK}{suffix}", net, _sel(tier, "bank", drive=drive, task=task))
+        out += compare(cells, f"{NETWORK} minus the {BANK}{suffix}", net, _sel(tier, "bank", pathway=pathway, task=task))
         kinds.append(("bank", BANK))
     for kind, name in kinds:
-        out += compare(cells, f"{name} minus the {WHOLE}{suffix}", _sel(tier, kind, drive=drive, task=task), whole,
+        out += compare(cells, f"{name} minus the {WHOLE}{suffix}", _sel(tier, kind, pathway=pathway, task=task), whole,
                        per_channel=False)
     for kind, name in kinds[:2]:
-        out += compare(cells, f"{name} {RATES}{suffix}", _sel(tier, kind, f"{read}+rate", drive=drive, task=task),
-                       _sel(tier, kind, drive=drive, task=task))
+        out += compare(cells, f"{name} {RATES}{suffix}", _sel(tier, kind, f"{read}+rate", pathway=pathway, task=task),
+                       _sel(tier, kind, pathway=pathway, task=task))
     return out
 
 
@@ -398,11 +398,11 @@ def size_comparisons(cells: list[Cell]) -> list[dict]:
     the longer window against paper 02's."""
     out = _controls(cells, "size", "recognition") + _controls(cells, "size", "order")
     out += _controls(cells, "sequence", "sequence")
-    for arch in plan.ANN_ARCHS:
-        net = terms.ARMS[f"ann-{arch}"]
-        out += compare(cells, f"{NETWORK} minus the {net} sized to it", _sel("size", "field"),
+    for arch in plan.TRAINED_ARCHS:
+        net = terms.ARMS[f"trained-{arch}"]
+        out += compare(cells, f"{NETWORK} minus the {net} sized to it", _sel("size", "network"),
                        lambda c, arch=arch: c.tier == "trained" and c.arm.get("arch") == arch and c.read == READ)
-    for kind, name in (("field", NETWORK), ("severed", UNCOUPLED), ("bank", BANK), ("floor", "spectrogram-only "
+    for kind, name in (("network", NETWORK), ("uncoupled", UNCOUPLED), ("bank", BANK), ("baseline", "spectrogram-only "
                                                                                     "baseline")):
         own = _sel("size", kind)
         out += compare(cells, f"{name}: one band per row minus 16 bands mapped onto the rows",
@@ -417,16 +417,16 @@ def size_comparisons(cells: list[Cell]) -> list[dict]:
 def design_comparisons(cells: list[Cell]) -> list[dict]:
     """Each coupling function and geometry minus the reference network, at every size and pathway."""
     out = []
-    for tier, ref_tier, drive in (("design", "size", "envelope"), ("design-quadrature", "quadrature", "quadrature"),
+    for tier, ref_tier, pathway in (("design", "size", "spectrogram"), ("design-quadrature", "quadrature", "quadrature"),
                                   ("design-carrier", "carrier", "carrier")):
-        for family, shape in plan.designs():
-            if (family, shape) == plan.REFERENCE:
+        for coupling, geometry in plan.designs():
+            if (coupling, geometry) == plan.REFERENCE:
                 continue
-            def a(c, family=family, shape=shape, tier=tier):
-                return (c.tier == tier and c.read == READ and c.arm.get("physics") == family
-                        and c.arm.get("boundary") == shape)
-            label = f"{terms.level(family)}, {shape} minus Kuramoto, torus ({terms.PATHWAYS[drive]} pathway)"
-            out += compare(cells, label, a, _sel(ref_tier, "field", drive=drive),
+            def a(c, coupling=coupling, geometry=geometry, tier=tier):
+                return (c.tier == tier and c.read == READ and c.arm.get("coupling") == coupling
+                        and c.arm.get("geometry") == geometry)
+            label = f"{terms.level(coupling)}, {geometry} minus Kuramoto, torus ({terms.PATHWAYS[pathway]} pathway)"
+            out += compare(cells, label, a, _sel(ref_tier, "network", pathway=pathway),
                            extra={"factor": "coupling function and lattice geometry"})
     return out
 
@@ -522,7 +522,7 @@ def _task_section(acc, cmp, projection: str, tier: str, task: str, title: str, n
                 and r["task"] == task and pick(r))
     lines = [f"## {title}: coupled oscillator network accuracy ({projection} projection)", "", note, ""]
     lines += _grid_table([r for r in acc if prim(r) and r["tier"] == tier and r["read"] == read
-                          and r["arm"].startswith("field-")], _acc) + [""]
+                          and r["arm"].startswith("coupled-")], _acc) + [""]
     for name in controls:
         lines += [f"### {name} ({title[0].lower() + title[1:]}, {projection} projection)", ""]
         lines += _grid_table([r for r in cmp if prim(r) and r["comparison"] == name], _diff) + [""]
@@ -546,7 +546,7 @@ def report(s: dict, done: dict[str, tuple[int, int, int]]) -> str:
              + ". A tier not yet complete is summarized over the runs it has.", ""]
     common = [f"{NETWORK} minus the {UNCOUPLED}", f"{NETWORK} minus the {BANK}", f"{NETWORK} minus the {WHOLE}",
               f"{NETWORK} {RATES}"]
-    trained = [f"{NETWORK} minus the {terms.ARMS['ann-' + arch]} sized to it" for arch in plan.ANN_ARCHS]
+    trained = [f"{NETWORK} minus the {terms.ARMS['trained-' + arch]} sized to it" for arch in plan.TRAINED_ARCHS]
     seq = ch["sequence"]
     for projection in PROJECTIONS:
         lines += _task_section(acc, cmp, projection, "size", "recognition", "Recognition",
@@ -577,8 +577,8 @@ def report(s: dict, done: dict[str, tuple[int, int, int]]) -> str:
               "parameter R (1 when every oscillator of a channel shares one phase), each oscillator's phase "
               "locking to its own row's drive (1 when locked), and the share of oscillators whose locking "
               f"exceeds {am.PLV_LOCK_THRESH:g}. Recognition, the "
-              "band-energy pathway.", ""]
-    for kind, name in (("field-", NETWORK), ("severed-", UNCOUPLED)):
+              "spectrogram pathway.", ""]
+    for kind, name in (("coupled-", NETWORK), ("uncoupled-", UNCOUPLED)):
         for key, text in INSTRUMENTS.items():
             if key == "amplitude":
                 continue
@@ -587,11 +587,11 @@ def report(s: dict, done: dict[str, tuple[int, int, int]]) -> str:
                                   and r["arm"].startswith(kind)], _instrument(key)) + [""]
     rows = defaultdict(dict)
     for r in inst:
-        if r["tier"] in ("design", "size") and r["task"] == "recognition" and r["arm"].startswith("field-") \
+        if r["tier"] in ("design", "size") and r["task"] == "recognition" and r["arm"].startswith("coupled-") \
                 and r["channels"] == am.CHANNELS and not r["bands"] and not r["window"]:
-            m = terms._OSCILLATORS.match(terms.split(r["arm"])[0])
+            m = terms._NETWORK.match(terms.split(r["arm"])[0])
             if m and "R" in r:
-                rows[(m["physics"], m["boundary"])][r["grid"]] = _instrument("R")(r)
+                rows[(m["coupling"], m["geometry"])][r["grid"]] = _instrument("R")(r)
     lines += [f"### Every coupling function and geometry: order parameter R ({terms.channels_text(am.CHANNELS)}, "
               "one band per row)", ""]
     if rows:
