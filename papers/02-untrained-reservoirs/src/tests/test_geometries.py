@@ -209,3 +209,44 @@ def test_geometry_registry_is_complete_and_self_describing():
         assert cls.frequency_axis, f"{name} must declare its tonotopic axis"
     with pytest.raises(ValueError, match="unknown boundary"):
         build_geometry("hyperboloid", 16)
+
+
+# --- the coil and the cochlea -------------------------------------------------
+
+def _coil_response(boundary: str, taps: dict[int, float], source: int, grid: int = 8) -> torch.Tensor:
+    """One forced-coupling step from a pulse at coil position `source`: the flat response [N]."""
+    n = grid * grid
+    blk = PhaseBlock(channels=1, grid=grid, dt=1.0, coupling="forced", damping=0.0,
+                     spectral_clamp=0.0, coupling_impl="matmul", boundary=boundary)
+    with torch.no_grad():
+        blk.kernel.zero_()
+        for offset, value in taps.items():                 # flat tap index: offset, or n + offset if negative
+            blk.kernel.view(1, n)[0, offset % n] = value
+        blk.natural_freqs.zero_()
+    theta = torch.zeros(1, 1, grid, grid)
+    theta.view(1, 1, n)[0, 0, source] = math.pi / 2
+    out = blk.step(theta, torch.zeros_like(theta), blk.prepare_coupling(), substeps=1)
+    return out.view(n) - theta.view(n)
+
+
+def test_the_coil_is_open_where_the_helix_closes():
+    n = 64
+    for boundary, closes in (("helix", True), ("coil", False), ("cochlea", False)):
+        reach = _coil_response(boundary, {1: 1.0}, source=n - 1)[0].abs().item()   # base end -> apex end
+        assert (reach > 1e-3) == closes, f"{boundary}: {reach}"
+
+
+def test_the_cochlea_carries_influence_toward_the_apex_and_the_coil_both_ways():
+    # a symmetric kernel: the coil passes it on equally; the cochlea 3:1 toward the apex, times the
+    # curvature weights of the two receiving sites
+    w = build_geometry("cochlea", 8).curvature(torch.zeros(1))
+    for boundary, ratio in (("coil", 1.0), ("cochlea", 3.0 * (w[29] / w[31]).item())):
+        r = _coil_response(boundary, {1: 1.0, -1: 1.0}, source=30)
+        toward_apex, toward_base = r[29].item(), r[31].item()   # lower positions are lower bands
+        assert toward_apex / toward_base == pytest.approx(ratio, rel=1e-4), boundary
+
+
+def test_the_cochlea_couples_most_strongly_at_the_apex():
+    w = build_geometry("cochlea", 16).curvature(torch.zeros(1))
+    assert w[0].item() == pytest.approx(1.0) and w[-1].item() == pytest.approx(0.25)
+    assert torch.all(w[1:] < w[:-1]) and build_geometry("coil", 16).curvature(torch.zeros(1)) is None

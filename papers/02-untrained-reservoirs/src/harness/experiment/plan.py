@@ -144,6 +144,22 @@ def sweep() -> Iterator[rn.Spec]:
                                   Arm("network", coupling=coupling), **common)
 
 
+def cochlea() -> Iterator[rn.Spec]:
+    """The coil and the cochlea (harness.models.geometries.coil), for every phase coupling function and
+    kind of natural frequencies, at the reference restoring strength and ceiling. Paired with Tier 2's
+    torus and helix cells: same clips, seeds and reads."""
+    common = dict(bits="primary", reads=("windowed", "windowed+rate"))
+    for noise in DESIGN_NOISES:
+        for gain in GAINS:
+            for seed in SEEDS:
+                for geometry in ("coil", "cochlea"):
+                    for coupling in PHASE_COUPLINGS:
+                        for frequencies in FREQUENCIES:
+                            yield rn.Spec("cochlea", "recognition", "spectrogram", noise, gain, seed,
+                                          Arm("network", coupling=coupling, geometry=geometry,
+                                              frequencies=frequencies), **common)
+
+
 def projection() -> Iterator[rn.Spec]:
     """Tier 1's reservoir runs again at the primary size, read under the fixed and the seeded projection.
 
@@ -179,7 +195,7 @@ def becker() -> Iterator[rn.Spec]:
 
 
 TIERS = {"gate": gate, "tier1": tier1, "tier2": tier2, "becker": becker, "tier3": tier3,
-         "projection": projection, "sweep": sweep}
+         "projection": projection, "sweep": sweep, "cochlea": cochlea}
 
 
 # ---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 """Lattice venues for the oscillator field — one module per geometry.
 
-Six `boundary` values reuse one [C, G, G] parameter and state storage and
+Eight `boundary` values reuse one [C, G, G] parameter and state storage and
 re-interpret it as different venues. The stadium picture: the seats never move,
 only the seating chart changes. Everything here is derived, deterministic, and
 parameter-free, so varying the geometry varies exactly one thing.
@@ -18,6 +18,8 @@ columns) geometry-correct everywhere:
 | helix    | along the coil, one octave per turn  | ring positions G*b..G*b+G-1      |
 | cube     | z axis (fully periodic)              | z-slice b (an s x s slab)        |
 | sphere   | latitude, south = low -> north       | latitude ring b                  |
+| coil     | along the open coil, apex = low      | coil positions G*b..G*b+G-1      |
+| cochlea  | the coil, with direction and curvature | coil positions G*b..G*b+G-1    |
 
 `drive_map` states that mapping explicitly, so callers and tests pin the
 contract rather than relying on the layout coincidence silently.
@@ -28,6 +30,7 @@ from __future__ import annotations
 import torch
 
 from harness.models.geometries.base import Geometry, PlanarGeometry
+from harness.models.geometries.coil import Cochlea, Coil
 from harness.models.geometries.cube import Cube, cube_dims
 from harness.models.geometries.cylinder import Cylinder
 from harness.models.geometries.helix import Helix
@@ -37,7 +40,7 @@ from harness.models.geometries.torus import Torus
 
 #: name -> class, in the order the paper's tables list them
 GEOMETRIES: dict[str, type[Geometry]] = {
-    g.name: g for g in (Torus, Cylinder, Sheet, Helix, Cube, Sphere)
+    g.name: g for g in (Torus, Cylinder, Sheet, Helix, Cube, Sphere, Coil, Cochlea)
 }
 BOUNDARIES = tuple(GEOMETRIES)
 
@@ -65,6 +68,8 @@ def drive_map(boundary: str, grid: int) -> torch.Tensor:
 __all__ = [
     "BOUNDARIES",
     "GEOMETRIES",
+    "Cochlea",
+    "Coil",
     "Cube",
     "Cylinder",
     "Geometry",
