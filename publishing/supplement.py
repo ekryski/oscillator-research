@@ -14,8 +14,10 @@ committed files (git ls-files, so no corpus, cache or lock file) of
 
 under one neutral top folder, with the supplement README as its README. The
 paper's own scripts (its schematics, its GPU-pod runner) live outside src/ and
-stay out. Because the repository is public, the run record's git commits are
-dropped on the way, and a last scan of every file refuses to write the zip if a
+stay out. Every file is cleaned on the way (sanitize.py: no invisible
+character, look-alike letter or odd space in the text, no metadata chunk in
+the sound), and because the repository is public the run record's git commits
+are dropped, and a last scan of every file refuses to write the zip if a
 string that names the author, the repository or the paper's folder survives. The
 zip is a build output, not committed.
 """
@@ -28,7 +30,11 @@ import re
 import subprocess
 import sys
 import zipfile
+from collections import Counter
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
+from sanitize import neutral  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 TOP = "supplement"
@@ -93,6 +99,12 @@ def build(paper_arg: str, out: Path | None = None) -> Path:
                 raw = scrub_record(raw)
             contents[target + rel[len(source):]] = raw
     contents["README.md"] = (paper / README).read_bytes()
+    stripped: Counter = Counter()
+    for rel, raw in contents.items():
+        contents[rel], found = neutral(rel, raw)
+        stripped += found
+    if stripped:
+        print("    stripped " + ", ".join(f"{n} {kind}" for kind, n in sorted(stripped.items())))
 
     kept = [rel for rel, raw in contents.items() if rel.startswith("results/") and b'"commit"' in raw]
     if kept:

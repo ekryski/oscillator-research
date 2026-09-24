@@ -207,6 +207,8 @@ stage_venue() {  # stage_venue <dir> <paper dir> <bib> <venue>
 
 built=0
 missing=0
+# the outputs written after this marker are the ones the closing check reads
+mkdir -p "$WORK" && touch "$WORK/.build-start"
 for dir in papers/*/; do
     slug="$(basename "$dir")"
     [ -n "$FILTER" ] && [[ "$slug" != "$FILTER"* ]] && continue
@@ -228,6 +230,13 @@ for dir in papers/*/; do
     [ "$slug" != "01-evidence-audit" ] && [ -f papers/01-evidence-audit/references/bibliography.bib ] \
         && inherit="--inherit papers/01-evidence-audit/references/bibliography.bib"
     python3 publishing/lib/extract_bib.py "$manuscript" $inherit
+    # Every format is built from cleaned copies: the manuscript through preprocess.py,
+    # the bibliography and the front matter here, so no invisible character, look-alike
+    # letter or odd space that could carry an unseen mark reaches an output (sanitize.py)
+    python3 publishing/lib/sanitize.py "$bib" --out "$WORK/$slug.bib"
+    python3 publishing/lib/sanitize.py "$meta" --out "$WORK/$slug.paper.yaml"
+    bib="$WORK/$slug.bib"
+    meta="$WORK/$slug.paper.yaml"
 
     echo "--- rewriting citations"
     body="$WORK/$slug.md"
@@ -254,6 +263,11 @@ for dir in papers/*/; do
     # the manuscript's own last-changed date, so a rebuild is reproducible
     date="$(git log -1 --format=%ad --date=short -- "$manuscript" 2>/dev/null)"
     [ -z "$date" ] && date="$(date +%F)"
+    # and every timestamp a format records (the Word and EPUB files' dates and zip
+    # entries, pdfTeX's, the arXiv archive's) is that day at midnight UTC, not the
+    # moment of the build, so no output carries a build time or a time zone
+    export SOURCE_DATE_EPOCH="$(python3 -c 'import datetime, sys
+print(int(datetime.datetime.fromisoformat(sys.argv[1]).replace(tzinfo=datetime.timezone.utc).timestamp()))' "$date")"
 
     common=(--from=markdown+tex_math_dollars+pipe_tables+footnotes
             --metadata-file="$meta" --metadata-file="$abstract_yaml"
@@ -402,7 +416,11 @@ for dir in papers/*/; do
                 fi
                 ;;
             epub)
+                # pandoc gives each EPUB a random identifier unless handed one; a random
+                # one tells two builds apart, so the paper's own name fixes it
+                epub_id="urn:uuid:$(python3 -c 'import sys, uuid; print(uuid.uuid5(uuid.NAMESPACE_URL, sys.argv[1]))' "$name")"
                 pandoc "${common[@]}" "${byline[@]}" "${cite[@]}" "${raster[@]}" --to=epub3 --toc --toc-depth=2 \
+                    --metadata=identifier="$epub_id" \
                     --output="$dir$name.epub" "$body" && echo "    $dir$name.epub"
                 ;;
             html)
@@ -417,6 +435,7 @@ for dir in papers/*/; do
                     --css=publishing/css/paper.css \
                     --metadata=reference-section-title="References" \
                     --embed-resources --output="$dir$name.html" "$body" \
+                    && sed -i.bak '/<meta name="generator"/d' "$dir$name.html" && rm -f "$dir$name.html.bak" \
                     && echo "    $dir$name.html"
                 ;;
             docx)
@@ -481,7 +500,7 @@ for dir in papers/*/; do
                     --variable=biblio-style="$(basename "$house_bst" .bst)" \
                     ${appendix_arg[@]+"${appendix_arg[@]}"} \
                     --output="$bundle/$name.tex" "$tex_body" || continue
-                (cd "$WORK" && tar czf "$ROOT/$dir$name-arxiv.tar.gz" "arxiv-$slug")
+                python3 publishing/lib/archive.py "$bundle" "$ROOT/$dir$name-arxiv.tar.gz"
                 echo "    $dir$name-arxiv.tar.gz (tex + style + references.bib + figures)"
                 ;;
             supplement)
@@ -505,8 +524,12 @@ echo "=== section numbers in the manuscript"
 python3 publishing/lib/number_sections.py --check
 
 echo
-echo "=== invisible characters in the sources"
+echo "=== hidden characters in the sources"
 python3 publishing/lib/check_hidden.py
+
+echo
+echo "=== fingerprints in the formats just built"
+python3 publishing/lib/check_outputs.py "$FILTER" --newer "$WORK/.build-start" || missing=1
 
 echo
 echo "=== citation labels shared by two works"
@@ -522,5 +545,5 @@ python3 publishing/lib/check_sections.py
 
 echo
 echo "built $built paper(s), beside their Markdown under papers/"
-[ "$missing" = 1 ] && { echo "one or more builds failed or dropped characters — see above" >&2; exit 1; }
+[ "$missing" = 1 ] && { echo "one or more builds failed, dropped characters or kept a fingerprint — see above" >&2; exit 1; }
 echo "citation metadata for these papers: python3 publishing/cite_this.py"

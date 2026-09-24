@@ -99,6 +99,7 @@ $-- in the same words the title block prints; hyperref's own guess from a
 $-- structured author entry is unusable.
 \hypersetup{pdfauthor={$for(author)$$author.name$$sep$, $endfor$}}
 $endif$
+$no-fingerprints.latex()$
 
 $-- The camera-ready running head is "Published in TMLR (month/year)" and the
 $-- title block carries the OpenReview link; both come from these three.

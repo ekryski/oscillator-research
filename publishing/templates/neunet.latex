@@ -69,7 +69,8 @@ $endif$
 $if(keywords)$
   pdfkeywords={$for(keywords)$$keywords$$sep$, $endfor$},
 $endif$
-  pdfcreator={LaTeX via pandoc}}
+  pdfcreator={}}
+$no-fingerprints.latex()$
 
 $-- The class hard-codes its running foot inside an expl3 function. On the
 $-- preprint face that function is redefined, body for body, with the venue
