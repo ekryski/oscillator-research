@@ -43,10 +43,10 @@ from harness.utils.paths import results_root
 WIDTHS = (192, 1024, 4096)
 #: the size every verdict is read at
 PRIMARY_SIZE = 2048
-PRIMARY_STAT = {"recognition": "windowed", "order": "pooled"}
+PRIMARY_STAT = am.PRIMARY_READ
 #: clips per batch, by task and drive; the carrier runs at 16 kHz, so its batches
 #: are small, and a GPU (CUDA or MPS) holds four times as many of its 16,000-frame trajectories
-BATCH = {"recognition": 512, "carrier": 8, "carrier-gpu": 32}
+BATCH = {"recognition": 512, "order": 256, "sequence": 128, "carrier": 8, "carrier-gpu": 32}
 #: a batch holds this many states' trajectories at the sizes above; larger arms (or channels) shrink it
 BATCH_STATES = 1024
 #: above this many states a batch shrinks in proportion (paper 02's rule, unchanged up to 4,096 states)
@@ -61,13 +61,15 @@ CARRIER_RATE_HZ = 16000.0
 class Spec:
     """Everything that decides a run's numbers, and nothing else."""
     tier: str
-    task: str                      # recognition (paper 03 runs no other task)
+    task: str                      # recognition | order | sequence
     drive: str                     # envelope | quadrature | carrier: the input pathway
     noise_db: float | None         # None is clean audio
     gain: float | None             # None for arms that read the rows as they are
     seed: int
     arm: am.Arm
     protocol: str = "A"            # paper 02's Protocol A, the only one paper 03 uses
+    pair: tuple = ()               # the order task's digit pair
+    length: int = 0                # the digit-sequence task's number of digits
     sizes: tuple = (PRIMARY_SIZE,)
     widths: tuple = WIDTHS
     native_sizes: tuple = (PRIMARY_SIZE,)
@@ -76,13 +78,19 @@ class Spec:
     reads: tuple = ()              # the reads to record; empty records every read the arm has
 
     def group(self) -> str:
-        """The record file: tier, pathway and lattice, and the coupling function in the design tiers."""
+        """The record file: tier, task (unless recognition), pathway and lattice, and the coupling
+        function in the design tiers."""
         a = self.arm
-        name = f"{self.tier}-{self.drive}-{a.grid}x{a.grid}"
+        task = "" if self.task == "recognition" else f"-{self.task}"
+        name = f"{self.tier}{task}-{self.drive}-{a.grid}x{a.grid}"
         return f"{name}-{a.physics}" if self.tier.startswith("design") and a.kind == "field" else name
 
     def run_id(self) -> str:
         parts = [self.protocol]
+        if self.task == "order":
+            parts.append(f"pair{self.pair[0]}{self.pair[1]}")
+        if self.task == "sequence":
+            parts.append(f"seq{self.length}")
         parts.append("clean" if self.noise_db is None else f"{self.noise_db:g}db")
         if self.gain is not None:
             parts.append(f"g{self.gain:g}")
@@ -163,12 +171,44 @@ def environment(device: str) -> dict:
 
 @dataclass
 class Clips:
-    """A run's clips in readout order: training (seed order), then test."""
+    """A run's clips in readout order: training (seed order), then test.
+
+    `labels` is [clips] for recognition and the order task, and [clips, positions]
+    for the digit-sequence task, one 10-way label per position."""
     blocks: list                   # per block: a callable (start, stop) -> (rows, valid frames)
     sizes: list[int]
     labels: torch.Tensor
     layout: ro.Layout
     n_classes: int
+
+
+def _cached_or_built(spec: Spec, path, n: int, build):
+    """Rows maker for a joined-clip set: from its cache when there is one, else built batch by batch."""
+    bands, grid, window = spec.arm.n_bands, spec.arm.grid, spec.arm.n_window
+    cache = pr.load_rows(path, n) if window == am.WINDOW and spec.drive == "envelope" else None
+    if cache is not None:
+        return lambda a, b: (pr.to_rows(cache["rows"][a:b], grid), cache["tvalid"][a:b])
+
+    def make(a, b):
+        waves, lens = build(a, b)
+        return pr.to_rows(pr.front_end(waves, spec.drive, bands, window), grid), pr.valid_frames(lens, spec.drive)
+    return make
+
+
+def _order_block(bank: dict, spec: Spec, pool: torch.Tensor, n: int, code: int):
+    """(rows maker, labels) for one order-task set, as paper 02 built it."""
+    first, second, labels = pr.order_set(bank, pool, spec.pair, n, code)
+    path = pr.order_rows_path(spec.pair, code, spec.noise_db, spec.arm.n_bands)
+    return _cached_or_built(spec, path, n, lambda a, b: pr.order_clips(
+        bank, first[a:b], second[a:b], spec.pair, code, a, spec.noise_db)), labels
+
+
+def _sequence_block(bank: dict, spec: Spec, pool: torch.Tensor, n: int, code: int):
+    """(rows maker, digits [n, length]) for one digit-sequence set."""
+    idx, digits = pr.sequence_set(bank, pool, spec.length, n, code)
+    path = pr.sequence_rows_path(spec.length, code, spec.noise_db, spec.arm.n_bands)
+    return _cached_or_built(spec, path, n, lambda a, b: pr.sequence_clips(
+        bank, idx[a:b], spec.length, code, a, spec.noise_db)), digits
 
 
 def _recognition_block(bank: dict, spec: Spec, idx: torch.Tensor):
@@ -187,9 +227,20 @@ def _recognition_block(bank: dict, spec: Spec, idx: torch.Tensor):
 
 
 def assemble(spec: Spec, bank: dict) -> Clips:
-    if spec.task != "recognition" or spec.protocol != "A":
-        raise ValueError("paper 03 reads recognition under Protocol A only")
+    if spec.protocol != "A":
+        raise ValueError("paper 03 reads Protocol A only")
     train_pool, test_pool = pr.protocol_a(bank)
+    if spec.task in ("order", "sequence"):
+        if spec.drive != "envelope":
+            raise ValueError("the memory tasks run on the band-energy pathway")
+        block, n_tr, n_te = ((_order_block, pr.ORDER_TRAIN, pr.ORDER_TEST) if spec.task == "order"
+                             else (_sequence_block, pr.SEQUENCE_TRAIN, pr.SEQUENCE_TEST))
+        tr, y_tr = block(bank, spec, train_pool, n_tr, spec.seed + 1)
+        te, y_te = block(bank, spec, test_pool, n_te, 0)
+        classes = 2 if spec.task == "order" else pr.DIGIT_CHOICES
+        return Clips([tr, te], [n_tr, n_te], torch.cat((y_tr, y_te)), ro.Layout(n_tr, 0, n_te), classes)
+    if spec.task != "recognition":
+        raise ValueError(f"unknown task '{spec.task}'")
     order = pr.training_order(train_pool, spec.seed)[:max(spec.sizes)]
     parts = (order, test_pool)
     layout = ro.Layout(len(order), 0, len(test_pool))
@@ -273,6 +324,8 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
     buffers: dict[str, torch.Tensor] = {}
 
     if arm.kind == "ann":
+        if clips.labels.dim() != 1:
+            raise ValueError("the trained baselines are not run on the digit-sequence task")
         rows, tvalid = [], []
         for r, tv, _ in batches(spec, clips):
             rows.append(r)
@@ -325,9 +378,10 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
 
 def _execute_streamed(spec: Spec, clips: Clips, model: torch.nn.Module, device: str, t0: float) -> dict:
     """An arm too large to hold, read channel by channel (harness.confirm.stream)."""
-    if len(spec.sizes) != 1 or spec.native_sizes or spec.span != "fixed" or (spec.reads not in ((), (st.READ,))):
-        raise ValueError("the streamed read fits one training size, the fixed span and the windowed read, "
-                         "with no native cell")
+    if (len(spec.sizes) != 1 or spec.native_sizes or spec.span != "fixed"
+            or spec.reads not in ((), (am.PRIMARY_READ[spec.task],))):
+        raise ValueError("the streamed read fits one training size, the fixed span and the task's primary "
+                         "read, with no native cell")
     n = spec.sizes[0]
     t1 = time.perf_counter()
     with torch.no_grad():
@@ -340,14 +394,19 @@ def _execute_streamed(spec: Spec, clips: Clips, model: torch.nn.Module, device: 
     wanted = ro.wanted_widths(spec.widths, native, False)
     labels = torch.cat((clips.labels[:n], clips.labels[clips.layout.test]))
     layout = ro.Layout(n, 0, clips.layout.n_test)
+    read = am.PRIMARY_READ[spec.task]
+    positions = [None] if labels.dim() == 1 else list(range(labels.shape[1]))
     cells = []
     for projection, (p_tr, p_te) in projected.items():
-        cells += ro.fit_widths(st.READ, n, wanted, native, (p_tr, p_te, None), None, labels, layout,
-                               clips.n_classes, keep_bits(spec), projection)
+        for p in positions:
+            y = labels if p is None else labels[:, p]
+            fitted = ro.fit_widths(read, n, wanted, native, (p_tr, p_te, None), None, y, layout,
+                                   clips.n_classes, keep_bits(spec), projection)
+            cells += fitted if p is None else [{**c, "position": p} for c in fitted]
     timing = {"simulate_and_project_s": t2 - t1, "readout_s": time.perf_counter() - t2,
               "total_s": time.perf_counter() - t0}
     return {"spec": spec.as_dict(), "arm_meta": am.meta(spec.arm, model), "read": "streamed by channel",
-            "native_widths": {st.READ: native}, "n_test": clips.layout.n_test, "cells": cells, "health": None,
+            "native_widths": {read: native}, "n_test": clips.layout.n_test, "cells": cells, "health": None,
             "timing": timing, "env": environment(device)}
 
 

@@ -11,12 +11,23 @@ The test set is the whole test pool, in one fixed order. A seed permutes the
 training pool, and a training set is a prefix of that permutation; paper 03
 fits every readout on the first 2,048 clips, paper 02's primary size.
 
-Paper 02's Protocol B (Becker et al.'s folds) and its order task are not
-carried over: paper 03 reads recognition under Protocol A only.
+Two memory tasks join recordings into one clip, behind a silent leader and
+across 100 ms gaps, from the training speakers for training and the test
+speakers for testing. The order task is paper 02's: digit a then digit b, or
+b then a, on five digit pairs, its labels alternating so the classes are
+exactly balanced. The digit-sequence task joins 2, 3 or 4 recordings of
+different digits and asks for the digit at each position. Both are read over
+the whole span as one window, a read that does not depend on the order of the
+frames, so the spectrogram-only baseline can tell which digits are present but
+not in what order, and whatever an arm adds must come from its own memory.
+
+Paper 02's Protocol B (Becker et al.'s folds) is not carried over.
 """
 
 from __future__ import annotations
 
+import itertools
+import math
 from pathlib import Path
 
 import torch
@@ -41,8 +52,28 @@ SIZES = (2048, 8192, 24000)
 
 #: seed families, kept apart so no two uses of a generator can collide
 TRAIN_ORDER_SEED = 1000
+ORDER_SET_SEED = 3000
+ORDER_TEST_SET = 9999
+SEQUENCE_SET_SEED = 5000
+SEQUENCE_TEST_SET = 9000
 NOISE_SEED = 20_260_923
-#: clip identities: a bank clip is speaker*10,000 + digit*100 + rep
+#: clip identities: a bank clip is speaker*10,000 + digit*100 + rep; an order
+#: or a sequence clip lives in its own range above every bank identity
+ORDER_UID_BASE = 10**8
+ORDER_UID_PAIR, ORDER_UID_SET = 10**7, 10**5
+SEQUENCE_UID_BASE = 2 * 10**8
+
+#: the joined clips: a 272 ms silent leader (longer than the 16-frame warm-up, so the read starts
+#: in silence whatever comes first), then the recordings, each padded to 1 s, 100 ms apart
+LEADER_SAMPLES = 4352
+GAP_SAMPLES = 1600
+#: the order task's five pairs, and the size of each set (paper 02's)
+PAIRS = ((3, 7), (1, 8), (2, 5), (4, 9), (0, 6))
+ORDER_TRAIN, ORDER_TEST = 2048, 2048
+#: the digit-sequence task's lengths, and the size of each set
+SEQUENCE_LENGTHS = (2, 3, 4)
+SEQUENCE_TRAIN, SEQUENCE_TEST = 2048, 2048
+DIGIT_CHOICES = 10
 #: noise levels map to non-negative seed offsets
 NOISE_LEVEL_OFFSET, NOISE_LEVEL_SCALE, NOISE_UID_STRIDE = 1000, 10, 10_007
 
@@ -176,6 +207,128 @@ def valid_frames(lens: torch.Tensor, drive: str) -> torch.Tensor:
 # Clips
 # ---------------------------------------------------------------------------
 
+def joined_samples(length: int) -> int:
+    """Samples in a clip of `length` joined recordings: the leader, the recordings and the gaps."""
+    return LEADER_SAMPLES + length * DIGIT_MAX_SAMPLES + (length - 1) * GAP_SAMPLES
+
+
+def joined_frames(length: int) -> int:
+    """Hop frames in such a clip: 147, 216 and 284 for 2, 3 and 4 recordings."""
+    return hop_num_frames(joined_samples(length))
+
+
+def _join(bank: dict, parts: list[torch.Tensor], length: int) -> tuple[torch.Tensor, torch.Tensor]:
+    """(waves [n, joined_samples(length)], lens [n]): each row's recordings behind the leader, gap apart."""
+    n = len(parts[0])
+    waves = torch.zeros(n, joined_samples(length))
+    lens = torch.empty(n, dtype=torch.long)
+    for i in range(n):
+        at = LEADER_SAMPLES
+        for k, part in enumerate(parts):
+            w = bank["waves"][part[i], :bank["lens"][part[i]]].to(torch.float32) / INT16_SCALE
+            if k:
+                at += GAP_SAMPLES
+            waves[i, at:at + len(w)] = w
+            at += len(w)
+        lens[i] = at
+    return waves, lens
+
+
+def order_set(bank: dict, pool: torch.Tensor, pair: tuple[int, int], n: int,
+              set_code: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Which recordings make up an order-task set: (first idx, second idx, labels). Paper 02's.
+
+    Label 0 is a then b, label 1 is b then a, alternating so the classes are
+    exactly balanced. `set_code` 0 is the fixed test set; seed s draws training
+    set s + 1. Recordings are independent draws from the pool.
+    """
+    a, b = pair
+    pair_idx = PAIRS.index(pair)
+    seed = ORDER_TEST_SET + pair_idx if set_code == 0 else ORDER_SET_SEED + 100 * pair_idx + set_code
+    gen = torch.Generator().manual_seed(seed)
+    of_a = pool[bank["labels"][pool] == a]
+    of_b = pool[bank["labels"][pool] == b]
+    pick_a = of_a[torch.randint(len(of_a), (n,), generator=gen)]
+    pick_b = of_b[torch.randint(len(of_b), (n,), generator=gen)]
+    labels = torch.arange(n) % 2
+    first = torch.where(labels == 0, pick_a, pick_b)
+    second = torch.where(labels == 0, pick_b, pick_a)
+    return first, second, labels
+
+
+def order_clips(bank: dict, first: torch.Tensor, second: torch.Tensor, pair: tuple[int, int],
+                set_code: int, start: int, noise_db: float | None):
+    """(waves [n, joined_samples(2)], lens) for rows `start`.. of an order set, as paper 02 built them."""
+    waves, lens = _join(bank, [first, second], 2)
+    ids = (ORDER_UID_BASE + PAIRS.index(pair) * ORDER_UID_PAIR + set_code * ORDER_UID_SET
+           + start + torch.arange(len(first)))
+    return add_noise(waves, lens, ids, noise_db), lens
+
+
+def sequence_set(bank: dict, pool: torch.Tensor, length: int, n: int, set_code: int,
+                 repeats: bool = False) -> tuple[torch.Tensor, torch.Tensor]:
+    """Which recordings make up a digit-sequence set: (bank indices [n, length], digits [n, length]).
+
+    Each sequence's digits are drawn uniformly, without repeats by default (so
+    a sequence holds `length` different digits), and each position's recording
+    is an independent draw from the pool's recordings of that digit. The digit
+    at every position is therefore uniform over the ten, so chance at every
+    position is 1/10. `set_code` 0 is the fixed test set; seed s draws training
+    set s + 1.
+    """
+    seed = (SEQUENCE_TEST_SET + length if set_code == 0
+            else SEQUENCE_SET_SEED + 100 * length + set_code)
+    gen = torch.Generator().manual_seed(seed)
+    if repeats:
+        digits = torch.randint(DIGIT_CHOICES, (n, length), generator=gen)
+    else:
+        digits = torch.stack([torch.randperm(DIGIT_CHOICES, generator=gen)[:length] for _ in range(n)])
+    by_digit = [pool[bank["labels"][pool] == d] for d in range(DIGIT_CHOICES)]
+    idx = torch.empty(n, length, dtype=torch.long)
+    for p in range(length):
+        for d in range(DIGIT_CHOICES):
+            rows = (digits[:, p] == d).nonzero().flatten()
+            idx[rows, p] = by_digit[d][torch.randint(len(by_digit[d]), (len(rows),), generator=gen)]
+    return idx, digits
+
+
+def sequence_clips(bank: dict, idx: torch.Tensor, length: int, set_code: int, start: int,
+                   noise_db: float | None):
+    """(waves [n, joined_samples(length)], lens) for rows `start`.. of a digit-sequence set."""
+    waves, lens = _join(bank, [idx[:, p] for p in range(length)], length)
+    ids = (SEQUENCE_UID_BASE + length * ORDER_UID_PAIR + set_code * ORDER_UID_SET
+           + start + torch.arange(len(idx)))
+    return add_noise(waves, lens, ids, noise_db), lens
+
+
+def order_free_ceiling(length: int, repeats: bool = False) -> float:
+    """The best accuracy at one position for a reader that knows which digits a sequence holds but not
+    their order: the expected share of the sequence taken by its most frequent digit. Exactly 1/length
+    without repeats; with repeats, computed over every one of the 10**length equally likely sequences."""
+    if not repeats:
+        return 1.0 / length
+    best = sum(max(seq.count(d) for d in set(seq))
+               for seq in itertools.product(range(DIGIT_CHOICES), repeat=length))
+    return best / (length * DIGIT_CHOICES ** length)
+
+
+def sequence_chance(length: int, repeats: bool = False) -> dict:
+    """Exact chance levels for a sequence of `length` digits.
+
+    per_position: an uninformed reader, 1/10. order_free: a reader that knows
+    the digits present but not their order (order_free_ceiling). whole: every
+    position right by chance (one sequence among 10 * 9 * ... or 10**length).
+    whole_order_free: every position right knowing the digits present (one
+    ordering among length!, without repeats).
+    """
+    orderings = math.perm(DIGIT_CHOICES, length) if not repeats else DIGIT_CHOICES ** length
+    out = {"per_position": 1.0 / DIGIT_CHOICES, "order_free": order_free_ceiling(length, repeats),
+           "whole": 1.0 / orderings}
+    if not repeats:
+        out["whole_order_free"] = 1.0 / math.factorial(length)
+    return out
+
+
 def recognition_clips(bank: dict, idx: torch.Tensor, noise_db: float | None):
     """(waves [n, 16000] float, lens [n], labels [n]) for bank clips `idx`."""
     waves = bank["waves"][idx].to(torch.float32) / INT16_SCALE
@@ -230,6 +383,54 @@ def build_rows(bank: dict, drive: str, noise_db: float | None, bands: int = 16, 
         rows[idx], tvalid[idx] = r, valid_frames(lens, drive)
     out = rows_path(drive, noise_db, bands, window)
     _save(out, rows, tvalid, n_clips=n, drive=drive, noise_db=noise_db, bands=bands, window=window)
+    return out
+
+
+def order_rows_path(pair: tuple[int, int], set_code: int, noise_db: float | None, bands: int = 16) -> Path:
+    """An order-task set's cache; 16 bands keep paper 02's file name."""
+    size = "" if bands == 16 else f"-{bands}bands"
+    return ROWS_DIR / f"order-pair{pair[0]}{pair[1]}-set{set_code}{size}-{level_name(noise_db)}.pt"
+
+
+def sequence_rows_path(length: int, set_code: int, noise_db: float | None, bands: int = 16) -> Path:
+    size = "" if bands == 16 else f"-{bands}bands"
+    return ROWS_DIR / f"sequence{length}-set{set_code}{size}-{level_name(noise_db)}.pt"
+
+
+def order_pool(bank: dict, set_code: int, n_train: int, n_test: int) -> tuple[torch.Tensor, int]:
+    """(the speakers' pool, the set's size): the test pool for the test set (code 0), else the training pool."""
+    train_pool, test_pool = protocol_a(bank)
+    return (test_pool, n_test) if set_code == 0 else (train_pool, n_train)
+
+
+def build_order_rows(bank: dict, pair: tuple[int, int], set_code: int, noise_db: float | None,
+                     bands: int = 16) -> Path:
+    """Front-end rows for one order-task set: the test set (code 0) or seed s's training set (s + 1)."""
+    pool, n = order_pool(bank, set_code, ORDER_TRAIN, ORDER_TEST)
+    first, second, labels = order_set(bank, pool, pair, n, set_code)
+    rows, tvalid = [], []
+    for a in range(0, n, CACHE_BATCH):
+        waves, lens = order_clips(bank, first[a:a + CACHE_BATCH], second[a:a + CACHE_BATCH],
+                                  pair, set_code, a, noise_db)
+        rows.append(front_end(waves, "envelope", bands))
+        tvalid.append(valid_frames(lens, "envelope"))
+    out = order_rows_path(pair, set_code, noise_db, bands)
+    _save(out, torch.cat(rows), torch.cat(tvalid), labels=labels, n_clips=n)
+    return out
+
+
+def build_sequence_rows(bank: dict, length: int, set_code: int, noise_db: float | None,
+                        bands: int = 16) -> Path:
+    """Front-end rows for one digit-sequence set."""
+    pool, n = order_pool(bank, set_code, SEQUENCE_TRAIN, SEQUENCE_TEST)
+    idx, digits = sequence_set(bank, pool, length, n, set_code)
+    rows, tvalid = [], []
+    for a in range(0, n, CACHE_BATCH):
+        waves, lens = sequence_clips(bank, idx[a:a + CACHE_BATCH], length, set_code, a, noise_db)
+        rows.append(front_end(waves, "envelope", bands))
+        tvalid.append(valid_frames(lens, "envelope"))
+    out = sequence_rows_path(length, set_code, noise_db, bands)
+    _save(out, torch.cat(rows), torch.cat(tvalid), labels=digits, n_clips=n)
     return out
 
 

@@ -56,7 +56,9 @@ N_CLASSES = 10
 SPANS = ("fixed", "clip")
 DT, SUBSTEPS = 0.1, 1
 #: windows per read: four for recognition, one (the order-free read) for order
-WINDOWS = {"recognition": 4, "order": 1}
+WINDOWS = {"recognition": 4, "order": 1, "sequence": 1}
+#: each task's primary read: the four windows for recognition, the whole span, order-free, for the memory tasks
+PRIMARY_READ = {"recognition": "windowed", "order": "pooled", "sequence": "pooled"}
 ANNS = {"gru": GRUBaseline, "tcn": TCNBaseline, "cnn": CNNBaseline,
         "transformer": TransformerBaseline, "s4d": S4DBaseline}
 #: the exploratory trained-head recipe (scripts/trained_head_baselines.py)
@@ -137,7 +139,8 @@ class Arm:
 
 
 def _statistics(task: str) -> tuple[tuple[str, int], ...]:
-    """(name, windows): recognition reads four windows and the whole span; order only the whole span."""
+    """(name, windows): recognition reads four windows and the whole span; the memory tasks (order,
+    sequence) only the whole span, the read that does not depend on the order of the frames."""
     return (("windowed", WINDOWS["recognition"]), ("pooled", 1)) if task == "recognition" else (("pooled", 1),)
 
 

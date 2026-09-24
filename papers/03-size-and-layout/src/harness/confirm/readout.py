@@ -261,8 +261,15 @@ def read_cells(reads: dict[str, list[torch.Tensor]], labels: torch.Tensor, layou
     fixed one (paper 02's matrix) and the one seeded by the run's `seed`. A
     width at or above the native width is the unprojected read, fitted once
     and tagged "none". Only the projection runs on `device`; the ridge is
-    solved on the CPU in float64.
+    solved on the CPU in float64. `labels` [clips, positions] (the
+    digit-sequence task) fits one readout per position on the same features,
+    each cell tagged with its position.
     """
+    positions = [None] if labels.dim() == 1 else list(range(labels.shape[1]))
+
+    def tagged(fitted: list[dict], p: int | None) -> list[dict]:
+        return fitted if p is None else [{**c, "position": p} for c in fitted]
+
     cells = []
     for name, blocks in reads.items():
         native = sum(b.shape[1] for b in blocks)
@@ -281,13 +288,16 @@ def read_cells(reads: dict[str, list[torch.Tensor]], labels: torch.Tensor, layou
                     projected = (_projected(blocks, rows_tr, mean, sd, top, p, device),
                                  _projected(blocks, layout.test, mean, sd, top, p, device),
                                  _projected(blocks, layout.val, mean, sd, top, p, device) if layout.n_val else None)
-                    cells += fit_widths(name, n, below, native, projected, None, labels, layout, n_classes,
-                                        keep_bits, projection)
+                    for p in positions:
+                        y = labels if p is None else labels[:, p]
+                        cells += tagged(fit_widths(name, n, below, native, projected, None, y, layout, n_classes,
+                                                   keep_bits, projection), p)
             unprojected = [(r, e) for r, e in wanted if e >= native]
-            if unprojected:
-                cells += fit_widths(name, n, unprojected, native, None,
-                                    lambda rows, blocks=blocks: _native(blocks, rows), labels, layout, n_classes,
-                                    keep_bits, "none")
+            for p in positions if unprojected else []:
+                y = labels if p is None else labels[:, p]
+                cells += tagged(fit_widths(name, n, unprojected, native, None,
+                                           lambda rows, blocks=blocks: _native(blocks, rows), y, layout, n_classes,
+                                           keep_bits, "none"), p)
     return cells
 
 

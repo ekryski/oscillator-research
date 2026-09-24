@@ -68,8 +68,6 @@ from harness.measurement.features import MAX_WIDTH, projection_seed
 STREAM_STATES = 4096
 #: a channel's generator seed is this many times the in-memory generator seed, plus the channel
 CHANNEL_STRIDE = 100
-#: the read the streamed path records: the four-window statistics, paper 02's primary read
-READ = "windowed"
 
 
 def channel_seed(c: int, seed: int | None = None) -> int:
@@ -113,7 +111,7 @@ def streamed_read(arm: am.Arm, model: torch.nn.Module, blocks: Callable[[int, in
             x_tr = None
             for rows, tvalid, where in blocks(c, 0):
                 sig = am.frozen_signals(one, sub, rows.to(device))
-                f = am.frozen_features(one, sig, tvalid.to(device), task)[READ].cpu()
+                f = am.frozen_features(one, sig, tvalid.to(device), task)[am.PRIMARY_READ[task]].cpu()
                 if not out:                          # the first batch of the first channel sizes everything
                     per_channel = f.shape[1]
                     native = per_channel * arm.channels
@@ -130,7 +128,7 @@ def streamed_read(arm: am.Arm, model: torch.nn.Module, blocks: Callable[[int, in
             del x_tr
             for rows, tvalid, where in blocks(c, 1):
                 sig = am.frozen_signals(one, sub, rows.to(device))
-                f = am.frozen_features(one, sig, tvalid.to(device), task)[READ]
+                f = am.frozen_features(one, sig, tvalid.to(device), task)[am.PRIMARY_READ[task]]
                 for k, p in ps.items():
                     out[k][1][where] += ro._projected([f], slice(0, len(f)), mean, sd, top, p, device)
             del ps
