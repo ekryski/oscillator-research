@@ -258,6 +258,9 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
     buffers: dict[str, torch.Tensor] = {}
 
     if arm.kind == "trained":
+        # trained on the CPU whatever the device: at about 2,000 parameters in batches
+        # of 64, a GPU's launch overhead outweighs its arithmetic (1 to 3 times slower
+        # on the M1 Max GPU than on its CPU)
         rows, tvalid = [], []
         for r, tv, _ in batches(spec, clips):
             rows.append(r)

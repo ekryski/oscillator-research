@@ -260,13 +260,15 @@ def trained_features(backbone: nn.Module, rows: torch.Tensor, tvalid: torch.Tens
 
 def train_baseline(arm: Arm, rows: torch.Tensor, tvalid: torch.Tensor, labels: torch.Tensor,
                    task: str, seed: int, n_classes: int = N_CLASSES, epochs: int = EPOCHS,
-                   span: str = "fixed") -> tuple[nn.Module, nn.Module, dict]:
+                   span: str = "fixed", device: str = "cpu") -> tuple[nn.Module, nn.Module, dict]:
     """Train a baseline end to end, with a learned linear head on the shared statistics.
 
     Conventional practice is a learned head; putting that head on the same
     statistics the ridge will read means the network is trained for the read it
     is judged by, and a recurrent network cannot hand the head its last state.
-    Returns (backbone, head, health).
+    Returns (backbone, head, health). The weights are drawn on the CPU and the
+    batches in the same order on every device, so a GPU run differs from the
+    CPU's only by floating-point rounding.
     """
     torch.manual_seed(seed)
     backbone = TRAINED[arm.arch](grid=GRID, n_classes=n_classes, probe_seed=PROBE_SEED + seed)
@@ -274,6 +276,8 @@ def train_baseline(arm: Arm, rows: torch.Tensor, tvalid: torch.Tensor, labels: t
     with torch.no_grad():
         width = trained_features(backbone, rows[:2], tvalid[:2], windows, span).shape[1]
     head = nn.Linear(width, n_classes)
+    backbone, head = backbone.to(device), head.to(device)
+    rows, tvalid, labels = rows.to(device), tvalid.to(device), labels.to(device)
     params = list(backbone.parameters()) + list(head.parameters())
     steps = epochs * ((len(rows) + BATCH - 1) // BATCH)
     opt = torch.optim.AdamW(params, lr=LR)
@@ -282,7 +286,7 @@ def train_baseline(arm: Arm, rows: torch.Tensor, tvalid: torch.Tensor, labels: t
     losses = []
     backbone.train(); head.train()
     for _ in range(epochs):
-        perm = torch.randperm(len(rows), generator=gen)
+        perm = torch.randperm(len(rows), generator=gen).to(device)
         total = 0.0
         for i in range(0, len(rows), BATCH):
             idx = perm[i:i + BATCH]
