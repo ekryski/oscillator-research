@@ -38,10 +38,11 @@ from harness.measurement.instruments import analytic_row_phase
 from harness.models.baselines import CNNBaseline, GRUBaseline, S4DBaseline, TCNBaseline, TransformerBaseline
 from harness.models.field import OscillatorField, physics_block, tonotopic_omega
 from harness.models.leaky_bank import LeakyBank
-from harness.sweep import ALPHA, BETA
 from harness.utils.constants import PLV_LOCK_THRESH, WARMUP_FRAMES
 
 GRID = 16
+#: the Kuramoto-Sakaguchi phase lag and the second-harmonic weight
+ALPHA, BETA = 0.7853981633974483, 0.5   # pi/4, 0.5
 N_CLASSES = 10
 #: how much of each clip a read covers
 SPANS = ("fixed", "clip")

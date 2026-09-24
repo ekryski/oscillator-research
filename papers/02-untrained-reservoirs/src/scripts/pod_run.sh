@@ -7,7 +7,7 @@
 #
 # The argument is the AudioMNIST checkout on the attached volume: the folder
 # that holds data/01 ... data/60. The script clones or updates the repository,
-# builds both banks and the row caches, runs the test suite and the legacy
+# builds the bank and the row caches, runs the test suite and the zero-drive
 # gate, then the tiers. Every step is resume-safe, so re-running it after an
 # interruption carries on where it stopped. Results land in
 # papers/02-untrained-reservoirs/results/confirmatory/; copy that folder back
@@ -47,11 +47,9 @@ MEM_GB="$(awk '/MemAvailable/ {printf "%d", $2 / 1048576}' /proc/meminfo)"
 WIDE=$(( CPUS / 4 < MEM_GB / 10 ? CPUS / 4 : MEM_GB / 10 )); WIDE=$(( WIDE < 1 ? 1 : WIDE ))
 NARROW=$(( CPUS / 2 < MEM_GB / 3 ? CPUS / 2 : MEM_GB / 3 )); NARROW=$(( NARROW < 1 ? 1 : NARROW ))
 
-uv run python -m harness.stimuli.digits --build-bank      # the exploratory bank, for the legacy gate
 [ -f data/cache/digits_v2.pt ] || uv run python -m harness.confirm.protocol --build-bank
 uv run python -m harness.confirm.plan prepare --workers "$(( CPUS < 16 ? CPUS : 16 ))"
 uv run pytest -q                                          # gate 1
-uv run python -m harness.confirm.gates legacy             # gate 2
 
 for tier in "${TIERS[@]}"; do
     case "$tier" in

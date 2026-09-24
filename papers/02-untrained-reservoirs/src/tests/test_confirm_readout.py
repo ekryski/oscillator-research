@@ -5,7 +5,6 @@ import torch
 
 from harness.confirm import readout as ro
 from harness.measurement.features import projection_matrix
-from harness.measurement.probe import fit_ridge_probe
 
 
 def blobs(n, d, classes=4, seed=0, spread=1.5):
@@ -14,17 +13,6 @@ def blobs(n, d, classes=4, seed=0, spread=1.5):
     centres = torch.randn(classes, d, generator=g) * spread / d ** 0.5
     y = torch.arange(n) % classes
     return centres[y] + torch.randn(n, d, generator=g) / d ** 0.5 * 3, y
-
-
-@pytest.mark.parametrize("n_train,d", [(200, 400), (400, 60)], ids=["dual", "primal"])
-def test_it_matches_the_exploratory_ridge_choice_for_choice(n_train, d):
-    x, y = blobs(n_train + 300, d, seed=d)
-    x_tr, y_tr, x_te, y_te = x[:n_train], y[:n_train], x[n_train:], y[n_train:]
-    old = fit_ridge_probe(x_tr, y_tr, x_te, y_te, 4)
-    new = ro.ridge(x_tr, y_tr, x_te, y_te, 4)
-    assert new["form"] == ("dual" if d + 1 > n_train * 7 // 8 else "primal")
-    assert new["lam"] == old["lam"] and new["val_acc"] == pytest.approx(old["val_acc"])
-    assert new["correct"].tolist() == (torch.tensor(old["pred"]) == y_te).tolist()
 
 
 def test_primal_and_dual_are_the_same_estimator():

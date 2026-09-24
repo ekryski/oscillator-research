@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 
 from harness.confirm import readout as ro
-from harness.confirm import run as rn
 from harness.confirm import score as sc
 
 N_TEST = 400

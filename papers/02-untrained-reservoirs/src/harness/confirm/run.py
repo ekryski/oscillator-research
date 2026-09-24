@@ -31,7 +31,7 @@ import torch
 from harness.confirm import arms as am
 from harness.confirm import protocol as pr
 from harness.confirm import readout as ro
-from harness.results import results_root
+from harness.utils.paths import RESULTS_DIR
 
 #: the registered common widths; an arm is never read wider than its native width
 WIDTHS = (192, 1024, 4096)
@@ -96,7 +96,8 @@ class Spec:
 # ---------------------------------------------------------------------------
 
 def record_root() -> Path:
-    return results_root() / "confirmatory"
+    """Where the record lives, read per call: OSC_RESULTS_DIR redirects it, e.g. to reproduce into a fresh tree."""
+    return Path(os.environ.get("OSC_RESULTS_DIR", RESULTS_DIR)) / "confirmatory"
 
 
 def group_path(group: str) -> Path:

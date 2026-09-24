@@ -112,17 +112,6 @@ def test_severing_zeroes_the_coupling_and_nothing_else(bank):
     assert am.meta(am.Arm("field", severed=True), severed)["effective_params"] == 1024
 
 
-def test_the_field_matches_the_exploratory_runners_draw_for_the_same_seed():
-    from argparse import Namespace
-    from harness.runner import build_field
-    args = Namespace(channels=4, grid=16, damping=0.3, clamp=1.0, substeps=1, dt=0.1, gain=2.0,
-                     blocks=1, kernel_support=0, core="phase", boundary="torus", damping_learnable=False,
-                     sakaguchi_alpha=0.0, harmonic2_beta=0.0, graph_k=1)
-    old = build_field(args, "kuramoto", 10, seed=0).state_dict()
-    new = am.build_frozen(FIELD, 2.0, seed=0).state_dict()
-    assert all(torch.equal(old[k], new[k]) for k in ("core.blocks.0.kernel", "core.blocks.0.natural_freqs"))
-
-
 def test_a_trained_network_is_read_at_its_own_training_size(bank):
     rec = rn.execute(spec(am.Arm("ann", arch="gru"), sizes=(128,), native_sizes=(128,)), bank=bank)
     assert {c["n_train"] for c in rec["cells"]} == {128}

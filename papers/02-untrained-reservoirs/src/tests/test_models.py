@@ -293,30 +293,3 @@ def test_coupling_laws_distinct_at_nonzero_init():
     assert not torch.allclose(sak, kur, atol=1e-4)
     assert not torch.allclose(har, kur, atol=1e-4)
     assert not torch.allclose(sak, har, atol=1e-4)
-
-
-def test_randgraph_core_contract():
-    #: disorder core — right shapes, seed-dependent, differs from circulant
-    from harness import OscillatorField, RandGraphCore
-
-    torch.manual_seed(0)
-    rows = torch.rand(2, 30, 16) * 0.5
-    def feats(seed, k=4):
-        m = OscillatorField(channels=2, grid=16, n_classes=2, probe_seed=0, core="randgraph",
-                     damping=0.3, spectral_clamp=1.0, gain=2.0, seed=seed, graph_k=k)
-        return m.features(rows)
-    f0, f1 = feats(0), feats(1)
-    assert torch.isfinite(f0).all() and not torch.allclose(f0, f1, atol=1e-4)
-    m_circ = OscillatorField(channels=2, grid=16, n_classes=2, probe_seed=0, core="phase",
-                      damping=0.3, spectral_clamp=1.0, gain=2.0, seed=0)
-    assert not torch.allclose(f0, m_circ.features(rows), atol=1e-3)
-    core = RandGraphCore(channels=1, grid=16, dt=0.1, damping=0.3,
-                         spectral_clamp=0.7, graph_k=8, seed=3)
-    sv = torch.linalg.matrix_norm(core.W[0], ord=2)
-    assert abs(float(sv) - 0.7) < 0.05  # spectral radius ~ clamp
-    nnz = int((core.W[0] != 0).sum())
-    assert nnz == 8 * 256  # graph_k nonzeros per oscillator
-    # settle-read interface: forward_scan must accept a continuation state
-    m = OscillatorField(channels=2, grid=16, n_classes=2, probe_seed=0, core="randgraph",
-                 damping=0.3, spectral_clamp=1.0, gain=2.0, seed=0, graph_k=4)
-    assert torch.isfinite(m.features_settle(rows)).all()
