@@ -13,7 +13,7 @@ is the square slab (4 x 4, 8 x 8), so the geometry is paper 02's there; at 8,
 
 Fully periodic axes are symmetric, so which axis carries frequency is
 arbitrary but fixed: z (the storage row) is the tonotopic axis, and band b
-drives z-slice b.
+drives z-slice b. An open-z variant is a different geometry, not this one.
 """
 
 from __future__ import annotations

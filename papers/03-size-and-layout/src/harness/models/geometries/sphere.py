@@ -1,10 +1,9 @@
 """Sphere — a latitude/longitude lattice with open poles.
 
-APPROXIMATION, STATED PLAINLY: this is a lat-long lattice, not true S^2
-spectral coupling. Latitude rows use the cylinder's open-axis mechanism,
-longitude is periodic, and each SOURCE oscillator's contribution is scaled by
-cos(latitude) — the sphere's area element, so near-pole rings, which oversample
-the surface, are weighted down.
+Note: this is a lat-long lattice, not true S^2 spectral coupling. Latitude
+rows use the cylinder's open-axis mechanism, longitude is periodic, and each
+SOURCE oscillator's contribution is scaled by cos(latitude) — the sphere's area
+element, so near-pole rings, which oversample the surface, are weighted down.
 
 `torch-harmonics` (genuine spherical harmonics) was evaluated and rejected: it
 is not device-portable for this project's smoke ladder, and its real-SHT basis
@@ -38,10 +37,10 @@ def sphere_cos_weights(grid: int) -> torch.Tensor:
 class Sphere(PlanarGeometry):
     name = "sphere"
     frequency_axis = "latitude (south = low frequency -> north = high)"
-    #: "harmonics" is reserved for a future true-S^2 venue
+    #: "harmonics" is reserved for a future true-S^2 geometry
     implementation = "lattice"
     # latitude offsets live in the padded buffer, so the 2-D wrapped-distance
-    # mask would not mean what it means on the unpadded venues
+    # mask would not mean what it means on the unpadded geometries
     supports_kernel_support = False
     embed_shape = (2, 1)
 

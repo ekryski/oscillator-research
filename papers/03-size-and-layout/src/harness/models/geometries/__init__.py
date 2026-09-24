@@ -14,8 +14,6 @@ b, all channels and columns) correct everywhere:
 | helix    | along the coil, G/4 rows per turn       | ring positions G*b .. G*b+G-1   |
 | cube     | the z axis (fully periodic)             | z-slice b (an a x b slab)       |
 | sphere   | latitude, south = low -> north          | latitude ring b                 |
-
-Paper 02's exploratory geometries (Moebius, Klein, diamond) are not carried over.
 """
 
 from __future__ import annotations

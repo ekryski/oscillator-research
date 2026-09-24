@@ -1,6 +1,6 @@
 """Torus — both lattice axes periodic.
 
-The reference venue: a plain 2-D circular convolution, and the one every other
+The reference geometry: a plain 2-D circular convolution, and the one every other
 shape is measured against. Rows are the tonotopic axis, so band b drives row b
 and the wrap couples the top band back to the bottom.
 """

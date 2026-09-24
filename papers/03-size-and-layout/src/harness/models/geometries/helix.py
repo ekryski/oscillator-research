@@ -4,7 +4,7 @@ The [G, G] grid becomes a 1-D ring of N = G^2 positions (p = row*G + col) with
 a length-N circulant kernel. The point is tonotopic: at G=16 the ring spans
 four octaves over 256 positions, so 64 positions is exactly one turn = one
 octave, and a kernel tap at offset +/-64 couples octave-related bands
-"vertically across turns" — the one venue where harmonic structure is a
+"vertically across turns" — the one geometry where harmonic structure is a
 neighbourhood relation rather than a distant one.
 
 The ring is closed, so the seam couples the top band's end to the bottom band's
