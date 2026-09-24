@@ -24,8 +24,10 @@ def bits(acc: float, seed: int) -> str:
 def run(arm: Arm, noise, gain, seed, acc, read, tier="size"):
     spec = {"tier": tier, "task": "recognition", "drive": "envelope", "noise_db": noise, "gain": gain,
             "seed": seed, "arm": arm.as_dict(), "span": "fixed"}
-    cells = [{"read": read, "width": 192, "n_train": 2048, "acc": acc, "correct": bits(acc, 7 * seed + 2)}]
-    return {"spec": spec, "cells": cells, "n_test": N_TEST}
+    # recorded as paper 02 records: no projection tag, so the summary reads them as the fixed projection
+    cells = [{"read": read, "width": 192, "effective_width": 192, "n_train": 2048, "acc": acc,
+              "correct": bits(acc, 7 * seed + 2)}]
+    return {"spec": spec, "cells": cells, "n_test": N_TEST, "native_widths": {read: 10**6}}
 
 
 @pytest.fixture
@@ -73,7 +75,15 @@ def test_paper_02s_cells_are_read_from_its_record_under_paper_03s_tier(recorded)
     assert all(r["mean"] == pytest.approx(75.0) for r in reused)
 
 
+def test_a_cell_without_a_projection_tag_is_paper_02s_fixed_one_or_unprojected():
+    rec = {"native_widths": {"windowed": 192}}
+    assert sm.projection_of({"effective_width": 192, "read": "windowed"}, rec) == "none"
+    assert sm.projection_of({"effective_width": 64, "read": "windowed"}, rec) == "fixed"
+    assert sm.projection_of({"projection": "seeded", "effective_width": 64, "read": "windowed"}, rec) == "seeded"
+
+
 def test_the_report_tabulates_lattices_against_channels(recorded):
     s = sm.summary()
     text = sm.report(s, sm.progress())
     assert "32 × 32 lattice, 32 mel bands" in text and "8 channels" in text and "(+" in text
+    assert "fixed projection" in text and "seeded projection" in text

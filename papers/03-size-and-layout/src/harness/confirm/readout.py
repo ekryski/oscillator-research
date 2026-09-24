@@ -17,9 +17,13 @@ A read may be a list of feature blocks (the field's statistics, then its
 rotation rates). Blocks are projected piecewise, so a composite read never has
 to be copied into one matrix.
 
-This is paper 02's readout, unchanged in what it computes. An arm too large to
-hold is standardized and projected channel by channel instead
-(`harness.confirm.stream`), and hands `fit_widths` its projected features.
+This is paper 02's readout, unchanged in what it computes under paper 02's
+fixed projection. Paper 03 also reads every projected width under a second
+projection seeded by the run's seed (`features.projection_matrix`), so the
+projection's own draw is sampled across seeds, and tags each cell with its
+projection. An arm too large to hold is standardized and projected channel by
+channel instead (`harness.confirm.stream`), and hands `fit_widths` its
+projected features.
 """
 
 from __future__ import annotations
@@ -32,7 +36,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from harness.measurement.features import projection_matrix
+from harness.measurement.features import PROJECTIONS, projection_matrix
 
 #: ridge penalties, scaled by the number of fitted clips, as in the exploratory phase
 LAMBDAS = (1e-3, 1e-2, 1e-1, 1.0)
@@ -199,7 +203,7 @@ def _block_stats(blocks: list[torch.Tensor], rows: slice) -> tuple[torch.Tensor,
 
 
 def _projected(blocks: list[torch.Tensor], rows: slice, mean: torch.Tensor, sd: torch.Tensor,
-               width: int, p: torch.Tensor | None = None) -> torch.Tensor:
+               width: int, p: torch.Tensor | None = None, device: str = "cpu") -> torch.Tensor:
     """Standardize, then project to `width`, a chunk of rows at a time.
 
     Rows are centred before they are scaled and projected, which keeps float32
@@ -207,11 +211,16 @@ def _projected(blocks: list[torch.Tensor], rows: slice, mean: torch.Tensor, sd: 
     large numbers. A feature that is constant over the training set carries
     nothing, and is given weight zero rather than being divided by nothing.
     Blocks take consecutive row ranges of the one projection matrix: paper
-    02's draw for this native width, unless `p` ([features, width]) is given.
+    02's fixed draw for this native width, unless `p` ([features, width]) is
+    given. On a GPU (`device`) the products run there and the result comes
+    back to the CPU; on the CPU this is paper 02's arithmetic exactly.
     """
     p = projection_matrix(int(mean.numel()), width) if p is None else p
     m = mean.float()
     inv = torch.where(sd > MIN_SD, 1.0 / sd, torch.zeros_like(sd)).float()
+    gpu = device != "cpu"
+    if gpu:
+        p, m, inv = p.to(device), m.to(device), inv.to(device)
     out = []
     start, stop = rows.start or 0, rows.stop
     for i in range(start, stop, CHUNK):
@@ -219,10 +228,11 @@ def _projected(blocks: list[torch.Tensor], rows: slice, mean: torch.Tensor, sd: 
         acc, at = None, 0
         for b in blocks:
             k = b.shape[1]
-            part = ((b[i:j] - m[at:at + k]) * inv[at:at + k]) @ p[at:at + k]
+            x = b[i:j].to(device) if gpu else b[i:j]
+            part = ((x - m[at:at + k]) * inv[at:at + k]) @ p[at:at + k]
             acc = part if acc is None else acc + part
             at += k
-        out.append(acc)
+        out.append(acc.cpu() if gpu else acc)
     return torch.cat(out)
 
 
@@ -232,12 +242,17 @@ def _native(blocks: list[torch.Tensor], rows: slice) -> torch.Tensor:
 
 def read_cells(reads: dict[str, list[torch.Tensor]], labels: torch.Tensor, layout: Layout,
                sizes: tuple[int, ...], widths: tuple[int, ...], native_sizes: tuple[int, ...],
-               n_classes: int, keep_bits: Callable[[str, int, int], bool]) -> list[dict]:
-    """Every (read, size, width) cell a run asks for.
+               n_classes: int, keep_bits: Callable[[str, int, int], bool], seed: int = 0,
+               device: str = "cpu") -> list[dict]:
+    """Every (read, size, width, projection) cell a run asks for.
 
     `reads` maps a read's name to its feature blocks, rows laid out by `layout`.
     `keep_bits(read, width, size)` says which cells store per-clip correctness.
-    A width at or above the native width is the native read, fitted once.
+    Every width below the native width is read under both projections: the
+    fixed one (paper 02's matrix) and the one seeded by the run's `seed`. A
+    width at or above the native width is the unprojected read, fitted once
+    and tagged "none". Only the projection runs on `device`; the ridge is
+    solved on the CPU in float64.
     """
     cells = []
     for name, blocks in reads.items():
@@ -248,16 +263,22 @@ def read_cells(reads: dict[str, list[torch.Tensor]], labels: torch.Tensor, layou
             rows_tr = slice(0, n)
             mean, sd = _block_stats(blocks, rows_tr)
             wanted = wanted_widths(widths, native, n in native_sizes)
-            # project once, to the widest width below native; narrower widths are its leading columns
-            below = [e for _, e in wanted if e < native]
-            projected = None
+            below = [(r, e) for r, e in wanted if e < native]
             if below:
-                top = max(below)
-                projected = (_projected(blocks, rows_tr, mean, sd, top),
-                             _projected(blocks, layout.test, mean, sd, top),
-                             _projected(blocks, layout.val, mean, sd, top) if layout.n_val else None)
-            cells += fit_widths(name, n, wanted, native, projected, lambda rows, blocks=blocks: _native(blocks, rows),
-                                labels, layout, n_classes, keep_bits)
+                # project once per matrix, to the widest width below native; narrower widths are its leading columns
+                top = max(e for _, e in below)
+                for projection in PROJECTIONS:
+                    p = projection_matrix(native, top, None if projection == "fixed" else seed)
+                    projected = (_projected(blocks, rows_tr, mean, sd, top, p, device),
+                                 _projected(blocks, layout.test, mean, sd, top, p, device),
+                                 _projected(blocks, layout.val, mean, sd, top, p, device) if layout.n_val else None)
+                    cells += fit_widths(name, n, below, native, projected, None, labels, layout, n_classes,
+                                        keep_bits, projection)
+            unprojected = [(r, e) for r, e in wanted if e >= native]
+            if unprojected:
+                cells += fit_widths(name, n, unprojected, native, None,
+                                    lambda rows, blocks=blocks: _native(blocks, rows), labels, layout, n_classes,
+                                    keep_bits, "none")
     return cells
 
 
@@ -270,7 +291,7 @@ def wanted_widths(widths: tuple[int, ...], native: int, with_native: bool) -> li
 def fit_widths(name: str, n: int, wanted: list[tuple], native: int,
                projected: tuple[torch.Tensor, torch.Tensor, torch.Tensor | None] | None,
                native_rows: Callable[[slice], torch.Tensor] | None, labels: torch.Tensor, layout: Layout,
-               n_classes: int, keep_bits: Callable[[str, int, int], bool]) -> list[dict]:
+               n_classes: int, keep_bits: Callable[[str, int, int], bool], projection: str = "fixed") -> list[dict]:
     """One read at one training size: the ridge at every width, from the projected features.
 
     `projected` is (training, test, validation) projected to the widest width
@@ -297,6 +318,7 @@ def fit_widths(name: str, n: int, wanted: list[tuple], native: int,
             done[effective] = ridge(x_tr, labels[rows_tr], x_te, y_te, n_classes, x_val=x_val, y_val=y_val)
         r = done[effective]
         cell = {"read": name, "n_train": n, "width": requested, "effective_width": effective,
+                "projection": "none" if effective >= native else projection,
                 "acc": r["acc"], "lam": r["lam"], "val_acc": r["val_acc"], "form": r["form"]}
         width_key = effective if requested == "native" else requested
         if keep_bits(name, width_key, n):

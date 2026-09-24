@@ -63,9 +63,17 @@ def test_a_frozen_arm_is_read_at_every_size_and_width(bank, arm):
     rec = rn.execute(spec(arm), bank=bank)
     reads = am.reads(arm, "recognition")
     assert set(rec["native_widths"]) == set(reads)
-    per_read = len(SIZES) * 2 + 1            # two widths at each size, plus native at 128
-    assert len(rec["cells"]) == len(reads) * per_read
+    expected = 0
+    for read in reads:
+        native = rec["native_widths"][read]
+        below = sum(w < native for w in (64, 256))
+        # each width below the arm's own under both projections, the rest unprojected, and native at 128
+        expected += len(SIZES) * (2 * below + (2 - below)) + 1
+    assert len(rec["cells"]) == expected
     assert all(0.0 <= c["acc"] <= 1.0 and "correct" in c for c in rec["cells"])
+    for c in rec["cells"]:
+        assert c["projection"] == ("none" if c["effective_width"] >= rec["native_widths"][c["read"]] else
+                                   c["projection"]) and c["projection"] in ("fixed", "seeded", "none")
     assert rec["n_test"] == 120 and rec["env"]["torch"] == torch.__version__
 
 
@@ -106,6 +114,22 @@ def test_severing_zeroes_the_coupling_and_nothing_else(bank):
     assert am.meta(am.Arm("field", severed=True), severed)["effective_params"] == 1024
 
 
+def test_every_projected_width_is_read_under_the_fixed_and_the_seeded_projection(bank):
+    cells = {}
+    for seed in (0, 1):
+        rec = rn.execute(spec(FIELD, seed=seed, sizes=(128,), native_sizes=(), reads=("windowed",)), bank=bank)
+        cells[seed] = {(c["width"], c["projection"]): c for c in rec["cells"]}
+        assert set(cells[seed]) == {(w, p) for w in (64, 256) for p in ("fixed", "seeded")}
+        assert all("correct" in c for c in rec["cells"])
+    # the seeded projection is drawn from 4242 + 1 + seed, the fixed one from 4242 for every seed
+    from harness.measurement.features import projection_matrix
+    assert not torch.equal(projection_matrix(1000, 64, 0), projection_matrix(1000, 64, 1))
+    g = torch.Generator().manual_seed(4242 + 1 + 1)
+    assert torch.equal(projection_matrix(1000, 64, 1), (torch.randn(1000, 4096, generator=g) / math.sqrt(1000))[:, :64])
+    g = torch.Generator().manual_seed(4242)
+    assert torch.equal(projection_matrix(1000, 64), (torch.randn(1000, 4096, generator=g) / math.sqrt(1000))[:, :64])
+
+
 def test_a_trained_network_is_read_at_its_own_training_size(bank):
     rec = rn.execute(spec(am.Arm("ann", arch="gru"), sizes=(128,), native_sizes=(128,)), bank=bank)
     assert {c["n_train"] for c in rec["cells"]} == {128}
@@ -117,7 +141,7 @@ def test_a_smaller_run_reproduces_the_same_cell_of_a_larger_one(bank):
     # paper 02's tier 1 ran three training sizes; its 2,048-clip cell is the cell a paper 03 run computes
     big = rn.execute(spec(FIELD), bank=bank)
     small = rn.execute(spec(FIELD, tier="design", sizes=(128,)), bank=bank)
-    key = lambda c: (c["read"], c["n_train"], c["width"])  # noqa: E731
+    key = lambda c: (c["read"], c["n_train"], c["width"], c["projection"])  # noqa: E731
     big_cells = {key(c): c for c in big["cells"]}
     for c in small["cells"]:
         assert c["acc"] == big_cells[key(c)]["acc"] and c["correct"] == big_cells[key(c)]["correct"]

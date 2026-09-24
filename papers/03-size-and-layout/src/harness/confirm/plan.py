@@ -372,11 +372,19 @@ def planned(names: list[str], grids=(), channels=()) -> list[rn.Spec]:
     return specs
 
 
+def paper02_complete(rec: dict | None) -> bool:
+    """Whether a paper 02 run carries every cell paper 03 reports: its projected reads under the seeded
+    projection as well as the fixed one. Paper 02's runs recorded before it adopted the seeded
+    projection (2026-09-24) carry only the fixed one."""
+    return rec is not None and any(c.get("projection") == "seeded" for c in rec["cells"])
+
+
 def pending(specs: list[rn.Spec]) -> list[rn.Spec]:
-    """Specs not yet recorded here, and not recorded by paper 02. A reused spec whose paper 02 run is
-    missing (a paper 02 tier that has not run) is run here instead, and that run is the one reported."""
+    """Specs not yet recorded here, and not recorded completely by paper 02. A reused spec whose paper 02
+    run is missing (a paper 02 tier that has not run) or lacks the seeded projection is run here
+    instead, and that run is the one reported; its fixed cells equal paper 02's (the reuse gate)."""
     done = {g: rn.recorded_ids(g) for g in {s.group() for s in specs}}
-    return sorted((s for s in specs if s.run_id() not in done[s.group()] and paper02_run(s) is None),
+    return sorted((s for s in specs if s.run_id() not in done[s.group()] and not paper02_complete(paper02_run(s))),
                   key=seconds, reverse=True)
 
 
@@ -443,7 +451,7 @@ def drive(names: list[str], workers: int, threads: int, device: str, dry_run: bo
           grids=(), channels=()) -> None:
     specs = planned(names, grids, channels)
     todo = pending(specs)
-    n_reused = sum(run is not None for run in map(paper02_run, specs))
+    n_reused = sum(paper02_complete(run) for run in map(paper02_run, specs))
     print(f"=== {' + '.join(names)}: {len(specs)} runs planned, {n_reused} from paper 02, "
           f"{len(specs) - len(todo) - n_reused} recorded, {len(todo)} to run on {workers} worker(s) x "
           f"{threads} thread(s), device {device}; ~{sum(map(seconds, todo)) / 3600:.0f} CPU-hours")

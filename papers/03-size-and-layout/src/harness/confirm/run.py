@@ -241,6 +241,11 @@ def channel_batches(spec: Spec, clips: Clips, n_train: int, device: str = "cpu")
 # Running
 # ---------------------------------------------------------------------------
 
+def readout_device(device: str) -> str:
+    """Where the readout's projection runs: on the run's GPU if it has one. The ridge is always CPU float64."""
+    return device if device.startswith(("cuda", "mps")) else "cpu"
+
+
 def keep_bits(spec: Spec):
     if spec.bits == "all":
         return lambda read, width, n: True
@@ -304,7 +309,8 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
     read_blocks = {read: [buffers[k] for k in keys] for read, keys in am.reads(arm, spec.task).items()
                    if not spec.reads or read in spec.reads}
     cells = ro.read_cells(read_blocks, clips.labels, clips.layout, spec.sizes, spec.widths,
-                          spec.native_sizes, clips.n_classes, keep_bits(spec))
+                          spec.native_sizes, clips.n_classes, keep_bits(spec), seed=spec.seed,
+                          device=readout_device(device))
     timing["readout_s"] = time.perf_counter() - t2
     timing["total_s"] = time.perf_counter() - t0
     return {"spec": spec.as_dict(), "arm_meta": am.meta(arm, model), "read": "in memory",
@@ -321,8 +327,8 @@ def _execute_streamed(spec: Spec, clips: Clips, model: torch.nn.Module, device: 
     n = spec.sizes[0]
     t1 = time.perf_counter()
     with torch.no_grad():
-        p_tr, p_te, native = st.streamed_read(spec.arm, model, channel_batches(spec, clips, n, device), n,
-                                              clips.layout.n_test, spec.widths, spec.task, device)
+        projected, native = st.streamed_read(spec.arm, model, channel_batches(spec, clips, n, device), n,
+                                             clips.layout.n_test, spec.widths, spec.task, spec.seed, device)
     t2 = time.perf_counter()
     if max(spec.widths) >= native:
         raise ValueError(f"a streamed read keeps no unprojected features, so every width must be below the "
@@ -330,8 +336,10 @@ def _execute_streamed(spec: Spec, clips: Clips, model: torch.nn.Module, device: 
     wanted = ro.wanted_widths(spec.widths, native, False)
     labels = torch.cat((clips.labels[:n], clips.labels[clips.layout.test]))
     layout = ro.Layout(n, 0, clips.layout.n_test)
-    cells = ro.fit_widths(st.READ, n, wanted, native, (p_tr, p_te, None), None, labels, layout,
-                          clips.n_classes, keep_bits(spec))
+    cells = []
+    for projection, (p_tr, p_te) in projected.items():
+        cells += ro.fit_widths(st.READ, n, wanted, native, (p_tr, p_te, None), None, labels, layout,
+                               clips.n_classes, keep_bits(spec), projection)
     timing = {"simulate_and_project_s": t2 - t1, "readout_s": time.perf_counter() - t2,
               "total_s": time.perf_counter() - t0}
     return {"spec": spec.as_dict(), "arm_meta": am.meta(spec.arm, model), "read": "streamed by channel",

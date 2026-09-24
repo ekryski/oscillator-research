@@ -42,10 +42,11 @@ def _global_rows(arm: am.Arm, c: int, windows: int = 4) -> torch.Tensor:
 
 
 def paper02_rows(arm: am.Arm):
-    def rows(native: int, c: int, n_rows: int, width: int) -> torch.Tensor:
+    """Channel c's rows of the in-memory read's fixed (seed None) or seeded matrix."""
+    def rows(native: int, c: int, n_rows: int, width: int, seed: int | None = None) -> torch.Tensor:
         idx = _global_rows(arm, c)
         assert len(idx) == n_rows
-        return projection_matrix(native, width)[idx]
+        return projection_matrix(native, width, seed)[idx]
     return rows
 
 
@@ -81,8 +82,9 @@ def test_with_paper_02s_matrix_the_streamed_read_is_the_in_memory_read(bank, arm
     streamed = rn.execute(s, bank=bank)
     assert held["read"] == "in memory" and streamed["read"] == "streamed by channel"
     assert held["native_widths"] == streamed["native_widths"]
-    key = lambda c: (c["read"], c["width"])  # noqa: E731
+    key = lambda c: (c["read"], c["width"], c["projection"])  # noqa: E731
     mine = {key(c): c for c in streamed["cells"]}
+    assert {c["projection"] for c in held["cells"]} == {"fixed", "seeded"} and len(mine) == len(held["cells"])
     for c in held["cells"]:
         assert mine[key(c)]["acc"] == c["acc"] and mine[key(c)]["lam"] == c["lam"], key(c)
         assert mine[key(c)]["correct"] == c["correct"]
@@ -100,19 +102,26 @@ def test_the_projected_features_agree_to_float32_rounding(bank, monkeypatch):  #
     held = torch.cat(held)
     n, test = 128, clips.layout.test
     mean, sd = ro._stats(held[:n])
-    want_tr = ro._projected([held], slice(0, n), mean, sd, 256)
-    want_te = ro._projected([held], test, mean, sd, 256)
     with torch.no_grad():
-        p_tr, p_te, native = st.streamed_read(arm, model, rn.channel_batches(s, clips, n), n, clips.layout.n_test,
-                                              (64, 256), "recognition", projection=paper02_rows(arm))
+        streamed, native = st.streamed_read(arm, model, rn.channel_batches(s, clips, n), n, clips.layout.n_test,
+                                            (64, 256), "recognition", 2, projection=paper02_rows(arm))
     assert native == held.shape[1]
-    assert torch.allclose(p_tr, want_tr, rtol=1e-4, atol=1e-5) and torch.allclose(p_te, want_te, rtol=1e-4, atol=1e-5)
+    for projection, seed in (("fixed", None), ("seeded", 2)):
+        p = projection_matrix(native, 256, seed)
+        want_tr = ro._projected([held], slice(0, n), mean, sd, 256, p)
+        want_te = ro._projected([held], test, mean, sd, 256, p)
+        p_tr, p_te = streamed[projection]
+        assert torch.allclose(p_tr, want_tr, rtol=1e-4, atol=1e-5)
+        assert torch.allclose(p_te, want_te, rtol=1e-4, atol=1e-5)
 
 
-def test_the_streamed_matrix_is_fixed_gaussian_and_scaled_like_paper_02s():
+def test_the_streamed_matrices_are_fixed_or_seeded_gaussians_scaled_like_paper_02s():
     a, b = st.channel_projection(10_000, 3, 500, 256), st.channel_projection(10_000, 3, 500, 256)
     assert torch.equal(a, b) and a.shape == (500, 256)
     assert not torch.equal(a, st.channel_projection(10_000, 4, 500, 256))
+    assert (st.channel_seed(3), st.channel_seed(3, 0), st.channel_seed(5, 2)) == (424_203, 424_303, 424_505)
+    seeded = [st.channel_projection(10_000, 3, 500, 256, s) for s in (0, 1)]
+    assert not torch.equal(seeded[0], seeded[1]) and not torch.equal(seeded[0], a)
     assert torch.equal(st.channel_projection(10_000, 3, 500, 64), a[:, :64])       # narrow = leading columns
     assert abs(a.std().item() * 10_000 ** 0.5 - 1.0) < 0.02
 

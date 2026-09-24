@@ -29,6 +29,7 @@ import torch
 from harness.confirm import plan
 from harness.confirm import run as rn
 from harness.confirm.arms import Arm
+from harness.confirm.summary import projection_of
 
 CHANCE = 0.1
 #: one reused run per record file and arm kind: (tier maker's spec fields)
@@ -75,15 +76,16 @@ def _check(spec: rn.Spec, device: str) -> dict:
         print(f"NOT CHECKED  {where}: paper 02 has not recorded it", flush=True)
         return {"run": where, "status": "NOT CHECKED"}
     new = rn.execute(spec, device)
-    theirs = {(c["read"], c["n_train"], c["width"]): c for c in old["cells"]}
+    theirs = {(c["read"], c["n_train"], c["width"], projection_of(c, old)): c for c in old["cells"]}
     compared, mismatched = 0, []
     for c in new["cells"]:
-        o = theirs.get((c["read"], c["n_train"], c["width"]))
+        o = theirs.get((c["read"], c["n_train"], c["width"], c["projection"]))
         if o is None:
             continue
         compared += 1
         if o["acc"] != c["acc"] or ("correct" in o and "correct" in c and o["correct"] != c["correct"]):
-            mismatched.append({"read": c["read"], "width": c["width"], "paper02": o["acc"], "paper03": c["acc"]})
+            mismatched.append({"read": c["read"], "width": c["width"], "projection": c["projection"],
+                               "paper02": o["acc"], "paper03": c["acc"]})
     status = "PASS" if compared and not mismatched else "FAIL"
     print(f"{status}  {where}: {compared - len(mismatched)}/{compared} cells identical", flush=True)
     return {"run": where, "status": status, "cells": compared, "mismatched": mismatched}
