@@ -21,10 +21,10 @@ NOISES = ((None, "clean"), (0.0, "0 dB"), (5.0, "+5 dB"))
 BASELINE = ("baseline", "windowed@wholeclip",
          "**Spectrogram-only baseline**: the readout reads the 16 mel band energies directly; no reservoir",
          "Spectrogram-only baseline: no reservoir", "#8C8C8C")
-COUPLED = (sm.COUPLED, "windowed", "**Coupled oscillator network**{gain}: 1,024 oscillators, untrained",
-         "Coupled oscillator network{gain}", "#534AB7")
+COUPLED = (sm.COUPLED, "windowed", "**Coupled oscillator network**{gain}: 1,024 Kuramoto oscillators, untrained",
+         "Coupled oscillator network, Kuramoto{gain}", "#534AB7")
 UNCOUPLED = (sm.UNCOUPLED, "windowed", "**Uncoupled oscillator network**{gain}: the same network with its coupling removed",
-             "Uncoupled oscillator network{gain}", "#A9A4DB")
+             "Uncoupled oscillator network, Kuramoto{gain}", "#A9A4DB")
 BANK_STATE = ("bank-state", "windowed",
               "**Leaky-integrator bank, state-matched**{gain}: 1,024 leaky integrators with the network's states and "
               "parameters, untrained",
@@ -172,8 +172,8 @@ def design_figure(rows: list[dict], stem: str = "c4-design-differences") -> None
 
 #: the training-size figure's arms: (arm, read, gain, legend, colour); the reservoirs at gain 1
 SIZE_ARMS = (("baseline", "windowed@wholeclip", None, "spectrogram-only baseline, whole clip", "#8C8C8C"),
-             (sm.COUPLED, "windowed", 1.0, "coupled oscillator network", "#534AB7"),
-             (sm.UNCOUPLED, "windowed", 1.0, "uncoupled oscillator network", "#A9A4DB"),
+             (sm.COUPLED, "windowed", 1.0, "coupled oscillator network, Kuramoto", "#534AB7"),
+             (sm.UNCOUPLED, "windowed", 1.0, "uncoupled oscillator network, Kuramoto", "#A9A4DB"),
              ("bank-state", "windowed", 1.0, "leaky-integrator bank, state-matched", "#D85A30"),
              ("trained-transformer", "windowed", None, "transformer", "#0F6E56"),
              ("trained-s4d", "windowed", None, "S4D", "#5DB39A"),
