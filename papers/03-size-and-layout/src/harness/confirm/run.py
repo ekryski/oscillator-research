@@ -39,7 +39,7 @@ from harness.confirm import stream as st
 from harness.utils.device import describe, resolve
 from harness.utils.paths import results_root
 
-#: the registered common widths; an arm is never read wider than its native width
+#: paper 02's common widths; an arm is never read wider than its native width
 WIDTHS = (192, 1024, 4096)
 #: the size every verdict is read at
 PRIMARY_SIZE = 2048

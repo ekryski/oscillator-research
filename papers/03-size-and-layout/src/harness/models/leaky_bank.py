@@ -24,7 +24,7 @@ claim that the design is a good one. Because only the gains vary with the seed,
 this arm's seed-to-seed spread is small by construction, and should be read
 that way.
 
-Two sizes are registered, because the field exposes two signals per state
+Paper 02 ran two sizes, because the field exposes two signals per state
 (sin and cos) and a leaky unit exposes one: `channels=4` matches the field's
 states and parameters, `channels=8` matches its exposed signals at twice the
 parameters.

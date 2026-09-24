@@ -182,12 +182,14 @@ def test_a_reads_filter_records_only_those_reads(bank):
     assert {c["read"] for c in rec["cells"]} == {"windowed", "windowed+rate"}
 
 
-def test_adding_the_lattice_left_every_registered_label_as_it_was():
+def test_adding_the_lattice_and_the_window_left_every_paper_02_label_as_it_was():
     assert FIELD.label() == "field-kuramoto-torus-random-lam0.3-clamp1"
     assert am.Arm("field", channels=16).label() == "field-kuramoto-torus-random-lam0.3-clamp1-c16"
     assert (am.Arm("floor").label(), am.Arm("bank", channels=8).label()) == ("floor", "bank-c8")
     assert am.Arm("field", grid=16, bands=16).label() == FIELD.label()       # a band per row is the default
     assert am.Arm("bank", channels=2, grid=32, bands=16).label() == "bank-c2-32x32-16bands"
+    assert am.Arm("field", window=512).label() == FIELD.label()               # paper 02's window is the default
+    assert am.Arm("bank", channels=2, grid=64, window=1024).label() == "bank-c2-64x64-w1024"
     assert pr.rows_path("envelope", 0.0).name == "envelope-0db.pt"
 
 
