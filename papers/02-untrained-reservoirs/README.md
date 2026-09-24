@@ -17,6 +17,7 @@ What each tier runs is in [TIERS.md](TIERS.md), the design, with its decision lo
 | [`…-DRAFT-tmlr.pdf`](spoken-digit-recognition-without-training-DRAFT-tmlr.pdf) | the TMLR submission build, anonymous, in the journal's own style |
 | [`…-DRAFT-iclr.pdf`](spoken-digit-recognition-without-training-DRAFT-iclr.pdf) | the ICLR 2027 submission build, anonymous and line-numbered, in ICLR's own style |
 | [`…-DRAFT-preprint.pdf`](spoken-digit-recognition-without-training-DRAFT-preprint.pdf) | the preprint build, with the author named and no venue claimed |
+| [`…-FULL.md`](spoken-digit-recognition-without-training-FULL.md) · [`…-FULL-iclr.pdf`](spoken-digit-recognition-without-training-FULL-iclr.pdf) | the full-length paper, saved before the draft was cut to ICLR's nine pages; the draft keeps its methods and results in full in Appendices F to H |
 | [`…-DRAFT-arxiv.tar.gz`](spoken-digit-recognition-without-training-DRAFT-arxiv.tar.gz) | LaTeX source, style files, bibliography and figures, ready to upload |
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |

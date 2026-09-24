@@ -32,4 +32,4 @@ reference-section-title: References
 # template carries the same two lines.
 header-includes:
   - \renewcommand{\arraystretch}{1.35}
-  - \setlength{\extrarowheight}{3pt}
+  - \ifdefined\extrarowheight\setlength{\extrarowheight}{3pt}\fi
