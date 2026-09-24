@@ -14,7 +14,8 @@
 # set (a reproduction run should set it, to keep its record apart); copy that
 # folder back (the rsync line is printed at the end).
 #
-# Pod: one GPU with 24 GB or more, 32 or more vCPUs, 64 GB or more RAM.
+# Pod: one GPU with 48 GB or more (a carrier batch of 32 clips needs about 35 GB),
+# 32 or more vCPUs, 64 GB or more RAM.
 set -euo pipefail
 
 AUDIOMNIST="${1:?usage: pod_run.sh <path to the AudioMNIST checkout> [tier ...]}"

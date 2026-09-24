@@ -1,43 +1,43 @@
-# Design: confirmatory run for Paper 02
+# Design: paper 02
 
-This document records the design of paper 02's confirmatory run: its questions, data, arms, read, readout, tiers and gates. It was written before the run's first tier started (commit f1d52fb, 2026-09-23 03:53 MDT), and the design has changed since where the experiment needed it; each change is in the decision log at the end, dated, with its reason. Sections 2 and 9 keep the hypotheses and bars as first written; results are reported without the bars (see the log).
+This document records the design of paper 02's study: its questions, data, arms, read, readout, tiers and integrity checks. It was written before the study's first tier started (commit f1d52fb, 2026-09-23 03:53 MDT), and the design has changed since where the experiment needed it; each change is in the decision log at the end, dated, with its reason.
 
-Everything below is implemented in `src/harness/confirm/` and tested in `src/tests/test_confirm_*.py`; where this text and the code could disagree, the code's tier definitions in `harness/confirm/plan.py` are the plan.
+Everything below is implemented in `src/harness/experiment/` and tested in `src/tests/test_experiment_*.py`; where this text and the code could disagree, the tier definitions in `harness/experiment/plan.py` are the plan.
 
 ## 1. What this is
 
-A confirmatory replication. An exploratory phase (August 2026, 1,940 runs, in a separate development repository whose commits timestamp its own pre-registrations) produced the design and the hypotheses. This run fixes the decision bars first and then measures. Because the bars are set after the exploratory results were seen, the paper describes them as confirmatory and does not present them as blind.
+An original study. Earlier pilot experiments (August 2026, in a separate development repository) suggested the questions and several of the comparisons, and this study runs similar comparisons again under a new protocol. Every number in the record and in the paper comes from this study's own runs; nothing from the pilot is in either, and the pilot's code is archived on the `ek/paper-02-pilot` branch.
 
-The exploratory phase also showed five things the design below exists to correct:
+The pilot also showed five weaknesses in how it read its arms, which the design below exists to correct:
 
-- **Readout width.** The field was read with 16,384 features and its no-dynamics floor with 192, so the ridge had 163,840 coefficients for one and 1,920 for the other. The one width-matched read in that record put the field below its floor in 936 of 936 runs.
-- **Featurization.** The arms were not read alike. The conventional networks' features included their last hidden state, which carries temporal order directly; the field's and the floor's did not.
-- **The read window.** Each arm was read over its own clip's length, while the floor was read over the whole padded clip. Measured before freezing, with no drive (so no hypothesis was tested): an undriven field read over each clip's own length classifies spoken digits at 16.6 to 18.0% against a chance of 10%, because an oscillator keeps rotating and statistics over a span encode the span's length, which in speech carries the digit. The same field read over a fixed window reads exactly 10.0%. That per-clip window handed the field a duration code the floor did not get in the same form.
-- **Seeds.** The 1,800-run factorial was run at one seed.
-- **Floors.** The floors were printed to a terminal and never written to the record.
+- **Readout width.** The oscillator network was read with far more features than its spectrogram-only baseline, so the two readouts had very different numbers of coefficients.
+- **Featurization.** The arms were not read alike. The trained baselines' features included their last hidden state, which carries temporal order directly; the network's and the baseline's did not.
+- **The read window.** Each arm was read over its own clip's length, while the baseline was read over the whole padded clip. An undriven network read over each clip's own length still tells clips apart, because an oscillator keeps rotating and statistics over a span encode the span's length, which in speech carries the digit. This study measures that leak itself (diagnostic D1) and closes it with a fixed window.
+- **Seeds.** The pilot's factorial was run at one seed.
+- **Baselines.** The pilot's baselines were printed to a terminal and never written to its record.
 
 ## 2. Hypotheses
 
-The direction and the hypotheses are the author's; the wording below was proposed on 18 September and accepted on 23 September.
+The direction and the hypotheses are the author's; the wording below was proposed on 18 September and accepted on 23 September. They say which comparisons the study makes. None is scored as passed or failed: every comparison is reported with its spread (section 9).
 
-- **H1, dynamics.** A frozen oscillator field adds accuracy over its front end alone when both are read at the same width.
+- **H1, dynamics.** An untrained oscillator network adds accuracy over its front end alone when both are read at the same width.
 - **H2, oscillation.** That gain exceeds the gain from a non-oscillating bank of leaky integrators of the same size.
-- **H3, coupling.** The coupled field reads higher than the same field with coupling severed.
-- **H4, design.** Coupling law, lattice geometry, natural-frequency structure, pinning and spectral clamp each move accuracy.
+- **H3, coupling.** The coupled network reads higher than the same network uncoupled.
+- **H4, design.** The coupling function, lattice geometry, natural frequencies, restoring strength and coupling ceiling each move accuracy.
 - **H5, readout.** Readout width has a large effect on accuracy, for every arm.
-- **H6, memory.** A frozen field reads temporal order through an order-free readout, and does so better than a leaky bank.
+- **H6, memory.** An untrained network reads temporal order through an order-free readout, and does so better than a leaky-integrator bank.
 
 ## 3. Data
 
-AudioMNIST, 30,000 recordings, 60 speakers, 10 digits, 50 repetitions, resampled to 16 kHz by the exploratory bank's own per-recording function. The confirmatory bank keeps all 50 repetitions; the exploratory bank kept 20, and every one of its 12,000 clips is bit-identical inside the new bank (checked before freezing, as was the exploratory bank against the one resonant built in August).
+AudioMNIST, 30,000 recordings, 60 speakers, 10 digits, 50 repetitions, resampled to 16 kHz, peak-normalized, energy-trimmed and capped at 1 s. The bank keeps all 50 repetitions.
 
-**Protocol A, for every verdict.** Speakers 1 to 48 train (24,000 clips), 49 to 60 test (6,000). **The test set is the whole test pool**, in one fixed order, identical for every arm, seed and condition; the exploratory phase scored 512 clips drawn with replacement. A seed permutes the training pool, and the training sets are the first 2,048, 8,192 and 24,000 clips of that permutation, so each contains the one before it.
+**Protocol A, for every tier but B.** Speakers 1 to 48 train (24,000 clips), 49 to 60 test (6,000). **The test set is the whole test pool**, in one fixed order, identical for every arm, seed and condition. A seed permutes the training pool, and the training sets are the first 2,048, 8,192 and 24,000 clips of that permutation, so each contains the one before it.
 
-**Protocol B, for comparison with published results only.** The five speaker folds of Becker et al., copied verbatim from `preprocess_data.py` in the corpus: three folds train (18,000 clips), one validates (6,000), one tests (6,000), clean audio, one run per fold. No design verdict is read from Protocol B.
+**Protocol B, for comparison with published results only.** The five speaker folds of Becker et al., copied verbatim from `preprocess_data.py` in the corpus: three folds train (18,000 clips), one validates (6,000), one tests (6,000), clean audio, one run per fold.
 
-**Noise.** Clean, 0 dB and +5 dB. The harness's convention is the reverse of the usual one: noise amplitude is speech RMS times 10^(dB/20), so 0 dB is noise at speech-equal power and +5 dB is louder noise, drawn over the whole padded window. Each clip's noise comes from a generator seeded by the clip's identity and the level, so a clip sounds the same in every arm, seed, tier and process. Seeds change which clips a readout is fitted on and an arm's own random draws, never the clips themselves. Front-end rows are computed once per drive and level and memory-mapped by every run.
+**Noise.** Clean, 0 dB and +5 dB. The harness's convention is the reverse of the usual one: noise amplitude is speech RMS times 10^(dB/20), so 0 dB is noise at speech-equal power and +5 dB is louder noise, drawn over the whole padded window. Each clip's noise comes from a generator seeded by the clip's identity and the level, so a clip sounds the same in every arm, seed, tier and process. Seeds change which clips a readout is fitted on and an arm's own random draws, never the clips themselves. Front-end rows are computed once per input pathway and level and memory-mapped by every run.
 
-**Gain.** g = 1 and g = 2 for every frozen dynamical arm. The floor and the trained networks read the rows as they are, so gain does not apply to them. g = 0 removes the drive and runs as a sanity cell per frozen arm.
+**Gain.** g = 1 and g = 2 for every reservoir. The spectrogram-only baseline and the trained baselines read the rows as they are, so gain does not apply to them. g = 0 removes the input and runs as a sanity cell per reservoir.
 
 ## 4. Arms
 
@@ -45,119 +45,97 @@ Every arm sits in the same slot: front end, then the arm, then the shared readou
 
 | arm | what it is | states | stored parameters |
 |---|---|---|---|
-| floor | the arm slot left empty | 0 | 0 |
-| field | coupled oscillator field, 4 channels on a 16 by 16 lattice | 1,024 | 2,048 |
-| severed field | the same field, same seed, with its coupling kernel set to zero | 1,024 | 2,048 (1,024 in effect) |
-| leaky bank A | independent leaky integrators, matched to the field in states and parameters | 1,024 | 2,048 |
-| leaky bank B | the same, matched to the field in exposed signals | 2,048 | 4,096 |
-| GRU, TCN, CNN, transformer, S4D | trained conventional networks | | about 2,000, trained |
+| spectrogram-only baseline | the arm slot left empty | 0 | 0 |
+| coupled oscillator network | 4 channels on a 16 by 16 lattice | 1,024 | 2,048 |
+| uncoupled oscillator network | the same network, same seed, with its coupling kernels set to zero | 1,024 | 2,048 (1,024 in effect) |
+| leaky-integrator bank, state-matched | independent leaky integrators, matched to the network in states and parameters | 1,024 | 2,048 |
+| leaky-integrator bank, width-matched | the same, matched to the network in exposed signals | 2,048 | 4,096 |
+| GRU, TCN, CNN, transformer, S4D | trained baselines | | about 2,000, trained |
 
-**The field.** Where a tier does not vary it: Kuramoto coupling, torus, random natural frequencies, pinning 0.3, spectral clamp 1, the configuration the exploratory phase used for its gates and its order task. Each seed draws the kernel and natural frequencies exactly as the exploratory runner did (tested), so seed 0 is the exploratory field.
+**The coupled network.** Where a tier does not vary it: Kuramoto coupling, torus, random natural frequencies, restoring strength 0.3, coupling ceiling 1. Each seed draws the kernels and natural frequencies.
 
-**The leaky bank.** Each unit follows x ← (1 − a)·x + a·tanh(g_in·g·u). Band r drives the units of row r, the routing the field uses. The time constants are one fixed log-spaced schedule from one hop frame (16 ms) to one clip (1 s), laid out so that every band is read at every time scale, and converted to a leak rate at the drive's own frame rate. The input gains are drawn N(1, 0.1²), the distribution the field draws its natural frequencies from. Only the gains vary with the seed, so this arm's seed-to-seed spread is small by construction. Nothing about the schedule is tuned: this is a falsification control, not a claim that the design is optimal. Bank A matches the field's states and parameters and is half as wide at native width, because the field exposes two signals per state; bank B matches the native width at twice the parameters.
+**The leaky-integrator bank.** Each unit follows x ← (1 − a)·x + a·tanh(g_in·g·u). Band r drives the units of row r, the routing the network uses. The time constants are one fixed log-spaced schedule from one hop frame (16 ms) to one clip (1 s), laid out so that every band is read at every time scale, and converted to a leak rate at the input's own frame rate. The input gains are drawn N(1, 0.1²), the distribution the network draws its natural frequencies from. Only the gains vary with the seed, so this arm's seed-to-seed spread is small by construction. Nothing about the schedule is tuned: it is a control, not a claim that the design is optimal. The state-matched bank matches the network's states and parameters and is half as wide at native width, because the network exposes two signals per state; the width-matched bank matches the native width at twice the parameters.
 
-**The conventional networks.** Trained end to end with a learned linear head on the shared statistics of section 5 (four windows for recognition, the whole span for the order task), so each network is trained for the read it is judged by and cannot hand its head its last state. The recipe is the exploratory trained-head one: AdamW at 3e-3 annealed to 3e-4 by cosine, 30 epochs, batches of 64, gradients clipped at 1, the last epoch kept. A network that does not cut its loss by 20% is recorded as an optimization failure. Each network is trained at each training size and read by the shared ridge at that size; its own head's accuracy is recorded as a secondary number.
+**The trained baselines.** Trained end to end with a learned linear head on the shared statistics of section 5 (four windows for recognition, the whole span for the order task), so each network is trained for the read it is judged by and cannot hand its head its last state. The recipe: AdamW at 3e-3 annealed to 3e-4 by cosine, 30 epochs, batches of 64, gradients clipped at 1, the last epoch kept. A run whose loss does not fall by 20% is flagged in the record as not having trained. Each baseline is trained at each training size and read by the shared ridge at that size; its own head's accuracy is recorded as a secondary number. They train on the CPU on every machine.
 
 ## 5. The read
 
-One function reads every arm: over a window, or over each of four equal windows, it computes three statistics per signal, the mean, the standard deviation, and the mean absolute frame-to-frame difference. Arms differ only in the signals they expose: the front-end rows (floor), sin θ and cos θ per oscillator (field; x and y for Stuart-Landau cores), the unit states (leaky banks), the hidden trajectory (networks).
+One function reads every arm: over a window, or over each of four equal windows, it computes three statistics per signal, the mean, the standard deviation, and the mean absolute frame-to-frame difference. Arms differ only in the signals they expose: the front-end rows (the spectrogram-only baseline), sin θ and cos θ per oscillator (the networks; x and y for Stuart-Landau cores), the unit states (the banks), the hidden trajectory (the trained baselines).
 
-**Every arm is read over one fixed window, the same frames for every clip:** from the end of the 16-frame integrator warm-up to the end of the padded clip (frames 16 to 61 for recognition, 16 to 147 for the order task). An arm with no input therefore reads exactly chance, and everything a read carries arrives through the arm's response to the input. **The floor is also read from the first frame, and that whole-clip floor is the primary control**, because it is the harder one: it is given everything the field was driven with, including the onset the field can carry only as memory. The floor over the arms' own window is reported as a secondary.
+**Every arm is read over one fixed window, the same frames for every clip:** from the end of the 16-frame integrator warm-up to the end of the padded clip (frames 16 to 61 for recognition, 16 to 147 for the order task). An arm with no input therefore reads exactly chance, and everything a read carries arrives through the arm's response to the input. **The spectrogram-only baseline is also read from the first frame, and that whole-clip baseline is the primary control**, because it is the harder one: it is given everything the network was driven with, including the onset the network can carry only as memory. The baseline over the arms' own window is reported beside it.
 
 **No statistic may depend on an endpoint.** That excludes the last state, and the signed mean of a first difference, which telescopes to the last value minus the first.
 
-**Secondary read S1, the field's rotation rate.** The read above plus two signed rotation-rate features per oscillator and window, the mean cos Δθ and sin Δθ between consecutive frames: the oscillator's natural observable, which the generic read drops. It is recorded beside the primary read for every field arm, labelled as the read that favours the field, since no other arm has an analogue.
+**Secondary read S1, the networks' rotation rates.** The read above plus two signed rotation-rate features per oscillator and window, the mean cos Δθ and sin Δθ between consecutive frames: the oscillator's natural observable, which the generic read drops. It is recorded beside the primary read for every coupled and uncoupled network, labelled as the read that favours the networks, since no other arm has an analogue.
 
-**Diagnostic D1, the exploratory window.** The field at g = 0, 1 and 2, 0 dB, three seeds, read over each clip's own length as the exploratory harness read it, to measure how much that window inflated the exploratory field reads. Not a hypothesis test.
+**Diagnostic D1, a per-clip window.** The coupled network at g = 0, 1 and 2, 0 dB, three seeds, read over each clip's own length, to measure how much a per-clip window hands a network. Not a hypothesis test.
 
-## 6. The readout, and the two ablations on it
+**Coherence instruments.** Every coupled and uncoupled network run from Tier B on records, over its test clips, the order parameter R, each oscillator's phase-locking value to its own band's drive, the share of oscillators locked above 0.5 and the mean amplitude. They are diagnostics and reach no readout.
 
-For each training size, an arm's native features are standardized with that training set's own statistics (a feature constant over the training set gets weight zero), brought to each common width by one fixed seeded Gaussian projection (each narrower width is the leading columns of the widest, so a wide read contains the narrow one), and classified by a closed-form ridge, one hyperplane per class, with its penalty chosen from {0.001, 0.01, 0.1, 1} (scaled by the number of fitted clips) on the last eighth of the training set, or on the validation fold under Protocol B. The ridge is the exploratory one, solved in whichever of its two equivalent forms is smaller; it is tested to make the same penalty choice and the same prediction on every clip as the exploratory code.
+## 6. The readout
 
-**Width.** 192, 1,024 and 4,096, plus native. 192 is the floor's native width under the envelope drive. An arm is never read wider than its native width; at or above it, it is read unprojected.
+For each training size, an arm's native features are standardized with that training set's own statistics (a feature constant over the training set gets weight zero), brought to each common width by one fixed seeded Gaussian projection (each narrower width is the leading columns of the widest, so a wide read contains the narrow one), and classified by a closed-form ridge, one hyperplane per class, with its penalty chosen from {0.001, 0.01, 0.1, 1} (scaled by the number of fitted clips) on the last eighth of the training set, or on the validation fold under Protocol B. The ridge is solved in whichever of its two equivalent forms is smaller, and is tested to make the same penalty choice and the same prediction on every clip as the direct solution. The projection tier also reads Tier 1's reservoirs through a projection drawn per run seed.
+
+**Width.** 192, 1,024 and 4,096, plus native. 192 is the spectrogram-only baseline's native width (16 bands, three statistics, four windows). An arm is never read wider than its native width; at or above it, it is read unprojected.
 
 **Training-set size.** 2,048, 8,192 and 24,000 clips, crossed with width, because a wide ridge on few clips and a wide ridge on many are different estimators. The native read is fitted at 2,048 clips only: at 24,000 its system is too large to solve per run.
 
-**The primary read, for every verdict: width 192, 2,048 training clips, four windows (recognition) or the whole span (order).** Everything else is secondary and is reported whatever it shows.
+**The primary cell: width 192, 2,048 training clips, four windows (recognition) or the whole span (order).** Everything else is secondary and is reported whatever it shows.
 
 ## 7. Tasks and tiers
 
 **Recognition.** Ten-way digit classification.
 
-**Temporal order.** Two recordings joined behind the exploratory task's 272 ms silent leader and across a 100 ms gap, a then b against b then a, on five digit pairs (3-7, 1-8, 2-5, 4-9, 0-6). Per pair, 2,048 training clips drawn per seed from the training speakers and one fixed set of 2,048 test clips from the test speakers, with alternating labels so the classes are exactly balanced. Scored on the whole-span read only. **Gate:** for each pair and noise level, the three-seed mean of each floor read (whole clip, and arms' window) must have a 95% bootstrap interval over test clips that contains 0.5, or that pair is invalid at that level and is not scored. The first exploratory order design failed this check and was repaired; the paper names that failure.
+**Temporal order.** Two recordings joined behind a 272 ms silent leader and across a 100 ms gap, a then b against b then a, on five digit pairs (3-7, 1-8, 2-5, 4-9, 0-6). Per pair, 2,048 training clips drawn per seed from the training speakers and one fixed set of 2,048 test clips from the test speakers, with alternating labels so the classes are exactly balanced. Scored on the whole-span read only. For each pair and noise level, the spectrogram-only baseline's three-seed mean is reported with its 95% interval over test clips, to show whether the task leaks order to a read with no memory: it should sit at chance, 50%.
 
 | tier | what | runs |
 |---|---|---|
-| gate | the g = 0 cells for the four frozen arms, and diagnostic D1 | 13 |
-| 1, arms | floor, field, severed field, bank A, bank B at every noise level, gain and seed, at all three training sizes; the five networks at every size; the same arms on the order task, five pairs | 846 |
-| 2, design | coupling law (4 phase families; the 2 Stuart-Landau cores on the torus only), lattice geometry (6), natural-frequency structure (random, designed, uniform), pinning (0.3, 0.1), clamp (1, 0.5); 0 and +5 dB, both gains, three seeds; primary size; four-window read with and without rotation rates | 3,744 |
-| B, Becker | every Tier 1 arm under Protocol B, both gains for the dynamical arms | 70 |
-| 3, quadrature | a diagonal (4 phase families by random and designed frequencies on the torus, plus a helix pair) and its floor; 0 and +5 dB, both gains, three seeds | 126 |
-| 4, size | the field and bank A at 1, 4 and 16 channels (256, 1,024, 4,096 states, same lattice and front end); 0 and +5 dB, g = 2, three seeds | 36 |
-| 3c, carrier | the carrier diagonal (the quadrature diagonal plus the two Stuart-Landau cores), its floor, and bank A at the sample rate; 0 dB, g = 32 (the exploratory calibrated carrier gain), three seeds | 48 |
+| gate | the g = 0 cells for the four reservoirs, and diagnostic D1 | 13 |
+| 1, arms | the spectrogram-only baseline, both networks and both banks at every noise level, gain and seed, at all three training sizes; the five trained baselines at every size; the same arms on the order task, five pairs | 846 |
+| 2, design | coupling function (4 phase functions; the 2 Stuart-Landau functions on the torus only), lattice geometry (6), natural frequencies (random, tonotopic, identical), restoring strength (0.3, 0.1), coupling ceiling (1, 0.5); 0 and +5 dB, both gains, three seeds; primary size; four-window read with and without rotation rates | 3,744 |
+| B, Becker | every Tier 1 arm under Protocol B, both gains for the reservoirs | 70 |
+| 3, quadrature | a diagonal (4 phase functions by random and tonotopic frequencies on the torus, plus a helix pair) and its baseline; 0 and +5 dB, both gains, three seeds | 126 |
+| projection | Tier 1's reservoirs, recognition at 2,048 clips and the order task, each read under the fixed and a seeded projection | 432 |
+| carrier | the carrier diagonal (the quadrature diagonal plus the two Stuart-Landau functions), its baseline, and the state-matched bank at the sample rate; 0 dB, g = 32 (the carrier gain carried over from the pilot), three seeds | 48 |
 
-Clean audio carries no design verdict (Tiers 2 to 4), because the task saturates there; it is run in Tier 1 for the comparison with published results. **Running order:** gate, 1, 2, B, 3, 4, 3c. Tier 4 and the carrier tier run only if compute allows before the paper deadline; whether they run is decided by time, not by results, and any that do not run are reported as not run.
+Clean audio is left out of Tiers 2 and 3, because the task saturates there; it is run in Tier 1 and Tier B for the comparison with published results. **Running order:** gate, 1, 2, B, 3, projection, carrier. The carrier tier integrates at 16 kHz and runs on a rented CUDA GPU.
 
-## 8. Integrity gates
+## 8. Integrity checks
 
 1. The harness test suite passes.
-2. **Legacy reproduction.** Six exploratory runs (a phase core, an amplitude core, a designed and a quadrature cell, an order run, a trained network), re-run with the exploratory harness from the configurations the record stored, reproduce every recorded accuracy exactly. Continuous diagnostics (ridge margins, locking instruments) are reported with their largest difference; they move in the last digits between library versions and no verdict reads them. Before freezing, three of the six were re-run and matched exactly in every accuracy.
-3. Every g = 0 cell reads exactly 0.100.
-4. The floors are recorded as floor runs in the confirmatory record, for every drive, noise level, width and size.
-5. The order-task floor gate of section 7.
+2. Every g = 0 cell reads exactly 0.100.
+3. The spectrogram-only baseline is recorded as runs in the record, for every pathway, noise level, width and size.
+4. The order task's baseline is reported against chance (section 7).
+5. The projection tier's fixed cells equal Tier 1's.
 
-A failed gate stops the scoring of whatever it guards. It is fixed and logged before anything it guards is scored.
+A failed check is fixed and logged before any result it bears on is read.
 
-## 9. Decision bars
+## 9. Reporting
 
-All in accuracy points, at the primary read. **A bar is met only if the three-seed mean clears it and all three seeds agree in sign.** Every comparison carries a 95% bootstrap interval over test clips.
+Every accuracy is reported as its mean over replicates (three seeds; the five folds under Protocol B) with the sample standard deviation and each replicate's value. Every comparison between two arms is paired on condition and replicate, and reported as the mean difference with its standard deviation over replicates and a 95% interval from resampling test clips (2,000 resamples). Seeds share one test set, so their per-clip differences are averaged; folds and order-task pairs each have their own test clips, so theirs are concatenated. No threshold is applied, and nothing is marked as passing or failing (`harness.experiment.summary`).
 
-Each hypothesis is scored separately at each discriminating condition: 0 dB and +5 dB, at g = 1 and g = 2 where gain applies. It is **supported** if its bar is met at every discriminating condition, **refuted** if it is missed at every one, and **mixed** otherwise, with the conditions named. Clean audio is reported and carries no verdict.
-
-| hypothesis | comparison | bar |
-|---|---|---|
-| H1 | field minus the whole-clip floor (the floor over the arms' window reported beside it) | +3 |
-| H2 | field minus bank A, and field minus bank B | +3 |
-| H3 | field minus severed field | +3 |
-| H4 | a shape minus its torus twin | +3 |
-| H4 | designed minus randomized natural frequencies | +5 |
-| H4 | a coupling family minus its Kuramoto twin | ±3 |
-| H4 | a drive over its own floor | +5 |
-| H5 | width 4,096 minus width 192, per arm | +5 |
-| H6 | field order accuracy, on at least 3 of 5 valid pairs | 0.60 or above |
-| H6 | field minus bank A, order task | +3 |
-
-For H4, a factor level's effect is the mean over its twins, the runs identical to it in every other factor, of the paired difference. The +3 bars of H1 to H3 and H6 and the +5 bar of H5 were proposed for this registration; the H4 bars and the 0.60 bar are the exploratory phase's. The exploratory coherence bar, a Spearman correlation of −0.3 or below in two of three conditions, is carried over as a pre-specified analysis of these runs, not as an experiment.
-
-## 10. Reporting commitments
-
-- Every registered comparison is reported, whichever way it falls, including every bar not met.
+- Every planned comparison is reported, whichever way it falls.
 - Arm parameters and readout coefficients are reported separately, at every width.
 - Accuracy against width and against training size is reported as curves for every arm, not as one operating point.
-- Diagnostic D1 is reported beside the exploratory numbers it bears on.
+- Diagnostic D1 is reported.
 - Published AudioMNIST figures are given as context only. None found so far combines a speaker-disjoint split with added noise, so none is a head-to-head comparison. See `references/audiomnist-prior-art.md`.
 
-## 11. Decisions
-
-Resolved before freezing:
+## 10. Decisions made before the first run
 
 1. Hypotheses, section 2: the proposed wording, accepted 23 September.
-2. Bars, section 9: as proposed, accepted 23 September.
-3. The leaky bank's time constants, section 4: as proposed.
-4. The conventional networks: the trained-head protocol only, with the head on the shared statistics.
-5. Widths and training sizes, section 6: as proposed, with the native read at 2,048 clips only.
-6. Tiers 3 and 4: run in the order given; Tier 4 and the carrier tier as compute allows.
-7. The paper names the first order-task design that failed its blindness check.
-8. The whole-clip floor is the primary control (the author, 23 September).
-9. **Every arm is read over one fixed window.** Made while building the harness, after the per-clip window was measured to hand an undriven field a duration code (section 1). It replaces the per-clip masking the 18 September draft described, and is flagged to the author.
+2. The leaky-integrator bank's time constants, section 4: as proposed.
+3. The trained baselines: the trained-head protocol only, with the head on the shared statistics.
+4. Widths and training sizes, section 6: as proposed, with the native read at 2,048 clips only.
+5. The whole-clip spectrogram-only baseline is the primary control (the author, 23 September).
+6. **Every arm is read over one fixed window.** Made while building the harness, after a per-clip window was measured to hand an undriven network a duration code (section 1).
 
-Before freezing, the only runs on the confirmatory data were zero-drive field cells (the section 1 measurement) and three legacy re-runs of exploratory runs whose results were already on record. No driven arm was run under this protocol before this registration was frozen.
+Before the first tier, the only runs on this study's data were zero-gain network cells, the measurement behind decision 6, since repeated as the gate tier's diagnostic D1.
 
 ## Decision log
 
 Each change to the design after the run began, with its date and reason.
 
-**2026-09-23 20:04 MDT. Results are reported without the section 9 bars.** Every accuracy is reported as its mean over replicates (three seeds; the five folds under Protocol B) with the sample standard deviation and each replicate's value, and every comparison as the paired difference with its standard deviation over replicates and a 95% interval from resampling test clips (`harness.confirm.summary`). No threshold is applied and no verdict is drawn. Whether a difference is a real gain is left to further seeds and to a side-by-side comparison of the arms, to be published as supplementary material. Reason: the author judged a fixed bar such as +3 points arbitrary. **This decision was made after the Tier 1 results had been seen.** The bars are still scored, unchanged, by `harness.confirm.score`, and its Tier 1 verdicts remain in the record (`results/confirmatory/verdicts.json`, commit c68a1fb).
+**2026-09-23 20:04 MDT. Results are reported without the section 9 bars.** Every accuracy is reported as its mean over replicates (three seeds; the five folds under Protocol B) with the sample standard deviation and each replicate's value, and every comparison as the paired difference with its standard deviation over replicates and a 95% interval from resampling test clips (`harness.experiment.summary`). No threshold is applied and no verdict is drawn. Whether a difference is a real gain is left to further seeds and to a side-by-side comparison of the arms, to be published as supplementary material. Reason: the author judged a fixed bar such as +3 points arbitrary. **This decision was made after the Tier 1 results had been seen.** The bars are still scored, unchanged, by `harness.confirm.score`, and its Tier 1 verdicts remain in the record (`results/confirmatory/verdicts.json`, commit c68a1fb).
 
 **2026-09-23 21:51 MDT. Terms.** The paper and the documents written for readers now use the terms of the paper's glossary (Appendix A) in place of several used here: the floor is the spectrogram-only baseline, the field the coupled oscillator network, the severed field the uncoupled oscillator network, bank A and bank B the state-matched and width-matched leaky-integrator banks, frozen is untrained, a twin is a matched pair, a coupling law or family is a coupling function, a shape a lattice geometry, designed and uniform natural frequencies are tonotopic and identical, pinning is the restoring strength, the spectral clamp is the coupling ceiling, the envelope pathway is the band-energy pathway. Nothing in the design changes. This document, the code and the run record keep the original labels, which are the runs' identities; `src/README.md` maps each term to its label.
 
@@ -169,3 +147,8 @@ Each change to the design after the run began, with its date and reason.
 
 **2026-09-24 02:21 MDT. Coherence instruments.** Every coupled or uncoupled network run now also records, over its test clips, the global order parameter R, each oscillator's phase-locking value to its own band's drive, the share of oscillators locked above 0.5, and the mean amplitude, each as a mean, a spread and a mean per class. They are diagnostics: nothing reaches the readout, and no cell changes. The pilot measured them and this run did not; Tiers 1 and 2 have no instruments, while Tier B, Tier 3, the carrier tier and the projection tier (which reruns Tier 1's networks) do. Reason: the author wants coherence recorded even where the paper does not discuss it, and paper 03 will evaluate it.
 
+**2026-09-24 03:20 MDT. An original study, not a confirmatory one.** This document and the paper no longer describe the study as confirmatory, registered or frozen: it is an original study that reruns comparisons similar to the pilot's under a new protocol. Every number in the record and the paper comes from this study's runs. With that: the pilot's harness is archived on the `ek/paper-02-pilot` branch, and this study's source holds only the code its runs use; the legacy-reproduction gate, which re-ran pilot runs against the pilot's record, is dropped with it (it ran before the first tier, on ten pilot runs, and reproduced every accuracy it checked; commit f1b2d25); the bank no longer claims bit-identity with the pilot's bank; the pass/fail scorer and its Tier 1 verdicts are removed (they remain in the history at commit c68a1fb); the order task's baseline is reported against chance rather than used to mark pairs invalid; the hypotheses name the comparisons and none is scored; and section 9's bars are replaced by the reporting rules they had already given way to. The carrier gain of 32 is the one design value carried over from the pilot. Reason: the author asked that the study stand on its own data.
+
+**2026-09-24 03:20 MDT. The code and the record use the glossary terms.** Superseding the Terms entry of 21:51: the code and the record now use the glossary's terms in short form. Arm kinds are `baseline`, `network` (with `coupled` true or false), `bank` and `trained`; labels are `baseline`, `coupled-…`/`uncoupled-…` (coupling, geometry, frequencies, `restoring…`, `ceiling…`), `bank-state`, `bank-width` and `trained-<arch>`; the design factors are `coupling`, `geometry`, `frequencies` (random, tonotopic, identical), `restoring` and `ceiling`; the coupling functions are `kuramoto`, `kuramoto-sakaguchi`, `second-harmonic`, `winfree`, `stuart-landau` and `stuart-landau-fixed`; the input pathway field is `pathway`, and the band-energy pathway is the `spectrogram` pathway. The harness moves from `harness/confirm/` to `harness/experiment/` and the record from `results/confirmatory/` to `results/`. Every record entry was migrated in place with its numbers untouched: the regenerated summary matches the one before the migration in all 12,360 accuracies, 1,332 comparisons and the order baseline's intervals, and two recorded runs re-executed through the renamed code reproduce their cells exactly. The model layer (`src/harness/models/`) keeps its own parameter names, which the arms map onto.
+
+**2026-09-24 03:20 MDT. Devices.** Tier B, Tier 3 and the projection tier simulate the reservoirs on the Apple M1 Max GPU, about four to six times faster than its CPU; the readout stays on the CPU. On the GPU an untrained arm's cells equal the CPU's exactly (tested for both networks and the bank), and the projection tier's fixed cells must equal Tier 1's, which ran on the CPU. The trained baselines stay on the CPU on every machine: at about 2,000 parameters in batches of 64 they train one to three times slower on the GPU. Superseding "on the CPU like every tier before it" in the projection entry. The carrier tier, about ten hours on the Mac's GPU, runs on a rented CUDA GPU, and after the paper is drafted the whole study is to be rerun on one to check that it reproduces across devices.
