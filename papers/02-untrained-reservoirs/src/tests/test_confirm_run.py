@@ -208,3 +208,9 @@ def test_both_projections_keep_the_fixed_cells_exactly_and_add_only_projected_se
     native = both["native_widths"]["windowed"]
     assert seeded and all(c["effective_width"] < native for c in seeded)
     assert {(c["n_train"], c["width"]) for c in seeded} == {(n, w) for n in SIZES for w in (64, 256)}
+
+
+@pytest.mark.skipif(not torch.backends.mps.is_available(), reason="no Apple Silicon GPU")
+@pytest.mark.parametrize("arm", [FIELD, am.Arm("bank")], ids=lambda a: a.label())
+def test_an_untrained_arm_reads_the_same_on_the_apple_silicon_gpu(bank, arm):
+    assert rn.execute(spec(arm), device="mps", bank=bank)["cells"] == rn.execute(spec(arm), bank=bank)["cells"]

@@ -160,9 +160,7 @@ Rather than just test a mel spectrogram front-end drive we wanted to see what qu
 
 ## Reproducibility statement {-}
 
-The code, the registration with its dated change log, and the complete run record (every run's specification, results and per-clip correctness) are in the anonymized supplementary material and will be released with the paper; AudioMNIST is public ([Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)). From the record alone, one command regenerates every table and figure in this paper, and from the audio, the harness reruns any tier, resuming without repeating a finished run. Every run records its code version, hardware and library versions. The runs reported here used the CPU of an Apple M1 Max, where runs with the same seed are bit-identical; the carrier pathway used a CUDA GPU. We welcome reproductions.
-
-<!-- TODO: the harness runs on the CPU and on CUDA GPUs; Apple Silicon GPU (MPS) support is untested for paper 02. Test it before claiming it here. -->
+The code, the registration with its dated change log, and the complete run record (every run's specification, results and per-clip correctness) are in the anonymized supplementary material and will be released with the paper; AudioMNIST is public ([Becker 2024](https://doi.org/10.1016/j.jfranklin.2023.11.038)). From the record alone, one command regenerates every table and figure in this paper, and from the audio, the harness reruns any tier, resuming without repeating a finished run. Every run records its code version, hardware and library versions. The runs reported here used the CPU of an Apple M1 Max, where runs with the same seed are bit-identical; the carrier pathway used a CUDA GPU. The untrained arms also run on Apple Silicon GPUs, where a test on a small synthetic bank gives results identical to the CPU's; the trained baselines train on the CPU. We welcome reproductions.
 
 ## AI use statement {-}
 
