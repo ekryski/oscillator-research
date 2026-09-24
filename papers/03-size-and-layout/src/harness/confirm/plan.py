@@ -498,8 +498,10 @@ def _build(drive, noise, bands) -> str:
 
 
 def _work(spec: rn.Spec, device: str, threads: int) -> tuple[str, float]:
+    """One run. A paper 02 cell run here (paper 02 has not recorded it completely) runs on the CPU,
+    the only device on which it is bit-identical to paper 02's."""
     t0 = time.perf_counter()
-    return rn.run(spec, device, threads), time.perf_counter() - t0
+    return rn.run(spec, "cpu" if reused(spec) else device, threads), time.perf_counter() - t0
 
 
 def drive(names: list[str], workers: int, threads: int, device: str, dry_run: bool,
