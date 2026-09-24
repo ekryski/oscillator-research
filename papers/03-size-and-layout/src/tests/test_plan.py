@@ -7,9 +7,9 @@ from harness.confirm import run as rn
 from harness.confirm.arms import Arm
 
 #: the run counts TIERS.md and DESIGN.md state
-COUNTS = {"gate": 30, "size": 432, "trained": 675, "design": 3375, "quadrature": 297, "carrier": 240,
-          "design-quadrature": 3105, "design-carrier": 1875}
-REUSED = {"gate": 0, "size": 15, "trained": 15, "design": 75, "quadrature": 6, "carrier": 9,
+COUNTS = {"gate": 30, "size": 2688, "trained": 825, "sequence": 1296, "design": 3375, "quadrature": 363,
+          "carrier": 432, "design-quadrature": 3105, "design-carrier": 3375}
+REUSED = {"gate": 0, "size": 90, "trained": 15, "sequence": 0, "design": 75, "quadrature": 6, "carrier": 9,
           "design-quadrature": 12, "design-carrier": 18}
 
 
@@ -31,6 +31,30 @@ def test_every_tier_runs_at_0_db_and_input_gain_1_except_the_carrier_at_its_cali
 def test_the_lattices_are_nine_and_16x16_runs_once():
     assert list(plan.lattices()) == [(8, 0), (8, 16), (16, 0), (32, 0), (32, 16), (64, 0), (64, 16), (128, 0),
                                      (128, 16)]
+
+
+def test_the_long_window_runs_only_at_64_and_128_with_one_band_per_row():
+    assert [f for f in plan.front_ends() if f[2]] == [(64, 0, 1024), (128, 0, 2048)]
+    specs = plan.planned(["size", "trained", "quadrature"])
+    assert {(s.arm.grid, s.arm.n_bands, s.arm.n_window) for s in specs if s.arm.window} == {
+        (64, 64, 1024), (128, 128, 2048)}
+    assert all(not s.arm.window for s in plan.planned(["sequence", "design", "carrier"]))
+
+
+def test_the_size_tier_carries_paper_02s_order_task_and_the_sequence_tier_every_length():
+    order = [s for s in plan.planned(["size"]) if s.task == "order"]
+    assert {s.pair for s in order} == set(plan.pr.PAIRS)
+    assert sum(map(plan.reused, order)) == 75                           # paper 02's tier 1 order runs
+    seq = plan.planned(["sequence"])
+    assert {s.length for s in seq} == set(plan.pr.SEQUENCE_LENGTHS) and {s.task for s in seq} == {"sequence"}
+    assert not any(s.arm.kind == "ann" for s in seq)
+
+
+def test_a_network_records_its_rotation_rates_and_the_baseline_its_whole_clip_read():
+    assert plan.reads_for(Arm("field"), "recognition") == ("windowed", "windowed+rate")
+    assert plan.reads_for(Arm("field"), "sequence") == ("pooled", "pooled+rate")
+    assert plan.reads_for(Arm("bank"), "order") == ("pooled",)
+    assert plan.reads_for(Arm("floor"), "recognition") == ("windowed", "windowed@wholeclip")
 
 
 def test_the_reused_cells_are_paper_02s_16x16_4_channel_runs_under_their_own_ids():
@@ -104,3 +128,19 @@ def test_a_paper_02_run_with_no_projected_read_needs_no_seeded_cell(tmp_path, mo
     old = {"native_widths": {"windowed": 192}, "cells": [_cell("windowed", 192, 192, 0.78)]}
     (tmp_path / "tier1-recognition-envelope.json").write_text(json.dumps({"runs": {s.run_id(): old}}))
     assert plan.paper02_complete(s, plan.paper02_run(s))
+
+
+def test_prepare_builds_every_row_cache_a_run_reads_and_no_other():
+    paths = {plan.cache_path(j) for j in plan.cache_jobs()}
+    wanted = set()
+    for s in plan.planned([t for t in plan.TIERS if t != "gate"]):
+        a = s.arm
+        if s.drive == "carrier":
+            continue
+        if s.task == "recognition":
+            wanted.add(plan.pr.rows_path(s.drive, s.noise_db, a.n_bands, a.n_window))
+        else:
+            for code in (0, s.seed + 1):
+                wanted.add(plan.pr.order_rows_path(s.pair, code, s.noise_db, a.n_bands) if s.task == "order"
+                           else plan.pr.sequence_rows_path(s.length, code, s.noise_db, a.n_bands))
+    assert wanted == paths

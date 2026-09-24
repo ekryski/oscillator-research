@@ -52,14 +52,16 @@ AMPLITUDE_FAMILIES = ("sl", "sl-fixedamp")
 SHAPES = ("torus", "cylinder", "sheet", "helix", "cube", "sphere")
 CARRIER_GAIN = 32.0                     # the carrier pathway's calibrated gain in paper 02
 CARRIER_NOISE = 0.0                     # paper 02 ran the carrier at 0 dB only
-#: the carrier integrates 16,000 steps a clip; above 32 x 32 it is not planned (see estimate())
-CARRIER_GRIDS = (8, 16, 32)
+#: the carrier integrates 16,000 steps a clip; it is planned at every lattice until a GPU benchmark
+#: (`plan benchmark`) prices it
+CARRIER_GRIDS = GRIDS
+#: the front end's longer real analysis window, as long as the zero-padded transform at that band count;
+#: the own-band lattices at 64 and 128 run under both windows in the size, trained and quadrature tiers
+LONG_WINDOW = {64: 1024, 128: 2048}
 #: the unprojected (native) read is fitted where the features are small enough, as in paper 02's tier 4
 NATIVE_STATES = 1024
 REFERENCE = ("kuramoto", "torus")       # paper 02's reference network: its coupling function and geometry
 
-FLOOR_READS = ("windowed", "windowed@wholeclip")
-NETWORK_READS = ("windowed",)
 
 
 def lattices(grids: tuple[int, ...] = GRIDS) -> Iterator[tuple[int, int]]:
@@ -70,18 +72,44 @@ def lattices(grids: tuple[int, ...] = GRIDS) -> Iterator[tuple[int, int]]:
                 yield grid, bands
 
 
+def front_ends(grids: tuple[int, ...] = GRIDS) -> Iterator[tuple[int, int, int]]:
+    """(grid, bands, window): every lattice and band mapping, and the own-band lattices of 64 and 128 again
+    under the longer analysis window (0 is paper 02's 512-sample window)."""
+    for grid, bands in lattices(grids):
+        yield grid, bands, 0
+        if bands == 0 and grid in LONG_WINDOW:
+            yield grid, bands, LONG_WINDOW[grid]
+
+
 def _native(arm: Arm) -> tuple:
     return (rn.PRIMARY_SIZE,) if arm.states <= NATIVE_STATES else ()
 
 
-def _net(tier: str, drive: str, noise, gain, seed, arm: Arm) -> rn.Spec:
-    return rn.Spec(tier, "recognition", drive, noise, gain, seed, arm, native_sizes=_native(arm),
-                   reads=NETWORK_READS)
+def reads_for(arm: Arm, task: str) -> tuple[str, ...]:
+    """The reads recorded for an arm: the task's primary read; with the rotation rates for a network
+    (paper 02's secondary read); from the first frame as well for the spectrogram-only baseline."""
+    base = am.PRIMARY_READ[task]
+    if arm.kind == "floor":
+        return base, f"{base}@wholeclip"
+    return (base, f"{base}+rate") if arm.kind == "field" else (base,)
 
 
-def _floor(tier: str, drive: str, noise, seed, grid: int, bands: int) -> rn.Spec:
-    return rn.Spec(tier, "recognition", drive, noise, None, seed, Arm("floor", grid=grid, bands=bands),
-                   reads=FLOOR_READS)
+def _net(tier: str, drive: str, noise, gain, seed, arm: Arm, task: str = "recognition", **kw) -> rn.Spec:
+    return rn.Spec(tier, task, drive, noise, gain, seed, arm, native_sizes=_native(arm),
+                   reads=reads_for(arm, task), **kw)
+
+
+def _floor(tier: str, drive: str, noise, seed, grid: int, bands: int, window: int = 0,
+           task: str = "recognition", **kw) -> rn.Spec:
+    arm = Arm("floor", grid=grid, bands=bands, window=window)
+    return rn.Spec(tier, task, drive, noise, None, seed, arm, reads=reads_for(arm, task), **kw)
+
+
+def _reservoirs(channels: int, grid: int, bands: int, window: int = 0, bank: bool = True) -> tuple[Arm, ...]:
+    """The coupled and uncoupled networks (and the state-matched bank) of one size."""
+    arms = (Arm("field", channels=channels, grid=grid, bands=bands, window=window),
+            Arm("field", channels=channels, grid=grid, bands=bands, window=window, severed=True))
+    return arms + ((Arm("bank", channels=channels, grid=grid, bands=bands, window=window),) if bank else ())
 
 
 def designs(families: tuple[str, ...] = PHASE_FAMILIES + AMPLITUDE_FAMILIES) -> Iterator[tuple[str, str]]:
@@ -105,30 +133,54 @@ def gate() -> Iterator[rn.Spec]:
 
 
 def size() -> Iterator[rn.Spec]:
-    """The reference network, uncoupled network and state-matched bank at every lattice, channel count
-    and band mapping, with the spectrogram-only baseline on the same rows."""
-    for grid, bands in lattices():
+    """The reference network, uncoupled network and state-matched bank at every lattice, channel count,
+    band mapping and window, with the spectrogram-only baseline on the same rows; and the same arms on
+    paper 02's order task at every lattice and band mapping."""
+    for grid, bands, window in front_ends():
         for noise in NOISES:
             for seed in SEEDS:
-                yield _floor("size", "envelope", noise, seed, grid, bands)
+                yield _floor("size", "envelope", noise, seed, grid, bands, window)
                 for channels in CHANNELS:
                     for gain in GAINS:
-                        for arm in (Arm("field", channels=channels, grid=grid, bands=bands),
-                                    Arm("field", channels=channels, grid=grid, bands=bands, severed=True),
-                                    Arm("bank", channels=channels, grid=grid, bands=bands)):
+                        for arm in _reservoirs(channels, grid, bands, window):
                             yield _net("size", "envelope", noise, gain, seed, arm)
+    for grid, bands in lattices():
+        for pair in pr.PAIRS:
+            for noise in NOISES:
+                for seed in SEEDS:
+                    yield _floor("size", "envelope", noise, seed, grid, bands, task="order", pair=pair)
+                    for channels in CHANNELS:
+                        for gain in GAINS:
+                            for arm in _reservoirs(channels, grid, bands):
+                                yield _net("size", "envelope", noise, gain, seed, arm, "order", pair=pair)
 
 
 def trained() -> Iterator[rn.Spec]:
     """The five trained baselines, each sized to every network of the size tier, on its rows."""
-    for grid, bands in lattices():
+    for grid, bands, window in front_ends():
         for channels in CHANNELS:
             for arch in ANN_ARCHS:
                 for noise in NOISES:
                     for seed in SEEDS:
-                        arm = Arm("ann", arch=arch, channels=channels, grid=grid, bands=bands)
+                        arm = Arm("ann", arch=arch, channels=channels, grid=grid, bands=bands, window=window)
                         yield rn.Spec("trained", "recognition", "envelope", noise, None, seed, arm,
-                                      reads=("windowed",))
+                                      reads=reads_for(arm, "recognition"))
+
+
+def sequence() -> Iterator[rn.Spec]:
+    """The digit-sequence task, 2, 3 and 4 digits, for the reference network, uncoupled network and
+    state-matched bank at every lattice, channel count and band mapping, with the spectrogram-only
+    baseline, which can tell which digits a sequence holds but not where."""
+    for grid, bands in lattices():
+        for length in pr.SEQUENCE_LENGTHS:
+            for noise in NOISES:
+                for seed in SEEDS:
+                    yield _floor("sequence", "envelope", noise, seed, grid, bands, task="sequence", length=length)
+                    for channels in CHANNELS:
+                        for gain in GAINS:
+                            for arm in _reservoirs(channels, grid, bands):
+                                yield _net("sequence", "envelope", noise, gain, seed, arm, "sequence",
+                                           length=length)
 
 
 def design() -> Iterator[rn.Spec]:
@@ -149,27 +201,24 @@ def design() -> Iterator[rn.Spec]:
 def quadrature() -> Iterator[rn.Spec]:
     """The quadrature pathway at every size: the reference and uncoupled networks, and the pathway's
     own spectrogram-only baseline. The bank has no phase to take it, as in paper 02."""
-    for grid, bands in lattices():
+    for grid, bands, window in front_ends():
         for noise in NOISES:
             for seed in SEEDS:
-                yield _floor("quadrature", "quadrature", noise, seed, grid, bands)
+                yield _floor("quadrature", "quadrature", noise, seed, grid, bands, window)
                 for channels in CHANNELS:
                     for gain in GAINS:
-                        for severed in (False, True):
-                            arm = Arm("field", channels=channels, grid=grid, bands=bands, severed=severed)
+                        for arm in _reservoirs(channels, grid, bands, window, bank=False):
                             yield _net("quadrature", "quadrature", noise, gain, seed, arm)
 
 
 def carrier() -> Iterator[rn.Spec]:
-    """The carrier pathway up to 32 x 32: the reference and uncoupled networks, the state-matched bank at
-    the sample rate, and the pathway's own spectrogram-only baseline; 0 dB and gain 32, as in paper 02."""
+    """The carrier pathway: the reference and uncoupled networks, the state-matched bank at the sample
+    rate, and the pathway's own spectrogram-only baseline; 0 dB and gain 32, as in paper 02."""
     for grid, bands in lattices(CARRIER_GRIDS):
         for seed in SEEDS:
             yield _floor("carrier", "carrier", CARRIER_NOISE, seed, grid, bands)
             for channels in CHANNELS:
-                for arm in (Arm("field", channels=channels, grid=grid, bands=bands),
-                            Arm("field", channels=channels, grid=grid, bands=bands, severed=True),
-                            Arm("bank", channels=channels, grid=grid, bands=bands)):
+                for arm in _reservoirs(channels, grid, bands):
                     yield _net("carrier", "carrier", CARRIER_NOISE, CARRIER_GAIN, seed, arm)
 
 
@@ -189,7 +238,7 @@ def quadrature_design() -> Iterator[rn.Spec]:
 
 
 def carrier_design() -> Iterator[rn.Spec]:
-    """Every coupling function and geometry on the carrier pathway, up to 32 x 32."""
+    """Every coupling function and geometry on the carrier pathway, at every lattice."""
     for grid, bands in lattices(CARRIER_GRIDS):
         for channels in CHANNELS:
             for family, shape in designs():
@@ -200,8 +249,9 @@ def carrier_design() -> Iterator[rn.Spec]:
                     yield _net("design-carrier", "carrier", CARRIER_NOISE, CARRIER_GAIN, seed, arm)
 
 
-TIERS = {"gate": gate, "size": size, "trained": trained, "design": design, "quadrature": quadrature,
-         "carrier": carrier, "design-quadrature": quadrature_design, "design-carrier": carrier_design}
+TIERS = {"gate": gate, "size": size, "trained": trained, "sequence": sequence, "design": design,
+         "quadrature": quadrature, "carrier": carrier, "design-quadrature": quadrature_design,
+         "design-carrier": carrier_design}
 
 
 # ---------------------------------------------------------------------------
@@ -222,6 +272,7 @@ PAPER02_RECORD = PAPER02_ROOT / "results" / "confirmatory"
 
 TIER1, QUAD02, CARRIER02 = ("tier1-recognition-envelope", "tier3-recognition-quadrature",
                              "tier3-recognition-carrier")
+ORDER02 = "tier1-order-envelope"
 #: paper 02's projection tier: its record files are f"{PAPER02_PROJECTION}-{task}-{drive}"
 PAPER02_PROJECTION = "projection"
 
@@ -236,11 +287,22 @@ def paper02_group(spec: rn.Spec) -> str | None:
     and geometry at 4 channels (its tier 2); the trained baselines at 2,048
     parameters; and a diagonal of coupling functions and geometries on the
     quadrature and carrier pathways (its tier 3), with the 4-channel bank on
-    the carrier.
+    the carrier. On the order task (its tier 1) it ran the spectrogram-only
+    baseline, the reference network, its uncoupled copy and both banks. It did
+    not run the digit-sequence task, or any window but its 512 samples.
     """
     a = spec.arm
-    if spec.tier == "gate" or a.grid != 16 or a.n_bands != 16:
+    if spec.tier == "gate" or a.grid != 16 or a.n_bands != 16 or a.n_window != am.WINDOW:
         return None
+    if spec.task == "sequence":
+        return None
+    if spec.task == "order":
+        if a.kind == "ann" or (a.kind == "bank" and a.channels not in (4, 8)):
+            return None
+        if a.kind == "field" and (a.channels != 4 or (a.physics, a.boundary) != REFERENCE
+                                  or (a.omega, a.damping, a.clamp) != ("random", 0.3, 1.0)):
+            return None
+        return ORDER02
     if a.kind == "floor":
         return {"envelope": TIER1, "quadrature": QUAD02, "carrier": CARRIER02}[spec.drive]
     if a.kind == "ann":
@@ -394,45 +456,75 @@ def _sim_feat_ms(spec: rn.Spec, device: str) -> tuple[float, float]:
     return sim, feat
 
 
+def clips_and_frames(spec: rn.Spec) -> tuple[int, int]:
+    """(clips a run reads, frames per clip): 8,048 of 61 for recognition, 4,096 of 147 for the order
+    task, 4,096 of 147 to 284 for the digit-sequence task, and 16,000 samples per clip on the carrier."""
+    if spec.task == "order":
+        return pr.ORDER_TRAIN + pr.ORDER_TEST, pr.joined_frames(2)
+    if spec.task == "sequence":
+        return pr.SEQUENCE_TRAIN + pr.SEQUENCE_TEST, pr.joined_frames(spec.length)
+    return CLIPS, (16000 if spec.drive == "carrier" else 61)
+
+
+def features_per_state(arm: Arm, read: str) -> int:
+    """Features per state for a read: 3 statistics per signal and window; a network has two signals per
+    oscillator, and its rotation rates add two more per oscillator and window."""
+    windows = am.WINDOWS["recognition"] if read.startswith("windowed") else 1
+    per = 3 * windows * (2 if arm.kind == "field" else 1)
+    return per + (2 * windows if read.endswith("+rate") else 0)
+
+
 def seconds(spec: rn.Spec, device: str = "cpu") -> float:
     """Estimated seconds for one run: on one CPU thread (`cpu`) or on the M1 Max's GPU (`mps`).
 
     Both include what runs on the CPU either way: drawing the two projection
-    matrices, and the ridge readout under each projection.
+    matrices, and the ridge readout under each projection, for every read (and,
+    on the digit-sequence task, every position). The frame counts and the
+    number of clips scale the per-clip times measured on recognition; a streamed
+    arm simulates its channels once per read.
     """
     a = spec.arm
-    reads = len(spec.reads or (1, 1))
-    ridge = RIDGE_S * reads * 2                      # the fixed and the seeded projection
+    reads = spec.reads or tuple(am.reads(a, spec.task))
+    positions = spec.length if spec.task == "sequence" else 1
+    ridge = RIDGE_S * len(reads) * 2 * positions             # the fixed and the seeded projection
+    clips, frames = clips_and_frames(spec)
+    scale = frames / (16000 if spec.drive == "carrier" else 61)
     if a.kind == "ann":
-        return 60 * _ann_minutes(a.arch, a.budget, device) + ridge
+        return 60 * _ann_minutes(a.arch, a.budget, device) * scale * clips / CLIPS + ridge
     if a.kind == "floor":
         return 2.0 + ridge
     sim, feat = _sim_feat_ms(spec, device)
-    per_channel_features = (24 if a.kind == "field" else 12) * a.grid * a.grid
-    native = per_channel_features * a.channels
-    top = min(4096, native)
-    project_ms = 2 * 1e3 * 2 * per_channel_features * top / PROJECT_FLOPS[device]
-    draws = 2 * native * 4096 / RANDN_PER_S if native > 4096 else 0.0
+    sites = a.grid * a.grid
+    passes = len(reads) if spec.streamed else 1
+    project_ms = draws = 0.0
+    for read in reads:
+        per_channel = features_per_state(a, read) * sites
+        native = per_channel * a.channels
+        project_ms += 2 * 1e3 * 2 * per_channel * min(4096, native) / PROJECT_FLOPS[device]
+        draws += 2 * native * 4096 / RANDN_PER_S if native > 4096 else 0.0
     if spec.streamed:
-        draws /= TWO_THREADS                         # a channel's two matrices are drawn in two threads
-    return a.channels * CLIPS * (sim + feat + project_ms) / 1e3 + draws + ridge
+        draws /= TWO_THREADS                                  # a channel's two matrices are drawn in two threads
+    per_clip_ms = passes * sim * scale + feat * scale * (1 + 0.33 * (len(reads) > 1)) + project_ms
+    return a.channels * clips * per_clip_ms / 1e3 + draws + ridge
 
 
 def memory_gb(spec: rn.Spec) -> float:
     """Rough peak memory of one run: the held features and the two projection matrices (in memory), or
-    one channel's training features and its rows of both matrices (streamed), plus a batch of
-    trajectories. On MPS this is the unified memory the CPU and GPU share."""
+    one channel's training features and its rows of both matrices for the widest read (streamed), plus
+    a batch of trajectories. On MPS this is the unified memory the CPU and GPU share."""
     a = spec.arm
     if a.kind in ("floor", "ann"):
         return 1.0
     signals = (2 if a.kind == "field" else 1) * a.grid * a.grid
-    frames = 16000 if spec.drive == "carrier" else 61
+    clips, frames = clips_and_frames(spec)
+    reads = spec.reads or tuple(am.reads(a, spec.task))
+    widest = max(features_per_state(a, r) for r in reads) * a.grid * a.grid
     if spec.streamed:
-        held = (rn.PRIMARY_SIZE + 2 * 4096) * 12 * signals * 4
+        held = (rn.PRIMARY_SIZE + 2 * 4096) * widest * 4
         batch = rn.batch_size(spec, states=a.grid * a.grid) * frames * signals * 4
     else:
-        native = 12 * signals * a.channels
-        held = CLIPS * native * 4 + 2 * native * 4096 * 4 * (native > 4096)
+        native = sum(features_per_state(a, r) for r in reads) * a.grid * a.grid * a.channels
+        held = clips * native * 4 + 2 * widest * a.channels * 4096 * 4 * (widest * a.channels > 4096)
         batch = rn.batch_size(spec) * frames * signals * a.channels * 4
     return (held + batch) / 1e9 + 0.5
 
@@ -504,23 +596,54 @@ def _print_estimate(rows: list[dict]) -> None:
           f"{sum(t[3] for t in totals.values()):7.1f} MPS-hours")
 
 
+def cache_jobs(grids=GRIDS) -> list[tuple]:
+    """Every row cache the tiers read: the bank's rows on the band-energy and quadrature pathways at each
+    band count and window, and each order-task and digit-sequence set (its test set and every seed's
+    training set) at each band count. The carrier's rows are never cached."""
+    counts = sorted({16} | {g for g, b in lattices(grids) if b == 0})
+    windows = {(g, w) for g, b, w in front_ends(grids) if w}
+    codes = (0, *(seed + 1 for seed in SEEDS))
+    jobs = [("rows", drive, noise, bands, pr.HOP_N_FFT) for drive in pr.CACHED_DRIVES for noise in NOISES
+            for bands in counts]
+    jobs += [("rows", drive, noise, g, w) for drive in pr.CACHED_DRIVES for noise in NOISES for g, w in sorted(windows)]
+    jobs += [("order", pair, code, noise, bands) for pair in pr.PAIRS for code in codes for noise in NOISES
+             for bands in counts]
+    jobs += [("sequence", length, code, noise, bands) for length in pr.SEQUENCE_LENGTHS for code in codes
+             for noise in NOISES for bands in counts]
+    return jobs
+
+
+def cache_path(job: tuple):
+    kind, *args = job
+    if kind == "rows":
+        return pr.rows_path(*args)
+    return (pr.order_rows_path if kind == "order" else pr.sequence_rows_path)(*args)
+
+
+def cache_clips(job: tuple, bank_clips: int) -> int:
+    if job[0] == "rows":
+        return bank_clips
+    code = job[2]
+    return (pr.ORDER_TEST if code == 0 else pr.ORDER_TRAIN) if job[0] == "order" else (
+        pr.SEQUENCE_TEST if code == 0 else pr.SEQUENCE_TRAIN)
+
+
 def prepare(workers: int, grids=GRIDS) -> None:
     """Build every row cache the tiers read, in parallel, skipping those that exist."""
-    bank = pr.load_bank()
-    n = len(bank["labels"])
-    counts = sorted({16} | {g for g, b in lattices(grids) if b == 0})
-    jobs = [(drive, noise, bands) for drive in pr.CACHED_DRIVES for noise in NOISES for bands in counts
-            if pr.load_rows(pr.rows_path(drive, noise, bands), n) is None]
+    n = len(pr.load_bank()["labels"])
+    jobs = [j for j in cache_jobs(grids) if pr.load_rows(cache_path(j), cache_clips(j, n)) is None]
     print(f"=== prepare: {len(jobs)} row cache(s) to build with {workers} worker(s)")
     with ProcessPoolExecutor(workers, mp_context=get_context("spawn")) as ex:
-        for f in as_completed([ex.submit(_build, *j) for j in jobs]):
+        for f in as_completed([ex.submit(_build, j) for j in jobs]):
             print(f"    {f.result()}")
 
 
-def _build(drive, noise, bands) -> str:
+def _build(job: tuple) -> str:
     import torch
     torch.set_num_threads(1)
-    return str(pr.build_rows(pr.load_bank(), drive, noise, bands).name)
+    kind, *args = job
+    build = {"rows": pr.build_rows, "order": pr.build_order_rows, "sequence": pr.build_sequence_rows}[kind]
+    return str(build(pr.load_bank(), *args).name)
 
 
 def _work(spec: rn.Spec, device: str, threads: int) -> tuple[str, float]:
