@@ -64,7 +64,8 @@ class Spec:
     bits: str = "all"              # all | primary
     span: str = "fixed"            # fixed | clip (the exploratory per-clip span, a diagnostic)
     reads: tuple = ()              # the reads to record; empty records every read the arm has
-    projection: str = "fixed"      # fixed | both: also read through the seeded projection
+    projection: str = "fixed"      # fixed | both: also read through the seeded projection (cells tagged
+                                   # fixed, seeded, or none where the read is not projected)
 
     def group(self) -> str:
         name = f"{self.tier}-{self.task}-{self.drive}"
@@ -285,7 +286,7 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
         native = {read: sum(b.shape[1] for b in blocks) for read, blocks in read_blocks.items()}
         seeded = ro.read_cells(read_blocks, clips.labels, clips.layout, spec.sizes, spec.widths, (),
                                clips.n_classes, keep_bits(spec), projection_seed=spec.seed)
-        cells = ([{**c, "projection": "fixed"} for c in cells]
+        cells = ([{**c, "projection": "none" if c["effective_width"] == native[c["read"]] else "fixed"} for c in cells]
                  + [{**c, "projection": "seeded"} for c in seeded if c["effective_width"] != native[c["read"]]])
     timing["readout_s"] = time.perf_counter() - t2
     timing["total_s"] = time.perf_counter() - t0

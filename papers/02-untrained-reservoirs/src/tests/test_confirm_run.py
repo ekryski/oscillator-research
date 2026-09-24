@@ -203,7 +203,9 @@ def test_both_projections_keep_the_fixed_cells_exactly_and_add_only_projected_se
     fixed = rn.execute(spec(FIELD, reads=("windowed",)), bank=bank)
     both = rn.execute(spec(FIELD, reads=("windowed",), projection="both"), bank=bank)
     strip = lambda c: {k: v for k, v in c.items() if k != "projection"}  # noqa: E731
-    assert [strip(c) for c in both["cells"] if c["projection"] == "fixed"] == fixed["cells"]
+    assert [strip(c) for c in both["cells"] if c["projection"] != "seeded"] == fixed["cells"]
+    assert all((c["projection"] == "none") == (c["effective_width"] == both["native_widths"]["windowed"])
+               for c in both["cells"] if c["projection"] != "seeded")
     seeded = [c for c in both["cells"] if c["projection"] == "seeded"]
     native = both["native_widths"]["windowed"]
     assert seeded and all(c["effective_width"] < native for c in seeded)
