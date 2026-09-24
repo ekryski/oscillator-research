@@ -371,8 +371,10 @@ def planned(names: list[str], grids=(), channels=()) -> list[rn.Spec]:
 
 
 def pending(specs: list[rn.Spec]) -> list[rn.Spec]:
+    """Specs not yet recorded here, and not recorded by paper 02. A reused spec whose paper 02 run is
+    missing (a paper 02 tier that has not run) is run here instead, and that run is the one reported."""
     done = {g: rn.recorded_ids(g) for g in {s.group() for s in specs}}
-    return sorted((s for s in specs if s.run_id() not in done[s.group()] and not reused(s)),
+    return sorted((s for s in specs if s.run_id() not in done[s.group()] and paper02_run(s) is None),
                   key=seconds, reverse=True)
 
 
@@ -439,7 +441,7 @@ def drive(names: list[str], workers: int, threads: int, device: str, dry_run: bo
           grids=(), channels=()) -> None:
     specs = planned(names, grids, channels)
     todo = pending(specs)
-    n_reused = sum(map(reused, specs))
+    n_reused = sum(run is not None for run in map(paper02_run, specs))
     print(f"=== {' + '.join(names)}: {len(specs)} runs planned, {n_reused} from paper 02, "
           f"{len(specs) - len(todo) - n_reused} recorded, {len(todo)} to run on {workers} worker(s) x "
           f"{threads} thread(s), device {device}; ~{sum(map(seconds, todo)) / 3600:.0f} CPU-hours")

@@ -83,16 +83,18 @@ def _cells(tier: str, rec: dict, run_id: str, source: str) -> list[Cell]:
 
 
 def load() -> list[Cell]:
-    """Paper 03's record, and the planned cells paper 02 recorded."""
-    out = []
+    """Paper 03's record, and the planned cells paper 02 recorded (unless paper 03 ran them itself)."""
+    out, ours = [], set()
     for path in sorted(rn.record_root().glob("*.json")):
         if path.name in NOT_RUNS:
             continue
         for run_id, rec in json.loads(path.read_text())["runs"].items():
             out += _cells(rec["spec"]["tier"], rec, run_id, "paper 03")
+            ours.add((path.stem, run_id))
     for tier in plan.TIERS.values():
         for spec in tier():
-            rec = plan.paper02_run(spec) if plan.reused(spec) else None
+            mine = (spec.group(), spec.run_id()) in ours
+            rec = plan.paper02_run(spec) if plan.reused(spec) and not mine else None
             if rec is not None:
                 out += _cells(spec.tier, rec, spec.run_id(), "paper 02")
     return out
