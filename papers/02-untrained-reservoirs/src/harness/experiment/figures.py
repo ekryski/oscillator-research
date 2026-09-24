@@ -31,8 +31,8 @@ BANK_STATE = ("bank-state", "windowed",
               "**Leaky-integrator bank, state-matched**{gain}: 1,024 leaky integrators with the network's states and "
               "parameters, untrained",
               "Leaky-integrator bank, state-matched{gain}", "#D85A30")
-TRANSFORMER = ("trained-transformer", "windowed", "**Transformer**: a trained baseline, 1,968 parameters, trained end to end",
-               "Transformer: trained baseline", "#0F6E56")
+TRAINED_REFERENCE = ("trained-gru", "windowed", "**GRU**: a trained baseline, 1,944 parameters, trained end to end",
+                     "GRU: trained baseline", "#0F6E56")
 DYNAMICAL = (COUPLED, UNCOUPLED, BANK_STATE)
 
 
@@ -40,14 +40,14 @@ def _bars(gains: tuple[float, ...]) -> list[tuple]:
     """(arm, read, gain, table label, legend label, colour, hatched) per bar, in plotting order.
 
     Input gain applies only to the reservoirs; the spectrogram-only baseline
-    and the transformer appear once, without it.
+    and the GRU appear once, without it.
     """
     def one(spec, gain):
         arm, read, table, legend, colour = spec
         tag = "" if gain is None else f" (gain = {gain:g})"
         return (arm, read, gain, table.format(gain=tag), legend.format(gain=tag), colour, gain == 2.0)
     return ([one(BASELINE, None)] + [one(spec, g) for spec in DYNAMICAL for g in gains]
-            + [one(TRANSFORMER, None)])
+            + [one(TRAINED_REFERENCE, None)])
 
 
 #: the figures: file stem, the gains shown
