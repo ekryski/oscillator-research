@@ -268,7 +268,8 @@ def main() -> None:
              "yellow). Star: one oscillator. Dots: its nearest neighbours under that geometry.",
              ha="center", fontsize=9, color=INK, linespacing=1.5)
     stem = FIGURES_DIR / "a2-lattice-geometries"
-    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 200})):
+    for suffix, kwargs in ((".pdf", {"metadata": {"CreationDate": None, "Creator": None, "Producer": None}}),
+                           (".png", {"dpi": 200, "metadata": {"Software": None}})):
         fig.savefig(stem.with_suffix(suffix), bbox_inches="tight", **kwargs)
     print(f"wrote {stem}.{{pdf,png}}")
 

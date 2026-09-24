@@ -17,6 +17,12 @@ from harness.experiment import summary as sm
 from harness.experiment import terms
 from harness.utils.paths import FIGURES_DIR
 
+#: how every figure is saved: vector and raster, with no build date, tool or version in either file,
+#: so a figure carries nothing that dates or identifies the machine that drew it, and redrawing it
+#: from the same record gives the same bytes
+SAVE = ((".pdf", {"metadata": {"CreationDate": None, "Creator": None, "Producer": None}}),
+        (".png", {"dpi": 200, "metadata": {"Software": None}}))
+
 NOISES = tuple((n, sm.snr(n)) for n in (None, 0.0, 5.0))
 
 #: the controls experiment's recognition arms: (arm, read, table label, legend label, colour); gain is set per figure
@@ -103,7 +109,7 @@ def recognition_figure(acc: dict[tuple, dict], stem: str, gains: tuple[float, ..
     # the LaTeX builds take the vector PDF; everything else takes the PNG
     path = FIGURES_DIR / stem
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
-    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 200})):
+    for suffix, kwargs in SAVE:
         fig.savefig(path.with_suffix(suffix), **kwargs)
     plt.close(fig)
     print(f"wrote {path}.{{pdf,png}}")
@@ -166,7 +172,7 @@ def design_figure(rows: list[dict], stem: str = "c4-design-differences") -> None
     fig.tight_layout()
     path = FIGURES_DIR / stem
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
-    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 200})):
+    for suffix, kwargs in SAVE:
         fig.savefig(path.with_suffix(suffix), bbox_inches="tight", **kwargs)
     plt.close(fig)
     print(f"wrote {path}.{{pdf,png}}")
@@ -213,7 +219,7 @@ def size_figure(stem: str = "c5-training-size") -> None:
     fig.tight_layout()
     path = FIGURES_DIR / stem
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
-    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 200})):
+    for suffix, kwargs in SAVE:
         fig.savefig(path.with_suffix(suffix), bbox_inches="tight", **kwargs)
     plt.close(fig)
     print(f"wrote {path}.{{pdf,png}}")
@@ -259,7 +265,7 @@ def gain_figure(stem: str = "c6-gain-sweep") -> None:
     fig.tight_layout()
     path = FIGURES_DIR / stem
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
-    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 200})):
+    for suffix, kwargs in SAVE:
         fig.savefig(path.with_suffix(suffix), bbox_inches="tight", **kwargs)
     plt.close(fig)
     print(f"wrote {path}.{{pdf,png}}")
@@ -346,7 +352,7 @@ def anova_figure(maps: dict[str, torch.Tensor] | None = None, stem: str = "c7-an
     fig.tight_layout()
     path = FIGURES_DIR / stem
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
-    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 200})):
+    for suffix, kwargs in SAVE:
         fig.savefig(path.with_suffix(suffix), bbox_inches="tight", **kwargs)
     plt.close(fig)
     print(f"wrote {path}.{{pdf,png}}")

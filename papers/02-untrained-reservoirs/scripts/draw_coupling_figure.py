@@ -179,7 +179,8 @@ def main() -> None:
              "feels the sum over every other oscillator in its channel.",
              ha="center", fontsize=8.5, color=INK, linespacing=1.5)
     stem = FIGURES_DIR / "a3-coupling-functions"
-    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 200})):
+    for suffix, kwargs in ((".pdf", {"metadata": {"CreationDate": None, "Creator": None, "Producer": None}}),
+                           (".png", {"dpi": 200, "metadata": {"Software": None}})):
         fig.savefig(stem.with_suffix(suffix), bbox_inches="tight", **kwargs)
     print(f"wrote {stem}.{{pdf,png}}")
 

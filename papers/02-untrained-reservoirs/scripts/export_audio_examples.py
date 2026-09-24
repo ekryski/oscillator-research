@@ -14,8 +14,8 @@ from __future__ import annotations
 
 import shutil
 
-import soundfile as sf
 import torch
+from scipy.io import wavfile
 
 from harness.experiment import protocol as pr
 from harness.experiment.summary import snr
@@ -35,7 +35,9 @@ def level(noise: float | None) -> str:
 
 
 def write(name: str, wave: torch.Tensor, scale: float) -> None:
-    sf.write(OUT / name, (wave * scale).numpy(), DIGIT_SR, subtype="FLOAT")
+    # scipy writes the format and the samples and nothing else; libsndfile adds a PEAK chunk to a
+    # float WAV that records when the file was written
+    wavfile.write(OUT / name, DIGIT_SR, (wave * scale).numpy().astype("float32"))
 
 
 def main() -> None:
@@ -71,7 +73,7 @@ def main() -> None:
 
     lines = [
         "# Audio examples", "",
-        "Clips as the arms hear them: each is the waveform the front end received, sample for sample, with the "
+        "Example audio clips from the experiment: each is the waveform the front end received, sample for sample, with the "
         "same seeded noise, made by the harness's own `recognition_clips` and `order_clips` "
         "(`src/harness/experiment/protocol.py`). "
         "The recordings are from AudioMNIST (Becker et al. 2024), under its MIT licence (`LICENSE-AudioMNIST.txt`): "
