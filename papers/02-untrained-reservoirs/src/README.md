@@ -268,6 +268,15 @@ uv run python -m harness.runner --task digits --noise-db 0 --gain 2.0 \
     --arms frozen --probe-windows 4 --probe-macro 4
 ```
 
+### The interactive post's data
+
+The post that lets you run these arms in a browser, one clip at a time, reads everything from one export: the seed-0 physics, the demo clips, and each config's readout, refitted at the registered primary cell and checked against the record's seed-0 accuracy. Nothing it writes is part of the record.
+
+```bash
+uv run python scripts/export_web_demo.py --out <website>/public/untrained   # every part; hours on a CPU
+uv run python scripts/export_web_demo.py --out <dir> --record-only           # refresh the record's numbers only
+```
+
 ## Reading the record
 
 One file per drive variant and coupling law, so an entire sweep is one file you
