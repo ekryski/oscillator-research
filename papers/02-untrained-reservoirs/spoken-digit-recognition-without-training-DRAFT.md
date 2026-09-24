@@ -206,7 +206,7 @@ The terms as this paper uses them. The code and the run record keep the labels t
 
 ### A.4 Coupling functions
 
-Each is the coupling term in θ̇ᵢ = ωᵢ + couplingᵢ + g·uᵢ − λ sin θᵢ, where the sum runs over the oscillators j of oscillator i's channel and Kᵢⱼ is the kernel weight at their offset.
+Each is the coupling term in θ̇ᵢ = ωᵢ + couplingᵢ + g·uᵢ − λ sin θᵢ, where the sum runs over the oscillators j of oscillator i's channel and Kᵢⱼ is the kernel weight at their offset. Appendix D draws each one.
 
 | Term | As used in this paper |
 |---|---|
@@ -251,3 +251,7 @@ Every channel stores its oscillators as the same 16 × 16 grid; a geometry chang
 ## C Lattice geometries
 
 ![Lattice geometries. Every channel stores its 256 oscillators the same way, as a 16 × 16 grid whose row r is driven by mel band r (colour, lowest band dark). A geometry changes only which oscillators are neighbours, that is, how the grid's edges are glued, and each of a network's four channels is a separate copy of the same shape. For each geometry, left: the grid, with glued edges marked by a shared colour and arrow, open edges dark, one oscillator (star) and its nearest neighbours (dots); right: the shape the gluing makes, with the same oscillator and neighbours. On the torus the highest band's row meets the lowest; on the cylinder and the sphere the frequency axis is open; the helix threads all 256 sites into one closed ring, one octave per turn; the cube folds each row into a 4 × 4 slab and wraps all three axes.](resources/figures/a2-lattice-geometries.png)
+
+## D Coupling functions
+
+![Coupling functions, each for one neighbour j with a positive kernel weight. Left: the push an oscillator would feel at each phase around the circle while j sits at the top; arrows point the way it is pushed. Right: that push against the phase difference θⱼ − θᵢ, with filled dots where a pair rests stably and open dots where it rests but is unstable or neutral. Kuramoto pulls each oscillator along the circle toward its neighbour. Kuramoto–Sakaguchi aims α = π/4 behind it. The second harmonic (β = 0.5) strengthens the pull and removes the push away from opposite phase. Winfree pushes every oscillator toward phase 0, the neighbour's phase setting only how hard. Stuart–Landau pulls each oscillator straight toward its neighbour in the plane, so out-of-phase neighbours also shrink each other's amplitude; at fixed amplitude only the pull along the circle is left, which is Kuramoto. A negative kernel weight reverses every arrow, and each oscillator feels the sum over every other oscillator in its channel.](resources/figures/a3-coupling-functions.png)
