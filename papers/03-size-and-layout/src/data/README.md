@@ -28,7 +28,7 @@ uv run python -m harness.confirm.protocol --build-bank
 
 ## The row caches
 
-`uv run python -m harness.confirm.plan prepare` builds, once per pathway and noise level, the front-end rows of every clip: 16 bands (paper 02's, and the mapped band count at every lattice) and 8, 32, 64 and 128 bands (one band per row). Up to 32 bands the rows are computed exactly as paper 02 computed them, so paper 02's 16-band caches may be linked in the same way as the bank. The 128-band band-energy cache is about 0.9 GB per noise level, the quadrature one twice that.
+`uv run python -m harness.confirm.plan prepare` builds, once per pathway and noise level, the front-end rows of every clip: 16 bands (paper 02's, and the mapped band count at every lattice) and 8, 32, 64 and 128 bands (one band per row), and at 64 and 128 bands again under the longer analysis window (`-w1024`, `-w2048`). It also builds the rows of every order-task set (five pairs; the test set and each seed's training set) and every digit-sequence set (lengths 2, 3 and 4), at each band count. Up to 32 bands the rows are computed exactly as paper 02 computed them, so paper 02's 16-band caches, the order task's included, may be linked in the same way as the bank. The 128-band band-energy cache is about 0.9 GB per noise level, the quadrature one twice that; the memory tasks' sets, with 147 to 284 frames a clip, are about 11 GB together over every band count. A run whose cache is missing computes its rows on the fly, with the same result.
 
 ## Another location
 

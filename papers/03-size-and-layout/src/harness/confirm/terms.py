@@ -7,11 +7,12 @@ Everything people read (tables, figures, the summary report) names things
 with the terms the paper's glossary defines (Appendix A), and gets them from
 here. The same mapping is tabulated in src/README.md.
 
-Paper 03's labels add three suffixes to paper 02's: `-c<C>` for a channel
-count other than 4, `-<G>x<G>` for a lattice other than 16 x 16, and
-`-16bands` when paper 02's 16 mel bands are mapped onto the lattice's rows
-rather than one band driving each row. A trained baseline carries the suffixes
-of the network it is sized to.
+Paper 03's labels add four suffixes to paper 02's: `-c<C>` for a channel
+count other than 4, `-<G>x<G>` for a lattice other than 16 x 16, `-16bands`
+when paper 02's 16 mel bands are mapped onto the lattice's rows rather than
+one band driving each row, and `-w<N>` for an analysis window of N samples
+other than paper 02's 512. A trained baseline carries the suffixes of the
+network it is sized to.
 """
 
 from __future__ import annotations
