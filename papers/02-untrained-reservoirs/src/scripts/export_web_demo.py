@@ -644,9 +644,10 @@ def main(argv: list[str] | None = None) -> None:
     bank = pr.load_bank()
     if "base" in parts or "frontend" not in manifest:
         manifest.update(export_base(out, bank))
+    # projections already written are reused; a missing file is simply drawn again
     projections = {p["rows"]: {**p, "p16": torch.from_numpy(
         np.fromfile(out / p["file"], dtype="<f2").reshape(p["rows"], p["cols"]))}
-        for p in manifest.get("projections", {}).values()}
+        for p in manifest.get("projections", {}).values() if (out / p["file"]).exists()}
     for cfg in configs(parts):
         if args.only and not any(s in cfg.cid() for s in args.only):
             continue
