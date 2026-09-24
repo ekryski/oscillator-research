@@ -4,7 +4,6 @@
     uv run python scripts/export_web_demo.py --out <dir> --part base --part envelope     # some of it
     uv run python scripts/export_web_demo.py --out <dir> --smoke                         # a fast dry run
     uv run python scripts/export_web_demo.py --out <dir> --record-only                   # refresh the record's numbers
-    uv run python scripts/export_web_demo.py --out <dir> --part carrier --device cuda    # the carrier, on a GPU
 
 The post runs paper 02's arms in the browser, one clip at a time. Everything it
 needs comes from here, and all of it is computed by the harness's own code:
@@ -72,7 +71,6 @@ from harness.measurement.features import MIN_FRAMES_PER_WINDOW, projection_matri
 from harness.models.field import physics_block
 from harness.models.geometries import build_geometry
 from harness.stimuli import frontend as fe
-from harness.stimuli.filterbank import band_edges
 from harness.sweep import ALPHA, BETA
 from harness.utils.constants import WARMUP_FRAMES
 
@@ -82,13 +80,12 @@ SIZE = rn.PRIMARY_SIZE
 #: the demo clips: two per digit, from two different test speakers (49-58 and 60-51), repetition 0
 DEMO_SPEAKERS = lambda d: (49 + d, 60 - d)  # noqa: E731
 DEMO_REP = 0
-CARRIER_GAIN = pl.CARRIER_GAIN
 GAINS = pl.GAINS
-PATHWAY_NOISES = {"envelope": (None, 0.0, 5.0), "quadrature": (0.0, 5.0), "carrier": (0.0,)}
+PATHWAY_NOISES = {"envelope": (None, 0.0, 5.0), "quadrature": (0.0, 5.0)}
 DESIGN_NOISES = pl.DESIGN_NOISES
 SHAPES = pl.SHAPES
 FAMILIES = pl.PHASE_FAMILIES + pl.AMPLITUDE_FAMILIES
-PARTS = ("base", "record", "envelope", "design", "quadrature", "carrier")
+PARTS = ("base", "record", "envelope", "design", "quadrature")
 
 
 # ---------------------------------------------------------------------------
@@ -147,11 +144,6 @@ def configs(parts: tuple[str, ...]) -> list[Config]:
                 for family in pl.PHASE_FAMILIES:
                     out.append(Config("quadrature", "quadrature", field_arm(family), gain, noise, "tier3"))
                 out.append(Config("quadrature", "quadrature", pl.SEVERED, gain, noise, ""))
-    if "carrier" in parts:
-        out.append(Config("carrier", "carrier", pl.BANK_A, CARRIER_GAIN, 0.0, "tier3"))
-        out.append(Config("carrier", "carrier", pl.SEVERED, CARRIER_GAIN, 0.0, ""))
-        for family in FAMILIES:
-            out.append(Config("carrier", "carrier", field_arm(family), CARRIER_GAIN, 0.0, "tier3"))
     return out
 
 
@@ -221,8 +213,7 @@ def export_record(out: Path) -> dict:
 # Features, exactly as a registered run computes them
 # ---------------------------------------------------------------------------
 
-def arm_features(cfg: Config, bank: dict, clips: rn.Clips, reads: tuple[str, ...], train_only: bool,
-                 device: str = "cpu"):
+def arm_features(cfg: Config, bank: dict, clips: rn.Clips, reads: tuple[str, ...], train_only: bool):
     """(read blocks, model, net state) over the run's clips, as `run.execute` builds them."""
     spec = cfg.spec()
     arm = cfg.arm
@@ -253,14 +244,13 @@ def arm_features(cfg: Config, bank: dict, clips: rn.Clips, reads: tuple[str, ...
                 keep(am.ann_blocks(backbone, rows[a:b], tvalid[a:b], "recognition"), slice(a, b))
         model, net = backbone, {"health": health}
     else:
-        rate = rn.CARRIER_RATE_HZ if cfg.drive == "carrier" else None
-        model = am.build_frozen(arm, cfg.gain if cfg.gain is not None else 0.0, SEED, device, rate)
+        model = am.build_frozen(arm, cfg.gain if cfg.gain is not None else 0.0, SEED)
         with torch.no_grad():
-            for rows, tvalid, where in rn.batches(spec, clips, device):
+            for rows, tvalid, where in rn.batches(spec, clips):
                 if where.start >= total:
                     break
-                sig = am.frozen_signals(arm, model, rows.to(device))
-                keep(am.frozen_features(arm, sig, tvalid.to(device), "recognition"), where)
+                sig = am.frozen_signals(arm, model, rows)
+                keep(am.frozen_features(arm, sig, tvalid, "recognition"), where)
     blocks = {read: [buffers[k] for k in keys] for read, keys in am.reads(arm, "recognition").items()
               if read in reads}
     return blocks, model, net
@@ -424,7 +414,6 @@ def export_base(out: Path, bank: dict) -> dict:
         "window": "hann_periodic", "center": False, "int16_scale": pr.INT16_SCALE,
         "mel_fb": b64(mel.mel.mel_scale.fb),
         "quad_bins": [int(b) for b in bins], "quad_freqs": [float(f) for f in freqs],
-        "carrier_edges": [float(e) for e in band_edges(fe.HOP_N_ROWS)],   # cycles per sample
         "warmup": WARMUP_FRAMES, "windows": am.WINDOWS["recognition"], "width": WIDTH,
         "min_frames_per_window": MIN_FRAMES_PER_WINDOW,
     }
@@ -470,7 +459,7 @@ def export_base(out: Path, bank: dict) -> dict:
     for arm in (pl.BANK_A, pl.BANK_B):
         b = am.build_frozen(arm, 1.0, SEED)
         banks[arm.label()] = {"channels": arm.channels, "input_gain": b64(b.input_gain), "tau_s": b64(b.tau_s),
-                              "rates_hz": {"hop": 62.5, "carrier": rn.CARRIER_RATE_HZ}}
+                              "rates_hz": {"hop": 62.5}}
 
     clips, noise = [], []
     for i in demo_indices(bank):
@@ -517,26 +506,19 @@ def export_config(cfg: Config, out: Path, bank: dict, args, projections: dict) -
         clips = rn.Clips([lambda a, b, f=clips.blocks[0]: f(a, b), lambda a, b, f=clips.blocks[1]: f(a, b)],
                          [n_tr, n_te], torch.cat((clips.labels[:n_tr], clips.labels[SIZE:SIZE + n_te])),
                          ro.Layout(n_tr, 0, n_te), clips.n_classes)
-    with_test = not args.no_test and cfg.drive != "carrier"
-    device = args.device if cfg.arm.kind != "ann" else "cpu"
-    blocks, model, net = arm_features(cfg, bank, clips, cfg.reads, train_only=not with_test, device=device)
+    with_test = not args.no_test
+    blocks, model, net = arm_features(cfg, bank, clips, cfg.reads, train_only=not with_test)
     t_sim = time.perf_counter() - t0
 
     # the demo clips, run the same way, for the page to check itself against
     waves, lens, _ = demo_waves(bank, cfg.noise_db)
     demo_rows = pr.front_end(waves, cfg.drive)
     tvalid = pr.valid_frames(lens, cfg.drive)
-    chunk = 4 if cfg.drive == "carrier" else len(waves)      # a carrier trajectory is 16,000 frames
-    parts: list[dict] = []
     with torch.no_grad():
-        for a in range(0, len(waves), chunk):
-            rows, tv = demo_rows[a:a + chunk], tvalid[a:a + chunk]
-            if cfg.arm.kind == "ann":
-                parts.append(am.ann_blocks(model, rows, tv, "recognition"))
-            else:
-                sig = am.frozen_signals(cfg.arm, model, rows.to(device))
-                parts.append(am.frozen_features(cfg.arm, sig, tv.to(device), "recognition"))
-    feats = {k: torch.cat([p[k].cpu() for p in parts]) for k in parts[0]}
+        if cfg.arm.kind == "ann":
+            feats = am.ann_blocks(model, demo_rows, tvalid, "recognition")
+        else:
+            feats = am.frozen_features(cfg.arm, am.frozen_signals(cfg.arm, model, demo_rows), tvalid, "recognition")
     demo = {read: [feats[k] for k in keys] for read, keys in am.reads(cfg.arm, "recognition").items()
             if read in cfg.reads}
 
@@ -611,7 +593,6 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--part", action="append", choices=PARTS, help="repeatable; default: all")
     ap.add_argument("--only", action="append", default=[], help="export only config ids containing this")
     ap.add_argument("--threads", type=int, default=2)
-    ap.add_argument("--device", default="cpu", help="where the untrained arms run; the carrier wants cuda")
     ap.add_argument("--smoke", action="store_true", help="short training and test sets, for development")
     ap.add_argument("--smoke-train", type=int, default=384)
     ap.add_argument("--smoke-test", type=int, default=256)
@@ -648,6 +629,7 @@ def main(argv: list[str] | None = None) -> None:
     bank = pr.load_bank()
     if "base" in parts or "frontend" not in manifest:
         manifest.update(export_base(out, bank))
+        save()
     # projections already written are reused; a missing file is simply drawn again
     projections = {p["rows"]: {**p, "p16": torch.from_numpy(
         np.fromfile(out / p["file"], dtype="<f2").reshape(p["rows"], p["cols"]))}
