@@ -18,25 +18,26 @@ NOISES = ((None, "clean"), (0.0, "0 dB"), (5.0, "+5 dB"))
 
 #: Tier 1 recognition arms: (arm, read, table label, legend label, colour); gain is set per figure
 FLOOR = ("floor", "windowed@wholeclip",
-         "**Floor**: the front end alone, its 16 band envelopes read directly; no dynamics",
-         "Floor: front end alone, no dynamics", "#8C8C8C")
-FIELD = (sm.FIELD, "windowed", "**Oscillator field**{gain}: 1,024 coupled oscillators, untrained",
-         "Oscillator field{gain}", "#534AB7")
-SEVERED = (sm.SEVERED, "windowed", "**Severed field**{gain}: the same field with its coupling removed",
-           "Severed field: coupling removed{gain}", "#A9A4DB")
+         "**Spectrogram-only baseline**: the readout reads the 16 mel band energies directly; no reservoir",
+         "Spectrogram-only baseline: no reservoir", "#8C8C8C")
+FIELD = (sm.FIELD, "windowed", "**Coupled oscillator network**{gain}: 1,024 oscillators, untrained",
+         "Coupled oscillator network{gain}", "#534AB7")
+SEVERED = (sm.SEVERED, "windowed", "**Uncoupled oscillator network**{gain}: the same network with its coupling removed",
+           "Uncoupled oscillator network{gain}", "#A9A4DB")
 BANK_A = ("bank-c4", "windowed",
-          "**Bank A**{gain}: 1,024 leaky integrators with the field's states and parameters, untrained",
-          "Bank A: leaky integrators, the field's size{gain}", "#D85A30")
-TRANSFORMER = ("ann-transformer", "windowed", "**Transformer**: trained end to end, 1,968 parameters",
-               "Transformer: trained end to end", "#0F6E56")
+          "**Leaky-integrator bank, state-matched**{gain}: 1,024 leaky integrators with the network's states and "
+          "parameters, untrained",
+          "Leaky-integrator bank, state-matched{gain}", "#D85A30")
+TRANSFORMER = ("ann-transformer", "windowed", "**Transformer**: a trained baseline, 1,968 parameters, trained end to end",
+               "Transformer: trained baseline", "#0F6E56")
 DYNAMICAL = (FIELD, SEVERED, BANK_A)
 
 
 def _bars(gains: tuple[float, ...]) -> list[tuple]:
     """(arm, read, gain, table label, legend label, colour, hatched) per bar, in plotting order.
 
-    Gain applies only to the untrained dynamical arms; the floor and the
-    transformer appear once, without it.
+    Input gain applies only to the reservoirs; the spectrogram-only baseline
+    and the transformer appear once, without it.
     """
     def one(spec, gain):
         arm, read, table, legend, colour = spec

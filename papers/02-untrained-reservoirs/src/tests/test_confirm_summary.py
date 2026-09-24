@@ -52,8 +52,9 @@ def test_an_accuracy_is_its_mean_spread_and_every_replicate_in_points():
     assert s["values"] == pytest.approx({"seed0": 78.0, "seed1": 79.0, "seed2": 80.0})
 
 
-def test_the_field_is_compared_with_the_gainless_floor_at_every_gain(recorded):
-    rows = [r for r in sm.tier1(sc.load()) if r["comparison"] == "field minus the whole-clip floor"]
+def test_the_network_is_compared_with_the_gainless_baseline_at_every_gain(recorded):
+    rows = [r for r in sm.tier1(sc.load())
+            if r["comparison"] == "coupled oscillator network minus the spectrogram-only baseline, whole clip"]
     assert {(r["noise"], r["gain"]) for r in rows} == {(0.0, 1.0), (0.0, 2.0), (5.0, 1.0), (5.0, 2.0)}
     for r in rows:
         assert r["mean"] == pytest.approx(9.0) and r["sd"] == pytest.approx(1.0)

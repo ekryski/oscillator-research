@@ -148,11 +148,12 @@ Three tests skip without the digit bank; the rest run on synthetic stimuli.
 
 ## The confirmatory run
 
-Every arm (the front end alone, the field, its severed twin, two leaky-integrator
-banks, five trained networks) is read by one contract: the same three
-statistics over the same fixed window for every clip, standardized with the
-training set's own statistics, projected to a common width, and classified by
-the same ridge. The design, the bars and the reasons are in the registration.
+Every arm (the spectrogram-only baseline, the coupled and uncoupled oscillator
+networks, two leaky-integrator banks, five trained baselines) is read by one
+contract: the same three statistics over the same fixed window for every clip,
+standardized with the training set's own statistics, projected to a common
+width, and classified by the same linear readout. The design and the reasons are
+in the registration; what each tier runs is in [TIERS.md](../TIERS.md).
 
 ```bash
 uv run python -m harness.confirm.protocol --build-bank   # the 50-repetition bank
@@ -184,6 +185,35 @@ it, or any tier, on a RunPod pod from the pushed branch.
 | `confirm/summary.py` | every accuracy and paired difference, with its spread: `summary.json` and `summary.md` |
 | `confirm/figures.py` | the paper's confirmatory figures, and the tables printed beside them |
 | `confirm/score.py` | the verdicts against the registered bars, kept for the record |
+| `confirm/terms.py` | the paper's names for the record's labels, used by every table, figure and report |
+
+### Terms in the code
+
+The paper's glossary (Appendix A) defines the terms. The code, the run record and
+the registration keep the labels the registration froze, because they are the
+runs' identities; `confirm/terms.py` turns them into the paper's terms for
+everything people read.
+
+| paper term | in the code, the record and the registration |
+|---|---|
+| spectrogram-only baseline | arm kind `floor`; its whole-clip reads are `windowed@wholeclip` and `pooled@wholeclip` |
+| coupled oscillator network | arm kind `field`, labels `field-<coupling>-<geometry>-<ω>-lam<λ>-clamp<ceiling>`; "the field" |
+| uncoupled oscillator network | `field` with `severed=True`, labels `severed-...`; "the severed field" |
+| leaky-integrator bank, state-matched / width-matched | `bank-c4` / `bank-c8` (`LeakyBank`); "bank A" / "bank B" |
+| trained baselines | `ann-gru`, `ann-tcn`, `ann-cnn`, `ann-transformer`, `ann-s4d` |
+| reservoir | the frozen arms (`FROZEN` in `plan.py`) |
+| untrained | "frozen" |
+| readout | the ridge (`readout.py`) |
+| coupling function | `physics`: `kuramoto`, `sakaguchi`, `harmonic2`, `winfree`, `sl`, `sl-fixedamp`; "coupling law", "family" |
+| lattice geometry | `boundary`; "shape", "venue" |
+| natural frequencies: random / tonotopic / identical | `omega`: `random` / `designed` / `uniform` |
+| restoring strength λ | `damping`, `lam` in labels; "pinning" |
+| coupling ceiling | `clamp`, `spectral_clamp`; "spectral clamp" |
+| coupling kernel, channel | `kernel`, `channels` |
+| input gain | `gain`, `g` in run ids |
+| input pathway: band-energy / quadrature / carrier | `drive`: `envelope` / `quadrature` / `carrier` |
+| mel spectrogram, band energies | the front-end rows (`hop_rows`); "envelopes" |
+| matched pair | "twin" |
 
 ## Reproducing the paper
 
