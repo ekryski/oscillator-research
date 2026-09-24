@@ -273,7 +273,9 @@ def train_baseline(arm: Arm, rows: torch.Tensor, tvalid: torch.Tensor, labels: t
     windows = WINDOWS[task]
     with torch.no_grad():
         width = trained_features(backbone, rows[:2], tvalid[:2], windows, span).shape[1]
-    head = nn.Linear(width, n_classes)
+    # the head reads the statistics standardized, as the ridge does: unstandardized, their spread between
+    # clips can be a thousandth of their size (with noise especially), and the loss never leaves chance
+    head = nn.Sequential(nn.BatchNorm1d(width, affine=False), nn.Linear(width, n_classes))
     backbone, head = backbone.to(device), head.to(device)
     rows, tvalid, labels = rows.to(device), tvalid.to(device), labels.to(device)
     params = list(backbone.parameters()) + list(head.parameters())

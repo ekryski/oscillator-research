@@ -32,4 +32,6 @@ class CNNBaseline(PooledBaseline):
     def _hidden(self, rows: torch.Tensor) -> torch.Tensor:
         x = rows.transpose(1, 2)  # [B,G,T]
         x = F.relu(self.c1(F.pad(x, (self.k - 1, 0))))  # causal pad
-        return F.relu(self.c2(F.pad(x, (self.k - 1, 0)))).transpose(1, 2)[:, WARMUP_FRAMES:]
+        # a linear output layer: with a rectified one, a poor draw can leave every output unit
+        # inactive on every clip, and the network then never learns
+        return self.c2(F.pad(x, (self.k - 1, 0))).transpose(1, 2)[:, WARMUP_FRAMES:]

@@ -38,7 +38,8 @@ def test_baseline_minis_budget_and_contract():
     rows = torch.rand(3, 64, 16) * 0.5
     tv = torch.tensor([30, 45, 64])
     full = torch.full((3,), 64, dtype=torch.long)
-    for cls in (CNNBaseline, TransformerBaseline, S4DBaseline):
+    from harness import TCNBaseline
+    for cls in (CNNBaseline, TCNBaseline, TransformerBaseline, S4DBaseline):
         torch.manual_seed(0)
         m = cls(grid=16, n_classes=5)
         n = sum(p.numel() for p in m.parameters() if p.requires_grad)
