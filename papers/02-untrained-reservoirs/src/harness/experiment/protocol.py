@@ -24,7 +24,7 @@ from pathlib import Path
 
 import torch
 
-from harness.stimuli import bandpass_rows, hop_num_frames, hop_rows, hop_rows_quad
+from harness.stimuli import hop_num_frames, hop_rows, hop_rows_quad
 from harness.stimuli.digits import (
     DIGIT_MAX_SAMPLES,
     DIGIT_SR,
@@ -187,15 +187,11 @@ def front_end(waves: torch.Tensor, pathway: str, grid: int = 16) -> torch.Tensor
         return hop_rows(waves, grid)
     if pathway == "quadrature":
         return hop_rows_quad(waves, grid)
-    if pathway == "carrier":
-        return bandpass_rows(waves, grid)
     raise ValueError(f"unknown pathway '{pathway}'")
 
 
 def valid_frames(lens: torch.Tensor, pathway: str) -> torch.Tensor:
-    """How many of each clip's rows hold speech: hop frames, or samples for the carrier."""
-    if pathway == "carrier":
-        return lens.clone()
+    """How many of each clip's rows hold speech, in hop frames."""
     return torch.tensor([hop_num_frames(int(n)) for n in lens])
 
 
@@ -258,7 +254,6 @@ def order_clips(bank: dict, first: torch.Tensor, second: torch.Tensor, pair: tup
 # are computed once per (pathway, level), saved, and memory-mapped by every run.
 # That saves each run its noise draws and front end, and it means every run
 # reads bit-identical rows: nothing depends on how a run happened to batch.
-# The carrier's rows are 16,000 frames a clip and are always computed on the fly.
 
 ROWS_DIR = CACHE_DIR / "rows"
 #: clips per batch while building a cache

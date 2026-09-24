@@ -1,6 +1,6 @@
 """One readout contract for every arm.
 
-The exploratory phase read its arms three different ways. The field got four
+A pilot of this study read its arms three different ways. The field got four
 whole-span means per oscillator, the conventional networks got mean, spread,
 change and their LAST hidden state, and the no-dynamics floor got three
 statistics over every frame, padding included, where every other arm dropped a
@@ -57,8 +57,7 @@ def span(frames: int, lo: int, hi: torch.Tensor | None, windows: int,
 
     `hi` is each clip's count of valid frames, or None for the whole clip. A
     clip shorter than two frames per window is read a little way into its
-    trailing frames, to exactly the minimum, the rule the exploratory harness
-    used; every arm gets the same widening, so it cannot favour one.
+    trailing frames, to exactly the minimum; every arm gets the same widening, so it cannot favour one.
     """
     lo_t = torch.full((batch,), lo, dtype=torch.long, device=device)
     hi_t = (torch.full((batch,), frames, dtype=torch.long, device=device) if hi is None
@@ -170,7 +169,7 @@ def projection_matrix(native: int, width: int, seed: int | None = None) -> torch
     read contains the narrow one: any accuracy the wide read adds comes from the
     added features alone.
 
-    Without `seed` this is the fixed projection every registered run used, one
+    Without `seed` this is the fixed projection every run uses, one
     draw for every seed. With it, the seeded projection: a draw of its own for
     each run seed (generator seed PROJECTION_SEED + 1 + seed), so the spread
     over seeds includes the projection's variability too.

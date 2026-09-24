@@ -36,7 +36,6 @@ GEOMETRIES = ("torus", "cylinder", "sheet", "helix", "cube", "sphere")
 FREQUENCIES = ("random", "tonotopic", "identical")
 RESTORINGS = (0.3, 0.1)
 CEILINGS = (1.0, 0.5)
-CARRIER_GAIN = 32.0                 # the carrier pathway's gain, set before this study (DESIGN.md)
 BECKER_TRAIN = 18000
 
 BASELINE = Arm("baseline")
@@ -120,17 +119,6 @@ def tier3() -> Iterator[rn.Spec]:
                     yield rn.Spec("tier3", "recognition", "quadrature", noise, gain, seed, arm, bits="primary")
 
 
-def carrier() -> Iterator[rn.Spec]:
-    """The carrier pathway's diagonal, with its baseline and the leaky bank at the sample rate."""
-    arms = _diagonal() + [Arm("network", coupling=c, frequencies=f) for c in AMPLITUDE_COUPLINGS
-                          for f in ("random", "tonotopic")]
-    for seed in SEEDS:
-        yield rn.Spec("tier3", "recognition", "carrier", 0.0, None, seed, BASELINE, bits="primary")
-        yield rn.Spec("tier3", "recognition", "carrier", 0.0, CARRIER_GAIN, seed, BANK_STATE, bits="primary")
-        for arm in arms:
-            yield rn.Spec("tier3", "recognition", "carrier", 0.0, CARRIER_GAIN, seed, arm, bits="primary")
-
-
 def projection() -> Iterator[rn.Spec]:
     """Tier 1's reservoir runs again at the primary size, read under the fixed and the seeded projection.
 
@@ -165,7 +153,7 @@ def becker() -> Iterator[rn.Spec]:
             yield rn.Spec("becker", "recognition", "spectrogram", None, None, 0, _trained(arch), **common)
 
 
-TIERS = {"gate": gate, "tier1": tier1, "tier2": tier2, "becker": becker, "tier3": tier3, "carrier": carrier,
+TIERS = {"gate": gate, "tier1": tier1, "tier2": tier2, "becker": becker, "tier3": tier3,
          "projection": projection}
 
 
@@ -177,8 +165,6 @@ def cost(spec: rn.Spec) -> float:
     """A rough relative cost, so the pool starts the longest runs first."""
     clips = (pr.ORDER_TRAIN + pr.ORDER_TEST) if spec.task == "order" else max(spec.sizes) + 6000
     per_clip = {"baseline": 0.1, "bank": 0.4, "network": 1.0, "trained": 3.0}[spec.arm.kind]
-    if spec.pathway == "carrier":
-        per_clip *= 250
     return clips * per_clip * (spec.arm.channels / 4 if spec.arm.kind != "trained" else 1)
 
 

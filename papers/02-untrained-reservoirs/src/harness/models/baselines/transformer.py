@@ -14,7 +14,7 @@ class TransformerBaseline(PooledBaseline):
     """Tiny 1-layer causal transformer encoder (Vaswani et al. 2017), d=16,
     nhead=2: input linear + fixed sinusoidal positions -> masked self-attention
     -> 2-layer FFN (post-norm), pooled stats over the outputs. 1,968 params
-    (-3.9% of the 2,048 budget — inside the pre-registered ~1.8-2.2k window).
+    (-3.9% of the 2,048 budget — inside the ~1.8-2.2k budget window).
     Positions are a deterministic buffer-free encoding (no learned pos table:
     T x d position embeddings alone would blow the budget)."""
 

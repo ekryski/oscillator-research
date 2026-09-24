@@ -5,7 +5,7 @@ re-interpret it as different venues. The stadium picture: the seats never move,
 only the seating chart changes. Everything here is derived, deterministic, and
 parameter-free, so varying the geometry varies exactly one thing.
 
-Pre-registered tonotopy. Every internal layout was chosen so the shape's
+A fixed tonotopy. Every internal layout was chosen so the shape's
 declared frequency axis lands on STORAGE ROW b for input band b, which is what
 makes the harness's one broadcast rule (band b -> row b, all channels and
 columns) geometry-correct everywhere:
@@ -50,7 +50,7 @@ def build_geometry(boundary: str, grid: int) -> Geometry:
 
 
 def drive_map(boundary: str, grid: int) -> torch.Tensor:
-    """The pre-registered tonotopic drive mapping: [G, G] whose row b holds the
+    """The fixed tonotopic drive mapping: [G, G] whose row b holds the
     G flat oscillator indices (into the row-major [G*G] flattening) that input
     band b drives.
 

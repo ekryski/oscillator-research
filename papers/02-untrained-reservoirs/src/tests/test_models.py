@@ -19,7 +19,6 @@ from harness.models.phase import PhaseBlock
 from harness.stimuli import (
     band_edges,
     band_index,
-    bandpass_rows,
 )
 
 TWO_PI = 2 * math.pi
@@ -67,7 +66,8 @@ def test_drive_response_localizes_to_driven_row_and_drags_phase():
     f = float(math.sqrt(e[10] * e[11]))  # ~0.037 cyc/frame vs natural ~0.014
     row = band_index(f, grid)
     phase = TWO_PI * f * torch.arange(t)
-    rows = bandpass_rows(torch.sin(phase)[None, :], grid)
+    rows = torch.zeros(1, t, grid)
+    rows[0, :, row] = torch.sin(phase)            # the tone, on the row its band drives
     warm = 16
 
     def field(model, rows_in):

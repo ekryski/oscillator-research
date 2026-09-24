@@ -80,7 +80,7 @@ class OscillatorField(nn.Module):
                 p.requires_grad_(False)
         # input-as-omega: a tiny tonotopic tuner (row-energy -> per-row
         # omega modulation; 272 params at G=16, zero-init => warm-equivalent to
-        # frozen). Registered exception to physics-only: the TUNER is the
+        # frozen). A stated exception to physics-only: the TUNER is the
         # hypothesis under test — additive drive is OFF for this arm, so
         # omega-writing is the only input channel.
         self.omega_encoder = omega_encoder
@@ -216,7 +216,7 @@ class OscillatorField(nn.Module):
         call-site symmetry but unused by design: every settle frame is valid,
         and the driven scan covers the identical padded clip for every arm
         (digit padding is already near-silent drive; a per-clip tvalid-anchored
-        settle start would be a different pre-registered experiment).
+        settle start would be a different experiment).
         omega-encoder arms settle at their NATURAL omega — the encoder's
         override is input-derived, and the settle regime is stimulus-removed."""
         _, state = self._scan_full(rows)

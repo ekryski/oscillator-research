@@ -38,11 +38,8 @@ WIDTHS = (192, 1024, 4096)
 #: the training size of the primary cell
 PRIMARY_SIZE = 2048
 PRIMARY_STAT = {"recognition": "windowed", "order": "pooled"}
-#: clips per batch, by task and pathway; the carrier runs at 16 kHz, so its batches
-#: are small, and a GPU holds four times as many of its 16,000-frame trajectories
-BATCH = {"recognition": 512, "order": 256, "carrier": 8, "carrier-cuda": 32}
-#: the carrier pathway drives a reservoir at the audio sample rate
-CARRIER_RATE_HZ = 16000.0
+#: clips per batch, by task
+BATCH = {"recognition": 512, "order": 256}
 
 
 @dataclass(frozen=True)
@@ -50,7 +47,7 @@ class Spec:
     """Everything that decides a run's numbers, and nothing else."""
     tier: str
     task: str                      # recognition | order
-    pathway: str                   # spectrogram | quadrature | carrier
+    pathway: str                   # spectrogram | quadrature
     noise_db: float | None         # None is clean audio
     gain: float | None             # None for arms that read the rows as they are
     seed: int
@@ -208,8 +205,7 @@ def assemble(spec: Spec, bank: dict) -> Clips:
 
 def batches(spec: Spec, clips: Clips, device: str = "cpu") -> Iterator[tuple[torch.Tensor, torch.Tensor, slice]]:
     """(rows, valid frames, rows' place in the readout order), block by block."""
-    carrier = "carrier-cuda" if device.startswith("cuda") else "carrier"
-    size = BATCH[carrier] if spec.pathway == "carrier" else BATCH[spec.task]
+    size = BATCH[spec.task]
     at = 0
     for make, n in zip(clips.blocks, clips.sizes):
         for a in range(0, n, size):
@@ -281,8 +277,7 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
             extra["head_acc"] = (head(primary[test]).argmax(1) == clips.labels[test]).double().mean().item()
         model = backbone
     else:
-        rate = CARRIER_RATE_HZ if spec.pathway == "carrier" else None
-        model = am.build_untrained(arm, spec.gain if spec.gain is not None else 0.0, spec.seed, device, rate)
+        model = am.build_untrained(arm, spec.gain if spec.gain is not None else 0.0, spec.seed, device)
         t1 = time.perf_counter()
         per_clip: dict[str, torch.Tensor] = {}
         with torch.no_grad():

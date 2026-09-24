@@ -125,14 +125,12 @@ def reads(arm: Arm, task: str) -> dict[str, list[str]]:
 # Untrained arms
 # ---------------------------------------------------------------------------
 
-def build_untrained(arm: Arm, gain: float, seed: int, device: str = "cpu",
-                    rate_hz: float | None = None) -> nn.Module | None:
+def build_untrained(arm: Arm, gain: float, seed: int, device: str = "cpu") -> nn.Module | None:
     """An untrained arm, built from its seed."""
     if arm.kind == "baseline":
         return None
     if arm.kind == "bank":
-        extra = {} if rate_hz is None else {"rate_hz": rate_hz}
-        return LeakyBank(channels=arm.channels, grid=GRID, gain=gain, seed=seed, **extra).to(device)
+        return LeakyBank(channels=arm.channels, grid=GRID, gain=gain, seed=seed).to(device)
     if arm.kind != "network":
         raise ValueError(f"{arm.kind} is not an untrained arm")
     core, coupling = CORES[arm.coupling]
@@ -190,8 +188,8 @@ def untrained_features(arm: Arm, signals: torch.Tensor, tvalid: torch.Tensor, ta
 def drive_phase(rows: torch.Tensor, pathway: str) -> torch.Tensor:
     """[B, T, G]: the phase of each band's own delivered drive, the reference an oscillator can lock to.
 
-    The quadrature pathway carries its phase explicitly; the band energies and
-    the carrier's band waveforms have none, so theirs is the analytic phase.
+    The quadrature pathway carries its phase explicitly; the band energies have
+    none, so theirs is the analytic phase.
     """
     if pathway == "quadrature":
         return torch.atan2(rows[..., 1], rows[..., 0])

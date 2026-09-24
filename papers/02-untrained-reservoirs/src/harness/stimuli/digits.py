@@ -55,7 +55,7 @@ def read_wav(path: Path) -> tuple[torch.Tensor, int]:
 
     The standard-library reader, because torchaudio's own loader now needs a
     separate decoding package. The scaling is torchaudio's: int16 over 32768,
-    so the samples are the ones the exploratory bank was built from.
+    so the samples match torchaudio's.
     """
     import wave
     with wave.open(str(path), "rb") as w:

@@ -40,7 +40,7 @@ uv run python -m harness.experiment.summary                 # every accuracy and
 uv run python -m harness.experiment.figures                 # the paper's figures and their tables
 ```
 
-`plan run <tier> --dry-run` prints what would run. Every run is recorded under an identity derived from its specification, so a sweep stopped at any point restarts where it left off, and `--task order` or `--task recognition` lets two machines split a tier without sharing a file. `--device mps` or `--device cuda` simulates the untrained arms on a GPU; the readout is closed-form and runs on the CPU, and the trained baselines always train on the CPU. A GPU rounds differently from the CPU, so its cells can differ from the CPU's by a test clip or two. The carrier tier integrates at 16 kHz and wants a CUDA GPU; `scripts/pod_run.sh <AudioMNIST checkout> [tier ...]` runs it, or any tier, on a RunPod pod from the pushed branch. Set `OSC_RESULTS_DIR` to write a reproduction into a fresh folder instead of the committed record.
+`plan run <tier> --dry-run` prints what would run. Every run is recorded under an identity derived from its specification, so a sweep stopped at any point restarts where it left off, and `--task order` or `--task recognition` lets two machines split a tier without sharing a file. `--device mps` or `--device cuda` simulates the untrained arms on a GPU; the readout is closed-form and runs on the CPU, and the trained baselines always train on the CPU. A GPU rounds differently from the CPU, so its cells can differ from the CPU's by a test clip or two. `scripts/pod_run.sh <AudioMNIST checkout> [tier ...]` runs any tier on a RunPod pod from the pushed branch. Set `OSC_RESULTS_DIR` to write a reproduction into a fresh folder instead of the committed record.
 
 | module | what it owns |
 |---|---|
@@ -54,7 +54,7 @@ uv run python -m harness.experiment.figures                 # the paper's figure
 | `experiment/summary.py` | every accuracy and paired difference, with its spread: `summary.json` and `summary.md` |
 | `experiment/figures.py` | the paper's figures, and the tables printed beside them |
 | `experiment/terms.py` | the paper's names for the record's labels, used by every table, figure and report |
-| `stimuli/` | the log-mel front end, the hop-rate and quadrature rows, the carrier band split, the digit clips |
+| `stimuli/` | the log-mel front end, the hop-rate and quadrature rows, the digit clips |
 | `models/field.py`, `phase.py`, `stuart_landau.py` | the oscillator network and its two cores |
 | `models/geometries/` | one module per lattice geometry, behind a four-method interface |
 | `models/leaky_bank.py` | the leaky-integrator bank |
@@ -80,7 +80,7 @@ The paper's glossary (Appendix A) defines the terms. The code and the record use
 | restoring strength λ | `restoring` | `damping` |
 | coupling ceiling | `ceiling` | `spectral_clamp` |
 | input gain | `gain`, `g` in run ids | `gain` |
-| input pathway: spectrogram / quadrature / carrier | `pathway` | |
+| input pathway: spectrogram / quadrature | `pathway` | |
 
 ## Tests
 

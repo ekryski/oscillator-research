@@ -2,7 +2,7 @@
 
 Also the geometry builds (sheet/helix/cube/sphere): boundary correctness,
 fft==matmul operator parity, spectral-clamp operator-norm bounds, and the
-pre-registered tonotopic drive mappings."""
+fixed tonotopic drive mappings."""
 
 import math
 
@@ -133,7 +133,7 @@ def test_multiblock_forward_and_grad():
 
 # ---------------------------------------------------------------------------
 # geometry builds: sheet / helix / cube / sphere
-# (pre-registered per-shape tonotopic mappings:
+# (fixed per-shape tonotopic mappings:
 #
 # ---------------------------------------------------------------------------
 
@@ -192,7 +192,7 @@ def test_helix_ring_seam_and_wrap():
     # Ring position p = row*G + col with a +1 circulant tap (kernel storage
     # [0, 1] = ring offset 1): the pulse CROSSES the row seam (position G-1 ->
     # position G = next row, col 0) and the ring CLOSES (position N-1 -> 0) —
-    # both per the pre-registered circulant design (the seam couples the top
+    # both per the circulant design (the seam couples the top
     # band to the bottom band; recorded in the core docstring).
     g = 8
     for impl in ("fft", "matmul"):
@@ -348,7 +348,7 @@ def test_helix_cube_sphere_translation_equivariance():
     assert torch.allclose(a, b, atol=1e-5)
 
 
-def test_drive_map_matches_preregistered_tonotopy():
+def test_drive_map_matches_the_fixed_tonotopy():
     import sys
     sys.path.insert(0, ".")
     from harness import drive_map, rows_to_drive
@@ -357,7 +357,7 @@ def test_drive_map_matches_preregistered_tonotopy():
     for boundary in ("torus", "cylinder") + NEW_BOUNDARIES:
         m = drive_map(boundary, g)
         assert m.shape == (g, g) and m.dtype == torch.long
-        # every pre-registered mapping lands on storage row b (chosen layouts)
+        # every mapping lands on storage row b (chosen layouts)
         assert torch.equal(m, row_ids), boundary
     # helix: band b = ring positions G*b .. G*b+G-1 (16b..16b+15 — contiguous
     # quarter-octave arc; 4 bands x 16 positions = 64 = one turn = one octave)

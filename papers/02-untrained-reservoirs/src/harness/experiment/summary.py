@@ -206,9 +206,9 @@ def design(cells: list[Cell]) -> list[dict]:
 
 
 def pathways(cells: list[Cell]) -> list[dict]:
-    """Every arm on the quadrature and carrier pathways, minus that pathway's own baseline."""
+    """Every arm on the quadrature pathway, minus that pathway's own baseline."""
     out = []
-    for pathway in ("quadrature", "carrier"):
+    for pathway in ("quadrature",):
         for label in sorted({c.label for c in cells if c.tier == "tier3" and c.pathway == pathway} - {"baseline"}):
             for name, read in ((BASELINE_WHOLE, "windowed@wholeclip"), (BASELINE_16, "windowed")):
                 out += versus(cells, f"{terms.arm(label)} minus {name}", (label, "windowed"), ("baseline", read),
@@ -442,7 +442,7 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
     lines += _grid(prim_acc("becker", "recognition", plan.BECKER_TRAIN), _arm, _by_noise, _acc)
     lines += ["", "## Tier B: differences", ""]
     lines += _grid(prim_cmp("becker", plan.BECKER_TRAIN), by_gain, _by_noise, _diff)
-    lines += ["", "## Tier 3, quadrature and carrier pathways: each arm minus that pathway's baseline", ""]
+    lines += ["", "## Tier 3, quadrature pathway: each arm minus that pathway's baseline, and minus the same network on the spectrogram pathway", ""]
     lines += _grid([r for r in prim_cmp("tier3")], lambda r: f"{terms.PATHWAYS[r['pathway']]} pathway: {r['comparison']}",
                    _by_condition, _diff)
     return "\n".join(lines) + "\n"

@@ -85,7 +85,7 @@ def test_every_declared_boundary_is_buildable_and_parameter_matched():
 
 
 def test_drive_map_puts_band_b_on_storage_row_b_for_every_shape():
-    """The pre-registered tonotopy. `rows_to_drive` broadcasts band b onto row
+    """The fixed tonotopy. `rows_to_drive` broadcasts band b onto row
     b; this is the contract that makes that broadcast geometry-correct."""
     grid = 16
     expected = torch.arange(grid * grid).view(grid, grid)

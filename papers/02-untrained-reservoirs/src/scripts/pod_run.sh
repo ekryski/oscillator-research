@@ -14,13 +14,12 @@
 # set (a reproduction run should set it, to keep its record apart); copy that
 # folder back (the rsync line is printed at the end).
 #
-# Pod: one GPU with 48 GB or more (a carrier batch of 32 clips needs about 35 GB),
-# 32 or more vCPUs, 64 GB or more RAM.
+# Pod: one GPU with 24 GB or more, 32 or more vCPUs, 64 GB or more RAM.
 set -euo pipefail
 
 AUDIOMNIST="${1:?usage: pod_run.sh <path to the AudioMNIST checkout> [tier ...]}"
 shift || true
-if [ "$#" -gt 0 ]; then TIERS=("$@"); else TIERS=(gate tier1 tier2 becker tier3 projection carrier); fi
+if [ "$#" -gt 0 ]; then TIERS=("$@"); else TIERS=(gate tier1 tier2 becker tier3 projection); fi
 REPO="${REPO:-https://github.com/ekryski/oscillator-research.git}"
 BRANCH="${BRANCH:-ek/paper-02}"
 WORK="${WORK:-/workspace/oscillator-research}"
@@ -56,7 +55,6 @@ uv run pytest -q
 for tier in "${TIERS[@]}"; do
     case "$tier" in
         gate|tier1|becker) W="$WIDE"; T=4 ;;
-        carrier) W=2; T=4 ;;
         *) W="$NARROW"; T=2 ;;
     esac
     uv run python -m harness.experiment.plan run "$tier" --workers "$W" --threads "$T" --device "$DEVICE"
