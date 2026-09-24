@@ -415,6 +415,68 @@ def design_panels_figure(stem: str = "c4-design-differences") -> None:
     _save(fig, stem)
 
 
+def _design_rows() -> dict[tuple, dict]:
+    cells = rec.load(None)
+    rows = [r for r in sm.design(cells) + sm.cochlea(cells)
+            if r["width"] == rec.PRIMARY_WIDTH and r["n_train"] == rec.PRIMARY_SIZE and "ci95" in r]
+    return {(r["comparison"], r["noise"], r["gain"]): r for r in rows}
+
+
+def design_factor_figure(panel: int, stem: str, across: bool = False, by: dict | None = None) -> None:
+    """One design factor's levels minus its reference, per condition: the mean over seeds and the paired 95%
+    interval. Rows of levels by default; `across` lays the levels along the x-axis, for a short, wide figure."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    by = by if by is not None else _design_rows()
+    _, factor, ref, levels = DESIGN_PANELS[panel]
+    n = len(levels)
+    if across:
+        fig, ax = plt.subplots(figsize=(9.0, 2.9))
+    else:
+        height = 0.36 * n + 1.5
+        fig, ax = plt.subplots(figsize=(7.0, height))
+    for i, (noise, gain, legend, colour, marker) in enumerate(CONDITIONS):
+        offset = (i - 1.5) * 0.17
+        for j, (level, _) in enumerate(levels):
+            r = by.get((f"{factor}: {level} minus {ref}", noise, gain))
+            if r is None:
+                continue
+            if across:
+                ax.plot([j + offset] * 2, r["ci95"], color=colour, linewidth=1.2)
+                ax.plot(j + offset, r["mean"], marker=marker, color=colour, markersize=4, linestyle="none",
+                        label=legend if j == 0 else None)
+            else:
+                ax.plot(r["ci95"], [j + offset] * 2, color=colour, linewidth=1.2)
+                ax.plot(r["mean"], j + offset, marker=marker, color=colour, markersize=4, linestyle="none",
+                        label=legend if j == 0 else None)
+    labels = [label.replace(", ", ",\n") if across else label for _, label in levels]
+    if across:
+        ax.axhline(0, color="#333333", linewidth=0.8, linestyle=":")
+        if factor == "lattice geometry":
+            ax.axvline(4.5, color="#DDDDDD", linewidth=0.8)
+        ax.set_xticks(range(n), labels, fontsize=8.5)
+        ax.set_xlim(-0.5, n - 0.5)
+        ax.set_ylabel(f"minus {ref} (points)", fontsize=8.5)
+    else:
+        ax.axvline(0, color="#333333", linewidth=0.8, linestyle=":")
+        ax.set_yticks(range(n), labels, fontsize=8.5)
+        ax.set_ylim(n - 0.5, -0.5)
+        ax.set_xlabel(f"difference in test accuracy, minus {ref} (points)", fontsize=8.5)
+    ax.tick_params(labelsize=8)
+    ax.spines[["top", "right"]].set_visible(False)
+    handles, legends = ax.get_legend_handles_labels()
+    fig.legend(handles, legends, frameon=False, fontsize=7.5, loc="lower center", ncol=4, bbox_to_anchor=(0.5, 0))
+    fig.tight_layout(rect=(0, 0.4 / (2.9 if across else height), 1, 1))
+    _save(fig, stem)
+
+
+#: the design experiment's factors as figures of their own: (panel in DESIGN_PANELS, file stem, levels across)
+DESIGN_FIGURES = ((0, "c4-coupling-functions", False), (1, "c4-natural-frequencies", False),
+                  (2, "c4-lattice-geometries", True))
+
+
 def sweep_figure(stem: str = "c6-restoring-ceiling-gain") -> None:
     """Accuracy against restoring strength, coupling ceiling and input gain for every coupling function at the
     reference configuration, at 0 and -5 dB: the design experiment's levels with the sweep's, gain 1 in the
@@ -592,6 +654,9 @@ def main(argv: list[str] | None = None) -> None:
     arms_figure("recognition", "c3-recognition-arms")
     arms_figure("order", "c8-order-arms")
     design_panels_figure()
+    by = _design_rows()
+    for panel, stem, across in DESIGN_FIGURES:
+        design_factor_figure(panel, stem, across, by)
     sweep_figure()
     rows = design_differences()
     if rows:
