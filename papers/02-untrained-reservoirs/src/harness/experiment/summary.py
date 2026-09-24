@@ -225,6 +225,66 @@ def pathways(cells: list[Cell]) -> list[dict]:
     return out
 
 
+def _pair_by(a_cells: list[Cell], b_cells: list[Cell], key) -> dict[tuple, list]:
+    """Pairs (a, b) with equal key(a) == key(b), grouped by a's condition, width and size."""
+    idx = {key(c): c for c in b_cells}
+    groups = defaultdict(list)
+    for c in a_cells:
+        other = idx.get(key(c))
+        if other is not None:
+            groups[(c.noise, c.gain, c.width, c.n_train)].append((c, other))
+    return groups
+
+
+def _rows(name: str, tier: str, groups: dict[tuple, list]) -> list[dict]:
+    return [{"comparison": name, "tier": tier, "task": "recognition", "pathway": "spectrogram", "noise": k[0],
+             "gain": k[1], "width": k[2], "b_width": k[2], "n_train": k[3], **paired(v)}
+            for k, v in sorted(groups.items(), key=str)]
+
+
+def sweep(cells: list[Cell]) -> list[dict]:
+    """The sweep tier against Tier 2's reference cells: each restoring strength minus 0.3, each ceiling minus
+    1, and each gain minus gain 1, per coupling function, at the reference configuration."""
+    tier2 = [c for c in cells if c.tier == "tier2" and c.read == "windowed"]
+    swept = [c for c in cells if c.tier == "sweep" and c.read == "windowed"]
+    out = []
+    for coupling in plan.PHASE_COUPLINGS + plan.AMPLITUDE_COUPLINGS:
+        reference = Arm("network", coupling=coupling)
+        base = [c for c in tier2 if c.label == reference.label()]
+        same = lambda c: (c.noise, c.gain, c.width, c.n_train, replicate(c))  # noqa: E731
+        name = terms.level(coupling)
+        for restoring in plan.SWEEP_RESTORINGS:
+            a = [c for c in swept if c.label == Arm("network", coupling=coupling, restoring=restoring).label()]
+            out += _rows(f"{name}: restoring strength {restoring:g} minus 0.3", "sweep", _pair_by(a, base, same))
+        for ceiling in plan.SWEEP_CEILINGS:
+            a = [c for c in swept if c.label == Arm("network", coupling=coupling, ceiling=ceiling).label()]
+            out += _rows(f"{name}: coupling ceiling {ceiling:g} minus 1", "sweep", _pair_by(a, base, same))
+        at_one = [c for c in base if c.gain == 1.0]
+        by_seed = lambda c: (c.noise, c.width, c.n_train, replicate(c))  # noqa: E731
+        for gain in plan.SWEEP_GAINS:
+            a = [c for c in swept if c.label == reference.label() and c.gain == gain]
+            out += _rows(f"{name}: gain {gain:g} minus gain 1", "sweep", _pair_by(a, at_one, by_seed))
+    return out
+
+
+def cochlea(cells: list[Cell]) -> list[dict]:
+    """The coil and the cochlea against Tier 2's torus and helix, and the cochlea against the coil, over
+    matched configurations (the same coupling function and natural frequencies, at the reference restoring
+    strength and ceiling)."""
+    runs = [c for c in cells if c.tier in ("tier2", "cochlea") and c.read == "windowed"
+            and c.arm["restoring"] == 0.3 and c.arm["ceiling"] == 1.0 and c.arm["coupling"] in plan.PHASE_COUPLINGS]
+
+    def of(geometry):
+        return [c for c in runs if c.arm["geometry"] == geometry]
+
+    def key(c):
+        return (c.arm["coupling"], c.arm["frequencies"], c.noise, c.gain, c.width, c.n_train, replicate(c))
+    out = []
+    for a, b in (("coil", "torus"), ("cochlea", "torus"), ("cochlea", "coil"), ("coil", "helix")):
+        out += _rows(f"lattice geometry: {a} minus {b}", "cochlea", _pair_by(of(a), of(b), key))
+    return out
+
+
 def projections(cells: list[Cell]) -> list[dict]:
     """The projection tier: each reservoir under the seeded projection minus the fixed one, and the coupled
     network against its controls under the seeded projection (the spectrogram-only baseline and the trained
@@ -278,7 +338,7 @@ def summary(cells: list[Cell] | None = None) -> dict:
     cells = rec.load() if cells is None else cells
     return {"accuracy": accuracies(cells),
             "comparisons": (tier1(cells) + _against_network(cells, "becker", "recognition") + design(cells)
-                            + pathways(cells) + projections(cells)),
+                            + pathways(cells) + projections(cells) + sweep(cells) + cochlea(cells)),
             "order_baseline_at_chance": rec.baseline_at_chance(cells),
             "projection_reproduces_tier1": reproduction(cells)}
 
@@ -438,6 +498,12 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
     lines += _grid([r for r in cmp if r["tier"] == "projection" and r["width"] == w and r["n_train"] == n],
                    lambda r: f"{r['task']}: {r['comparison']}" + (f" (gain = {r['gain']:g})" if r["gain"] is not None else ""),
                    _by_noise, _diff)
+    lines += ["", "## Sweep: restoring strength, coupling ceiling and gain beyond Tier 2's, each minus its reference", ""]
+    lines += _grid([r for r in cmp if r["tier"] == "sweep" and r["width"] == w and r["n_train"] == n],
+                   lambda r: r["comparison"], _by_condition, _diff)
+    lines += ["", "## Coil and cochlea: each minus a Tier 2 geometry, over matched configurations", ""]
+    lines += _grid([r for r in cmp if r["tier"] == "cochlea" and r["width"] == w and r["n_train"] == n],
+                   lambda r: r["comparison"], _by_condition, _diff)
     lines += ["", "## Tier B, Becker et al.'s folds: accuracy", ""]
     lines += _grid(prim_acc("becker", "recognition", plan.BECKER_TRAIN), _arm, _by_noise, _acc)
     lines += ["", "## Tier B: differences", ""]

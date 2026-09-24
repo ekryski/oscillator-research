@@ -217,6 +217,52 @@ def size_figure(stem: str = "c5-training-size") -> None:
     print(f"wrote {path}.{{pdf,png}}")
 
 
+#: the gain figure's coupling functions and colours
+GAIN_COUPLINGS = (("kuramoto", "#534AB7"), ("kuramoto-sakaguchi", "#8C7FD6"), ("second-harmonic", "#2F6DB5"),
+                  ("winfree", "#5DB39A"), ("stuart-landau", "#D85A30"), ("stuart-landau-fixed", "#EFA98F"))
+
+
+def gain_figure(stem: str = "c6-gain-sweep") -> None:
+    """Accuracy against input gain for every coupling function at the reference configuration: Tier 2's
+    gains 1 and 2 with the sweep's 3 to 12, per noise level."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    from harness.experiment import plan
+    from harness.experiment.arms import Arm
+    groups = [f"tier2-recognition-spectrogram-{c}" for c, _ in GAIN_COUPLINGS]
+    groups += [f"sweep-recognition-spectrogram-{c}" for c, _ in GAIN_COUPLINGS]
+    acc = {(r["arm"], r["noise"], r["gain"]): r for r in sm.accuracies(rec.load(groups))
+           if r["width"] == rec.PRIMARY_WIDTH and r["n_train"] == rec.PRIMARY_SIZE and r["read"] == "windowed"}
+    gains = (1.0, 2.0) + plan.SWEEP_GAINS
+    fig, axes = plt.subplots(1, 2, figsize=(9.0, 4.0), sharey=True)
+    for ax, noise, title in ((axes[0], 0.0, "0 dB"), (axes[1], 5.0, "+5 dB")):
+        for coupling, colour in GAIN_COUPLINGS:
+            label = Arm("network", coupling=coupling).label()
+            pts = [(g, acc[(label, noise, g)]) for g in gains if (label, noise, g) in acc]
+            if pts:
+                ax.errorbar([g for g, _ in pts], [r["mean"] for _, r in pts], yerr=[r["sd"] for _, r in pts],
+                            color=colour, marker="o", markersize=3.5, capsize=2, linewidth=1.2,
+                            label=terms.level(coupling))
+        ax.set_xscale("log")
+        ax.set_xticks(gains, [f"{g:g}" for g in gains])
+        ax.minorticks_off()
+        ax.set_title(title, fontsize=10)
+        ax.set_xlabel("input gain")
+        ax.spines[["top", "right"]].set_visible(False)
+    axes[0].set_ylabel("test accuracy (%)")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, frameon=False, fontsize=8, loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.1))
+    fig.tight_layout()
+    path = FIGURES_DIR / stem
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 200})):
+        fig.savefig(path.with_suffix(suffix), bbox_inches="tight", **kwargs)
+    plt.close(fig)
+    print(f"wrote {path}.{{pdf,png}}")
+
+
 TRAINED = ("trained-gru", "trained-tcn", "trained-cnn", "trained-transformer", "trained-s4d")
 
 
@@ -254,6 +300,7 @@ def main(argv: list[str] | None = None) -> None:
         print(f"\ngain {gains[0]:g}\n" + recognition_table(acc, gains))
     print("\ntrained baselines\n" + trained_table(acc))
     size_figure()
+    gain_figure()
     rows = design_differences()
     if rows:
         design_figure(rows)
