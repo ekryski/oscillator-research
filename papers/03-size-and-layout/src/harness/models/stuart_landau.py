@@ -50,7 +50,8 @@ import math
 import torch
 from torch import nn
 
-from harness.models.phase import ceiling_factor
+from harness.models.geometries import Torus
+from harness.models.phase import auto_impl, ceiling_factor
 
 
 def _softplus_inv(v: float) -> float:
@@ -108,6 +109,7 @@ class SLCore(nn.Module):
         theta0 = torch.rand(1, channels, grid, grid, generator=gen) * (2 * math.pi)
         # start on the unit circle at the same seeded angles as the phase core
         self.register_buffer("state0", torch.stack((torch.cos(theta0), torch.sin(theta0)), dim=1))
+        self._circ: tuple[torch.device, torch.Tensor] | None = None
 
     @property
     def readout_dim(self) -> int:
@@ -117,12 +119,31 @@ class SLCore(nn.Module):
         return self.state0.expand(batch, -1, -1, -1, -1).clone()  # [B, 2(x,y), C, G, G]
 
     def prepare_coupling(self) -> tuple[torch.Tensor, torch.Tensor]:
+        """(the coupling operator, the per-channel kernel sum s0).
+
+        The operator is the kernel's spectrum (FFT) on the CPU, as in paper 02,
+        and on CUDA; on MPS, up to 64 x 64, it is the same circulant as a dense
+        [C, N, N] matrix (the torus's gather index over the scaled kernel's
+        taps), which is far faster there (see `phase.auto_impl`).
+        """
         kfft = torch.fft.rfft2(self.kernel)
         if self.spectral_clamp:
             mag = kfft.abs().amax(dim=(-2, -1), keepdim=True)
             kfft = kfft * ceiling_factor(mag, self.spectral_clamp, self.kernel_scaling)
-        s0 = torch.fft.irfft2(kfft, s=(self.grid, self.grid)).sum(dim=(-2, -1))  # [C]
+        taps = torch.fft.irfft2(kfft, s=(self.grid, self.grid))
+        s0 = taps.sum(dim=(-2, -1))  # [C]
+        device = self.kernel.device
+        if device.type == "mps" and auto_impl("mps", self.grid) == "matmul":
+            if self._circ is None or self._circ[0] != device:
+                self._circ = (device, Torus(self.grid).circulant_index().to(device))
+            return taps.flatten(1)[:, self._circ[1]], s0.view(1, -1, 1, 1)
         return kfft, s0.view(1, -1, 1, 1)
+
+    def _convolve(self, field: torch.Tensor, coup: torch.Tensor) -> torch.Tensor:
+        """field [B, 2, C, G, G] convolved with each channel's kernel, by FFT or the dense circulant."""
+        if coup.is_complex():
+            return torch.fft.irfft2(torch.fft.rfft2(field) * coup, s=(self.grid, self.grid))
+        return torch.einsum("bxcn,cmn->bxcm", field.flatten(-2), coup).view_as(field)
 
     def step_frame(self, state: torch.Tensor, drive: torch.Tensor,
                    coup: tuple[torch.Tensor, torch.Tensor]) -> tuple[torch.Tensor, torch.Tensor]:
@@ -134,7 +155,7 @@ class SLCore(nn.Module):
         co, si = torch.cos(dt * self.natural_freqs), torch.sin(dt * self.natural_freqs)
         for _ in range(self.substeps):
             field = torch.stack((x, y), dim=1)
-            conv = torch.fft.irfft2(torch.fft.rfft2(field) * kfft, s=(self.grid, self.grid))
+            conv = self._convolve(field, kfft)
             # tangential drive: i·d·z = (−d·y, +d·x) — pure phase push, θ' += d.
             # y reads the updated x on purpose (semi-implicit ordering — see
             # "Discretization ordering" in the module docstring).
