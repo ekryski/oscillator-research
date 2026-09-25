@@ -51,6 +51,9 @@ UNCOUPLED = Arm("network", coupled=False)
 BANK_STATE = Arm("bank", channels=4)   # the network's states and parameters
 BANK_WIDTH = Arm("bank", channels=8)   # the network's exposed signals, at twice the parameters
 UNTRAINED = (COUPLED, UNCOUPLED, BANK_STATE, BANK_WIDTH)
+#: the design experiment runs this network with noise only; the controls experiment adds it on clean
+#: audio, so it stands beside every other arm in all three conditions
+STUART_LANDAU = Arm("network", coupling="stuart-landau")
 
 
 def _trained(arch: str) -> Arm:
@@ -75,6 +78,9 @@ def controls() -> Iterator[rn.Spec]:
             for gain in GAINS:
                 for arm in UNTRAINED:
                     yield rn.Spec("controls", "recognition", "spectrogram", noise, gain, seed, arm, sizes=pr.SIZES)
+                if noise is None:
+                    yield rn.Spec("controls", "recognition", "spectrogram", noise, gain, seed, STUART_LANDAU,
+                                  sizes=pr.SIZES)
             for arch in TRAINED_ARCHS:
                 for n in pr.SIZES:
                     yield rn.Spec("controls", "recognition", "spectrogram", noise, None, seed, _trained(arch),
