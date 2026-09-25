@@ -26,7 +26,7 @@ def test_width_is_three_per_signal_per_window():
 
 def test_frames_outside_the_span_cannot_touch_the_read():
     # padding after a clip ends, and a warm-up before it starts, must be invisible:
-    # the exploratory floor pooled over both and every other arm over neither
+    # a read that pooled over both would hand one arm frames the others never see
     x = trajectory()
     hi = torch.tensor([12, 15, 9])
     clean = ft.windowed(x, 2, lo=4, hi=hi)
@@ -158,3 +158,14 @@ def test_the_fixed_window_fast_path_equals_the_masked_path():
     sc = torch.cat((theta.sin(), theta.cos()), 2)
     for windows, lo in ((4, 16), (1, 16)):
         assert torch.allclose(ft.rotation_rate(sc, windows, lo=lo), ft.rotation_rate(sc, windows, lo=lo, hi=full), atol=1e-6)
+
+
+def test_the_seeded_projection_is_a_draw_of_its_own_per_seed_and_leaves_the_fixed_one_alone():
+    fixed = ft.projection_matrix(500, 64).clone()
+    s0, s1 = ft.projection_matrix(500, 64, seed=0).clone(), ft.projection_matrix(500, 64, seed=1).clone()
+    assert not torch.equal(s0, fixed) and not torch.equal(s0, s1)
+    ft._PROJECTIONS.clear()
+    assert torch.equal(ft.projection_matrix(500, 64), fixed)              # the fixed draw, unchanged
+    assert torch.equal(ft.projection_matrix(500, 64, seed=0), s0)         # and each seeded draw is repeatable
+    gen = torch.Generator().manual_seed(ft.PROJECTION_SEED + 1 + 1)
+    assert torch.allclose(s1, (torch.randn(500, ft.MAX_WIDTH, generator=gen) / 500 ** 0.5)[:, :64])

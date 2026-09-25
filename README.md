@@ -14,7 +14,7 @@ That convergence is the motivation here. The working hypothesis is that a substr
 
 Speech is the natural place to explore this idea, because speech is oscillation at every scale: prosody near 1 Hz, syllable rhythm at 4-8 Hz, phone transitions at 10-40 Hz, pitch and formants from 100 Hz to several kHz. An oscillator field is a frequency-selective medium with intrinsic timescales, locking behaviour and spatial wave modes, which is the representational vocabulary that structure would seem to want.
 
-Whether any of that survives contact with controlled measurement is the open question, and it is the question this research addresses. The work is deliberately small-scale and control-heavy: single-variable comparisons, pre-registered decision criteria written before each run, no-dynamics floors under every accuracy, parameter-matched conventional baselines, and randomized twins for every designed structure. Negative results are reported with the same weight as positive ones.
+Whether any of that survives contact with controlled measurement is the open question, and it is the question this research addresses. The work is deliberately small-scale and control-heavy: single-variable comparisons, a control that reads the input alone under every accuracy, parameter-matched conventional baselines, and comparisons paired over matched configurations, test clips and seeds. Negative results are reported with the same weight as positive ones.
 
 Every experimental paper ships with the code and the raw per-run data that produced its numbers, so any claim here can be peer reviewed and validated or refuted.
 
@@ -23,8 +23,8 @@ Every experimental paper ships with the code and the raw per-run data that produ
 | # | Paper | What it does |
 |---|---|---|
 | 01 | [From Synchronization Physics to Trained Dynamics: A Survey of Oscillator Networks in Machine Learning](papers/01-evidence-audit/from-synchronization-physics-to-trained-dynamics.md) | A critical survey of oscillator networks in machine learning, tracing the idea from Huygens in 1665 to the current revival and drawing on 130 sources across physics, mathematics, neuroscience and neuromorphic computing. It sorts eighteen published systems by what is actually learned, and finds that of the sixty-five control comparisons that would isolate the physics, sixteen have been run, ten of them by three systems. |
-| 02 | [Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Frozen Oscillator Fields](papers/02-untrained-reservoirs/) | Freezes every physics parameter of a 1,024-oscillator field and measures spoken-digit recognition across 1,940 pre-registered runs. The frozen field beats all five trained conventional networks at the same ~2k parameter budget (GRU, TCN, CNN, tiny transformer, S4D-style SSM) yet clears its own no-dynamics linear floor by only about three points, and neither lattice geometry nor coupling law moves that margin by as much as a point; on a task built so that order-free readouts provably cannot answer it, the same frozen fields read temporal order at 0.97 to 1.00. |
-| 03 | [Size and Channel Layout in Untrained Coupled Oscillator Networks for Spoken-Digit Recognition](papers/03-size-and-layout/) | In design. Varies the number of oscillators in paper 02's untrained networks from 64 to 262,144 (lattices of 8 × 8 to 128 × 128, 1 to 16 channels) and how they are laid out, against an uncoupled copy, a leaky-integrator bank, the input alone and trained networks of the same size, across paper 02's coupling functions, lattice geometries and input pathways. The registration is a draft and no run has been made. |
+| 02 | [Spoken-Digit Recognition Without Training: Geometry, Coupling, and Drive Effects in Oscillator Networks](papers/02-untrained-reservoirs/) | Reads an untrained network of 1,024 coupled oscillators with a linear readout on spoken digits from held-out speakers in noise (AudioMNIST), against the readout on its input alone, the same network uncoupled, non-oscillating leaky-integrator banks and five trained networks of the same ~2k parameters, over 6,353 runs that vary the coupling function, lattice geometry (a cochlea among them), natural frequencies, input pathway, input gain, readout width and training data. Most of the accuracy comes from the input and the readout: the Kuramoto network reads within a point of its own input in noise, and carries the order of events by integrating its input, as a leaky-integrator bank does. A free oscillator amplitude (Stuart–Landau) is the one design choice that lifts it above its input, into the trained networks' range; geometry moves it by less than a point, and the trained networks still lead. |
+| 03 | [Size and Channel Layout in Untrained Coupled Oscillator Networks for Spoken-Digit Recognition](papers/03-size-and-layout/) | In design. Varies the number of oscillators in paper 02's untrained networks from 64 to 262,144 (lattices of 8 × 8 to 128 × 128, 1 to 16 channels) and how they are laid out, against an uncoupled copy, a leaky-integrator bank, the input alone and trained networks of the same size, across paper 02's coupling functions, lattice geometries (the coil and the cochlea among them) and input pathways. No run has been made yet. |
 
 ## Layout
 
@@ -41,9 +41,10 @@ papers/
 │   └── references/  the works it cites
 └── 02-untrained-reservoirs/
     ├── … the same, plus
-    ├── src/         harness, sweep driver, tests
-    ├── results/     the record: 1,940 experiment runs
-    └── resources/   figures and audio
+    ├── src/         harness, experiment driver, tests
+    ├── scripts/     the paper's own scripts: schematics, audio examples, a GPU-pod runner
+    ├── results/     the record: 6,353 runs, one file per experiment, and what each holds
+    └── resources/   figures, and audio examples to listen to
 
 publishing/          the scripts that turn a manuscript into those formats
 ```

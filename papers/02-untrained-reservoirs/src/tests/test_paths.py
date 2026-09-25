@@ -47,15 +47,12 @@ def test_environment_overrides_redirect_both_roots(monkeypatch, tmp_path):
 
 def test_the_committed_results_tree_is_where_the_paper_points():
     assert paths.RESULTS_DIR.is_dir(), "the committed per-run results should be present"
-    assert (paths.RESULTS_DIR / "envelope").is_dir()
-    assert (paths.PAPER_ROOT / "resources" / "figures").is_dir()
-    drafts = list(paths.PAPER_ROOT.glob("*-DRAFT.md"))
-    assert len(drafts) == 1, f"expected exactly one manuscript, found {drafts}"
+    assert (paths.RESULTS_DIR / "controls-recognition.json").is_file()
 
 
 def test_data_directory_is_not_committed():
     """The corpus and the derived bank are rebuilt, never shipped."""
     keep = {p.name for p in Path(paths.DATA_DIR).glob("*")} if paths.DATA_DIR.is_dir() else set()
-    assert not (keep - {"README.md", ".gitignore", "AudioMNIST", "cache"}), (
+    assert not (keep - {"README.md", ".gitignore", "AudioMNIST", "cache", "logs"}), (
         "src/data/ should hold only its README, its .gitignore, and untracked data")
     assert (paths.DATA_DIR / ".gitignore").is_file()

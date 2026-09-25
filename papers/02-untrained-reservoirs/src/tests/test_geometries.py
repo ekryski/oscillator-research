@@ -20,7 +20,6 @@ from harness.models.geometries import (
     GEOMETRIES,
     build_geometry,
     cube_dims,
-    diamond_dims,
     drive_map,
     sphere_cos_weights,
     sphere_latitudes,
@@ -86,7 +85,7 @@ def test_every_declared_boundary_is_buildable_and_parameter_matched():
 
 
 def test_drive_map_puts_band_b_on_storage_row_b_for_every_shape():
-    """The pre-registered tonotopy. `rows_to_drive` broadcasts band b onto row
+    """The fixed tonotopy. `rows_to_drive` broadcasts band b onto row
     b; this is the contract that makes that broadcast geometry-correct."""
     grid = 16
     expected = torch.arange(grid * grid).view(grid, grid)
@@ -99,15 +98,10 @@ def test_drive_map_rejects_unknown_boundaries():
         drive_map("hyperboloid", 16)
 
 
-def test_cube_and_diamond_require_the_grids_their_layouts_assume():
+def test_the_cube_requires_the_grid_its_layout_assumes():
     assert cube_dims(16) == (16, 4, 4)
-    assert diamond_dims(16) == (8, 4, 4)
     with pytest.raises(ValueError, match="perfect-square"):
         cube_dims(12)
-    with pytest.raises(ValueError, match="perfect-square"):
-        diamond_dims(12)
-    with pytest.raises(ValueError, match="perfect-square"):
-        diamond_dims(9)  # odd: no A/B sublattice split
 
 
 def test_sphere_latitudes_span_the_globe_with_open_poles():
@@ -130,7 +124,7 @@ def test_periodic_shapes_wrap_and_open_shapes_do_not():
     axis and reaches nothing on one with an open row edge."""
     grid = 8
     reach = {}
-    for boundary in ("torus", "cylinder", "sheet", "klein"):
+    for boundary in ("torus", "cylinder", "sheet"):
         blk = PhaseBlock(channels=1, grid=grid, dt=1.0, coupling="forced", damping=0.0,
                          spectral_clamp=0.0, coupling_impl="matmul", boundary=boundary)
         with torch.no_grad():
@@ -143,7 +137,7 @@ def test_periodic_shapes_wrap_and_open_shapes_do_not():
         out = blk.step(theta, torch.zeros_like(theta), coup, substeps=1)
         reach[boundary] = out[0, 0, 0].abs().max().item()
     # float32 FFT round-trip leaves ~1e-8 of noise, so compare magnitudes
-    assert min(reach["torus"], reach["klein"]) > 1e-3, f"periodic rows wrap: {reach}"
+    assert reach["torus"] > 1e-3, f"periodic rows wrap: {reach}"
     assert max(reach["cylinder"], reach["sheet"]) < 1e-5, f"open rows do not: {reach}"
 
 
@@ -203,14 +197,9 @@ def test_every_coupling_law_runs_on_every_venue(coupling):
         assert torch.isfinite(feats).all(), f"{boundary} x {coupling}"
 
 
-def test_only_the_twisted_venues_correct_their_spectral_clamp():
-    """The mirrored double-cover extension has operator norm sqrt(2), so
-    moebius and klein must cap lower to keep the clamp a true bound. Every
-    other venue's max |K-hat| already bounds its operator."""
+def test_every_geometry_bounds_its_operator_without_a_correction():
     for name in BOUNDARIES:
-        geom = build_geometry(name, 16)
-        expected = math.sqrt(2.0) if name in ("moebius", "klein") else 1.0
-        assert geom.clamp_factor == pytest.approx(expected), name
+        assert build_geometry(name, 16).clamp_factor == pytest.approx(1.0), name
 
 
 def test_geometry_registry_is_complete_and_self_describing():
@@ -220,3 +209,47 @@ def test_geometry_registry_is_complete_and_self_describing():
         assert cls.frequency_axis, f"{name} must declare its tonotopic axis"
     with pytest.raises(ValueError, match="unknown boundary"):
         build_geometry("hyperboloid", 16)
+
+
+# --- the coil and the cochlea -------------------------------------------------
+
+def _coil_response(boundary: str, taps: dict[int, float], source: int, grid: int = 8) -> torch.Tensor:
+    """One forced-coupling step from a pulse at coil position `source`: the flat response [N]."""
+    n = grid * grid
+    blk = PhaseBlock(channels=1, grid=grid, dt=1.0, coupling="forced", damping=0.0,
+                     spectral_clamp=0.0, coupling_impl="matmul", boundary=boundary)
+    with torch.no_grad():
+        blk.kernel.zero_()
+        for offset, value in taps.items():                 # flat tap index: offset, or n + offset if negative
+            blk.kernel.view(1, n)[0, offset % n] = value
+        blk.natural_freqs.zero_()
+    theta = torch.zeros(1, 1, grid, grid)
+    theta.view(1, 1, n)[0, 0, source] = math.pi / 2
+    out = blk.step(theta, torch.zeros_like(theta), blk.prepare_coupling(), substeps=1)
+    return out.view(n) - theta.view(n)
+
+
+def test_the_coil_is_open_where_the_helix_closes():
+    n = 64
+    for boundary, closes in (("helix", True), ("coil", False), ("cochlea", False)):
+        reach = _coil_response(boundary, {1: 1.0}, source=n - 1)[0].abs().item()   # base end -> apex end
+        assert (reach > 1e-3) == closes, f"{boundary}: {reach}"
+
+
+def test_the_cochlea_carries_influence_toward_the_apex_and_the_coil_both_ways():
+    # a symmetric kernel: the coil passes it on equally; the cochlea 3:1 toward the apex, times the
+    # curvature weights of the two receiving sites
+    w = build_geometry("cochlea", 8).curvature(torch.zeros(1))
+    for boundary, ratio in (("coil", 1.0), ("cochlea", 3.0 * (w[29] / w[31]).item())):
+        r = _coil_response(boundary, {1: 1.0, -1: 1.0}, source=30)
+        toward_apex, toward_base = r[29].item(), r[31].item()   # lower positions are lower bands
+        assert toward_apex / toward_base == pytest.approx(ratio, rel=1e-4), boundary
+
+
+def test_the_cochlea_couples_most_strongly_at_the_apex():
+    w = build_geometry("cochlea", 16).curvature(torch.zeros(1))
+    assert w[0].item() == pytest.approx(1.0) and w[-1].item() == pytest.approx(0.25)
+    assert torch.all(w[1:] < w[:-1]) and build_geometry("coil", 16).curvature(torch.zeros(1)) is None
+    # the matched control: the same shape of weighting, at the coil's average coupling
+    m = build_geometry("cochlea-matched", 16).curvature(torch.zeros(1))
+    assert m.mean().item() == pytest.approx(1.0) and torch.allclose(m / m[0], w / w[0])

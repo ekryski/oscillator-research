@@ -46,6 +46,7 @@ from urllib.parse import unquote
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import abstract as abstract_mod
+import sanitize
 import bibfile
 import title as title_mod
 from extract_bib import BRACKET, LINK, NOT_A_CITATION, citekey, split_author_year
@@ -85,7 +86,7 @@ SYMBOLS = {
     "γ": r"\gamma", "δ": r"\delta",
     "≤": r"\leq", "≥": r"\geq", "≈": r"\approx", "≲": r"\lesssim",
     "∈": r"\in", "∝": r"\propto", "×": r"\times", "·": r"\cdot",
-    "±": r"\pm", "→": r"\to", "⇒": r"\Rightarrow", "−": "-",
+    "±": r"\pm", "→": r"\to", "←": r"\leftarrow", "⇒": r"\Rightarrow", "−": "-",
     "⟨": r"\langle", "⟩": r"\rangle",
     # table marks: no glyph in the text font, and pdflatex errors on them
     "✓": r"\checkmark", "✗": r"\times",
@@ -268,29 +269,10 @@ def url_index(bib: str) -> dict[str, str]:
     return out
 
 
-#: Characters with no visual width. They survive copy-paste, they survive most
-#: editors, and a run of them encodes arbitrary text that no reader can see —
-#: the tag block exists for exactly that and is the usual way generated prose
-#: gets watermarked. None of them has a legitimate use in these manuscripts, so
-#: they are removed from every built format rather than reported and left.
-#: Variation selectors are included: they matter for emoji presentation, which
-#: an academic manuscript does not have, and they are a known carrier too.
-HIDDEN = re.compile(
-    "[\u00ad\u200b-\u200f\u2060-\u2064\ufeff\u180e"   # zero-width, directional marks
-    "\ufe00-\ufe0f"                                        # variation selectors
-    "\u202a-\u202e\u2066-\u2069"                          # bidi overrides
-    "\U000e0000-\U000e007f]"                               # tag block
-)
-#: a no-break space is invisible as a *difference* rather than invisible outright;
-#: deleting it would run two words together, so it is normalised, not dropped
-NBSP = "\u00a0"
-
-
 def strip_hidden(text: str) -> tuple[str, int]:
-    """Remove zero-width and formatting characters; normalise no-break spaces."""
-    text, n = HIDDEN.subn("", text)
-    n += text.count(NBSP)
-    return text.replace(NBSP, " "), n
+    """Remove every character that could carry an unseen mark (see sanitize.py), and how many there were."""
+    text, found = sanitize.clean(text, markdown=True)
+    return text, sum(found.values())
 
 
 def rewrite_links(text: str, known: dict[str, str],
@@ -437,6 +419,10 @@ def main() -> None:
         a.abstract_out.write_text(abstract_mod.as_yaml(abstract_mod.read(text)))
         text = abstract_mod.strip(text)
     n_math = n_img = n_unnumbered = 0
+    # the ids go on while the headings still carry their numbers, which the LaTeX
+    # path takes off next; imported here for the same cycle as number_sections
+    import crossref
+    text, section_ids = crossref.anchor(text, APPENDIX)
     if a.target == "latex":
         # LaTeX numbers its own sections, and sets the number off from the title
         # by a fixed gap the plain space in the heading text does not reproduce.
@@ -459,6 +445,7 @@ def main() -> None:
     text, n_hidden = strip_hidden(text)
     text, n_links, disagreements = rewrite_links(text, known, by_url)
     text, n_brackets = rewrite_brackets(text, known)
+    text, n_xrefs = crossref.link(text, section_ids)
     if a.target == "latex":
         text, n_img = to_vector_images(text)
         for line in warn_pseudo_math(text):
@@ -481,6 +468,8 @@ def main() -> None:
             appendix, _, appx_disagreements = rewrite_links(appendix, known, by_url)
             disagreements += appx_disagreements
             appendix, _ = rewrite_brackets(appendix, known)
+            appendix, n_appx = crossref.link(appendix, section_ids)
+            n_xrefs += n_appx
             if a.target == "latex":
                 appendix, _ = to_latex_math(appendix)
                 appendix, _ = to_vector_images(appendix)
@@ -490,7 +479,8 @@ def main() -> None:
     for line in dict.fromkeys(disagreements):
         print(f"  WARNING: a citation's label and link name different works:\n"
               f"    {line}", file=sys.stderr)
-    extra = f", {n_math} math characters" if n_math else ""
+    extra = f", {n_xrefs} section references linked" if n_xrefs else ""
+    extra += f", {n_math} math characters" if n_math else ""
     extra += f", {n_img} images to vector" if n_img else ""
     extra += f", {n_unnumbered} headings unnumbered for LaTeX" if n_unnumbered else ""
     # loud rather than silent: a hidden character in the source means the
