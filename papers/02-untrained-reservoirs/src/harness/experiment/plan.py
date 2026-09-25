@@ -42,7 +42,8 @@ BECKER_TRAIN = 18000
 #: bound, where drive, natural frequency and coupling together would pass pi radians a step
 SWEEP_RESTORINGS = (0.5, 0.8, 1.0)
 SWEEP_CEILINGS = (1.5, 2.0)
-SWEEP_GAINS = (3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0)
+#: and below gain 1, where the input's push weakens toward the no-input leak check (gain 0)
+SWEEP_GAINS = (0.25, 0.5, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0)
 
 BASELINE = Arm("baseline")
 COUPLED = Arm("network")            # Kuramoto, torus, random frequencies, restoring 0.3, ceiling 1

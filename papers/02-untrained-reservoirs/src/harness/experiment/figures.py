@@ -243,7 +243,7 @@ def gain_figure(stem: str = "c6-gain-sweep") -> None:
     groups += [f"sweep-recognition-{c}" for c, _ in GAIN_COUPLINGS]
     acc = {(r["arm"], r["noise"], r["gain"]): r for r in sm.accuracies(rec.load(groups))
            if r["width"] == rec.PRIMARY_WIDTH and r["n_train"] == rec.PRIMARY_SIZE and r["read"] == "windowed"}
-    gains = (1.0, 2.0) + plan.SWEEP_GAINS
+    gains = tuple(sorted((1.0, 2.0) + plan.SWEEP_GAINS))
     fig, axes = plt.subplots(1, 2, figsize=(9.0, 4.0), sharey=True)
     for ax, noise, title in ((axes[0], 0.0, sm.snr(0.0)), (axes[1], 5.0, sm.snr(5.0))):
         for coupling, colour in GAIN_COUPLINGS:
@@ -493,13 +493,13 @@ def sweep_figure(stem: str = "c6-restoring-ceiling-gain") -> None:
     columns = (
         ("restoring strength", (0.1, 0.3) + plan.SWEEP_RESTORINGS, lambda c, v: (Arm("network", coupling=c, restoring=v), 1.0), False),
         ("coupling ceiling", (0.5, 1.0) + plan.SWEEP_CEILINGS, lambda c, v: (Arm("network", coupling=c, ceiling=v), 1.0), False),
-        ("input gain", (1.0, 2.0) + plan.SWEEP_GAINS, lambda c, v: (Arm("network", coupling=c), v), True),
+        ("input gain", tuple(sorted((1.0, 2.0) + plan.SWEEP_GAINS)), lambda c, v: (Arm("network", coupling=c), v), True),
     )
     fig, axes = plt.subplots(2, 3, figsize=(10.0, 5.0), sharey="row", gridspec_kw={"width_ratios": (1, 1, 1.6)})
     for row, noise in enumerate((0.0, 5.0)):
         for col, (name, values, arm_of, log) in enumerate(columns):
             ax = axes[row, col]
-            ax.axvline(values[1] if col < 2 else values[0], color="#BBBBBB", linewidth=0.8, linestyle=":")
+            ax.axvline((0.3, 1.0, 1.0)[col], color="#BBBBBB", linewidth=0.8, linestyle=":")     # the reference setting
             for coupling, colour in GAIN_COUPLINGS:
                 pts = []
                 for v in values:
