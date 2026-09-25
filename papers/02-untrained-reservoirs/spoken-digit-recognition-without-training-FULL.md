@@ -317,7 +317,7 @@ The terms as this paper uses them. The code and the run record keep their own la
 | Term | As used in this paper |
 |---|---|
 | **Oscillator** | A unit whose state advances around a cycle. A phase oscillator keeps only its phase θ, an angle; a Stuart–Landau oscillator also keeps an amplitude. The readout sees sin θ and cos θ of each. |
-| **Natural frequency ω** | The rate at which an oscillator would advance if nothing acted on it. Random: drawn from N(1, 0.1²). Tonotopic: each row set to the centre frequency of the mel band that drives it, with small jitter. Identical: all 1. |
+| **Natural frequency ω** | The rate at which an oscillator would advance if nothing acted on it. Random: drawn from N(1, 0.1²). Tonotopic: ordered by the band that drives each row, rising a quarter octave per row from 0.41 to 5.5, with 5% jitter. Identical: all 1. |
 | **Lattice** | The 16 × 16 grid a channel's oscillators sit on. Rows follow frequency: mel band r drives row r, from lowest to highest. |
 | **Row** | The 16 oscillators of one channel that a single mel band drives. The only grouping built into the network. |
 | **Channel** | One independent 16 × 16 lattice of 256 oscillators, with its own coupling kernel and natural frequencies. Every channel receives the same input, and channels do not act on each other; the network's 4 channels are four differently drawn copies, read side by side (Appendix C). The name follows the channels of a convolutional network, where each channel likewise has its own kernel. |
