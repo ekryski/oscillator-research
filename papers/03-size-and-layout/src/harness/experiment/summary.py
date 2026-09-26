@@ -417,8 +417,7 @@ def size_comparisons(cells: list[Cell]) -> list[dict]:
 def design_comparisons(cells: list[Cell]) -> list[dict]:
     """Each coupling function and geometry minus the reference network, at every size and pathway."""
     out = []
-    for tier, ref_tier, pathway in (("design", "size", "spectrogram"), ("design-quadrature", "quadrature", "quadrature"),
-                                  ("design-carrier", "carrier", "carrier")):
+    for tier, ref_tier, pathway in (("design", "size", "spectrogram"), ("design-quadrature", "quadrature", "quadrature")):
         for coupling, geometry in plan.designs():
             if (coupling, geometry) == plan.REFERENCE:
                 continue
@@ -432,9 +431,8 @@ def design_comparisons(cells: list[Cell]) -> list[dict]:
 
 
 def pathway_comparisons(cells: list[Cell]) -> list[dict]:
-    """On the quadrature and carrier pathways: the network against that pathway's own controls."""
-    out = _controls(cells, "quadrature", "recognition", "quadrature", " (quadrature pathway)", bank=False)
-    return out + _controls(cells, "carrier", "recognition", "carrier", " (carrier pathway)")
+    """On the quadrature pathway: the network against that pathway's own controls."""
+    return _controls(cells, "quadrature", "recognition", "quadrature", " (quadrature pathway)", bank=False)
 
 
 def chance() -> dict:

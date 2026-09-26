@@ -49,7 +49,6 @@ REUSE_SAMPLE = (
             Arm("network", coupling="kuramoto-sakaguchi", geometry="sheet")),
     rn.Spec("size", "order", "spectrogram", 0.0, 1.0, 0, Arm("network"), pair=(3, 7)),
     rn.Spec("quadrature", "recognition", "quadrature", 0.0, 1.0, 0, Arm("network")),
-    rn.Spec("carrier", "recognition", "carrier", 0.0, 32.0, 0, Arm("network")),
 )
 
 

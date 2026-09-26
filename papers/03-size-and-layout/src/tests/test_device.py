@@ -16,7 +16,6 @@ from harness.experiment import readout as ro
 from harness.experiment import run as rn
 from harness.experiment import stream as st
 from harness.models.geometries import BOUNDARIES
-from harness.stimuli.filterbank import bandpass_rows
 from harness.stimuli.frontend import hop_rows, hop_rows_quad
 from harness.utils import device as dv
 
@@ -90,7 +89,6 @@ def test_the_bank_and_the_front_ends_run_on_the_gpu(device):
     for bands in (16, 128):
         _close(hop_rows(waves.to(device), bands).cpu(), hop_rows(waves, bands), atol=1e-3)
         _close(hop_rows_quad(waves.to(device), bands).cpu(), hop_rows_quad(waves, bands), atol=2e-3)
-    _close(bandpass_rows(waves.to(device), 16).cpu(), bandpass_rows(waves, 16), atol=1e-4)
 
 
 @gpu

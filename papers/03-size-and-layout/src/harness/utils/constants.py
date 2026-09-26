@@ -1,8 +1,7 @@
 """Fixed constants of the protocol, carried over from paper 02 unchanged.
 
 One "frame" is one core integration frame (substeps=1, dt=0.1). Speech enters
-through the hop front end (62.5 frames per second) or, on the carrier pathway,
-at the 16 kHz sample rate.
+through the hop front end (62.5 frames per second).
 """
 
 import math

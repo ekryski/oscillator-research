@@ -44,17 +44,12 @@ WIDTHS = (192, 1024, 4096)
 #: the training size of the primary cell
 PRIMARY_SIZE = 2048
 PRIMARY_STAT = am.PRIMARY_READ
-#: clips per batch, by task and pathway; the carrier runs at 16 kHz, so its batches
-#: are small, and a GPU (CUDA or MPS) holds four times as many of its 16,000-frame trajectories
-BATCH = {"recognition": 512, "order": 256, "sequence": 128, "carrier": 8, "carrier-gpu": 32}
-#: a batch holds this many states' trajectories at the sizes above; larger arms (or channels) shrink it
-BATCH_STATES = 1024
+#: clips per batch, by task
+BATCH = {"recognition": 512, "order": 256, "sequence": 128}
 #: above this many states a batch shrinks in proportion (paper 02's rule, unchanged up to 4,096 states)
 LARGE_STATES = 4096
 #: the fewest clips a batch shrinks to
 MIN_BATCH = 16
-#: the carrier pathway drives a reservoir at the audio sample rate
-CARRIER_RATE_HZ = 16000.0
 
 
 @dataclass(frozen=True)
@@ -62,7 +57,7 @@ class Spec:
     """Everything that decides a run's numbers, and nothing else."""
     tier: str
     task: str                      # recognition | order | sequence
-    pathway: str                   # spectrogram | quadrature | carrier: the input pathway
+    pathway: str                   # spectrogram | quadrature: the input pathway
     noise_db: float | None         # None is clean audio
     gain: float | None             # None for arms that read the rows as they are
     seed: int
@@ -255,13 +250,10 @@ def batch_size(spec: Spec, device: str = "cpu", states: int | None = None) -> in
 
     `states` is what one pass simulates: the whole arm, or one channel of a streamed arm.
     """
-    carrier = "carrier-gpu" if device.startswith(("cuda", "mps")) else "carrier"
-    size = BATCH[carrier] if spec.pathway == "carrier" else BATCH[spec.task]
+    size = BATCH[spec.task]
     states = spec.arm.states if states is None else states
-    if spec.pathway != "carrier" and states > LARGE_STATES:
+    if states > LARGE_STATES:
         size = max(MIN_BATCH, size * LARGE_STATES // states)      # bound a batch's trajectory memory
-    if spec.pathway == "carrier" and states > BATCH_STATES:
-        size = max(1, size * BATCH_STATES // states)
     return size
 
 
@@ -365,8 +357,7 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None, trained_d
             extra["head_acc"] = (predicted == clips.labels[test]).double().mean().item()
         model = backbone
     else:
-        rate = CARRIER_RATE_HZ if spec.pathway == "carrier" else None
-        model = am.build_untrained(arm, spec.gain if spec.gain is not None else 0.0, spec.seed, device, rate)
+        model = am.build_untrained(arm, spec.gain if spec.gain is not None else 0.0, spec.seed, device)
         if spec.streamed:
             return _execute_streamed(spec, clips, model, device, t0)
         # store only the blocks the recorded reads use: a large arm's unread blocks run to gigabytes

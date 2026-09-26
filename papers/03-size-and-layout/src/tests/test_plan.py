@@ -8,9 +8,9 @@ from harness.experiment.arms import Arm
 
 #: the run counts TIERS.md and DESIGN.md state
 COUNTS = {"gate": 30, "size": 2688, "trained": 825, "sequence": 1296, "design": 3375, "quadrature": 363,
-          "carrier": 432, "design-quadrature": 3105, "design-carrier": 3375}
-REUSED = {"gate": 0, "size": 90, "trained": 15, "sequence": 0, "design": 75, "quadrature": 6, "carrier": 9,
-          "design-quadrature": 12, "design-carrier": 18}
+          "design-quadrature": 3105}
+REUSED = {"gate": 0, "size": 90, "trained": 15, "sequence": 0, "design": 75, "quadrature": 6,
+          "design-quadrature": 12}
 
 
 @pytest.mark.parametrize("tier", plan.TIERS)
@@ -20,12 +20,11 @@ def test_each_tier_has_the_documented_runs_and_no_two_share_an_address(tier):
     assert sum(map(plan.reused, specs)) == REUSED[tier]
 
 
-def test_every_tier_runs_at_0_db_and_input_gain_1_except_the_carrier_at_its_calibrated_gain():
+def test_every_tier_runs_at_0_db_and_input_gain_1_on_the_spectrogram_and_quadrature_pathways():
     specs = plan.planned(list(plan.TIERS))
     assert {s.noise_db for s in specs} == {0.0}
-    assert {s.gain for s in specs if s.tier != "gate"} == {None, 1.0, plan.CARRIER_GAIN}
-    assert {s.gain for s in specs if s.gain == plan.CARRIER_GAIN} and all(
-        s.pathway == "carrier" for s in specs if s.gain == plan.CARRIER_GAIN)
+    assert {s.gain for s in specs if s.tier != "gate"} == {None, 1.0}
+    assert {s.pathway for s in specs} == {"spectrogram", "quadrature"}
 
 
 def test_the_lattices_are_nine_and_16x16_runs_once():
@@ -38,7 +37,7 @@ def test_the_long_window_runs_only_at_64_and_128_with_one_band_per_row():
     specs = plan.planned(["size", "trained", "quadrature"])
     assert {(s.arm.grid, s.arm.n_bands, s.arm.n_window) for s in specs if s.arm.window} == {
         (64, 64, 1024), (128, 128, 2048)}
-    assert all(not s.arm.window for s in plan.planned(["sequence", "design", "carrier"]))
+    assert all(not s.arm.window for s in plan.planned(["sequence", "design", "design-quadrature"]))
 
 
 def test_the_size_tier_carries_paper_02s_order_task_and_the_sequence_tier_every_length():
@@ -136,8 +135,6 @@ def test_prepare_builds_every_row_cache_a_run_reads_and_no_other():
     wanted = set()
     for s in plan.planned([t for t in plan.TIERS if t != "gate"]):
         a = s.arm
-        if s.pathway == "carrier":
-            continue
         if s.task == "recognition":
             wanted.add(plan.pr.rows_path(s.pathway, s.noise_db, a.n_bands, a.n_window))
         else:

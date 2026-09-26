@@ -226,11 +226,9 @@ def test_quadrature_rows_map_onto_rows_along_the_band_axis():
     assert pr.to_rows(rows, 8)[0, 0, 0].tolist() == [1.0, 2.0]          # the mean of bands 0 and 1
 
 
-@pytest.mark.parametrize("pathway", ["quadrature", "carrier"])
-def test_the_other_pathways_run_on_another_lattice(bank, pathway, monkeypatch):
-    monkeypatch.setitem(rn.BATCH, "carrier", 64)
+def test_the_quadrature_pathway_runs_on_another_lattice(bank):
     arm = am.Arm("network", channels=1, grid=8, bands=16)
-    rec = rn.execute(spec(arm, pathway=pathway, gain=1.0, reads=("windowed",), sizes=(128,)), bank=bank)
+    rec = rn.execute(spec(arm, pathway="quadrature", gain=1.0, reads=("windowed",), sizes=(128,)), bank=bank)
     assert all(0.0 <= c["acc"] <= 1.0 for c in rec["cells"])
 
 

@@ -176,7 +176,7 @@ def reads(arm: Arm, task: str) -> dict[str, list[str]]:
 # ---------------------------------------------------------------------------
 
 def build_untrained(arm: Arm, gain: float, seed: int, device: str = "cpu",
-                    rate_hz: float | None = None, kernel_scaling: str = "exact") -> nn.Module | None:
+                    kernel_scaling: str = "exact") -> nn.Module | None:
     """The untrained arm, built from its seed exactly as paper 02 built it.
 
     `kernel_scaling="cap"` rebuilds paper 02's network, whose kernels were only
@@ -186,8 +186,7 @@ def build_untrained(arm: Arm, gain: float, seed: int, device: str = "cpu",
     if arm.kind == "baseline":
         return None
     if arm.kind == "bank":
-        extra = {} if rate_hz is None else {"rate_hz": rate_hz}
-        return LeakyBank(channels=arm.channels, grid=arm.grid, gain=gain, seed=seed, **extra).to(device)
+        return LeakyBank(channels=arm.channels, grid=arm.grid, gain=gain, seed=seed).to(device)
     if arm.kind != "network":
         raise ValueError(f"{arm.kind} is not an untrained arm")
     core, coupling = CORES[arm.coupling]
@@ -226,8 +225,7 @@ def channel(arm: Arm, model: nn.Module, c: int) -> tuple[Arm, nn.Module]:
     if arm.channels == 1:
         return one, model
     with torch.random.fork_rng(devices=[]):
-        sub = build_untrained(one, getattr(model, "gain", 0.0), 0, "cpu", getattr(model, "rate_hz", None),
-                              _scaling(model))
+        sub = build_untrained(one, getattr(model, "gain", 0.0), 0, "cpu", _scaling(model))
     full, part = model.state_dict(), sub.state_dict()
     sliced = {}
     for key, value in part.items():
@@ -285,8 +283,8 @@ def untrained_features(arm: Arm, signals: torch.Tensor, tvalid: torch.Tensor, ta
 def drive_phase(rows: torch.Tensor, pathway: str) -> torch.Tensor:
     """[B, T, G]: the phase of each band's own delivered drive, the reference an oscillator can lock to.
 
-    The quadrature pathway carries its phase explicitly; the band energies and
-    the carrier's band waveforms have none, so theirs is the analytic phase.
+    The quadrature pathway carries its phase explicitly; the band energies have
+    none, so theirs is the analytic phase.
     """
     if pathway == "quadrature":
         return torch.atan2(rows[..., 1], rows[..., 0])

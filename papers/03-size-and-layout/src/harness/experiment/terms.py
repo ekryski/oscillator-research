@@ -48,7 +48,7 @@ LEVELS = {
 }
 
 #: the input pathways
-PATHWAYS = {"spectrogram": "spectrogram", "quadrature": "quadrature", "carrier": "carrier"}
+PATHWAYS = {"spectrogram": "spectrogram", "quadrature": "quadrature"}
 
 #: paper 02's reference configuration of the coupled network, and its size
 REFERENCE = {"coupling": "kuramoto", "geometry": "torus", "frequencies": "random", "restoring": 0.3, "ceiling": 1.0}

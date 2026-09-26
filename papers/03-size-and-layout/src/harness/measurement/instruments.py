@@ -15,8 +15,7 @@ def analytic_row_phase(rows: torch.Tensor) -> torch.Tensor:
     """[B,T,G] band-signal rows -> [B,T,G] instantaneous (analytic) phase.
 
     FFT-based Hilbert transform per band: the drive's own phase, the locking
-    reference when the input carries no phase of its own (the band energies,
-    and the carrier's band waveforms)."""
+    reference when the input carries no phase of its own (the band energies)."""
     b, t, g = rows.shape
     x = rows.transpose(1, 2).reshape(b * g, t)
     xf = torch.fft.fft(x, dim=1)

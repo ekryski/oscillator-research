@@ -20,7 +20,7 @@ Paper 02's harness ran one lattice (16 × 16) and, in its widened tier 4, lattic
 | change | where | why it leaves paper 02's cells alone |
 |---|---|---|
 | **Exact kernel scaling.** Every channel's coupling kernel is scaled so its spectral peak is exactly the coupling ceiling, up as well as down (`kernel_scaling="exact"`). Paper 02 only scaled down (`"cap"`, still available). | `models/phase.py` (`ceiling_factor`), `models/stuart_landau.py` | A random 16 × 16 kernel's peak is 1.42 or more on every geometry, seed and channel either paper draws, so the ceiling binds and the two rules are one computation. `tests/test_kernel_scaling.py` checks the coupling operator bit for bit for every 16 × 16 arm, both ceilings and both implementations. |
-| **Lattices to 128 × 128.** FFT coupling from 32 × 32 up; the cube cut into the most nearly square slab where G is not a square (2 × 4, 4 × 8, 8 × 16); log-spaced bands spanning four octaves at every band count (carrier pathway, tonotopic frequencies). | `models/phase.py`, `models/geometries/cube.py`, `stimuli/filterbank.py` | At 16 × 16 the coupling path, the cube (4 × 4) and the bands are paper 02's. |
+| **Lattices to 128 × 128.** FFT coupling from 32 × 32 up; the cube cut into the most nearly square slab where G is not a square (2 × 4, 4 × 8, 8 × 16). | `models/phase.py`, `models/geometries/cube.py` | At 16 × 16 the coupling path and the cube (4 × 4) are paper 02's. |
 | **A front end for 64 and 128 bands.** A zero-padded transform (1,024 and 2,048 points) behind paper 02's 512-sample window and frames, so no mel filter is empty. | `stimuli/frontend.py`, `stimuli/audio.py` | Up to 32 bands the front end is paper 02's exactly (`tests/test_frontend.py` compares it with paper 02's formula). |
 | **A longer analysis window.** At 64 and 128 bands the own-band lattices also run under a real window of 1,024 or 2,048 samples (`Arm.window`, `-w<N>` in labels), every frame centred where paper 02's is. | `stimuli/frontend.py`, `experiment/protocol.py` (`front_end`, `rows_path`) | Paper 02's 512-sample window is the default (`window=0`) and unchanged. |
 | **The streamed read.** An arm with more than 4,096 states is simulated, standardized and projected one channel at a time, one read at a time, recording its instruments on the first pass. | `experiment/stream.py`, `experiment/run.py` | Arms up to 4,096 states are read in memory by paper 02's code. The streamed read is tested against it, reads and instruments alike (`tests/test_stream.py`). |
@@ -108,7 +108,7 @@ The paper's glossary (Appendix A of the manuscript) defines the terms. The code 
 | coupling ceiling | `ceiling`, `ceiling<c>` in labels; exact scaling is `kernel_scaling="exact"` |
 | coupling kernel | `kernel` |
 | input gain | `gain`, `g` in run ids |
-| input pathway: spectrogram / quadrature / carrier | `pathway`: `spectrogram` / `quadrature` / `carrier` |
+| input pathway: spectrogram / quadrature | `pathway`: `spectrogram` / `quadrature` |
 | mel spectrogram, band energies | the front-end rows (`hop_rows`), cached as `spectrogram-*.pt` |
 | a trained baseline's training and read | `train_baseline`, `trained_blocks`, `trained_features`, `trained_width` |
 | matched pair | the cells `summary.compare` pairs |

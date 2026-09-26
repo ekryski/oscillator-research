@@ -3,12 +3,11 @@
     uv run python -m harness.experiment.plan benchmark --device cuda --out ../results/benchmark/cuda.json
     uv run python -m harness.experiment.plan benchmark --device mps --grids 8 16 --channels 1 4 --no-designs
 
-The cost model in `plan.py` was measured on an M1 Max; the carrier, which
-integrates 16,000 steps a clip, was extrapolated from the spectrogram pathway
-there, and a CUDA GPU was never measured. This measures what a run does on
-whatever device it is given, for a small, representative fraction of its clips:
+The cost model in `plan.py` was measured on an M1 Max, and a CUDA GPU was
+never measured. This measures what a run does on whatever device it is given,
+for a small, representative fraction of its clips:
 
-1. For each pathway (spectrogram and carrier by default), lattice and channel
+1. For each pathway (spectrogram and quadrature by default), lattice and channel
    count, the reference network and the state-matched bank are built exactly as
    a run builds them, and one batch of the run's own batch size (synthetic
    clips of the run's shape) is simulated, its instruments recorded and its
@@ -19,8 +18,7 @@ whatever device it is given, for a small, representative fraction of its clips:
    timed the same way at one channel, as a factor on the reference network.
 3. Once: the device's matrix-product rate (the projection), the CPU's
    Gaussian draws (the projection matrices) and one read's ridge fits (the
-   CPU, float64); and, on the carrier, its front end, which runs on the CPU
-   for every batch of every run and is never cached.
+   CPU, float64).
 4. The trained baselines' training steps (batches of 64) at 2,048, 65,536
    and 524,288 parameters, on the device and on the CPU, so the report says
    where each trains faster. Runs train them on the CPU unless told
@@ -54,10 +52,9 @@ from harness.experiment import plan
 from harness.experiment import readout as ro
 from harness.experiment import run as rn
 from harness.measurement.features import MAX_WIDTH
-from harness.stimuli.filterbank import bandpass_rows
 from harness.utils.device import describe, resolve
 
-PATHWAYS = ("spectrogram", "carrier")
+PATHWAYS = ("spectrogram", "quadrature")
 KINDS = ("network", "bank")
 #: clips per timed batch at most (the run's own batch size is used below this)
 MAX_CLIPS = 512
@@ -97,14 +94,12 @@ def _memory_gb(device: str) -> float | None:
 
 
 def synthetic_rows(pathway: str, n: int, grid: int) -> torch.Tensor:
-    """Front-end rows of a run's shape: 61 frames of band energies (or of quadrature pairs), or 16,000
-    samples of band waveforms, made from noise. What a batch costs does not depend on its values."""
+    """Front-end rows of a run's shape: 61 frames of band energies (or of quadrature pairs), made from
+    noise. What a batch costs does not depend on its values."""
     gen = torch.Generator().manual_seed(0)
-    if pathway == "carrier":
-        return bandpass_rows(torch.randn(n, 16000, generator=gen) * 0.05, grid)
-    rows = torch.rand(n, 61, grid, generator=gen)
+    rows = torch.rand(n, plan.FRAMES, grid, generator=gen)
     if pathway == "quadrature":
-        phase = torch.rand(n, 61, grid, generator=gen) * 2 * math.pi
+        phase = torch.rand(n, plan.FRAMES, grid, generator=gen) * 2 * math.pi
         return torch.stack((rows * phase.cos(), rows * phase.sin()), dim=-1)
     return rows
 
@@ -118,10 +113,8 @@ def time_arm(arm: am.Arm, pathway: str, device: str, max_clips: int = MAX_CLIPS)
     smaller batch on this device. A cell that does not fit even one clip is recorded without a time.
     """
     _free(device)
-    gain = plan.CARRIER_GAIN if pathway == "carrier" else 1.0
-    spec = plan._net("benchmark", pathway, 0.0, gain, 0, arm)
-    rate = rn.CARRIER_RATE_HZ if pathway == "carrier" else None
-    model = am.build_untrained(arm, gain, 0, device, rate)
+    spec = plan._net("benchmark", pathway, 0.0, 1.0, 0, arm)
+    model = am.build_untrained(arm, 1.0, 0, device)
     one, sub, scale = arm, model, 1
     if spec.streamed:
         (one, sub), scale = am.channel(arm, model, 0), arm.channels
@@ -161,15 +154,6 @@ def time_arm(arm: am.Arm, pathway: str, device: str, max_clips: int = MAX_CLIPS)
     model = sub = rows = None                          # drop the arm before freeing the cache
     _free(device)
     return out
-
-
-def time_front_end(grid: int, n: int = 8) -> float:
-    """Seconds per clip for the carrier's front end, on the CPU."""
-    waves = torch.randn(n, 16000, generator=torch.Generator().manual_seed(1)) * 0.05
-    bandpass_rows(waves[:1], grid)
-    t0 = time.perf_counter()
-    bandpass_rows(waves, grid)
-    return (time.perf_counter() - t0) / n
 
 
 def time_throughput(device: str) -> dict:
@@ -257,9 +241,7 @@ def run_seconds(spec: rn.Spec, m: dict) -> tuple[float, bool]:
     positions = spec.length if spec.task == "sequence" else 1
     clips, frames = plan.clips_and_frames(spec)
     passes = len(reads) if spec.streamed else 1
-    per_clip *= passes * frames / (16000 if spec.pathway == "carrier" else 61)
-    if spec.pathway == "carrier":
-        per_clip += m["front_end"][a.n_bands] * (a.channels * passes if spec.streamed else 1)
+    per_clip *= passes * frames / plan.FRAMES
     t = m["throughput"]
     project = draws = 0.0
     for read in reads:
@@ -304,16 +286,12 @@ def benchmark(device: str = "auto", grids=plan.GRIDS, channels=plan.CHANNELS, pa
            "cpu_threads": torch.get_num_threads()}
     log(f"=== benchmark: {env}")
     t_all = time.perf_counter()
-    m = {"cells": {}, "designs": {}, "front_end": {}, "throughput": throughput or time_throughput(device)}
+    m = {"cells": {}, "designs": {}, "throughput": throughput or time_throughput(device)}
     t = m["throughput"]
     log(f"    projection {t['matmul_flops'] / 1e12:.2f} TFLOP/s, Gaussian draws {t['randn_per_s'] / 1e6:.0f} M/s, "
         f"one read's ridge fits {t['ridge_s']:.1f} s")
     for pathway in pathways:
         for grid in grids:
-            for bands in sorted({grid, 16}) if pathway == "carrier" else ():
-                if bands not in m["front_end"]:
-                    m["front_end"][bands] = time_front_end(bands)
-                    log(f"    carrier front end at {bands} bands: {m['front_end'][bands] * 1e3:.1f} ms per clip")
             for c in channels:
                 for kind in (KINDS if pathway != "quadrature" else ("network",)):
                     cell = time_arm(am.Arm(kind, channels=c, grid=grid), pathway, device, max_clips)
@@ -351,7 +329,7 @@ def benchmark(device: str = "auto", grids=plan.GRIDS, channels=plan.CHANNELS, pa
               for name, rows in tiers.items()}
     report = {
         "when": time.strftime("%Y-%m-%d %H:%M:%S"), "env": env, "benchmark_s": time.perf_counter() - t_all,
-        "throughput": t, "front_end_s_per_clip": {str(g): v for g, v in m["front_end"].items()},
+        "throughput": t,
         "cells": [{"pathway": d, "grid": g, "channels": c, "kind": k, **v} for (d, g, c, k), v in m["cells"].items()],
         "design_factors": [{"pathway": d, "grid": g, "coupling": fa, "geometry": sh, "factor": v}
                            for (d, g, fa, sh), v in m["designs"].items()],

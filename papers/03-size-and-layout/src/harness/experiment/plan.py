@@ -53,11 +53,6 @@ TRAINED_ARCHS = ("gru", "tcn", "cnn", "transformer", "s4d")
 PHASE_COUPLINGS = ("kuramoto", "kuramoto-sakaguchi", "second-harmonic", "winfree")
 AMPLITUDE_COUPLINGS = ("stuart-landau", "stuart-landau-fixed")
 GEOMETRIES = ("torus", "cylinder", "sheet", "helix", "cube", "sphere")
-CARRIER_GAIN = 32.0                     # the carrier pathway's calibrated gain in paper 02
-CARRIER_NOISE = 0.0                     # paper 02 ran the carrier at 0 dB only
-#: the carrier integrates 16,000 steps a clip; it is planned at every lattice until a GPU benchmark
-#: (`plan benchmark`) prices it
-CARRIER_GRIDS = GRIDS
 #: the front end's longer real analysis window, as long as the zero-padded transform at that band count;
 #: the own-band lattices at 64 and 128 run under both windows in the size, trained and quadrature tiers
 LONG_WINDOW = {64: 1024, 128: 2048}
@@ -214,17 +209,6 @@ def quadrature() -> Iterator[rn.Spec]:
                             yield _net("quadrature", "quadrature", noise, gain, seed, arm)
 
 
-def carrier() -> Iterator[rn.Spec]:
-    """The carrier pathway: the reference and uncoupled networks, the state-matched bank at the sample
-    rate, and the pathway's own spectrogram-only baseline; 0 dB and gain 32, as in paper 02."""
-    for grid, bands in lattices(CARRIER_GRIDS):
-        for seed in SEEDS:
-            yield _baseline("carrier", "carrier", CARRIER_NOISE, seed, grid, bands)
-            for channels in CHANNELS:
-                for arm in _reservoirs(channels, grid, bands):
-                    yield _net("carrier", "carrier", CARRIER_NOISE, CARRIER_GAIN, seed, arm)
-
-
 def quadrature_design() -> Iterator[rn.Spec]:
     """The phase coupling functions and geometries on the quadrature pathway, at every size."""
     for grid, bands in lattices():
@@ -240,21 +224,8 @@ def quadrature_design() -> Iterator[rn.Spec]:
                             yield _net("design-quadrature", "quadrature", noise, gain, seed, arm)
 
 
-def carrier_design() -> Iterator[rn.Spec]:
-    """Every coupling function and geometry on the carrier pathway, at every lattice."""
-    for grid, bands in lattices(CARRIER_GRIDS):
-        for channels in CHANNELS:
-            for coupling, geometry in designs():
-                if (coupling, geometry) == REFERENCE:
-                    continue
-                for seed in SEEDS:
-                    arm = Arm("network", coupling=coupling, geometry=geometry, channels=channels, grid=grid, bands=bands)
-                    yield _net("design-carrier", "carrier", CARRIER_NOISE, CARRIER_GAIN, seed, arm)
-
-
 TIERS = {"gate": gate, "size": size, "trained": trained, "sequence": sequence, "design": design,
-         "quadrature": quadrature, "carrier": carrier, "design-quadrature": quadrature_design,
-         "design-carrier": carrier_design}
+         "quadrature": quadrature, "design-quadrature": quadrature_design}
 
 
 # ---------------------------------------------------------------------------
@@ -278,8 +249,7 @@ TIERS = {"gate": gate, "size": size, "trained": trained, "sequence": sequence, "
 PAPER02_RECORD = Path(os.environ.get("OSC_PAPER02_RESULTS", PAPER02_ROOT / "results"))
 
 
-TIER1, QUAD02, CARRIER02 = ("tier1-recognition-spectrogram", "tier3-recognition-quadrature",
-                             "tier3-recognition-carrier")
+TIER1, QUAD02 = "tier1-recognition-spectrogram", "tier3-recognition-quadrature"
 ORDER02 = "tier1-order-spectrogram"
 #: paper 02's projection tier: its record files are f"{PAPER02_PROJECTION}-{task}-{pathway}"
 PAPER02_PROJECTION = "projection"
@@ -295,8 +265,7 @@ def paper02_group(spec: rn.Spec) -> str | None:
     pathway; every coupling function
     and geometry at 4 channels (its tier 2); the trained baselines at 2,048
     parameters; and a diagonal of coupling functions and geometries on the
-    quadrature and carrier pathways (its tier 3), with the 4-channel bank on
-    the carrier. On the order task (its tier 1) it ran the spectrogram-only
+    quadrature pathway (its tier 3). On the order task (its tier 1) it ran the spectrogram-only
     baseline, the reference network, its uncoupled copy and both banks. It did
     not run the digit-sequence task, or any window but its 512 samples.
     """
@@ -313,13 +282,11 @@ def paper02_group(spec: rn.Spec) -> str | None:
             return None
         return ORDER02
     if a.kind == "baseline":
-        return {"spectrogram": TIER1, "quadrature": QUAD02, "carrier": CARRIER02}[spec.pathway]
+        return {"spectrogram": TIER1, "quadrature": QUAD02}[spec.pathway]
     if a.kind == "trained":
         return TIER1 if a.channels == 4 and spec.pathway == "spectrogram" else None
     if a.kind == "bank":
-        if spec.pathway == "spectrogram" and a.channels in (4, 8):
-            return TIER1
-        return CARRIER02 if spec.pathway == "carrier" and a.channels == 4 else None
+        return TIER1 if spec.pathway == "spectrogram" and a.channels in (4, 8) else None
     if a.channels != 4 or (a.frequencies, a.restoring, a.ceiling) != ("random", 0.3, 1.0):
         return None
     design = (a.coupling, a.geometry)
@@ -328,9 +295,7 @@ def paper02_group(spec: rn.Spec) -> str | None:
             return TIER1
         return f"tier2-recognition-spectrogram-{a.coupling}" if a.coupled else None
     diagonal = a.coupled and (a.geometry == "torus" or design == ("kuramoto", "helix"))
-    if spec.pathway == "quadrature":
-        return QUAD02 if diagonal and a.coupling in PHASE_COUPLINGS else None
-    return CARRIER02 if diagonal else None
+    return QUAD02 if diagonal and a.coupling in PHASE_COUPLINGS else None
 
 
 def reused(spec: rn.Spec) -> bool:
@@ -420,7 +385,6 @@ BANK_SIM = {"cpu": 0.35}
 BANK_MS_MPS = {8: 0.004, 16: 0.014, 32: 0.05, 64: 0.21, 128: 0.51}
 BANK_FEAT = 0.5                         # the bank has one signal per state, the network two
 QUADRATURE_COST = 1.3                   # measured on the CPU, assumed on MPS
-CARRIER_STEPS = 16000 / 61              # the carrier integrates at the sample rate (extrapolated, both devices)
 PROJECT_FLOPS = {"cpu": 150e9, "mps": 1.5e12}   # the projection's matrix products, measured
 RANDN_PER_S = 48e6                      # Gaussian draws per second on one CPU thread (the matrices, every device)
 TWO_THREADS = 1.65                      # measured speed-up drawing a channel's two matrices in two threads
@@ -432,6 +396,8 @@ TRAINED_MIN = {"cpu": {"gru": (0.6, 0.5, 3.8), "tcn": (0.2, 3.1, 22.7), "cnn": (
                    "transformer": (0.23, 0.29, 0.46), "s4d": (0.61, 0.97, 6.9)}}
 TRAINED_BUDGETS = (2048, 65536, 524288)
 CLIPS = rn.PRIMARY_SIZE + 6000
+#: frames in a recognition clip, the frames the per-clip times were measured over
+FRAMES = 61
 COST_DEVICES = ("cpu", "mps")
 
 
@@ -460,19 +426,17 @@ def _sim_feat_ms(spec: rn.Spec, device: str) -> tuple[float, float]:
         sim *= COUPLING_COST["mps"][a.coupling]
     if spec.pathway == "quadrature":
         sim *= QUADRATURE_COST
-    if spec.pathway == "carrier":
-        sim, feat = sim * CARRIER_STEPS, feat * CARRIER_STEPS
     return sim, feat
 
 
 def clips_and_frames(spec: rn.Spec) -> tuple[int, int]:
     """(clips a run reads, frames per clip): 8,048 of 61 for recognition, 4,096 of 147 for the order
-    task, 4,096 of 147 to 284 for the digit-sequence task, and 16,000 samples per clip on the carrier."""
+    task, and 4,096 of 147 to 284 for the digit-sequence task."""
     if spec.task == "order":
         return pr.ORDER_TRAIN + pr.ORDER_TEST, pr.joined_frames(2)
     if spec.task == "sequence":
         return pr.SEQUENCE_TRAIN + pr.SEQUENCE_TEST, pr.joined_frames(spec.length)
-    return CLIPS, (16000 if spec.pathway == "carrier" else 61)
+    return CLIPS, FRAMES
 
 
 def features_per_state(arm: Arm, read: str) -> int:
@@ -498,7 +462,7 @@ def seconds(spec: rn.Spec, device: str = "cpu", trained_device: str = "cpu") -> 
     positions = spec.length if spec.task == "sequence" else 1
     ridge = RIDGE_S * len(reads) * 2 * positions             # the fixed and the seeded projection
     clips, frames = clips_and_frames(spec)
-    scale = frames / (16000 if spec.pathway == "carrier" else 61)
+    scale = frames / FRAMES
     if a.kind == "trained":
         where = "mps" if trained_device == "mps" else "cpu"
         return 60 * _trained_minutes(a.arch, a.budget, where) * scale * clips / CLIPS + ridge
@@ -610,7 +574,7 @@ def _print_estimate(rows: list[dict]) -> None:
 def cache_jobs(grids=GRIDS) -> list[tuple]:
     """Every row cache the tiers read: the bank's rows on the spectrogram and quadrature pathways at each
     band count and window, and each order-task and digit-sequence set (its test set and every seed's
-    training set) at each band count. The carrier's rows are never cached."""
+    training set) at each band count."""
     counts = sorted({16} | {g for g, b in lattices(grids) if b == 0})
     windows = {(g, w) for g, b, w in front_ends(grids) if w}
     codes = (0, *(seed + 1 for seed in SEEDS))
@@ -735,8 +699,8 @@ def main(argv: list[str] | None = None) -> None:
     b.add_argument("--device", default="auto", choices=DEVICES)
     b.add_argument("--grids", type=int, nargs="+", default=list(GRIDS))
     b.add_argument("--channels", type=int, nargs="+", default=list(CHANNELS))
-    b.add_argument("--pathways", nargs="+", default=["spectrogram", "carrier"],
-                   choices=["spectrogram", "quadrature", "carrier"])
+    b.add_argument("--pathways", nargs="+", default=["spectrogram", "quadrature"],
+                   choices=["spectrogram", "quadrature"])
     b.add_argument("--no-designs", action="store_true", help="skip timing the other coupling functions and geometries")
     b.add_argument("--no-trained", action="store_true", help="skip timing the trained baselines' training steps")
     b.add_argument("--max-clips", type=int, default=512, help="clips per timed batch at most")
