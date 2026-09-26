@@ -635,14 +635,18 @@ where the dynamics sits.
   \textbf{Physical substrates} run the dynamics in hardware instead of
   simulating it. A single spin-torque oscillator, time-multiplexed as a
   frozen reservoir, reaches about 99.6\% on spoken digits with one
-  device \citep{torrejon2017}. Oscillator Ising machines
-  \citep{oscillator-ising-machines} engineer injection locking so the
-  physics performs a combinatorial search directly, with no training
-  anywhere. Both sit inside the broader physical-reservoir programme
-  \citep{tanaka2019}, and the run-the-physics thesis extends past
-  oscillators into optical \citep{chen2025} and thermodynamic
-  \citep{coles2023} computing. The same ground has been surveyed from
-  the materials and device side \citep{rivera-sierra2026}.
+  device \citep{torrejon2017}, on five TI-46 speakers shared between
+  training and test, where its cochlear front end alone reaches 95.8\%
+  \citep{abreu-araujo2020}; four coupled spin-torque oscillators have
+  been trained in hardware to recognize vowels \citep{romera2018}.
+  Oscillator Ising machines \citep{oscillator-ising-machines} engineer
+  injection locking so the physics performs a combinatorial search
+  directly, with no training anywhere. Both sit inside the broader
+  physical-reservoir programme \citep{tanaka2019}, and the
+  run-the-physics thesis extends past oscillators into optical
+  \citep{chen2025} and thermodynamic \citep{coles2023} computing. The
+  same ground has been surveyed from the materials and device side
+  \citep{rivera-sierra2026}.
 \end{enumerate}
 
 \begin{figure}
@@ -1035,11 +1039,13 @@ were consolidated a decade later \citep{lukosevicius2009}.
 The oscillator-specific evidence here is the strongest in the survey. A
 single physical spin-torque oscillator, time-multiplexed as a frozen
 reservoir, reaches roughly 99.6\% spoken-digit recognition with one
-device rather than a network of them \citep{torrejon2017}. Untrained
-networks of randomly coupled damped oscillators, RON \citep{ceni2024},
-are reported to beat a leaky echo-state network on every benchmark they
-run, and to beat fully trained recurrent models, including a trained
-version of themselves, on chaotic forecasting and on small-parameter
+device rather than a network of them \citep{torrejon2017}, 3.8 points
+above what its cochlear front end reaches alone, with the same speakers
+in training and test \citep{abreu-araujo2020}. Untrained networks of
+randomly coupled damped oscillators, RON \citep{ceni2024}, are reported
+to beat a leaky echo-state network on every benchmark they run, and to
+beat fully trained recurrent models, including a trained version of
+themselves, on chaotic forecasting and on small-parameter
 classification, while losing to the trained models on the long-memory
 classification tasks; the trainable parameters are matched, which the
 paper enforces, and the random reservoir then carries about fifty times
@@ -1505,9 +1511,10 @@ byte-level code, by median only on enwik8, and trails it at 1M
 (preprint). Untrained oscillator reservoirs beat trained RNNs on some
 time-series benchmarks. KomplexNet wins on multi-object binding
 robustness at small scale. A single physical oscillator does spoken
-digits at roughly 99.6\% with one device. Neural Wave Machines report a
-parameter saving that follows from their convolutional coupling, with
-45k of their 50k parameters in the encoder and decoder.
+digits at roughly 99.6\% with one device, 3.8 points above its front end
+alone. Neural Wave Machines report a parameter saving that follows from
+their convolutional coupling, with 45k of their 50k parameters in the
+encoder and decoder.
 
 The energy argument, often the headline motivation, currently rests on
 adjacent substrates rather than on oscillator networks. A
@@ -1815,12 +1822,14 @@ whichever way it came out.
   UnICORNN, LinOSS and D-LinOSS report. Character-level language
   modelling already runs on enwik8, and byte-level code on CodeParrot,
   where Kuramoto Attention and FSN report. Spoken-digit recognition on
-  TI-46 is the one task an oscillator has run in hardware. What is
-  missing from each is not the dataset but the protocol around it: a
-  tuned conventional baseline at a matched parameter budget, seeds
-  reported, and the five controls of Section 2.3.3 run alongside.
-  Nothing in Section 2.3 can be turned into a ranking until this exists,
-  and its absence is currently mistaken for parity in both directions.
+  TI-46 is a standard benchmark for oscillator reservoirs in hardware,
+  and vowel recognition has been run on coupled oscillators in hardware
+  \citep{romera2018}. What is missing from each is not the dataset but
+  the protocol around it: a tuned conventional baseline at a matched
+  parameter budget, seeds reported, and the five controls of Section
+  2.3.3 run alongside. Nothing in Section 2.3 can be turned into a
+  ranking until this exists, and its absence is currently mistaken for
+  parity in both directions.
 \item
   \textbf{A reporting standard for controls.} The five controls of
   Section 2.3.3 should become a norm rather than an exception: frozen
@@ -2346,8 +2355,9 @@ Training horizon
 \endlastfoot
 ESN / LSM & time series & the frozen-dynamics paradigm (survey
 \citep{lukosevicius2009}) & --- & --- \\
-\cmidrule{1-5}Spintronic reservoir & spoken digits &
-\textasciitilde99.6\% recognition & one device & --- \\
+\cmidrule{1-5}Spintronic reservoir & spoken digits (TI-46, five
+speakers, shared between training and test) & \textasciitilde99.6\%
+recognition; the cochlear front end alone 95.8\% & one device & --- \\
 \cmidrule{1-5}RON & time-series classification and chaotic forecasting &
 above a leaky ESN on every task; above trained RNNs on chaotic
 forecasting and small-parameter classification; below coRNN and its
