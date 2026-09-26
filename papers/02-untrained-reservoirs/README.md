@@ -2,7 +2,7 @@
 
 Geometry, coupling, and drive effects in oscillator networks.
 
-**[Read the paper →](spoken-digit-recognition-without-training-DRAFT.md)**
+**[Read the paper →](spoken-digit-recognition-without-training.md)**
 
 An untrained coupled oscillator network (1,024 oscillators, 2,048 parameters) is read by a linear readout on spoken-digit recognition (AudioMNIST, speakers held out, with added noise at signal-to-noise ratios of 0 and −5 dB) and compared with a spectrogram-only baseline, an uncoupled oscillator network, two leaky-integrator banks and five trained baselines of about the same size, every arm read the same way. Eight experiments, 6,353 runs in all, vary the coupling function, lattice geometry (a coil and a cochlea among them), natural frequencies, restoring strength, coupling ceiling, input pathway, input gain, readout width and training-set size, on recognition and on a temporal-order task.
 
@@ -14,13 +14,13 @@ Most of the accuracy comes from the input representation and the readout. At a m
 
 | path | contents |
 |---|---|
-| [`spoken-digit-recognition-without-training-DRAFT.md`](spoken-digit-recognition-without-training-DRAFT.md) | the manuscript, and the file to edit |
-| [`…-DRAFT.pdf`](spoken-digit-recognition-without-training-DRAFT.pdf) · [`.html`](spoken-digit-recognition-without-training-DRAFT.html) · [`.epub`](spoken-digit-recognition-without-training-DRAFT.epub) · [`.docx`](spoken-digit-recognition-without-training-DRAFT.docx) | the same paper to read or download |
-| [`…-DRAFT-tmlr.pdf`](spoken-digit-recognition-without-training-DRAFT-tmlr.pdf) | the TMLR submission build, anonymous, in the journal's own style |
-| [`…-DRAFT-iclr.pdf`](spoken-digit-recognition-without-training-DRAFT-iclr.pdf) | the ICLR 2027 submission build, anonymous and line-numbered, in ICLR's own style |
-| [`…-DRAFT-preprint.pdf`](spoken-digit-recognition-without-training-DRAFT-preprint.pdf) | the preprint build, with the author named and no venue claimed |
+| [`spoken-digit-recognition-without-training.md`](spoken-digit-recognition-without-training.md) | the manuscript, and the file to edit |
+| [`….pdf`](spoken-digit-recognition-without-training.pdf) · [`.html`](spoken-digit-recognition-without-training.html) · [`.epub`](spoken-digit-recognition-without-training.epub) · [`.docx`](spoken-digit-recognition-without-training.docx) | the same paper to read or download |
+| [`…-tmlr.pdf`](spoken-digit-recognition-without-training-tmlr.pdf) | the TMLR submission build, anonymous, in the journal's own style |
+| [`…-iclr.pdf`](spoken-digit-recognition-without-training-iclr.pdf) | the ICLR 2027 submission build, anonymous and line-numbered, in ICLR's own style |
+| [`…-preprint.pdf`](spoken-digit-recognition-without-training-preprint.pdf) | the preprint build, with the author named and no venue claimed |
 | [`…-FULL.md`](spoken-digit-recognition-without-training-FULL.md) · [`…-FULL-iclr.pdf`](spoken-digit-recognition-without-training-FULL-iclr.pdf) | the full-length paper, saved before the draft was cut to ICLR's nine pages; the draft keeps its methods and results in full in Appendices F to H |
-| [`…-DRAFT-arxiv.tar.gz`](spoken-digit-recognition-without-training-DRAFT-arxiv.tar.gz) | LaTeX source, style files, bibliography and figures, ready to upload |
+| [`…-arxiv.tar.gz`](spoken-digit-recognition-without-training-arxiv.tar.gz) | LaTeX source, style files, bibliography and figures, ready to upload |
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
 | [`src/`](src/) | the experiment harness, its driver, and the tests: [start here](src/README.md) |

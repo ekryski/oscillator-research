@@ -114,13 +114,14 @@ FORMATS="${FORMATS:-venue epub html docx arxiv supplement}"
 CSL="${CSL:-apa}"
 [ -f "publishing/csl/$CSL.csl" ] || { echo "no such style: publishing/csl/$CSL.csl" >&2; exit 1; }
 
-# the manuscript is the paper's only Markdown file that is not its README.
+# the manuscript is the paper's only Markdown file that is not its README or its
+# archival full-length version (-FULL.md).
 # `-DRAFT` was once required in the name and is now merely tolerated, so a
 # paper can drop it once the draft is out the door.
 manuscript_in() {
     local found
     found="$(ls "$1"*-DRAFT.md 2>/dev/null | head -1)"
-    [ -z "$found" ] && found="$(ls "$1"*.md 2>/dev/null | grep -v '/README\.md$' | head -1)"
+    [ -z "$found" ] && found="$(ls "$1"*.md 2>/dev/null | grep -v '/README\.md$' | grep -v -- '-FULL\.md$' | head -1)"
     echo "$found"
 }
 

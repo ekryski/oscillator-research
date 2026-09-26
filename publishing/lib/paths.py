@@ -32,7 +32,8 @@ class Paper:
         """The Markdown source. Named for the paper, so the built formats that
         take their name from it are self-describing once downloaded."""
         found = sorted(self.dir.glob("*-DRAFT.md")) or sorted(self.dir.glob("*.md"))
-        return next((p for p in found if p.name != "README.md"), None)
+        # the archival full-length version sits beside the manuscript and is never it
+        return next((p for p in found if p.name != "README.md" and not p.stem.endswith("-FULL")), None)
 
     @property
     def stem(self) -> str:
