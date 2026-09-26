@@ -1,0 +1,16 @@
+$-- No build fingerprints in the PDF. pdfTeX otherwise writes a document ID made
+$-- from the build's time and file name, the build's date with its time zone,
+$-- its own version, and each included figure's file name and metadata, and
+$-- hyperref names the tool that made the file. None of it belongs to the paper,
+$-- and any of it can match a submitted file to the build or the machine that
+$-- made it. The LuaTeX line does the same for that engine.
+\hypersetup{pdfcreator={}, pdfproducer={}}
+\ifdefined\pdftrailerid\pdftrailerid{}\fi
+\ifdefined\pdfsuppressptexinfo\pdfsuppressptexinfo=-1\fi
+\ifdefined\pdfinfoomitdate\pdfinfoomitdate=1\fi
+\ifdefined\pdfvariable\pdfvariable suppressoptionalinfo 1023\relax\fi
+$-- And every glyph maps back to its characters, so a word copied or extracted
+$-- from the PDF reads as written, rather than a ligature turning into a control
+$-- code (STIX's "ff" in "Effects" did), which is also how the output check can
+$-- tell a hidden character from a glyph.
+\ifdefined\pdfgentounicode\input{glyphtounicode}\pdfgentounicode=1\fi

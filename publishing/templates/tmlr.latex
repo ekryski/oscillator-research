@@ -33,6 +33,11 @@ $endfor$
 % longtables set them solid. Both knobs are needed: \arraystretch scales the
 % row strut, \extrarowheight lifts the text off the rule above it.
 \renewcommand{\arraystretch}{1.35}
+% pandoc loads these only when the main text has a table; a paper whose tables all sit
+% in the appendix still needs them, and \extrarowheight needs array either way
+\usepackage{longtable,booktabs,array,calc}
+% pandoc numbers a caption-less table against a counter named none, defined with the rest
+\makeatletter\@ifundefined{c@none}{\newcounter{none}}{}\makeatother
 \setlength{\extrarowheight}{3pt}
 $after-header-includes.latex()$
 % Captions are set a step down from the body, matching the HTML build, where a
@@ -94,6 +99,7 @@ $-- in the same words the title block prints; hyperref's own guess from a
 $-- structured author entry is unusable.
 \hypersetup{pdfauthor={$for(author)$$author.name$$sep$, $endfor$}}
 $endif$
+$no-fingerprints.latex()$
 
 $-- The camera-ready running head is "Published in TMLR (month/year)" and the
 $-- title block carries the OpenReview link; both come from these three.

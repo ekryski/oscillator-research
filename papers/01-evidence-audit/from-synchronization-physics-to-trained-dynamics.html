@@ -1266,8 +1266,12 @@ locality by construction.</li>
 <li><strong>Physical substrates</strong> run the dynamics in hardware
 instead of simulating it. A single spin-torque oscillator,
 time-multiplexed as a frozen reservoir, reaches about 99.6% on spoken
-digits with one device <span class="citation" data-cites="torrejon2017">(<a href="#ref-torrejon2017" role="doc-biblioref">Torrejon et al., 2017</a>)</span>. Oscillator Ising
-machines <span class="citation" data-cites="oscillator-ising-machines">(<a href="#ref-oscillator-ising-machines" role="doc-biblioref">T. Wang &amp;
+digits with one device <span class="citation" data-cites="torrejon2017">(<a href="#ref-torrejon2017" role="doc-biblioref">Torrejon et al., 2017</a>)</span>, on five TI-46
+speakers shared between training and test, where its cochlear front end
+alone reaches 95.8% <span class="citation" data-cites="abreu-araujo2020">(<a href="#ref-abreu-araujo2020" role="doc-biblioref">Abreu Araujo et al., 2020</a>)</span>; four coupled
+spin-torque oscillators have been trained in hardware to recognize
+vowels <span class="citation" data-cites="romera2018">(<a href="#ref-romera2018" role="doc-biblioref">Romera et al.,
+2018</a>)</span>. Oscillator Ising machines <span class="citation" data-cites="oscillator-ising-machines">(<a href="#ref-oscillator-ising-machines" role="doc-biblioref">T. Wang &amp;
 Roychowdhury, 2019</a>)</span> engineer injection locking so the physics
 performs a combinatorial search directly, with no training anywhere.
 Both sit inside the broader physical-reservoir programme <span class="citation" data-cites="tanaka2019">(<a href="#ref-tanaka2019" role="doc-biblioref">G. Tanaka et al., 2019</a>)</span>, and the
@@ -1633,7 +1637,9 @@ consolidated a decade later <span class="citation" data-cites="lukosevicius2009"
 <p>The oscillator-specific evidence here is the strongest in the survey.
 A single physical spin-torque oscillator, time-multiplexed as a frozen
 reservoir, reaches roughly 99.6% spoken-digit recognition with one
-device rather than a network of them <span class="citation" data-cites="torrejon2017">(<a href="#ref-torrejon2017" role="doc-biblioref">Torrejon et al., 2017</a>)</span>. Untrained
+device rather than a network of them <span class="citation" data-cites="torrejon2017">(<a href="#ref-torrejon2017" role="doc-biblioref">Torrejon et al., 2017</a>)</span>, 3.8 points above
+what its cochlear front end reaches alone, with the same speakers in
+training and test <span class="citation" data-cites="abreu-araujo2020">(<a href="#ref-abreu-araujo2020" role="doc-biblioref">Abreu Araujo et al., 2020</a>)</span>. Untrained
 networks of randomly coupled damped oscillators, RON <span class="citation" data-cites="ceni2024">(<a href="#ref-ceni2024" role="doc-biblioref">Ceni et al., 2024</a>)</span>, are reported to beat
 a leaky echo-state network on every benchmark they run, and to beat
 fully trained recurrent models, including a trained version of
@@ -2143,9 +2149,10 @@ byte-level code, by median only on enwik8, and trails it at 1M
 (preprint). Untrained oscillator reservoirs beat trained RNNs on some
 time-series benchmarks. KomplexNet wins on multi-object binding
 robustness at small scale. A single physical oscillator does spoken
-digits at roughly 99.6% with one device. Neural Wave Machines report a
-parameter saving that follows from their convolutional coupling, with
-45k of their 50k parameters in the encoder and decoder.</p>
+digits at roughly 99.6% with one device, 3.8 points above its front end
+alone. Neural Wave Machines report a parameter saving that follows from
+their convolutional coupling, with 45k of their 50k parameters in the
+encoder and decoder.</p>
 <p>The energy argument, often the headline motivation, currently rests
 on adjacent substrates rather than on oscillator networks. A
 spiking-network text-to-speech system reports ANN-comparable quality at
@@ -2429,12 +2436,13 @@ sequence work already runs on the UEA archive and EigenWorms, where
 UnICORNN, LinOSS and D-LinOSS report. Character-level language modelling
 already runs on enwik8, and byte-level code on CodeParrot, where
 Kuramoto Attention and FSN report. Spoken-digit recognition on TI-46 is
-the one task an oscillator has run in hardware. What is missing from
-each is not the dataset but the protocol around it: a tuned conventional
-baseline at a matched parameter budget, seeds reported, and the five
-controls of Section 2.3.3 run alongside. Nothing in Section 2.3 can be
-turned into a ranking until this exists, and its absence is currently
-mistaken for parity in both directions.</li>
+a standard benchmark for oscillator reservoirs in hardware, and vowel
+recognition has been run on coupled oscillators in hardware <span class="citation" data-cites="romera2018">(<a href="#ref-romera2018" role="doc-biblioref">Romera et al., 2018</a>)</span>. What is missing
+from each is not the dataset but the protocol around it: a tuned
+conventional baseline at a matched parameter budget, seeds reported, and
+the five controls of Section 2.3.3 run alongside. Nothing in Section 2.3
+can be turned into a ranking until this exists, and its absence is
+currently mistaken for parity in both directions.</li>
 <li><strong>A reporting standard for controls.</strong> The five
 controls of Section 2.3.3 should become a norm rather than an exception:
 frozen twins, decoder-only controls, randomized-structure twins,
@@ -3103,8 +3111,9 @@ different tuning effort (Section 2.3.2).</caption>
 </tr>
 <tr>
 <td>Spintronic reservoir</td>
-<td>spoken digits</td>
-<td>~99.6% recognition</td>
+<td>spoken digits (TI-46, five speakers, shared between training and
+test)</td>
+<td>~99.6% recognition; the cochlear front end alone 95.8%</td>
 <td>one device</td>
 <td>—</td>
 </tr>
@@ -3371,6 +3380,13 @@ every claim attributed to a source.</p>
 <div id="ref-abrams2004" class="csl-entry" role="listitem">
 Abrams, D. M., &amp; Strogatz, S. H. (2004). Chimera states for coupled
 oscillators. <em>Physical Review Letters</em>, <em>93</em>, 174102. <a href="https://doi.org/10.1103/PhysRevLett.93.174102">https://doi.org/10.1103/PhysRevLett.93.174102</a>
+</div>
+<div id="ref-abreu-araujo2020" class="csl-entry" role="listitem">
+Abreu Araujo, F., Riou, M., Torrejon, J., Tsunegi, S., Querlioz, D.,
+Yakushiji, K., Fukushima, A., Kubota, H., Yuasa, S., Stiles, M. D.,
+&amp; Grollier, J. (2020). Role of non-linear data processing on speech
+recognition task in the framework of reservoir computing. <em>Scientific
+Reports</em>, <em>10</em>, 328. <a href="https://doi.org/10.1038/s41598-019-56991-x">https://doi.org/10.1038/s41598-019-56991-x</a>
 </div>
 <div id="ref-achterberg2023" class="csl-entry" role="listitem">
 Achterberg, J., Akarca, D., Strouse, D. J., Duncan, J., &amp; Astle, D.
@@ -3881,6 +3897,14 @@ applications. <em>Chemical Reviews</em>, <em>126</em>(10). <a href="https://doi.
 <div id="ref-rodan2011" class="csl-entry" role="listitem">
 Rodan, A., &amp; Tino, P. (2011). Minimum complexity echo state network.
 <em>IEEE Transactions on Neural Networks</em>, <em>22</em>(1). <a href="https://doi.org/10.1109/TNN.2010.2089641">https://doi.org/10.1109/TNN.2010.2089641</a>
+</div>
+<div id="ref-romera2018" class="csl-entry" role="listitem">
+Romera, M., Talatchian, P., Tsunegi, S., Abreu Araujo, F., Cros, V.,
+Bortolotti, P., Trastoy, J., Yakushiji, K., Fukushima, A., Kubota, H.,
+Yuasa, S., Ernoult, M., Vodenicarevic, D., Hirtzlin, T., Locatelli, N.,
+Querlioz, D., &amp; Grollier, J. (2018). Vowel recognition with four
+coupled spin-torque nano-oscillators. <em>Nature</em>,
+<em>563</em>(7730), 230–234. <a href="https://doi.org/10.1038/s41586-018-0632-y">https://doi.org/10.1038/s41586-018-0632-y</a>
 </div>
 <div id="ref-rusch2021" class="csl-entry" role="listitem">
 Rusch, T. K., &amp; Mishra, S. (2021a). Coupled oscillatory recurrent

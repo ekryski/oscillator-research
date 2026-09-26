@@ -24,7 +24,7 @@ claim that the design is a good one. Because only the gains vary with the seed,
 this arm's seed-to-seed spread is small by construction, and should be read
 that way.
 
-Two sizes are registered, because the field exposes two signals per state
+Two sizes are used, because the field exposes two signals per state
 (sin and cos) and a leaky unit exposes one: `channels=4` matches the field's
 states and parameters, `channels=8` matches its exposed signals at twice the
 parameters.
@@ -37,7 +37,7 @@ import math
 import torch
 from torch import nn
 
-#: the frame rate of the hop front end; the carrier path runs at the sample rate
+#: the frame rate of the hop front end
 HOP_RATE_HZ = 62.5
 #: time constants span one hop frame to a full one-second clip
 TAU_MIN_S, TAU_MAX_S = 1.0 / HOP_RATE_HZ, 1.0
@@ -72,7 +72,7 @@ class LeakyBank(nn.Module):
         """Per-step leak rate a for each unit, from its time constant and the row rate.
 
         Stated in seconds and converted here, so the same bank means the same
-        physical filters at the hop rate and at the carrier's sample rate.
+        physical filters at any row rate.
         """
         return 1.0 - torch.exp(-1.0 / (self.tau_s * self.rate_hz))
 
@@ -91,7 +91,7 @@ class LeakyBank(nn.Module):
         for step in range(t):
             # band r drives every unit of row r, in all channels and columns.
             # Routed one frame at a time: the whole routed input is T times
-            # the size of a state, which the carrier's 16,000 frames cannot afford.
+            # the size of a state, which long inputs cannot afford.
             band = (rows[:, step] * self.gain).view(b, 1, g, 1)
             routed = band.expand(b, self.channels, g, self.grid).reshape(b, -1)
             x = (1.0 - a) * x + a * torch.tanh(gain * routed)

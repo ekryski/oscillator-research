@@ -30,7 +30,6 @@ from torch import nn
 
 from harness.measurement.probe import phase_features
 from harness.models.phase import PhaseCore
-from harness.models.random_graph import RandGraphCore
 from harness.models.stuart_landau import SLCore
 from harness.stimuli.filterbank import band_edges
 from harness.stimuli.injection import quad_rows_to_drive, rows_to_drive
@@ -59,12 +58,7 @@ class OscillatorField(nn.Module):
                  graph_k: int = 1):
         super().__init__()
         self.channels, self.grid, self.gain = channels, grid, gain
-        if core == "randgraph":
-            assert not omega_encoder, "randgraph: omega_encoder unsupported"
-            self.core = RandGraphCore(channels=channels, grid=grid, dt=dt,
-                                      damping=damping, spectral_clamp=spectral_clamp,
-                                      graph_k=graph_k, seed=seed, substeps=substeps)
-        elif core == "phase":
+        if core == "phase":
             self.core = PhaseCore(channels=channels, grid=grid, blocks=blocks, substeps=substeps,
                                   dt=dt, coupling=coupling, damping=damping, tbptt=0,
                                   spectral_clamp=spectral_clamp, coupling_impl="auto",
@@ -86,7 +80,7 @@ class OscillatorField(nn.Module):
                 p.requires_grad_(False)
         # input-as-omega: a tiny tonotopic tuner (row-energy -> per-row
         # omega modulation; 272 params at G=16, zero-init => warm-equivalent to
-        # frozen). Registered exception to physics-only: the TUNER is the
+        # frozen). A stated exception to physics-only: the TUNER is the
         # hypothesis under test — additive drive is OFF for this arm, so
         # omega-writing is the only input channel.
         self.omega_encoder = omega_encoder
@@ -222,7 +216,7 @@ class OscillatorField(nn.Module):
         call-site symmetry but unused by design: every settle frame is valid,
         and the driven scan covers the identical padded clip for every arm
         (digit padding is already near-silent drive; a per-clip tvalid-anchored
-        settle start would be a different pre-registered experiment).
+        settle start would be a different experiment).
         omega-encoder arms settle at their NATURAL omega — the encoder's
         override is input-derived, and the settle regime is stimulus-removed."""
         _, state = self._scan_full(rows)
@@ -261,15 +255,3 @@ def tonotopic_omega(channels: int, grid: int, dt: float, substeps: int,
     theta_dot = (TWO_PI * centers / (dt * substeps)).to(torch.float32)
     base = theta_dot.view(1, grid, 1).expand(channels, grid, grid)
     return base * (1 + jitter * torch.randn(channels, grid, grid, generator=gen))
-
-
-def shuffle_kernel_(model: OscillatorField, gen: torch.Generator) -> OscillatorField:
-    """Post-hoc control: permute each channel's kernel entries in place —
-    destroys learned spatial structure, keeps the magnitude distribution."""
-    with torch.no_grad():
-        k = physics_block(model.core).kernel
-        g2 = k.shape[-1] * k.shape[-2]
-        for ch in range(k.shape[0]):
-            perm = torch.randperm(g2, generator=gen)
-            k[ch] = k[ch].flatten()[perm].view_as(k[ch])
-    return model

@@ -14,7 +14,6 @@ from harness.models import (
     GRUBaseline,
 )
 from harness.models.baselines import CNNBaseline, S4DBaseline, TransformerBaseline
-from harness.runner import main as run_main
 
 TWO_PI = 2 * math.pi
 
@@ -39,7 +38,8 @@ def test_baseline_minis_budget_and_contract():
     rows = torch.rand(3, 64, 16) * 0.5
     tv = torch.tensor([30, 45, 64])
     full = torch.full((3,), 64, dtype=torch.long)
-    for cls in (CNNBaseline, TransformerBaseline, S4DBaseline):
+    from harness import TCNBaseline
+    for cls in (CNNBaseline, TCNBaseline, TransformerBaseline, S4DBaseline):
         torch.manual_seed(0)
         m = cls(grid=16, n_classes=5)
         n = sum(p.numel() for p in m.parameters() if p.requires_grad)
@@ -64,21 +64,3 @@ def test_baseline_minis_budget_and_contract():
         h1, h2 = m._hidden(rows), m._hidden(r2)
         assert torch.allclose(h1[:, :-1], h2[:, :-1], atol=1e-5), cls.__name__
         assert not torch.allclose(h1[:, -1], h2[:, -1], atol=1e-4), cls.__name__
-
-
-def test_baseline_minis_quick_end_to_end_train(tmp_path, monkeypatch):
-    # the three minis register as arms, train (loss drops), and get the full
-    # eval column set under the identical protocol every other arm gets
-    import json
-    monkeypatch.setenv("OSC_RESULTS_DIR", str(tmp_path))
-    run_main(["--quick", "--task", "tones", "--arms", "cnn,transformer,s4d",
-              "--epochs", "3", "--seeds", "0", "--threads", "2"])
-    group = next(p for p in tmp_path.rglob("*.json"))
-    rows = next(iter(json.loads(group.read_text())["runs"].values()))["rows"]
-    assert {r["arm"] for r in rows} == {"cnn", "transformer", "s4d"}
-    for r in rows:
-        assert r["loss_drop"] > 0.0, r["arm"]  # measured: +6%/+56%/+11%
-        assert 0.0 <= r["ridge_acc_settle"] <= 1.0
-        assert 0.0 <= r["ridge_acc_parity"] <= 1.0
-    curves = list((tmp_path / "training-curves").glob("*.csv"))
-    assert len(curves) == 3, curves

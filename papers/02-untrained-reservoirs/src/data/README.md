@@ -7,7 +7,7 @@ derived bank is deterministic, so both are rebuilt rather than shipped.
 ```
 data/
 ├── AudioMNIST/data/   the corpus, as downloaded (60 speaker folders, 01..60)
-└── cache/digits_v1.pt the derived stimulus bank, built by a committed script
+└── cache/            the derived bank (digits_v2.pt) and the front-end row caches
 ```
 
 ## Getting AudioMNIST
@@ -27,14 +27,15 @@ You should end up with `src/data/AudioMNIST/data/01/0_01_0.wav` and friends.
 From `src/`:
 
 ```bash
-uv run python -m harness.stimuli.digits --build-bank
+uv run python -m harness.experiment.protocol --build-bank
 ```
 
-That writes `cache/digits_v1.pt` deterministically: 48 kHz resampled to 16 kHz,
+That writes `cache/digits_v2.pt` deterministically: 48 kHz resampled to 16 kHz,
 peak-normalized to 0.5, energy-trimmed at 1% of clip peak, capped at 1 s with
-true lengths stored, repetitions 0-19 per speaker per digit, speakers 1-48 in
-the train pool and 49-60 in the test pool (verified disjoint). Same corpus in,
-same bank out — no RNG anywhere in the build.
+true lengths stored, all 50 repetitions per speaker per digit, speakers 1-48 in
+the train pool and 49-60 in the test pool. Same corpus in, same bank out: no
+RNG anywhere in the build. `uv run python -m harness.experiment.plan prepare`
+then builds the front-end row caches under `cache/rows/`.
 
 ## Using a different location
 

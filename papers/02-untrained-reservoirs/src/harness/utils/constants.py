@@ -1,16 +1,16 @@
-"""Fixed constants of the pre-registered protocol.
+"""Fixed constants of the protocol.
 
 The harness has no audio sample rate of its own: one "frame" is one core
 integration frame (substeps=1, dt=0.1), so synthetic-stimulus frequencies are
 quoted in cycles/frame. Speech tasks resample to 16 kHz upstream and enter
-through the hop frontend (62.5 fps) or the sample-rate carrier band-split.
+through the hop frontend (62.5 fps).
 """
 
 import math
 
 TWO_PI = 2 * math.pi
 
-# --- fixed frontend constants (part of the pre-registered task definition) ---
+# --- fixed frontend constants (part of the task definition) ---
 F_LO = 0.006  # lowest filterbank edge, cycles/frame
 BANDS_PER_OCTAVE = 4  # 16 rows span 4 octaves: F_LO .. F_LO * 2^4
 GAIN = 2.0  # default drive multiplier

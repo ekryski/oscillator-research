@@ -8,7 +8,7 @@ octave, and a kernel tap at offset +/-64 couples octave-related bands
 neighbourhood relation rather than a distant one.
 
 The ring is closed, so the seam couples the top band's end to the bottom band's
-start at ring distance 1. That is a recorded property of the pre-registered
+start at ring distance 1. That is a property of the
 design, not an accident.
 """
 

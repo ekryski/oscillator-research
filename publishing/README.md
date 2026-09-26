@@ -567,16 +567,15 @@ silently renumber every figure after it. `lib/check_sections.py` covers the
 other half, failing the build when the prose cites a "Figure 7" or "Table 6"
 that no caption in the document provides.
 
-### Invisible characters
+### Hidden characters and fingerprints
 
-`lib/preprocess.py` strips zero-width spaces, directional and bidi marks,
-variation selectors and the Unicode tag block from every built format, and says
-so loudly when it finds any. The tag block is the usual carrier when prose is
-watermarked: a run of it encodes text no reader can see. A no-break space is
-normalised to a space rather than deleted, since removing it would run two words
-together. `lib/check_hidden.py` reports what the source files still hold — the
-Markdown is what gets read on GitHub, and the `.bib` never passes through
-preprocess.
+A file can be marked without changing a word a reader would notice, and a build can leave traces that tie a submitted file to one machine or one moment. The build removes both, so an anonymous submission carries nothing but the paper.
+
+**Characters.** `lib/sanitize.py` defines what could carry an unseen mark, and every format is built from cleaned copies: the manuscript through `lib/preprocess.py`, the bibliography and `metadata/paper.yaml` through `sanitize.py` itself. It deletes invisible characters (zero-width and joiner characters, directional marks, variation selectors, the Unicode tag block that generated prose is usually watermarked with, soft hyphens, fillers, private-use and control characters); turns no-break, thin and other unusual spaces into ordinary ones; turns a Cyrillic or Greek letter that passes for a Latin one, inside a Latin word, into that Latin letter (whole Greek words such as θ are left alone), and fullwidth ASCII into ASCII; and drops trailing whitespace, keeping a Markdown hard break in its backslash form. `lib/check_hidden.py` reports what the sources themselves still hold, since the Markdown is what gets read on GitHub; `--fix` cleans them in place. Watermarks that shift word choice rather than characters cannot be removed this way.
+
+**Files.** Every date and timestamp a format records is the manuscript's last-changed day at midnight UTC (`SOURCE_DATE_EPOCH`), never the build's time or time zone. The LaTeX PDFs carry no document ID, no dates, no creator or producer, and none of pdfTeX's keys for included figures, which otherwise name each figure file and copy its own metadata (`templates/no-fingerprints.latex`); every glyph maps back to its characters, so copied text reads as written. The EPUB's identifier is derived from the paper's name instead of drawn at random, the HTML carries no generator tag, the arXiv tarball records no owner, group or file times (`lib/archive.py`), and the figures are saved with no date or tool version. The supplement zip is cleaned file by file on the way in: its text as above, its sound and images without metadata chunks (libsndfile's PEAK chunk in a float WAV records when the file was written). Two builds of the same sources are byte-identical.
+
+**The check.** `lib/check_outputs.py` runs at the end of every build over the files it just wrote, and fails the build on any hidden character or look-alike letter in their text, any ID, date or tool field in a PDF, a build time or random identifier in a Word or EPUB file, or an owner, varying time or metadata chunk in an archive. A PDF glyph with no Unicode mapping, such as a bitmap font's ligature, is reported as a note rather than a failure: text extraction shows it as a control code, but pdfTeX cannot put one in the page, and the `.tex` it typeset is checked in full.
 
 ## Citing these papers
 

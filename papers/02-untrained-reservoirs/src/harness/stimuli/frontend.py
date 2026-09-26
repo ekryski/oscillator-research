@@ -1,7 +1,6 @@
 """Hop-frame frontend: fixed log-mel rows at 62.5 fps.
 
-The envelope rung of the transduction ladder. Contract difference vs
-`bandpass_rows`, recorded: rows are log-energy ENVELOPE trajectories per mel
+The envelope rung of the transduction ladder. Rows are log-energy ENVELOPE trajectories per mel
 band — nonnegative, slow (62.5 fps), tonotopic by construction (mel band b ->
 row b, ascending frequency) — not sample-rate waveforms. The field is driven
 by spectral envelopes, the classic reservoir input. Deliberately FIXED (no
@@ -63,8 +62,7 @@ def hop_rows(waves: torch.Tensor, grid: int = HOP_N_ROWS,
 # (phi_baseband = phi - 2*pi*f_c*t) leaves a slowly-varying phase that is
 # valid at hop rate. Physics-honest scoping (a Nyquist theorem, stated in
 # the papers): hop-rate phase can only ever be BASEBAND deviation within a
-# band (±fps/2 = ±31.25 Hz), never raw carrier cycles — the sample-rate
-# frontend remains the carrier-true instrument.
+# band (±fps/2 = ±31.25 Hz), never raw carrier cycles.
 
 _QUAD: dict[tuple[int, int], tuple[torch.Tensor, torch.Tensor]] = {}
 

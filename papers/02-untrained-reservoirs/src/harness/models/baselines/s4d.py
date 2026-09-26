@@ -5,7 +5,6 @@ from __future__ import annotations
 import math
 
 import torch
-import torch.nn.functional as F
 from torch import nn
 
 from harness.models.baselines.pooled import PooledBaseline, register_probe
@@ -21,14 +20,22 @@ class S4DBaseline(PooledBaseline):
     C readout per state pair and a D skip, RECURRENT scan (the streaming-honest
     form; the convolutional view is an optimization we don't need at harness
     scale). freq initialized linspace(0, pi) — poles spread across the whole
-    discrete band, the S4D-Lin flavor. 1,840 params (-10.2% of 2,048)."""
+    discrete band, the S4D-Lin flavor — and the per-step decay rates log-spaced
+    across each channel's states from 0.5 to 0.005, so its time constants span
+    2 to 200 frames, as S4D spreads its time scales over the sequence's length.
+    A single decay of 0.5 for every state, the first version, gave every state a
+    memory of about two frames: the order task, which needs a digit's worth
+    (about 60 frames), then never trained with noise. The output layer is
+    linear, as the CNN's is, so no draw can leave its units inactive.
+    1,840 params (-10.2% of 2,048)."""
 
     def __init__(self, grid: int = 16, hidden: int = 16, n_states: int = 16,
                  n_classes: int = 8, probe_seed: int = 0):
         super().__init__()
         self.hidden, self.n_states = hidden, n_states
         self.inp = nn.Linear(grid, hidden)
-        self.log_decay = nn.Parameter(torch.full((hidden, n_states), math.log(0.5)))
+        rates = torch.logspace(math.log10(0.5), math.log10(0.005), n_states)
+        self.log_decay = nn.Parameter(rates.log().expand(hidden, n_states).clone())
         self.freq = nn.Parameter(torch.linspace(0, math.pi, n_states).expand(hidden, n_states).clone())
         self.b = nn.Parameter(torch.ones(hidden, n_states))
         self.c_re = nn.Parameter(torch.randn(hidden, n_states) / math.sqrt(n_states))
@@ -48,7 +55,7 @@ class S4DBaseline(PooledBaseline):
             x = a * x + self.b * u_t[:, :, None].to(a.dtype)
             ys.append((x * c).sum(dim=-1).real + self.d_skip * u_t)
         y = torch.stack(ys, dim=1)                           # [B,T,H]
-        return F.relu(self.out(y))[:, WARMUP_FRAMES:]
+        return self.out(y)[:, WARMUP_FRAMES:]
 
     def _hidden_tail(self, rows: torch.Tensor, n_settle: int) -> torch.Tensor:
         """S4D is genuinely recurrent, so concatenating a zero tail IS running
