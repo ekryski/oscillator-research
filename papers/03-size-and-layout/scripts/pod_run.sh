@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Paper 03 on a RunPod pod, or any Linux machine with a GPU, from the pushed branch.
 #
-#   bash pod_run.sh                                                            # set up, test, benchmark; nothing else
-#   bash pod_run.sh /workspace/AudioMNIST leak-check size -- --grids 8 16 32   # then these experiments, these lattices
+#   bash scripts/pod_run.sh                                                            # set up, test, benchmark
+#   bash scripts/pod_run.sh /workspace/AudioMNIST leak-check size -- --grids 8 16 32   # then these experiments
 #
 # First, always: clone or update the repository, sync the environment, run
 # the test suite, and run the benchmark (`plan benchmark`), which times one

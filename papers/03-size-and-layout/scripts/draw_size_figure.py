@@ -1,6 +1,6 @@
 """Draw the schematic of what paper 03 varies: lattice size, channel count and band mapping.
 
-    uv run python scripts/draw_size_figure.py
+    cd src && uv run python ../scripts/draw_size_figure.py      # from the paper's folder
 
 A drawing, not a result: nothing here reads the record. The numbers in it come
 from the plan (harness.experiment.plan) and the arms (harness.experiment.arms), so
@@ -109,7 +109,8 @@ def main() -> None:
     fig.tight_layout()
     stem = FIGURES_DIR / "a4-size-and-band-mapping"
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
-    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 200})):
+    for suffix, kwargs in ((".pdf", {"metadata": {"CreationDate": None, "Creator": None, "Producer": None}}),
+                           (".png", {"dpi": 200, "metadata": {"Software": None}})):
         fig.savefig(stem.with_suffix(suffix), bbox_inches="tight", **kwargs)
     print(f"wrote {stem}.{{pdf,png}}")
 

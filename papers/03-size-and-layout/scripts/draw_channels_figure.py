@@ -1,6 +1,6 @@
 """Draw the appendix schematic: layers stack in depth, channels sit side by side.
 
-    uv run python scripts/draw_channels_figure.py
+    cd src && uv run python ../scripts/draw_channels_figure.py      # from the paper's folder
 
 A drawing, not a result: nothing here reads the record. Copied from paper
 02's script and relabelled for paper 03's lattices of G x G oscillators and C
@@ -101,7 +101,8 @@ def main() -> None:
         ax.axis("off")
     fig.tight_layout()
     stem = FIGURES_DIR / "a1-channels-and-layers"
-    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 200})):
+    for suffix, kwargs in ((".pdf", {"metadata": {"CreationDate": None, "Creator": None, "Producer": None}}),
+                           (".png", {"dpi": 200, "metadata": {"Software": None}})):
         fig.savefig(stem.with_suffix(suffix), bbox_inches="tight", **kwargs)
     print(f"wrote {stem}.{{pdf,png}}")
 
