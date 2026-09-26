@@ -6,8 +6,7 @@ Everything needed to check every number in the paper and to rerun the study:
 
 | folder | contents |
 |---|---|
-| `documents/` | the methods and results in full, as `methods-in-full.md` (with each experiment's design) and `results-in-full.md`: the detail the paper summarizes |
-| `results/` | the complete record, 6,353 runs in the paper's eight experiments (`documents/methods-in-full.md` lists them), one file per experiment and task, with `summary.json` and `summary.md`; its [README](results/README.md) says what each file holds |
+| `results/` | the complete record, 6,353 runs in the paper's eight experiments (its README lists them), one file per experiment and task, with `summary.json` and `summary.md`; its [README](results/README.md) says what each file holds |
 | `src/` | the experiment harness, the driver that runs the experiments, the figure scripts and the tests; its [README](src/README.md) covers the code, the data and rerunning from scratch |
 | `audio/` | clips as the arms hear them, to listen to: a test digit clean, at 0 dB and at −5 dB SNR, and order-task sequences in both orders; its [README](audio/README.md) describes each |
 

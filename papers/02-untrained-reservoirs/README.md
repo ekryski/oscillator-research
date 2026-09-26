@@ -8,7 +8,7 @@ An untrained coupled oscillator network (1,024 oscillators, 2,048 parameters) is
 
 Most of the accuracy comes from the input representation and the readout. At a matched width the Kuramoto network reads within a percentage point of the readout fitted to its input alone in noise, and near chance when the audio drives it in quadrature; it carries the order of events by integrating its input, as a non-oscillating leaky-integrator bank does. A free oscillator amplitude (Stuart–Landau) is the one design choice that moved accuracy by more than about a point, lifting the network above its input and into the range of the trained baselines, which otherwise read higher; the lattice geometry, the cochlea included, moved it by less than a point.
 
-The experiments are listed in [`documents/methods-in-full.md`](documents/methods-in-full.md), which with [`documents/results-in-full.md`](documents/results-in-full.md) gives the methods and results in full, and [`results/README.md`](results/README.md) says which file of the record holds each; the terms are defined in the paper's glossary (Appendix A).
+[`results/README.md`](results/README.md) lists the experiments and says which file of the record holds each; the terms are defined in the paper's glossary (Appendix A).
 
 ## What is here
 

@@ -11,8 +11,6 @@ committed files (git ls-files, so no corpus, cache or lock file) of
     src/                        the experiment code and its tests
     results/                    the run record, its summary and its README
     resources/audio/examples/   as audio/: clips as the arms hear them
-    documents/                  the methods and results in full, with any
-                                figure they show from ../resources/figures/, beside them
 
 under one neutral top folder, with the supplement README as its README. The
 paper's own scripts (its schematics, its GPU-pod runner) live outside src/ and
@@ -42,9 +40,7 @@ REPO = Path(__file__).resolve().parent.parent
 TOP = "supplement"
 README = Path("metadata/supplement-README.md")
 #: (path in the paper's folder, path in the zip)
-CONTENTS = (("src", "src"), ("results", "results"), ("resources/audio/examples", "audio"), ("documents", "documents"))
-#: a figure a supplement document shows, which ships beside it from the paper's figures
-DOC_FIGURE = re.compile(r"\]\(\.\./resources/figures/([\w.-]+\.png)\)")
+CONTENTS = (("src", "src"), ("results", "results"), ("resources/audio/examples", "audio"))
 #: strings that would identify the author or the repository; any hit stops the build
 IDENTIFYING = r"(?i)kryski|\beric\b|/users/|oscillator-research|\bek/|github\.com/(?!soerenab/)"
 
@@ -102,13 +98,6 @@ def build(paper_arg: str, out: Path | None = None) -> Path:
             if rel.startswith("results/") and rel.endswith(".json"):
                 raw = scrub_record(raw)
             contents[target + rel[len(source):]] = raw
-    for rel in [r for r in contents if r.startswith("documents/") and r.endswith(".md")]:
-        text = contents[rel].decode("utf-8")
-        for name in DOC_FIGURE.findall(text):
-            if not tracked(paper, (f"resources/figures/{name}",)):
-                sys.exit(f"{rel} shows {name}, which resources/figures/ does not track")
-            contents[f"documents/figures/{name}"] = (paper / "resources/figures" / name).read_bytes()
-        contents[rel] = DOC_FIGURE.sub(r"](figures/\1)", text).encode("utf-8")
     contents["README.md"] = (paper / README).read_bytes()
     stripped: Counter = Counter()
     for rel, raw in contents.items():
