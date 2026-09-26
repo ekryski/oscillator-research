@@ -353,7 +353,7 @@ def arms_figure(task: str, stem: str) -> None:
 
 
 #: the readout widths the width figure draws, each with its marker: (width, shape, face, size, offset within the row)
-WIDTHS = ((192, "o", "white", 5, -0.2), (1024, "o", None, 4, 0.0), (4096, "s", None, 4.5, 0.2))
+WIDTHS = ((192, "o", "white", 5, -0.24), (1024, "o", None, 4, 0.0), (4096, "s", None, 4.5, 0.24))
 
 
 def width_figure(stem: str = "c9-readout-width") -> None:
