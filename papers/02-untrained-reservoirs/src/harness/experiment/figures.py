@@ -636,7 +636,8 @@ def anova_maps(windows: int = 16, noise: float = 0.0, gain: float = 1.0, seed: i
 
 
 def anova_figure(maps: dict[str, torch.Tensor] | None = None, stem: str = "c7-anova-f") -> None:
-    """Heat maps of the mean F per mel band and time window, one per arm, and the mean F per band."""
+    """The mean F per band across the top, and below it a heat map per arm of the mean F per mel band and
+    time window, two by two."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -645,31 +646,28 @@ def anova_figure(maps: dict[str, torch.Tensor] | None = None, stem: str = "c7-an
     names = {"baseline": "spectrogram (the input)", "kuramoto": "coupled network, Kuramoto",
              "stuart-landau": "coupled network, Stuart–Landau", "bank": "leaky-integrator bank, state-matched"}
     colours = {"baseline": "#8C8C8C", "kuramoto": "#534AB7", "stuart-landau": "#D85A30", "bank": "#0F6E56"}
-    fig, axes = plt.subplots(1, len(maps) + 1, figsize=(3.0 * (len(maps) + 1), 3.2))
-    for ax, (key, m) in zip(axes, maps.items(), strict=False):
+    fig = plt.figure(figsize=(7.0, 7.6))
+    grid = fig.add_gridspec(3, 2, height_ratios=(0.75, 1, 1))
+    ax = fig.add_subplot(grid[0, :])
+    for key, m in maps.items():
+        ax.plot(range(m.shape[1]), m.mean(0).numpy(), marker="o", markersize=3, color=colours[key],
+                label=names[key])
+    ax.set_xlabel("mel band", fontsize=8)
+    ax.set_ylabel("mean F over time windows", fontsize=8)
+    ax.tick_params(labelsize=7)
+    ax.legend(frameon=False, fontsize=7, ncol=2)
+    ax.spines[["top", "right"]].set_visible(False)
+    for i, (key, m) in enumerate(maps.items()):
+        ax = fig.add_subplot(grid[1 + i // 2, i % 2])
         im = ax.imshow(m.T.numpy(), origin="lower", aspect="auto", cmap="magma")
         ax.axvline(16 / 62 * m.shape[0] - 0.5, color="white", linewidth=0.8, linestyle=":")
-        ax.set_title(names[key], fontsize=8)
-        ax.set_xlabel("time window (1/16 of the clip)", fontsize=7)
-        ax.set_ylabel("mel band", fontsize=7)
-        ax.tick_params(labelsize=6)
-        fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03).ax.tick_params(labelsize=6)
-    ax = axes[-1]
-    for key, m in maps.items():
-        ax.plot(range(m.shape[1]), m.mean(0).numpy(), marker="o", markersize=2.5, color=colours[key],
-                label=names[key])
-    ax.set_xlabel("mel band", fontsize=7)
-    ax.set_ylabel("mean F over time windows", fontsize=7)
-    ax.tick_params(labelsize=6)
-    ax.legend(frameon=False, fontsize=6)
-    ax.spines[["top", "right"]].set_visible(False)
+        ax.set_title(names[key], fontsize=8.5)
+        ax.set_xlabel("time window (1/16 of the clip)", fontsize=8)
+        ax.set_ylabel("mel band", fontsize=8)
+        ax.tick_params(labelsize=7)
+        fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03).ax.tick_params(labelsize=7)
     fig.tight_layout()
-    path = FIGURES_DIR / stem
-    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
-    for suffix, kwargs in SAVE:
-        fig.savefig(path.with_suffix(suffix), bbox_inches="tight", **kwargs)
-    plt.close(fig)
-    print(f"wrote {path}.{{pdf,png}}")
+    _save(fig, stem)
 
 
 TRAINED = ("trained-gru", "trained-tcn", "trained-cnn", "trained-transformer", "trained-s4d")
