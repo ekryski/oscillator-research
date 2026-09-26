@@ -192,3 +192,7 @@ def test_the_coil_is_compared_with_the_torus_over_the_phase_coupling_functions_a
     assert coil["n_pairs"] == 6 and coil["mean"] == pytest.approx(2.0) and (coil["grid"], coil["channels"]) == (8, 2)
     assert rows["lattice geometry: coil minus helix"]["mean"] == pytest.approx(10.0)     # Winfree's only
     assert "lattice geometry: cochlea minus coil" not in rows
+
+
+def test_noise_is_reported_as_the_signal_to_noise_ratio():
+    assert (sm.snr(0.0), sm.snr(5.0), sm.snr(None)) == ("0 dB", "−5 dB", "clean")
