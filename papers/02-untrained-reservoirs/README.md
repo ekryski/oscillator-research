@@ -45,7 +45,7 @@ The paper's own scripts sit in [`scripts/`](scripts/), outside the experiment co
 
 ```bash
 cd src
-uv run python ../scripts/draw_channels_figure.py      # the appendix schematics; also draw_geometries_ and draw_coupling_figure.py
+uv run python ../scripts/draw_coupling_figure.py      # the appendix schematics; also draw_geometries_ and draw_read_figure.py
 uv run python ../scripts/export_audio_examples.py     # the audio examples, from the bank
 ```
 
