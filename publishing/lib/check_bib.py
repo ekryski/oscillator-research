@@ -34,6 +34,12 @@ VENUE_FIELDS = ("journal", "booktitle", "publisher", "institution", "school",
                 "organization", "howpublished")
 
 
+#: what extract_bib writes where the manuscript gave it nothing to go on
+PLACEHOLDER = "VERIFY"
+#: a citation label's "et al." surviving into the author field marks an unfinished stub
+STUB_AUTHOR = re.compile(r"\bet al\b", re.I)
+
+
 def problems(kind: str, f: dict) -> list[str]:
     out = []
     author = f.get("author", "").strip()
@@ -42,8 +48,16 @@ def problems(kind: str, f: dict) -> list[str]:
         out.append("no author")
     elif re.fullmatch(r"[\d/.\s-]+", author):
         out.append(f"author looks like a date ({author!r})")
+    elif STUB_AUTHOR.search(author):
+        # extract_bib derives a stub's author from the citation label, so it
+        # carries the label's "et al."; a real author list never does
+        out.append(f"author is a citation label ({author!r}), not an author list")
     if not title:
         out.append("no title")
+    elif title.startswith(PLACEHOLDER):
+        # the stub's title is a sentence, so the word count below waves it
+        # through; left alone it prints in the reference list as written
+        out.append("title is extract_bib's placeholder, not the published title")
     elif len(title.split()) < 2 and kind != "online":
         # a repository or post is legitimately known by a one-word name; a
         # journal article recorded under one is a citation that has lost its title

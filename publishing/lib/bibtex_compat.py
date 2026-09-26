@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -87,6 +88,62 @@ def escape_text_fields(block: str) -> str:
         m = re.search(rf"^(\s*{name}\s*=\s*)\{{.*?\}}(,?[ \t]*)$", block, re.M | re.S)
         if m:
             body = "{" + escape_underscores(value) + "}"
+            block = block[:m.start()] + m.group(1) + body + m.group(2) + block[m.end():]
+    return block
+
+
+#: fields holding people's names, which a style may shorten to initials
+NAME_FIELDS = ("author", "editor")
+#: a combining mark, and the LaTeX accent command that draws it
+ACCENT = {"\u0300": "`", "\u0301": "'", "\u0302": "^", "\u0303": "~", "\u0304": "=",
+          "\u0306": "u", "\u0307": ".", "\u0308": '"', "\u030a": "r", "\u030b": "H",
+          "\u030c": "v", "\u0327": "c", "\u0328": "k"}
+#: letters that are not a base letter plus a mark, and their LaTeX commands
+LETTER = {"Ł": "L", "ł": "l", "Ø": "O", "ø": "o", "Æ": "AE", "æ": "ae", "Œ": "OE",
+          "œ": "oe", "ß": "ss", "Đ": "DJ", "đ": "dj", "ı": "i"}
+#: the first letter of each part of a name: after the start, a space, a comma or a hyphen
+LEADING_LETTER = re.compile(r"(?:(?<=^)|(?<=[\s,\-]))[^\x00-\x7f]")
+
+
+def as_latex_letter(ch: str) -> str | None:
+    """One non-ASCII letter as a braced LaTeX command, or None if there is none.
+
+    The braces are the point: BibTeX counts `{\\L}` as a single letter.
+    """
+    if ch in LETTER:
+        return "{\\" + LETTER[ch] + "}"
+    base, *marks = unicodedata.normalize("NFD", ch)
+    if len(marks) == 1 and marks[0] in ACCENT and base.isascii():
+        accent = ACCENT[marks[0]]
+        body = f"{accent}{{{base}}}" if accent.isalpha() else f"{accent}{base}"
+        return "{\\" + body + "}"
+    return None
+
+
+def protect_initials(value: str) -> str:
+    """Make the first letter of every name part safe to abbreviate.
+
+    BibTeX is an 8-bit program. A style that prints initials keeps the first
+    BYTE of a given name, and a letter such as Ł is two bytes in UTF-8, so
+    "Łukasz" became half a character: LaTeX reported an invalid byte sequence
+    and the reference printed a broken initial. Written as `{\\L}ukasz`, the
+    same letter is one unit to BibTeX and abbreviates to `{\\L}.`. Only leading
+    letters are rewritten: a non-ASCII letter inside a name is never split, and
+    leaving it alone keeps the copy close to the source. A leading letter with
+    no LaTeX equivalent is left as it is, for the build's error check to report.
+    """
+    return LEADING_LETTER.sub(lambda m: as_latex_letter(m.group(0)) or m.group(0), value)
+
+
+def protect_name_fields(block: str) -> str:
+    """Apply protect_initials to every name field of one entry."""
+    for name in NAME_FIELDS:
+        value = field(block, name)
+        if not value or value.isascii():
+            continue
+        m = re.search(rf"^(\s*{name}\s*=\s*)\{{.*?\}}(,?[ \t]*)$", block, re.M | re.S)
+        if m:
+            body = "{" + protect_initials(value) + "}"
             block = block[:m.start()] + m.group(1) + body + m.group(2) + block[m.end():]
     return block
 
@@ -169,6 +226,7 @@ def convert(block: str) -> str:
                 block = block.replace("\n}", f"\n  note          = {{{merged}}},\n}}", 1)
     block = one_identifier(block)
     block = escape_text_fields(block)
+    block = protect_name_fields(block)
     if not field(block, "author") and not field(block, "editor") and not field(block, "key"):
         block = block.replace("\n}", f"\n  key           = {{{sort_key_for(m.group(2))}}},\n}}", 1)
     for name in UNKNOWN_FIELDS:

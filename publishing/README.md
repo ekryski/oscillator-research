@@ -85,6 +85,8 @@ another:
 | `publish.sh 01 --tmlr --accepted` | TMLR camera-ready | `…-tmlr-accepted.pdf` |
 | `publish.sh 01 --neunet` | *Neural Networks* submission (named: the journal is single-blind) | `…-neunet.pdf`, `…-neunet.tex` |
 | `publish.sh 01 --neunet --preprint` | named, Elsevier style, running foot "Preprint" and the date instead of the class's "Preprint submitted to Elsevier" | `…-neunet-preprint.pdf`, `…-neunet-preprint.tex` |
+| `publish.sh 02 --iclr` | ICLR submission (anonymous, line-numbered, "Under review" running head) | `…-iclr.pdf`, `…-iclr.tex` |
+| `publish.sh 02 --iclr --preprint` | named, ICLR style, no venue claimed | `…-iclr-preprint.pdf` |
 
 The venue flag only changes the LaTeX build. The reading formats (`epub`,
 `html`, `docx`, `pdf`) always carry the author, and the arXiv bundle is always
@@ -176,6 +178,43 @@ All three take their styles from one reference document, pandoc's own with a
 single change: links in a darker blue (`LINK_COLOR` in
 `lib/reference_docx.py`), because the stock theme blue reads faint. The
 document is generated into `.work/` at build time, so no binary lives here.
+
+### The ICLR style
+
+`--iclr` formats for ICLR, which is double-blind: naming the venue gives the
+anonymous face, with "Anonymous authors", line numbers and the running head
+"Under review as a conference paper at ICLR". `templates/iclr/` holds ICLR's
+own 2027 style files **unmodified** (see its README for the source), and
+`templates/iclr.latex` drives them. `--iclr --preprint` names the author
+through the style's camera-ready switch and clears the running head it would
+print, because a preprint is not an ICLR paper; `--iclr --accepted` keeps it.
+
+ICLR allows nine pages of main text at submission. References, appendices and
+the AI-use, ethics and reproducibility statements do not count, and the
+appendix goes after the references. The build reports total pages, so check
+which page the reference list starts on.
+
+The anonymous face blanks the PDF's author metadata, but it cannot anonymize
+the prose. A third-person citation of your own preprint is the form ICLR
+permits; a repository URL or an acknowledgement is not. Check the file:
+
+```bash
+pdftotext …-iclr.pdf - | grep -n -i -E "<surname>|github|<your domain>"
+```
+
+The style needs font metrics BasicTeX does not ship. Once, per machine:
+
+```bash
+tlmgr init-usertree; tlmgr --usermode install helvetic times courier
+```
+
+Two traps this venue exposed, both now handled in the build and both worth
+knowing for the next one. A template that skips pandoc's fonts partial, to keep
+the venue's own typeface, must load `iftex` itself, because the common partial
+tests `\ifLuaTeX`. And the bibliography style reaches pandoc as a template
+variable, not as metadata: pandoc escapes metadata for LaTeX, so
+`iclr2027_conference` became `iclr2027\_conference`, BibTeX found no such
+style, and every citation came out undefined with no LaTeX error at all.
 
 ### Adding a venue
 
@@ -505,9 +544,9 @@ A **shared link**: two entries carrying one DOI or arXiv id are two records of
 one work, and only the first is reachable, so the second is never cited. Merge
 them.
 
-A citation **matched on its label alone**: its link matches no `doi`, `eprint`
-or `url` in the bibliography, so nothing checks that the entry is the work the
-link points at. This is how a "Zhang et al. (2023)" in the prose came to print a
+A citation **matched on its label alone**: either its link matches no `doi`,
+`eprint` or `url` in the bibliography, or it is a bracket citation and carries no
+link to match. Either way nothing checks that the entry is the work meant. This is how a "Zhang et al. (2023)" in the prose came to print a
 Zhang 2023 about a different subject. Recording the identifier the link uses is
 what fixes it, and `entry_links` reads the arXiv id out of a `Preprint:
 arXiv:...` note as well as out of the fields, because most of the DBLP-sourced
@@ -528,16 +567,15 @@ silently renumber every figure after it. `lib/check_sections.py` covers the
 other half, failing the build when the prose cites a "Figure 7" or "Table 6"
 that no caption in the document provides.
 
-### Invisible characters
+### Hidden characters and fingerprints
 
-`lib/preprocess.py` strips zero-width spaces, directional and bidi marks,
-variation selectors and the Unicode tag block from every built format, and says
-so loudly when it finds any. The tag block is the usual carrier when prose is
-watermarked: a run of it encodes text no reader can see. A no-break space is
-normalised to a space rather than deleted, since removing it would run two words
-together. `lib/check_hidden.py` reports what the source files still hold — the
-Markdown is what gets read on GitHub, and the `.bib` never passes through
-preprocess.
+A file can be marked without changing a word a reader would notice, and a build can leave traces that tie a submitted file to one machine or one moment. The build removes both, so an anonymous submission carries nothing but the paper.
+
+**Characters.** `lib/sanitize.py` defines what could carry an unseen mark, and every format is built from cleaned copies: the manuscript through `lib/preprocess.py`, the bibliography and `metadata/paper.yaml` through `sanitize.py` itself. It deletes invisible characters (zero-width and joiner characters, directional marks, variation selectors, the Unicode tag block that generated prose is usually watermarked with, soft hyphens, fillers, private-use and control characters); turns no-break, thin and other unusual spaces into ordinary ones; turns a Cyrillic or Greek letter that passes for a Latin one, inside a Latin word, into that Latin letter (whole Greek words such as θ are left alone), and fullwidth ASCII into ASCII; and drops trailing whitespace, keeping a Markdown hard break in its backslash form. `lib/check_hidden.py` reports what the sources themselves still hold, since the Markdown is what gets read on GitHub; `--fix` cleans them in place. Watermarks that shift word choice rather than characters cannot be removed this way.
+
+**Files.** Every date and timestamp a format records is the manuscript's last-changed day at midnight UTC (`SOURCE_DATE_EPOCH`), never the build's time or time zone. The LaTeX PDFs carry no document ID, no dates, no creator or producer, and none of pdfTeX's keys for included figures, which otherwise name each figure file and copy its own metadata (`templates/no-fingerprints.latex`); every glyph maps back to its characters, so copied text reads as written. The EPUB's identifier is derived from the paper's name instead of drawn at random, the HTML carries no generator tag, the arXiv tarball records no owner, group or file times (`lib/archive.py`), and the figures are saved with no date or tool version. The supplement zip is cleaned file by file on the way in: its text as above, its sound and images without metadata chunks (libsndfile's PEAK chunk in a float WAV records when the file was written). Two builds of the same sources are byte-identical.
+
+**The check.** `lib/check_outputs.py` runs at the end of every build over the files it just wrote, and fails the build on any hidden character or look-alike letter in their text, any ID, date or tool field in a PDF, a build time or random identifier in a Word or EPUB file, or an owner, varying time or metadata chunk in an archive. A PDF glyph with no Unicode mapping, such as a bitmap font's ligature, is reported as a note rather than a failure: text extraction shows it as a control code, but pdfTeX cannot put one in the page, and the `.tex` it typeset is checked in full.
 
 ## Citing these papers
 

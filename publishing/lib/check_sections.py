@@ -91,6 +91,14 @@ def issues(text: str) -> list[tuple[str, str]]:
             if ref not in known:
                 context = re.sub(r"\s+", " ", text[max(0, m.start() - 62):m.end() + 10])
                 found.append((f"{label} {ref}", f"…{context.strip()}…"))
+    # a figure named by its file must be one of the manuscript's figures
+    names = {Path(src).stem for src in re.findall(r"(?m)^!\[.*?\]\(([^)\s]+)\)", text)}
+    name_pattern = r"(?:fig|[a-z])\d[\w-]*"
+    for m in re.finditer(rf"\bFigures?\s+({name_pattern}(?:(?:,\s*|,?\s+and\s+){name_pattern})*)", text):
+        for name in re.findall(name_pattern, m.group(1)):
+            if name not in names:
+                context = re.sub(r"\s+", " ", text[max(0, m.start() - 62):m.end() + 10])
+                found.append((f"Figure {name}", f"…{context.strip()}…"))
     # figure and table numbers are assigned by document order, so the only thing
     # checkable without a cross-reference package is that the number exists
     for label, pattern in (("Figure", FIGURE_REF), ("Table", TABLE_REF)):

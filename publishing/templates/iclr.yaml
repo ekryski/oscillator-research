@@ -1,0 +1,4 @@
+# Metadata the iclr build hands pandoc on top of the paper's own. The style
+# file sets its own paragraph shape (no indent, its own spacing); without
+# `indent`, pandoc loads parskip on top and the page stops being ICLR's.
+indent: true

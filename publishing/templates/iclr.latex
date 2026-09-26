@@ -1,0 +1,133 @@
+$-- Pandoc template producing an ICLR-conforming LaTeX document.
+$--
+$-- The style files in templates/iclr/ are vendored unmodified from ICLR's own
+$-- bundle. ICLR asks for its official files unaltered, so every adjustment
+$-- lives here in the preamble. The partials called below ($common.latex()$ and
+$-- friends) resolve from pandoc's own data directory, so the LaTeX pandoc
+$-- emits (longtable, \tightlist, \pandocbounded, natbib) always has what it
+$-- needs. templates/iclr.yaml carries the one pandoc-level knob this relies
+$-- on: `indent`, which keeps pandoc's parskip off the style's paragraph shape.
+$--
+$-- venue-face selects the three faces of the same manuscript:
+$--   submission  anonymous: "Anonymous authors", and the running head "Under
+$--               review as a conference paper at ICLR" (the style's default)
+$--   preprint    named, and no venue claimed: the style's camera-ready switch
+$--               gives the author block, and the running head it would print
+$--               is cleared, because a preprint is not an ICLR paper
+$--   accepted    camera-ready: "Published as a conference paper at ICLR"
+$--
+$-- ICLR counts pages: nine of main text at submission. References, appendices
+$-- and the AI-use, ethics and reproducibility statements do not count. The
+$-- appendix is injected after the references, where ICLR puts it.
+$document-metadata.latex()$
+$passoptions.latex()$
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+$-- ICLR numbers its sections; pandoc suppresses numbering unless asked, and
+$-- preprocess.py strips the numbers the Markdown headings carry
+\setcounter{secnumdepth}{$if(secnumdepth)$$secnumdepth$$else$3$endif$}
+$-- fonts.latex() is deliberately not called: it would load lmodern over the
+$-- Times face the style asks for. It is also what loads iftex, and the common
+$-- partial's babel block tests \ifLuaTeX, so iftex is loaded here instead.
+\usepackage{iftex}
+$common.latex()$
+$-- The style sets the page rectangle, the running head, the title block and
+$-- natbib's citation form. It loads after pandoc's packages so that nothing
+$-- pandoc pulled in overrides the geometry ICLR checks for. Next year's files
+$-- change the year in this name.
+\usepackage{iclr2027_conference,times}
+$if(venue-submission)$
+$else$
+$-- both named faces use the style's own switch for the author block
+\iclrfinalcopy
+$endif$
+$for(header-includes)$
+$header-includes$
+$endfor$
+% Table rows here carry phrases, not single words, and pandoc's longtables set
+% them solid. Both knobs are needed: \arraystretch scales the row strut,
+% \extrarowheight lifts the text off the rule above it.
+\renewcommand{\arraystretch}{1.35}
+% pandoc loads these only when the main text has a table; a paper whose tables all sit
+% in the appendix still needs them, and \extrarowheight needs array either way
+\usepackage{longtable,booktabs,array,calc}
+% pandoc numbers a caption-less table against a counter named none, defined with the rest
+\makeatletter\@ifundefined{c@none}{\newcounter{none}}{}\makeatother
+\setlength{\extrarowheight}{3pt}
+$after-header-includes.latex()$
+\ifdefined\captionsetup\captionsetup{font=small}\fi
+% Float placement, on every face. LaTeX's defaults reserve most of a page for
+% text, so a tall figure is deferred past the section that introduces it. These
+% let a float take more of the page it belongs on, and `!htbp` adds "here".
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.85}
+\renewcommand{\textfraction}{0.06}
+\renewcommand{\floatpagefraction}{0.72}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\makeatletter
+\renewcommand{\fps@figure}{!htbp}
+\renewcommand{\fps@table}{!htbp}
+% A float still waiting when a numbered section begins is flushed first, so a
+% figure stays inside the section that cites it. placeins would do this, but
+% it is not in a BasicTeX installation. \@deferlist holds exactly the pending
+% floats, so the page only breaks when one is actually waiting.
+\newcommand{\iclr@floatbarrier}{\par\vspace{\z@}%
+  \ifx\@deferlist\@empty\else\clearpage\fi}
+\let\iclr@section\section
+\renewcommand{\section}{\iclr@floatbarrier\iclr@section}
+\makeatother
+$hypersetup.latex()$
+$if(venue-submission)$
+$-- Double-blind covers the file, not just the page: hyperref writes the author
+$-- into the PDF's own metadata, where `pdfinfo` finds it even though the style
+$-- has replaced the title block with "Anonymous authors".
+\hypersetup{pdfauthor={}}
+$else$
+\hypersetup{pdfauthor={$for(author)$$author.name$$sep$, $endfor$}}
+$endif$
+$no-fingerprints.latex()$
+
+\title{$title$$if(subtitle)$ \\ $subtitle$$endif$}
+
+$-- ICLR's author block is plain lines separated by \And. Under the default
+$-- (anonymous) face the style discards it and prints "Anonymous authors".
+\author{$for(author)$$author.name$$if(author.affiliation)$ \\
+$author.affiliation$$endif$$if(author.email)$ \\
+\texttt{$author.email$}$endif$$sep$
+\And
+$endfor$}
+
+\begin{document}
+\maketitle
+$-- The style sets the running head inside \maketitle, so the preprint face
+$-- clears it afterwards: a preprint claims no venue. A pandoc template cannot
+$-- compare strings, so TeX does it; \ifx is true when both macros expand alike.
+\def\iclrface{$if(venue-face)$$venue-face$$endif$}\def\iclrpreprint{preprint}
+\ifx\iclrface\iclrpreprint\lhead{}\fi
+$if(abstract)$
+\begin{abstract}
+$abstract$
+\end{abstract}
+$endif$
+
+$for(include-before)$
+$include-before$
+
+$endfor$
+$body$
+
+$if(nocite-ids)$
+\nocite{$for(nocite-ids)$$it$$sep$, $endfor$}
+$endif$
+$-- \bibliographystyle comes from pandoc's own partial via biblio-style, which
+$-- publish.sh sets to the .bst it finds in the venue folder. BibTeX takes the
+$-- first \bibliographystyle it sees, so the template must not add another.
+\bibliography{references}
+$for(include-after)$
+$include-after$
+
+$endfor$
+\end{document}

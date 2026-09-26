@@ -124,3 +124,39 @@ def test_an_underscore_inside_math_or_a_url_is_left_alone():
     out = convert("@article{k,\n  title = {With {$S_N$} symmetry},\n"
                   "  howpublished = {\\url{http://x.org/paper_files}},\n}")
     assert "$S_N$" in out and "paper_files" in out
+
+
+def test_a_given_name_starting_with_a_two_byte_letter_can_be_abbreviated():
+    # BibTeX keeps the first BYTE of a name when a style prints initials, which
+    # cut the L-stroke of "Łukasz" in half and broke the reference
+    from bibtex_compat import protect_initials
+    assert protect_initials("Kuśmierz, Łukasz") == "Kuśmierz, {\\L}ukasz"
+
+
+def test_accented_leading_letters_become_braced_accent_commands():
+    from bibtex_compat import protect_initials
+    assert protect_initials("Élie, Jean") == "{\\'E}lie, Jean"
+    assert protect_initials("Čapek, Karel and Ørsted, Hans") == "{\\v{C}}apek, Karel and {\\O}rsted, Hans"
+
+
+def test_the_part_after_a_hyphen_is_an_initial_too():
+    from bibtex_compat import protect_initials
+    assert protect_initials("Dupont, Jean-Élie") == "Dupont, Jean-{\\'E}lie"
+
+
+def test_letters_inside_a_name_and_plain_names_are_left_alone():
+    from bibtex_compat import protect_initials
+    assert protect_initials("Bačić, Iva") == "Bačić, Iva"
+    assert protect_initials("Rusch, T. Konstantin") == "Rusch, T. Konstantin"
+
+
+def test_a_letter_with_no_latex_form_is_left_for_the_build_to_report():
+    from bibtex_compat import protect_initials
+    assert protect_initials("王, 伟") == "王, 伟"
+
+
+def test_only_name_fields_are_rewritten():
+    out = convert("@article{k,\n  author        = {Kuśmierz, Łukasz},\n"
+                  "  title         = {Łódź and its oscillators},\n  year          = {2025},\n"
+                  "  journal       = {J},\n  doi           = {10.1/x},\n}\n")
+    assert "{\\L}ukasz" in out and "Łódź and its oscillators" in out

@@ -85,3 +85,30 @@ def test_a_venue_preprint_keeps_its_own_file_name():
     # face must not overwrite it, and the house style's must keep its name
     assert f"would write {PDF}-neunet-preprint.pdf" in plan("--neunet", "--preprint").stdout
     assert f"would write {PDF}-preprint.pdf" in plan("--tmlr", "--preprint").stdout
+
+
+def test_the_iclr_venue_resolves_to_its_own_anonymous_submission_file():
+    out = plan("--iclr").stdout
+    assert "venue: iclr" in out and "face: submission" in out
+    assert f"would write {PDF}-iclr.pdf" in out
+    assert f"would write {PDF}-iclr-preprint.pdf" in plan("--iclr", "--preprint").stdout
+
+
+def test_a_style_name_with_an_underscore_reaches_bibtex_as_written():
+    # pandoc escapes metadata for LaTeX, so as metadata iclr2027_conference
+    # became iclr2027\_conference and BibTeX found no style file. As a template
+    # variable it is inserted verbatim, which is how the build must pass it.
+    import shutil
+    import pytest
+    if shutil.which("pandoc") is None:
+        pytest.skip("needs pandoc")
+    def bibstyle(flag: str) -> str:
+        out = subprocess.run(["pandoc", "--to=latex", "--natbib", "--standalone",
+                              "--template=publishing/templates/iclr.latex",
+                              f"--{flag}=biblio-style=iclr2027_conference"],
+                             cwd=ROOT, input="x", capture_output=True, text=True).stdout
+        return next(l for l in out.splitlines() if l.startswith("\\bibliographystyle"))
+    assert bibstyle("variable") == "\\bibliographystyle{iclr2027_conference}"
+    assert bibstyle("metadata") != "\\bibliographystyle{iclr2027_conference}"
+    script = (ROOT / "publishing/publish.sh").read_text()
+    assert "--variable=biblio-style=" in script and "--metadata=biblio-style=" not in script

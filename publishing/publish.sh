@@ -45,6 +45,8 @@
 #          `tmlr` is accepted as the old name for this format.
 #   pdf epub html docx   general reading formats, citeproc-rendered
 #   tex arxiv            LaTeX source, and a self-contained arXiv upload bundle
+#   supplement           the anonymized code-and-data zip for review (publishing/supplement.py),
+#                        for a paper with a metadata/supplement-README.md; others skip it
 #
 # Two companion tools, run when you want them rather than every build:
 #   publishing/lib/fetch_metadata.py  completes entries from the DOI registries
@@ -99,9 +101,9 @@ VENUE_BST="$(ls "$TEMPLATES/$VENUE"/*.bst 2>/dev/null | head -1)"
 BIBLIO_STYLE="$(basename "${VENUE_BST:-plainnat.bst}" .bst)"
 
 # the venue build is the submission; epub/html/docx are for reading and sharing;
-# arxiv is the posting bundle. The plain `pdf` and `tex` formats are dropped from
+# arxiv is the posting bundle; supplement is the review's code and data. The plain `pdf` and `tex` formats are dropped from
 # the default because they duplicate the venue ones — pass them explicitly.
-FORMATS="${FORMATS:-venue epub html docx arxiv}"
+FORMATS="${FORMATS:-venue epub html docx arxiv supplement}"
 # Citation style for the reading formats. The default is author-year because the
 # manuscripts are written that way ("Fries (2015) develops that observation"):
 # under a numeric style citeproc replaces the name with a bracketed number, the
@@ -136,6 +138,7 @@ if [ "$DRY_RUN" = 1 ]; then
             case "$fmt" in
                 venue|tmlr) echo "would write $dir$name-$SUFFIX.pdf and .tex" ;;
                 arxiv) echo "would write $dir$name-arxiv.tar.gz (preprint face, $HOUSE_VENUE style)" ;;
+                supplement) [ -f "${dir}metadata/supplement-README.md" ] && echo "would write $dir${name%-DRAFT}-supplement.zip (anonymized src, results, audio)" ;;
                 pdf|epub|html|docx|tex) echo "would write $dir$name.$fmt" ;;
                 *) echo "unknown format '$fmt'" ;;
             esac
@@ -204,6 +207,8 @@ stage_venue() {  # stage_venue <dir> <paper dir> <bib> <venue>
 
 built=0
 missing=0
+# the outputs written after this marker are the ones the closing check reads
+mkdir -p "$WORK" && touch "$WORK/.build-start"
 for dir in papers/*/; do
     slug="$(basename "$dir")"
     [ -n "$FILTER" ] && [[ "$slug" != "$FILTER"* ]] && continue
@@ -225,6 +230,13 @@ for dir in papers/*/; do
     [ "$slug" != "01-evidence-audit" ] && [ -f papers/01-evidence-audit/references/bibliography.bib ] \
         && inherit="--inherit papers/01-evidence-audit/references/bibliography.bib"
     python3 publishing/lib/extract_bib.py "$manuscript" $inherit
+    # Every format is built from cleaned copies: the manuscript through preprocess.py,
+    # the bibliography and the front matter here, so no invisible character, look-alike
+    # letter or odd space that could carry an unseen mark reaches an output (sanitize.py)
+    python3 publishing/lib/sanitize.py "$bib" --out "$WORK/$slug.bib"
+    python3 publishing/lib/sanitize.py "$meta" --out "$WORK/$slug.paper.yaml"
+    bib="$WORK/$slug.bib"
+    meta="$WORK/$slug.paper.yaml"
 
     echo "--- rewriting citations"
     body="$WORK/$slug.md"
@@ -251,6 +263,11 @@ for dir in papers/*/; do
     # the manuscript's own last-changed date, so a rebuild is reproducible
     date="$(git log -1 --format=%ad --date=short -- "$manuscript" 2>/dev/null)"
     [ -z "$date" ] && date="$(date +%F)"
+    # and every timestamp a format records (the Word and EPUB files' dates and zip
+    # entries, pdfTeX's, the arXiv archive's) is that day at midnight UTC, not the
+    # moment of the build, so no output carries a build time or a time zone
+    export SOURCE_DATE_EPOCH="$(python3 -c 'import datetime, sys
+print(int(datetime.datetime.fromisoformat(sys.argv[1]).replace(tzinfo=datetime.timezone.utc).timestamp()))' "$date")"
 
     common=(--from=markdown+tex_math_dollars+pipe_tables+footnotes
             --metadata-file="$meta" --metadata-file="$abstract_yaml"
@@ -321,12 +338,16 @@ for dir in papers/*/; do
                 # --natbib leaves the citations as \citep/\citet for BibTeX,
                 # which is what the venue's .bst and its instructions expect.
                 # venue-face and venue-submission are what the template reads
-                # to pick the title block and running head.
+                # to pick the title block and running head. The style name goes
+                # in as a variable, not as metadata: pandoc escapes metadata for
+                # LaTeX, so iclr2027_conference became iclr2027\_conference,
+                # BibTeX found no such style, and every citation came out
+                # undefined. A variable is inserted as written.
                 pandoc "${common[@]}" "${vector[@]}" ${venue_meta[@]+"${venue_meta[@]}"} \
                     --to=latex --natbib --template="$TEMPLATES/$VENUE.latex" \
                     --metadata=venue-face="$FACE" \
                     --metadata=venue-submission="$([ "$FACE" = submission ] && echo true)" \
-                    --metadata=biblio-style="$BIBLIO_STYLE" ${appendix_arg[@]+"${appendix_arg[@]}"} \
+                    --variable=biblio-style="$BIBLIO_STYLE" ${appendix_arg[@]+"${appendix_arg[@]}"} \
                     --output="$out/$name.tex" "$tex_body" || continue
                 log="$WORK/$slug.$VENUE.log"
                 final="$WORK/$slug.$VENUE.final.log"
@@ -355,9 +376,20 @@ for dir in papers/*/; do
                              | grep -oE "[0-9]+ pages" | tail -1)"
                     echo "    $dir$name-$SUFFIX.pdf ($VENUE $FACE${pages:+, $pages})"
                     check_glyphs "$final" || missing=1
-                    undefined="$(grep -c "Citation .* undefined" "$final")"
+                    # -a: a TeX log can carry stray bytes, and grep then takes
+                    # it for a binary file and reports nothing at all
+                    undefined="$(grep -a -c "Citation .* undefined" "$final")"
                     [ "$undefined" != 0 ] && {
                         echo "    ERROR: $undefined citation(s) did not resolve — see $final" >&2
+                        missing=1
+                    }
+                    # pdflatex recovers from most errors and still writes a PDF,
+                    # so a PDF existing proves nothing: a given name cut in half
+                    # by BibTeX printed a broken initial for a week unnoticed
+                    latex_errors="$(grep -a -c '^!' "$final")"
+                    [ "$latex_errors" != 0 ] && {
+                        echo "    ERROR: $latex_errors LaTeX error(s) in the final pass — see $final" >&2
+                        grep -a -m2 -A6 '^!' "$final" | grep -a -E '^!|^l\.[0-9]+' >&2
                         missing=1
                     }
                 else
@@ -384,7 +416,11 @@ for dir in papers/*/; do
                 fi
                 ;;
             epub)
+                # pandoc gives each EPUB a random identifier unless handed one; a random
+                # one tells two builds apart, so the paper's own name fixes it
+                epub_id="urn:uuid:$(python3 -c 'import sys, uuid; print(uuid.uuid5(uuid.NAMESPACE_URL, sys.argv[1]))' "$name")"
                 pandoc "${common[@]}" "${byline[@]}" "${cite[@]}" "${raster[@]}" --to=epub3 --toc --toc-depth=2 \
+                    --metadata=identifier="$epub_id" \
                     --output="$dir$name.epub" "$body" && echo "    $dir$name.epub"
                 ;;
             html)
@@ -399,6 +435,7 @@ for dir in papers/*/; do
                     --css=publishing/css/paper.css \
                     --metadata=reference-section-title="References" \
                     --embed-resources --output="$dir$name.html" "$body" \
+                    && sed -i.bak '/<meta name="generator"/d' "$dir$name.html" && rm -f "$dir$name.html.bak" \
                     && echo "    $dir$name.html"
                 ;;
             docx)
@@ -460,11 +497,16 @@ for dir in papers/*/; do
                 pandoc "${common[@]}" "${vector[@]}" ${house_meta[@]+"${house_meta[@]}"} \
                     --to=latex --natbib --template="$TEMPLATES/$HOUSE_VENUE.latex" \
                     --metadata=venue-face=preprint \
-                    --metadata=biblio-style="$(basename "$house_bst" .bst)" \
+                    --variable=biblio-style="$(basename "$house_bst" .bst)" \
                     ${appendix_arg[@]+"${appendix_arg[@]}"} \
                     --output="$bundle/$name.tex" "$tex_body" || continue
-                (cd "$WORK" && tar czf "$ROOT/$dir$name-arxiv.tar.gz" "arxiv-$slug")
+                python3 publishing/lib/archive.py "$bundle" "$ROOT/$dir$name-arxiv.tar.gz"
                 echo "    $dir$name-arxiv.tar.gz (tex + style + references.bib + figures)"
+                ;;
+            supplement)
+                # the review's code and data, anonymized; a paper without a supplement README has none
+                [ -f "${dir}metadata/supplement-README.md" ] || continue
+                python3 publishing/supplement.py "$slug" | sed 's/^/    /' || missing=1
                 ;;
             *) echo "    unknown format '$fmt'" ;;
         esac
@@ -482,8 +524,12 @@ echo "=== section numbers in the manuscript"
 python3 publishing/lib/number_sections.py --check
 
 echo
-echo "=== invisible characters in the sources"
+echo "=== hidden characters in the sources"
 python3 publishing/lib/check_hidden.py
+
+echo
+echo "=== fingerprints in the formats just built"
+python3 publishing/lib/check_outputs.py "$FILTER" --newer "$WORK/.build-start" || missing=1
 
 echo
 echo "=== citation labels shared by two works"
@@ -499,5 +545,5 @@ python3 publishing/lib/check_sections.py
 
 echo
 echo "built $built paper(s), beside their Markdown under papers/"
-[ "$missing" = 1 ] && { echo "one or more builds failed or dropped characters — see above" >&2; exit 1; }
+[ "$missing" = 1 ] && { echo "one or more builds failed, dropped characters or kept a fingerprint — see above" >&2; exit 1; }
 echo "citation metadata for these papers: python3 publishing/cite_this.py"

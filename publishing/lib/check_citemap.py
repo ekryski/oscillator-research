@@ -36,7 +36,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import bibfile
 import preprocess
-from extract_bib import citekey, split_author_year
+from extract_bib import AUTHOR_YEAR, LINK, citekey, split_author_year
 from paths import papers
 from preprocess import entry_links
 
@@ -94,6 +94,24 @@ def label_only(manuscript: str, bib: str) -> list[tuple[str, str]]:
             continue
         if not by_url.get(preprocess.url_key(m.group(2))):
             out.append((label, m.group(2)))
+    # A bracket citation carries no link at all, so it is label-resolved by
+    # construction and nothing checks that its entry holds the work meant. Paper
+    # 02 was written entirely this way and passed a check that only looked at
+    # links, which is the check reporting a clean bill it had not earned.
+    #
+    # Links are stripped first, as rewrite_links does before rewrite_brackets
+    # runs: the label half of `[Label](url)` is itself a bracket, and scanning
+    # the raw text reports every link citation in the paper. A bracket is only
+    # a citation if it parses as author-year, which leaves notation like the
+    # matrix shape `[T x 16]` alone.
+    bare = LINK.sub(" ", manuscript)
+    for m in preprocess.BRACKET.finditer(bare):
+        if m.group(1).startswith("@"):
+            continue
+        for part in m.group(1).split(";"):
+            label = " ".join(part.split())
+            if label and AUTHOR_YEAR.match(label) and not preprocess.NOT_A_CITATION.search(label):
+                out.append((label, "(no link: bracket citation)"))
     return sorted(set(out))
 
 

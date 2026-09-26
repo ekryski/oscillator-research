@@ -7,7 +7,7 @@ percent-encodes. The label collapses them; the link does not, so the link is
 what resolution reads first.
 """
 
-from check_citemap import shared_links
+from check_citemap import label_only, shared_links
 from preprocess import alias_map, entry_links, rewrite_brackets, rewrite_links, url_index, url_key
 
 #: two works by one author in one year, an old parenthesised DOI, a blog post
@@ -315,3 +315,46 @@ class TestParenthesisedCitations:
     def test_an_unresolved_label_leaves_the_parenthesis_untouched(self):
         src = "([Nobody 1999](https://example.org/zz))"
         assert self.rewrite(src) == src
+
+
+class TestLabelOnlyCitations:
+    """Citations nothing can verify: no identifier links them to their entry.
+
+    This is the path the Zhang 2023 mis-citation took. A label fits any work by
+    those authors in that year, so if the entry holds a different one, nothing
+    in the build notices.
+    """
+
+    BIB = """@misc{a, title={A}, doi={10.1000/a}}
+"""
+
+    def check(self, text):
+        return label_only(text, self.BIB)
+
+    def test_a_link_matching_an_entry_is_not_reported(self):
+        assert self.check("text ([A 2001](https://doi.org/10.1000/a)).") == []
+
+    def test_a_link_matching_no_entry_is_reported(self):
+        assert self.check("([A 2001](https://doi.org/10.9999/zz))") == [
+            ("A 2001", "https://doi.org/10.9999/zz")]
+
+    def test_a_bracket_citation_is_reported(self):
+        # it carries no link at all, so nothing checks the entry is the work meant
+        assert self.check("as shown [A 2001].") == [("A 2001", "(no link: bracket citation)")]
+
+    def test_each_work_in_a_multi_work_bracket_is_reported(self):
+        out = self.check("[A 2001; B 2002]")
+        assert out == [("A 2001", "(no link: bracket citation)"),
+                       ("B 2002", "(no link: bracket citation)")]
+
+    def test_the_label_half_of_a_link_is_not_a_bracket_citation(self):
+        # scanning raw text reports every link citation in the paper, since
+        # "[Label](url)" opens with a bracket of its own
+        assert self.check("text ([A 2001](https://doi.org/10.1000/a)) more") == []
+
+    def test_notation_that_is_not_author_year_is_left_alone(self):
+        # the manuscript writes matrix shapes the same way
+        assert self.check("rows [T x 16] at 62.5 fps") == []
+
+    def test_an_already_rewritten_citation_is_left_alone(self):
+        assert self.check("text [@a] more") == []

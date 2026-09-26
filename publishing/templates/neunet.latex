@@ -50,6 +50,11 @@ $endfor$
 % longtables set them solid. Both knobs are needed: \arraystretch scales the
 % row strut, \extrarowheight lifts the text off the rule above it.
 \renewcommand{\arraystretch}{1.35}
+% pandoc loads these only when the main text has a table; a paper whose tables all sit
+% in the appendix still needs them, and \extrarowheight needs array either way
+\usepackage{longtable,booktabs,array,calc}
+% pandoc numbers a caption-less table against a counter named none, defined with the rest
+\makeatletter\@ifundefined{c@none}{\newcounter{none}}{}\makeatother
 \setlength{\extrarowheight}{3pt}
 $after-header-includes.latex()$
 \ifdefined\captionsetup\captionsetup{font=small}\fi
@@ -64,7 +69,8 @@ $endif$
 $if(keywords)$
   pdfkeywords={$for(keywords)$$keywords$$sep$, $endfor$},
 $endif$
-  pdfcreator={LaTeX via pandoc}}
+  pdfcreator={}}
+$no-fingerprints.latex()$
 
 $-- The class hard-codes its running foot inside an expl3 function. On the
 $-- preprint face that function is redefined, body for body, with the venue
