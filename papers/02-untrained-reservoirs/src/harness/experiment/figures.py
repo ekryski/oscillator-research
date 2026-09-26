@@ -435,10 +435,10 @@ def design_factor_figure(panel: int, stem: str, across: bool = False, by: dict |
     if across:
         fig, ax = plt.subplots(figsize=(9.0, 2.9))
     else:
-        height = 0.36 * n + 1.5
+        height = 0.3 * n + 1.2
         fig, ax = plt.subplots(figsize=(7.0, height))
     for i, (noise, gain, legend, colour, marker) in enumerate(CONDITIONS):
-        offset = (i - 1.5) * 0.17
+        offset = (i - 1.5) * (0.17 if across else 0.18)
         for j, (level, _) in enumerate(levels):
             r = by.get((f"{factor}: {level} minus {ref}", noise, gain))
             if r is None:
@@ -449,7 +449,7 @@ def design_factor_figure(panel: int, stem: str, across: bool = False, by: dict |
                         label=legend if j == 0 else None)
             else:
                 ax.plot(r["ci95"], [j + offset] * 2, color=colour, linewidth=1.2)
-                ax.plot(r["mean"], j + offset, marker=marker, color=colour, markersize=4, linestyle="none",
+                ax.plot(r["mean"], j + offset, marker=marker, color=colour, markersize=3.5, linestyle="none",
                         label=legend if j == 0 else None)
     labels = [label.replace(", ", ",\n") if across else label for _, label in levels]
     if across:
