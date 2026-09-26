@@ -196,3 +196,16 @@ def test_the_coil_is_compared_with_the_torus_over_the_phase_coupling_functions_a
 
 def test_noise_is_reported_as_the_signal_to_noise_ratio():
     assert (sm.snr(0.0), sm.snr(5.0), sm.snr(None)) == ("0 dB", "−5 dB", "clean")
+
+
+def test_a_quadrature_network_is_paired_with_the_same_network_on_the_spectrogram_pathway():
+    def cell(experiment, pathway, coupling, geometry, seed, acc):
+        arm = Arm("network", coupling=coupling, geometry=geometry, channels=1, grid=32)
+        return sm.Cell(experiment, pathway, 0.0, 1.0, seed, arm.as_dict(), arm.label(), "windowed", 192, 2048, acc,
+                       bits(acc, seed), N_TEST)
+    cells = [c for seed in (0, 1, 2) for c in (
+        cell("quadrature", "quadrature", "kuramoto", "torus", seed, 0.20), cell("size", "spectrogram", "kuramoto", "torus", seed, 0.70),
+        cell("design-quadrature", "quadrature", "winfree", "cube", seed, 0.15), cell("design", "spectrogram", "winfree", "cube", seed, 0.65))]
+    rows = {r["comparison"]: r for r in sm.pathway_comparisons(cells)}
+    assert rows["coupled oscillator network: quadrature minus spectrogram pathway"]["mean"] == pytest.approx(-50.0)
+    assert rows["Winfree, cube: quadrature minus spectrogram pathway"]["n_pairs"] == 3

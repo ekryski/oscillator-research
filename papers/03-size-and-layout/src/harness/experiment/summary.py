@@ -324,8 +324,8 @@ def compare(cells: list[Cell], name: str, a, b, *, per_channel: bool = True, ign
             extra: dict | None = None, by=None) -> list[dict]:
     """a minus b over matched cells: `a` and `b` select cells, matched on task and its set (pair, length,
     position), lattice, band mapping, window (and channel count if `per_channel`), noise, gain, width,
-    training size, seed and projection; `ignore` drops some of the size's terms from the match (for
-    one band mapping or window against another), and `by(cell)` adds terms of its own, so that one
+    training size, seed and projection; `ignore` drops some of the size's terms, or the pathway, from the
+    match (for one band mapping, window or pathway against another), and `by(cell)` adds terms of its own, so that one
     comparison pools several matched configurations (the cochlea's coupling functions). A cell without
     gain (the spectrogram-only baseline, a trained baseline) matches the other at every gain, and an
     unprojected cell of b (projection "none") matches a under either projection."""
@@ -337,8 +337,8 @@ def compare(cells: list[Cell], name: str, a, b, *, per_channel: bool = True, ign
         return tuple(None if m in drop else getattr(c, m) for m in MATCH)
 
     def key(c: Cell, projection: str) -> tuple:
-        return (c.condition, c.pathway, size(c), c.noise, c.gain if b_gain else None, c.width, c.n_train, c.seed,
-                projection, by(c) if by else ())
+        return (c.condition, None if "pathway" in drop else c.pathway, size(c), c.noise, c.gain if b_gain else None,
+                c.width, c.n_train, c.seed, projection, by(c) if by else ())
     idx = {key(c, c.projection): c for c in bs}
     groups = defaultdict(list)
     for c in cells:
@@ -424,9 +424,25 @@ def size_comparisons(cells: list[Cell]) -> list[dict]:
     return out
 
 
+def _config(experiment: str, coupling: str, geometry: str, coupled: bool = True):
+    """A network configuration's primary cells in one experiment."""
+    def pick(c: Cell) -> bool:
+        return (c.experiment == experiment and c.read == READ and _kind(c) == ("network" if coupled else "uncoupled")
+                and c.arm.get("coupling") == coupling and c.arm.get("geometry") == geometry)
+    return pick
+
+
 def design_comparisons(cells: list[Cell]) -> list[dict]:
-    """Each coupling function and geometry minus the reference network, at every size and pathway."""
+    """Each coupling function and geometry minus the reference network, at every size and pathway; and, as
+    paper 02 compares them, each coupling function on the torus minus the whole-clip spectrogram-only
+    baseline on the same rows."""
     out = []
+    whole = _sel("size", "baseline", "windowed@wholeclip")
+    for coupling in plan.PHASE_COUPLINGS + plan.AMPLITUDE_COUPLINGS:
+        if coupling != plan.REFERENCE[0]:
+            out += compare(cells, f"{terms.level(coupling)}, torus minus the {WHOLE}",
+                           _config("design", coupling, "torus"), whole, per_channel=False,
+                           extra={"factor": "coupling function"})
     for experiment, reference, pathway in (("design", "size", "spectrogram"),
                                            ("design-quadrature", "quadrature", "quadrature")):
         for coupling, geometry in plan.designs():
@@ -473,8 +489,19 @@ def cochlea_comparisons(cells: list[Cell]) -> list[dict]:
 
 
 def pathway_comparisons(cells: list[Cell]) -> list[dict]:
-    """On the quadrature pathway: the network against that pathway's own controls."""
-    return _controls(cells, "quadrature", "recognition", "quadrature", " (quadrature pathway)", bank=False)
+    """On the quadrature pathway: the network against that pathway's own controls; and each network on the
+    quadrature pathway minus the same network on the spectrogram pathway, at the same size, as paper 02
+    pairs them."""
+    out = _controls(cells, "quadrature", "recognition", "quadrature", " (quadrature pathway)", bank=False)
+    same = [(f"{NETWORK}: quadrature minus spectrogram pathway", _config("quadrature", *plan.REFERENCE),
+             _config("size", *plan.REFERENCE)),
+            (f"{UNCOUPLED}: quadrature minus spectrogram pathway", _config("quadrature", *plan.REFERENCE, False),
+             _config("size", *plan.REFERENCE, False))]
+    same += [(f"{terms.level(c)}, {g}: quadrature minus spectrogram pathway", _config("design-quadrature", c, g),
+              _config("design", c, g)) for c, g in plan.designs(plan.PHASE_COUPLINGS) if (c, g) != plan.REFERENCE]
+    for name, a, b in same:
+        out += compare(cells, name, a, b, ignore=("pathway",), extra={"factor": "input pathway"})
+    return out
 
 
 def chance() -> dict:
