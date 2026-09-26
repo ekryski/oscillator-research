@@ -35,7 +35,7 @@ uv run python -m harness.experiment.plan prepare            # front-end rows, on
 uv run python -m harness.experiment.plan run leak-check controls --workers 3 --threads 2
 uv run python -m harness.experiment.plan run design becker-folds quadrature projection sweep cochlea --workers 6 --threads 1
 uv run python -m harness.experiment.summary                 # every accuracy and difference with its spread, and the leak check
-uv run python -m harness.experiment.figures                 # the paper's figures and their tables
+uv run python -m harness.experiment.figures                 # the paper's result figures
 ```
 
 `plan run <experiment> --dry-run` prints what would run. Every run is recorded under an identity derived from its specification, so a sweep stopped at any point restarts where it left off, and `--task order` or `--task recognition` lets two machines split an experiment without sharing a file. `--device mps` or `--device cuda` simulates the untrained arms on a GPU; the readout is closed-form and runs on the CPU, and the trained baselines always train on the CPU. A GPU rounds differently from the CPU, so its cells can differ from the CPU's by a test clip or two. Set `OSC_RESULTS_DIR` to write a reproduction into a fresh folder instead of the committed record.
@@ -49,7 +49,7 @@ uv run python -m harness.experiment.figures                 # the paper's figure
 | `experiment/plan.py` | the experiments, and the parallel driver |
 | `experiment/record.py` | the record read back, one cell at a time |
 | `experiment/summary.py` | every accuracy and paired difference, with its spread, and the zero-input leak check: `summary.json` and `summary.md` |
-| `experiment/figures.py` | the paper's figures, and the tables printed beside them |
+| `experiment/figures.py` | the paper's result figures, and the class-information map drawn from the corpus |
 | `experiment/terms.py` | the paper's names for the record's labels, used by every table, figure and report |
 | `stimuli/` | the log-mel front end, the hop-rate and quadrature rows, the digit clips |
 | `models/field.py`, `phase.py`, `stuart_landau.py` | the oscillator network and its two cores |

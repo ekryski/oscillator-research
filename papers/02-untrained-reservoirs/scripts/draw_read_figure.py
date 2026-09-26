@@ -3,7 +3,7 @@
     cd src && uv run python ../scripts/draw_read_figure.py      # from the paper's folder
 
 A drawing, not a result: nothing here reads the record. Writes
-resources/figures/a4-the-read.{pdf,png}.
+resources/figures/fig10-appD1-readout.{pdf,png}.
 """
 
 from __future__ import annotations
@@ -94,7 +94,7 @@ def main() -> None:
             "48 to 54 features and are read as they are; the reservoirs' 3,072 to 6,144 are projected to 192.",
             fontsize=7.5, color=MUTED, va="top")
     fig.tight_layout()
-    path = FIGURES_DIR / "a4-the-read"
+    path = FIGURES_DIR / "fig10-appD1-readout"
     for suffix, kwargs in SAVE:
         fig.savefig(path.with_suffix(suffix), bbox_inches="tight", **kwargs)
     plt.close(fig)

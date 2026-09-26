@@ -423,6 +423,7 @@ def main() -> None:
     # path takes off next; imported here for the same cycle as number_sections
     import crossref
     text, section_ids = crossref.anchor(text, APPENDIX)
+    text, figure_numbers = crossref.number_figures(text)
     if a.target == "latex":
         # LaTeX numbers its own sections, and sets the number off from the title
         # by a fixed gap the plain space in the heading text does not reproduce.
@@ -446,6 +447,8 @@ def main() -> None:
     text, n_links, disagreements = rewrite_links(text, known, by_url)
     text, n_brackets = rewrite_brackets(text, known)
     text, n_xrefs = crossref.link(text, section_ids)
+    text, n_figrefs = crossref.link_figures(text, figure_numbers)
+    n_xrefs += n_figrefs
     if a.target == "latex":
         text, n_img = to_vector_images(text)
         for line in warn_pseudo_math(text):
@@ -470,6 +473,8 @@ def main() -> None:
             appendix, _ = rewrite_brackets(appendix, known)
             appendix, n_appx = crossref.link(appendix, section_ids)
             n_xrefs += n_appx
+            appendix, n_appx = crossref.link_figures(appendix, figure_numbers)
+            n_xrefs += n_appx
             if a.target == "latex":
                 appendix, _ = to_latex_math(appendix)
                 appendix, _ = to_vector_images(appendix)
@@ -479,7 +484,7 @@ def main() -> None:
     for line in dict.fromkeys(disagreements):
         print(f"  WARNING: a citation's label and link name different works:\n"
               f"    {line}", file=sys.stderr)
-    extra = f", {n_xrefs} section references linked" if n_xrefs else ""
+    extra = f", {n_xrefs} section and figure references linked" if n_xrefs else ""
     extra += f", {n_math} math characters" if n_math else ""
     extra += f", {n_img} images to vector" if n_img else ""
     extra += f", {n_unnumbered} headings unnumbered for LaTeX" if n_unnumbered else ""

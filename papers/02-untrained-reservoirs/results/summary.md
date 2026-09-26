@@ -6,7 +6,7 @@ Runs recorded: leak-check 13 of 13; controls 852 of 852; design 3,744 of 3,744; 
 
 Leak check: with no input, 48 of the 48 cells of the 4 zero-gain runs read exactly chance (10%).
 
-## Controls, recognition: accuracy (Section 4.1, 4.2)
+## Controls, recognition: accuracy (Section 4.1)
 
 Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 61); tested on the 6,000 clips of speakers 49 to 60; mean ± standard deviation over seeds 0 to 2, in percent. The spectrogram-only baseline is read both over the whole clip and, as every other arm is, from frame 16. An arm with more than 192 signals is projected down to 192; one with fewer is read as it is.
 
@@ -30,7 +30,7 @@ Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 6
 | coupled oscillator network (Stuart–Landau) (gain = 1) | 93.9 ± 0.5 |  |  |
 | coupled oscillator network (Stuart–Landau) (gain = 2) | 93.7 ± 0.9 |  |  |
 
-## Controls, recognition: the coupled network minus each other arm (Section 4.1, 4.2)
+## Controls, recognition: the coupled network minus each other arm (Section 4.1)
 
 The cells of the table above, paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points. The gain in brackets is the coupled network's, and the other arm's when it takes one.
 
@@ -59,7 +59,7 @@ The cells of the table above, paired on the same test clips and seeds: mean ± s
 | coupled oscillator network, with rotation rates minus without (gain = 1) | -0.30 ± 0.50 [-0.59, -0.01] | +0.59 ± 0.58 [+0.19, +0.99] | +0.38 ± 0.31 [-0.01, +0.76] |
 | coupled oscillator network, with rotation rates minus without (gain = 2) | +0.97 ± 0.67 [+0.63, +1.31] | +1.18 ± 1.06 [+0.74, +1.61] | +1.36 ± 0.55 [+0.97, +1.81] |
 
-## Controls, recognition: accuracy by readout width and training size (Section 4.6)
+## Controls, recognition: accuracy by readout width and training size (Section 4.7)
 
 Each column is a training size (n clips, nested: each set contains the smaller) and a readout width (w); the four-window read, tested on the 6,000 clips of speakers 49 to 60; mean ± standard deviation over seeds 0 to 2, in percent. At each width an arm with more signals is projected down to it, and one with fewer is read as it is.
 
@@ -103,7 +103,7 @@ Each column is a training size (n clips, nested: each set contains the smaller) 
 | CNN | 73.9 ± 1.6 | 73.9 ± 1.6 | 73.9 ± 1.6 | 79.5 ± 1.3 | 79.5 ± 1.3 | 79.5 ± 1.3 | 81.4 ± 0.9 | 81.4 ± 0.9 | 81.4 ± 0.9 |
 | TCN | 76.2 ± 0.4 | 76.2 ± 0.4 | 76.2 ± 0.4 | 82.7 ± 1.0 | 82.7 ± 1.0 | 82.7 ± 1.0 | 84.3 ± 0.7 | 84.3 ± 0.7 | 84.3 ± 0.7 |
 
-## Controls, recognition: readout width 4,096 minus 192 (Section 4.6)
+## Controls, recognition: readout width 4,096 minus 192 (Section 4.7)
 
 Each arm at width 4,096 minus itself at 192, both at 2,048 training clips, paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points.
 
@@ -126,7 +126,7 @@ Each arm at width 4,096 minus itself at 192, both at 2,048 training clips, paire
 | uncoupled oscillator network: width 4,096 minus 192 (gain = 1) | +2.40 ± 0.25 [+2.04, +2.75] | +1.25 ± 0.29 [+0.85, +1.64] | +0.29 ± 0.87 [-0.22, +0.79] |
 | uncoupled oscillator network: width 4,096 minus 192 (gain = 2) | +3.97 ± 1.13 [+3.50, +4.46] | +1.92 ± 0.34 [+1.49, +2.37] | +1.32 ± 0.41 [+0.91, +1.72] |
 
-## Controls, order task: accuracy, averaged over the five digit pairs (Section 4.7)
+## Controls, order task: accuracy, averaged over the five digit pairs (Section 4.2)
 
 Readout width 192 and 2,048 training sequences per digit pair, the whole-span read (frames 16 to 147); tested on 2,048 sequences per pair from speakers 49 to 60; each seed's accuracy averaged over the five pairs, then mean ± standard deviation over seeds 0 to 2, in percent. An arm with more than 192 signals is projected down to 192; one with fewer is read as it is. Chance is 50%.
 
@@ -148,7 +148,7 @@ Readout width 192 and 2,048 training sequences per digit pair, the whole-span re
 | CNN | 92.2 ± 0.6 | 50.0 ± 0.4 | 50.0 ± 0.4 |
 | TCN | 99.9 ± 0.1 | 95.0 ± 0.4 | 91.1 ± 0.3 |
 
-## Controls, order task: the coupled network minus each other arm, pooled over the five pairs (Section 4.7)
+## Controls, order task: the coupled network minus each other arm, pooled over the five pairs (Section 4.2)
 
 The cells of the table above, paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points; the pairs' test clips are pooled.
 
@@ -179,7 +179,7 @@ The cells of the table above, paired on the same test clips and seeds: mean ± s
 
 Order task, the spectrogram-only baseline's 95% interval contains chance (50%) in 14 of 15 pair and noise cells; it does not in: pair37/0db.
 
-## Design: each level minus its reference, over matched configurations (Section 4.3)
+## Design: each level minus its reference, over matched configurations (Sections 4.3 to 4.5)
 
 Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 61); tested on the 6,000 clips of speakers 49 to 60. Each level minus its reference over every configuration identical in the other factors, paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points.
 
@@ -207,7 +207,7 @@ Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 6
 | coupled oscillator network (Stuart–Landau, fixed amplitude) minus the spectrogram-only baseline, whole clip | -0.96 ± 0.86 [-1.68, -0.19] | -2.65 ± 1.03 [-3.40, -1.81] | -0.86 ± 1.75 [-1.63, -0.06] | -3.47 ± 1.69 [-4.31, -2.64] |
 | with rotation rates minus without, every design configuration | +0.13 ± 0.00 | +0.47 ± 0.09 | +0.17 ± 0.07 | +0.49 ± 0.09 |
 
-## Projection: the controls experiment's reservoirs under the fixed and a seeded projection (Section 4.6)
+## Projection: the controls experiment's reservoirs under the fixed and a seeded projection (Section 4.7)
 
 What the projection does: every arm's standardized summary statistics are multiplied by a random Gaussian matrix that maps them to the common readout width, so an arm with thousands of signals and one with 192 are read by readouts of the same size. The fixed projection is one draw, shared by every run and seed; the seeded projection is drawn afresh from each run's seed. Seeded minus fixed therefore measures how far the particular draw moves a result, which the spread over seeds otherwise leaves out.
 
@@ -294,7 +294,7 @@ Rerun on the Apple GPU, the projection experiment's fixed-projection cells again
 | order: coupled oscillator network minus the leaky-integrator bank, width-matched, seeded projection (gain = 1) | -1.96 ± 0.29 [-2.15, -1.78] | -3.91 ± 0.59 [-4.18, -3.63] | -3.83 ± 0.63 [-4.13, -3.54] |
 | order: coupled oscillator network minus the leaky-integrator bank, width-matched, seeded projection (gain = 2) | -5.62 ± 0.78 [-5.91, -5.32] | -6.12 ± 0.55 [-6.47, -5.80] | -7.63 ± 1.01 [-8.01, -7.25] |
 
-## Sweep: restoring strength, coupling ceiling and gain beyond the design experiment's, each minus its reference (Section 4.4)
+## Sweep: restoring strength, coupling ceiling and gain beyond the design experiment's, each minus its reference (Section 4.5)
 
 Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 61); tested on the 6,000 clips of speakers 49 to 60. Each coupling function at the reference configuration, paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points.
 
@@ -385,7 +385,7 @@ Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 6
 | Stuart–Landau, fixed amplitude: gain 10 minus gain 1 |  |  |  |  |  |  |  |  |  | -38.48 ± 1.51 [-39.47, -37.50] |  |  |  |  |  |  |  |  |  |  | -37.90 ± 0.76 [-38.86, -36.91] |  |
 | Stuart–Landau, fixed amplitude: gain 12 minus gain 1 |  |  |  |  |  |  |  |  |  |  | -38.48 ± 0.46 [-39.51, -37.49] |  |  |  |  |  |  |  |  |  |  | -35.61 ± 1.19 [-36.68, -34.61] |
 
-## Cochlea: the coil and the cochlea, each minus another geometry, over matched configurations (Section 4.3)
+## Cochlea: the coil and the cochlea, each minus another geometry, over matched configurations (Section 4.4)
 
 Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 61); tested on the 6,000 clips of speakers 49 to 60. Matched on coupling function and natural frequencies, paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points.
 
@@ -448,7 +448,7 @@ The cells of the table above, paired on the same test clips and folds: mean ± s
 | coupled oscillator network minus the S4D (gain = 1) | -6.07 ± 2.44 [-6.38, -5.77] |
 | coupled oscillator network minus the S4D (gain = 2) | -9.13 ± 2.50 [-9.47, -8.77] |
 
-## Quadrature: each network minus the quadrature front end's own baseline, and minus the same network on the spectrogram pathway (Section 4.5)
+## Quadrature: each network minus the quadrature front end's own baseline, and minus the same network on the spectrogram pathway (Section 4.6)
 
 Readout width 192 and 2,048 training clips, the four-window read (frames 16 to 61); tested on the 6,000 clips of speakers 49 to 60. Paired on the same test clips and seeds: mean ± standard deviation over seeds 0 to 2, with the 95% interval from resampling test clips in brackets, in points.
 

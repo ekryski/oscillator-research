@@ -46,3 +46,25 @@ def test_code_existing_links_and_headings_are_left_alone():
     out, _ = link(text, ids)
     assert "[Section 2](#sec-2) and `Section 2.1`, and [Section 2.1](#elsewhere)." in out
     assert "### 2.1 Design {#sec-2-1}" in out
+
+
+FIGS = """Intro (Figure b2-two) and Figures a1-one and b2-two, and Figure z9-missing; Figure fig03-sec4-3-three.
+
+![First, with a [link](https://x.org).](resources/figures/a1-one.png)
+
+![Second.](resources/figures/b2-two.png){width=90%}
+
+![Third.](resources/figures/fig03-sec4-3-three.png)
+"""
+
+
+def test_figures_are_numbered_in_order_and_named_references_link_to_them():
+    from crossref import link_figures, number_figures
+    text, numbers = number_figures(FIGS)
+    assert numbers == {"a1-one": 1, "b2-two": 2, "fig03-sec4-3-three": 3}
+    assert "![First, with a [link](https://x.org).](resources/figures/a1-one.png){#fig-a1-one}" in text
+    assert "![Second.](resources/figures/b2-two.png){#fig-b2-two width=90%}" in text
+    out, n = link_figures(text, numbers)
+    assert ("Intro ([Figure 2](#fig-b2-two)) and [Figures 1](#fig-a1-one) and [2](#fig-b2-two), and Figure z9-missing; "
+            "[Figure 3](#fig-fig03-sec4-3-three).") in out
+    assert n == 4

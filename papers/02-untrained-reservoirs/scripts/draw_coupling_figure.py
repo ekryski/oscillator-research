@@ -7,7 +7,7 @@ is drawn twice for one neighbour j with a positive kernel weight: on the left,
 the push an oscillator would feel at each phase around the circle while j sits
 at the top; on the right, that push against the phase difference. The forms and
 constants follow harness/models/phase.py and stuart_landau.py (alpha = pi/4,
-beta = 0.5). Writes resources/figures/a3-coupling-functions.{pdf,png}.
+beta = 0.5). Writes resources/figures/fig08-appB-coupling-functions.{pdf,png}.
 """
 
 from __future__ import annotations
@@ -178,7 +178,7 @@ def main() -> None:
              "rest but unstable or neutral. A negative weight reverses every arrow, and each oscillator\n"
              "feels the sum over every other oscillator in its channel.",
              ha="center", fontsize=8.5, color=INK, linespacing=1.5)
-    stem = FIGURES_DIR / "a3-coupling-functions"
+    stem = FIGURES_DIR / "fig08-appB-coupling-functions"
     for suffix, kwargs in ((".pdf", {"metadata": {"CreationDate": None, "Creator": None, "Producer": None}}),
                            (".png", {"dpi": 200, "metadata": {"Software": None}})):
         fig.savefig(stem.with_suffix(suffix), bbox_inches="tight", **kwargs)

@@ -54,10 +54,11 @@ def paper_dir(paper: str) -> Path:
 
 
 def manuscript(paper: Path) -> Path:
-    drafts = sorted(paper.glob("*-DRAFT.md"))
-    if len(drafts) != 1:
-        sys.exit(f"expected one *-DRAFT.md in {paper}, found {drafts}")
-    return drafts[0]
+    """The paper's Markdown source, named -DRAFT.md or not, never its README."""
+    found = sorted(paper.glob("*-DRAFT.md")) or [p for p in sorted(paper.glob("*.md")) if p.name != "README.md"]
+    if len(found) != 1:
+        sys.exit(f"expected one manuscript in {paper}, found {found}")
+    return found[0]
 
 
 def tracked(paper: Path, paths: tuple[str, ...]) -> list[str]:
