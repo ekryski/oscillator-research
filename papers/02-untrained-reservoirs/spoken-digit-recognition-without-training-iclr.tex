@@ -133,8 +133,8 @@ its input representation, the width of its readout, and the oscillator
 dynamics and structure themselves. Our ablation study results give
 future studies of trained oscillator networks an untrained baseline to
 compare against for speech recognition tasks, and insight into which
-factors contribute to an oscillator network's effectiveness on time
-series tasks.
+factors contribute to an oscillator network's effectiveness on
+time-series tasks.
 \end{abstract}
 
 \section{Introduction}\label{sec-1}
@@ -261,7 +261,7 @@ arms are the reservoirs.
 
 \subsection{Task, data and noise}\label{sec-3-2}
 
-We perform single digit audio classification over AudioMNIST
+We perform single-digit audio classification over AudioMNIST
 \citep{becker2024}, which holds 30,000 recordings of digits 0 through 9
 by 60 speakers. Every result keeps speakers apart to avoid a model
 overfitting to a particular speaker's vocal spectrogram. Under Protocol
@@ -274,21 +274,21 @@ clip at signal-to-noise ratios of 0 dB (as loud as the speech) and
 \ensuremath{-}5 dB (5 dB louder), the levels at which \citet{young2026}
 trained hybrid real and complex-valued convolutional networks on
 AudioMNIST, though they did so on a random audio sample split so were
-not speaker disjoint. We also report clean audio for posterity.
+not speaker disjoint. We also report clean audio for reference.
 Additionally, we performed an order task on five different digit pairs
 where two digits of a pair are spoken one after the other and the arm
 must say which came first. Statistics of an input read over the whole
 span cannot tell the orders apart, so the spectrogram-only baseline
 reads chance, 50\%. Every arm hears the same fixed front end, a 16-band
 log-mel spectrogram at 62.5 frames per second, without training on this
-task besides the single digit training methodology.
+task besides the single-digit training methodology.
 
 \subsection{Readout}\label{sec-3-3}
 
 Every arm is read the same way (\hyperref[sec-D-1]{Appendix D.1} draws
-the read for each kind of arm). Each of its signals (a band energy, the
-sine or cosine of an oscillator's phase, a leaky integrator's state or a
-trained baseline's hidden unit) is summarized by its mean, standard
+the readout for each kind of arm). Each of its signals (a band energy,
+the sine or cosine of an oscillator's phase, a leaky integrator's state
+or a trained baseline's hidden unit) is summarized by its mean, standard
 deviation and mean absolute change over each of four equal windows of
 frames 16 to 61, after a 16-frame warm-up (frames 16 to 147 as one
 window for the order task). So that readout capacity cannot obscure
@@ -315,8 +315,8 @@ frames every other arm is read over.
 
 \subsection{Input pathways and gain}\label{sec-3-4}
 
-The audio drives a reservoir in one of two ways as an A/B comparison:
-the \textbf{spectrogram} pathway adds each band's energy to the rotation
+The audio drives a reservoir in one of two ways: the
+\textbf{spectrogram} pathway adds each band's energy to the rotation
 rate of its row's oscillators, and the \textbf{quadrature} pathway adds
 a phase-referenced push g\ensuremath{\cdot}A\ensuremath{_{r}}
 sin(\ensuremath{\varphi_{r}} \ensuremath{-} \ensuremath{\theta_{i}}),
@@ -342,9 +342,9 @@ seeds; five folds under Protocol B) \ensuremath{\pm} the sample standard
 deviation, and every comparison between two arms is paired on the same
 test clips, condition and seed, reported as the mean difference
 \ensuremath{\pm} its standard deviation over seeds and a 95\% interval
-from 2,000 paired bootstrap resamples of the test clips. The primary
-cross model comparator is the four-window read, 2,048 training clips and
-readout width of 192.
+from 2,000 paired bootstrap resamples of the test clips. Every
+comparison is reported at the primary cell, the four-window read at
+2,048 training clips and readout width 192, unless it says otherwise.
 
 \section{Results}\label{sec-4}
 
@@ -572,7 +572,7 @@ spectrogram-only baseline.}\label{fig-c9-readout-width}
 \section{Discussion and conclusion}\label{sec-5}
 
 \textbf{What the dynamics add.} Most of every arm's accuracy on the
-single digit classification task comes from the front end and the linear
+single-digit classification task comes from the front end and the linear
 readout, and the input's format matters as much: driven in quadrature,
 the same networks read near chance (\hyperref[sec-4-6]{Section 4.6}).
 Read directly on the spectrogram, the readout reaches 93.6\%, 78.0\% and
@@ -744,7 +744,8 @@ collected, and every experiment ran on a single Apple M1 Max computer.
 \section{Glossary}\label{sec-A}
 
 The terms as this paper uses them. The code and the run record keep
-their own labels; src/README.md maps each term to its label.
+their own labels; \emph{src/README.md}, in the supplementary material,
+maps each term to its label.
 
 \subsection{The pipeline}\label{sec-A-1}
 
@@ -1241,20 +1242,20 @@ coupling that grows toward the apex (thicker
 line).}\label{fig-a2-lattice-geometries}
 \end{figure}
 
-\section{The read}\label{sec-D}
+\section{The readout}\label{sec-D}
 
-\subsection{The read for each arm}\label{sec-D-1}
+\subsection{The readout for each arm}\label{sec-D-1}
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={The read for each kind of arm: the same three statistics over the same four windows, classified by a ridge readout fitted to each arm. The spectrogram-only baseline's 192 features are read as they are; a reservoir's 12,288 to 24,576 are standardized and projected to 192 by a fixed random matrix; a trained baseline's 192 (the GRU's 216, projected) are read after the network is trained end to end through a learned linear head.}]{resources/figures/a4-the-read.pdf}}
-\caption{The read for each kind of arm: the same three statistics over
-the same four windows, classified by a ridge readout fitted to each arm.
-The spectrogram-only baseline's 192 features are read as they are; a
-reservoir's 12,288 to 24,576 are standardized and projected to 192 by a
-fixed random matrix; a trained baseline's 192 (the GRU's 216, projected)
-are read after the network is trained end to end through a learned
-linear head.}\label{fig-a4-the-read}
+\pandocbounded{\includegraphics[keepaspectratio,alt={The readout for each kind of arm: the same three statistics over the same four windows, classified by a ridge readout fitted to each arm. The spectrogram-only baseline's 192 features are read as they are; a reservoir's 12,288 to 24,576 are standardized and projected to 192 by a fixed random matrix; a trained baseline's 192 (the GRU's 216, projected) are read after the network is trained end to end through a learned linear head.}]{resources/figures/a4-the-read.pdf}}
+\caption{The readout for each kind of arm: the same three statistics
+over the same four windows, classified by a ridge readout fitted to each
+arm. The spectrogram-only baseline's 192 features are read as they are;
+a reservoir's 12,288 to 24,576 are standardized and projected to 192 by
+a fixed random matrix; a trained baseline's 192 (the GRU's 216,
+projected) are read after the network is trained end to end through a
+learned linear head.}\label{fig-a4-the-read}
 \end{figure}
 
 \subsection{Where each arm carries class information}\label{sec-D-2}
