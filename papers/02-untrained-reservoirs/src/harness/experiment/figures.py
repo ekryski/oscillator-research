@@ -468,7 +468,7 @@ def design_factor_figure(panel: int, stem: str, across: bool = False, by: dict |
     ax.spines[["top", "right"]].set_visible(False)
     handles, legends = ax.get_legend_handles_labels()
     fig.legend(handles, legends, frameon=False, fontsize=7.5, loc="lower center", ncol=4, bbox_to_anchor=(0.5, 0))
-    fig.tight_layout(rect=(0, 0.4 / (2.9 if across else height), 1, 1))
+    fig.tight_layout(rect=(0, 0.2 / (2.9 if across else height), 1, 1))
     _save(fig, stem)
 
 
