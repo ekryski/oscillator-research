@@ -17,6 +17,13 @@ Two steps, because the LaTeX path takes the numbers off the headings
 The numbering is the one `check_sections` computes, so a reference that does not
 resolve stays plain text here and is reported there. A list continues its
 reference: in "Appendix H.2, H.6 and H.7" all three become links.
+
+Figures are referred to by their file's name, "Figure c4-lattice-geometries",
+so the Markdown never carries a number that moving a figure would falsify. Each
+figure is numbered by its order in the document, as LaTeX numbers it, gets the
+id `fig-<name>`, and a reference becomes a link reading "Figure 4". The captions
+carry the same numbers: LaTeX prints them itself, and filters/number-floats.lua
+writes them into the other formats, counting figures in the same order.
 """
 
 from __future__ import annotations
@@ -37,6 +44,13 @@ ITEM = re.compile(NUMBER)
 #: text a reference inside of is left alone: a heading, a link or image, inline
 #: code, an HTML comment, an attribute block
 SKIP = re.compile(r"(?m)^#{1,6}\s.*$|!?\[[^\]\n]*\]\([^)\n]*\)|`[^`\n]*`|<!--[\s\S]*?-->|\{#[^}\n]*\}")
+
+
+#: a figure: an image alone on its line, its caption allowed one level of nested brackets, and any attributes
+FIGURE = re.compile(r"(?m)^!\[((?:[^\]\[\\]|\\.|\[[^\]\[]*\])*)\]\(([^)\s]+)\)(\{[^}\n]*\})?[ \t]*$")
+#: a figure named by its file, the name opening with a letter and a digit: "Figure c4-lattice-geometries"
+FIGURE_NAME = r"[a-z]\d[\w-]*"
+FIGURE_REF = re.compile(rf"\bFigures?\s+({FIGURE_NAME}(?:(?:,\s*|,?\s+and\s+){FIGURE_NAME})*)")
 
 
 def ident(number: str) -> str:
@@ -76,6 +90,48 @@ def anchor(text: str, appendix: re.Pattern[str]) -> tuple[str, dict[str, str]]:
             last = m.end(2)
     out.append(text[last:])
     return "".join(out), ids
+
+
+def number_figures(text: str) -> tuple[str, dict[str, int]]:
+    """The text with an id on every figure, and each figure's number by its file's name."""
+    numbers: dict[str, int] = {}
+
+    def one(m: re.Match[str]) -> str:
+        caption, src, attrs = m.group(1), m.group(2), m.group(3) or ""
+        name = Path(src).stem
+        numbers[name] = len(numbers) + 1
+        if "#" not in attrs:
+            attrs = f"{{#fig-{name}{(' ' + attrs[1:-1]) if attrs else ''}}}"
+        return f"![{caption}]({src}){attrs}"
+
+    return FIGURE.sub(one, text), numbers
+
+
+def link_figures(text: str, numbers: dict[str, int]) -> tuple[str, int]:
+    """The text with every "Figure <name>" that names a figure made a link reading "Figure <number>"."""
+    hits = 0
+
+    def one(m: re.Match[str]) -> str:
+        nonlocal hits
+        whole, first = m.group(0), m.start(1) - m.start(0)
+        pieces, last = [], 0
+        for i, item in enumerate(re.finditer(FIGURE_NAME, m.group(1))):
+            name = item.group(0)
+            if name not in numbers:
+                continue
+            s, e = first + item.start(), first + item.end()
+            label = whole[:s] if i == 0 else ""
+            pieces += [whole[last:0 if i == 0 else s], f"[{label}{numbers[name]}](#fig-{name})"]
+            last = e
+            hits += 1
+        return "".join(pieces) + whole[last:]
+
+    out, last = [], 0
+    for m in SKIP.finditer(text):
+        out += [FIGURE_REF.sub(one, text[last:m.start()]), m.group(0)]
+        last = m.end()
+    out.append(FIGURE_REF.sub(one, text[last:]))
+    return "".join(out), hits
 
 
 def link(text: str, ids: dict[str, str]) -> tuple[str, int]:
