@@ -249,8 +249,9 @@ def quadrature_design() -> Iterator[rn.Spec]:
 
 def reuse_check() -> Iterator[rn.Spec]:
     """A sample of the runs paper 03 takes from paper 02, run again here, on the CPU: one from each paper 02
-    record file and arm kind it takes cells from. Recorded apart (`reuse-check-*.json`), so nothing
-    reported comes from it; `summary.reuse_check` compares every cell with paper 02's."""
+    record file and arm kind it takes cells from, and the GRU, TCN, CNN and S4D, whose recipe paper 02
+    fixed and whose runs it made again. Recorded apart (`reuse-check-*.json`), so nothing reported comes
+    from it; `summary.reuse_check` compares every cell with paper 02's."""
     ref, recognition = Arm("network"), dict(pathway="spectrogram", noise=NOISES[0], gain=GAINS[0])
     runs = [("recognition", recognition, 0, ref), ("recognition", recognition, 1, Arm("network", coupled=False)),
             ("recognition", recognition, 2, Arm("bank", channels=8)),
@@ -264,7 +265,8 @@ def reuse_check() -> Iterator[rn.Spec]:
         yield _net("reuse-check", c["pathway"], c["noise"], c["gain"], seed, arm, task,
                    **({"pair": pr.PAIRS[0]} if task == "order" else {}))
     yield _baseline("reuse-check", "spectrogram", NOISES[0], 0, GRID, 0)
-    yield _trained("gru", am.CHANNELS, GRID, 0, 0, 1, "reuse-check")
+    for arch, seed in (("gru", 1), ("tcn", 0), ("cnn", 2), ("s4d", 0)):
+        yield _trained(arch, am.CHANNELS, GRID, 0, 0, seed, "reuse-check")
 
 
 EXPERIMENTS = {"leak-check": leak_check, "reuse-check": reuse_check, "size": size, "trained": trained,
@@ -487,6 +489,8 @@ RANDN_PER_S = 48e6                      # Gaussian draws per second on one CPU t
 TWO_THREADS = 1.65                      # measured speed-up drawing a channel's two matrices in two threads
 RIDGE_S = 10.0                          # one read's ridge fits at every width under one projection, CPU float64
 #: trained baselines, minutes to train at 2,048 clips and 30 epochs, measured per step at three budgets
+#: before paper 02's recipe fix; a convolution costs its parameters per frame, so the dilated residual TCN
+#: costs what the two-layer one it replaced did at the same budget, and the fix changed nothing else's cost
 TRAINED_MIN = {"cpu": {"gru": (0.6, 0.5, 3.8), "tcn": (0.2, 3.1, 22.7), "cnn": (0.3, 3.4, 22.7),
                    "transformer": (0.7, 0.9, 2.0), "s4d": (0.5, 16.2, 154.2)},
            "mps": {"gru": (0.98, 1.12, 1.09), "tcn": (0.28, 0.81, 0.25), "cnn": (0.17, 0.16, 0.19),

@@ -340,7 +340,7 @@ def meta(arm: Arm, model: nn.Module | None) -> dict:
 #: each architecture's one width knob, the smallest width it takes, and the step between widths
 _WIDTH = {"gru": ("hidden", 1, 1), "tcn": ("hidden", 1, 1), "cnn": ("hidden", 1, 1),
           "transformer": ("d", 2, 2), "s4d": ("hidden", 1, 1)}
-#: the CNN takes the narrowest width at or over the budget; the rest the widest at or under it
+#: the CNN takes the narrowest width at or over the budget, as paper 02's does; the rest the widest at or under it
 _ROUND_UP = ("cnn",)
 
 
@@ -362,10 +362,10 @@ def trained_width(arch: str, rows: int, budget: int) -> int:
     the CNN's hidden channels, the transformer's model width with two heads,
     the S4D's width with as many states per channel as its width) and the
     rest of its design fixed. It takes the widest width whose parameter count
-    does not exceed the budget; the CNN, which is the TCN's form, takes the
-    narrowest that reaches it, so the two stay one width apart. On 16 rows at
-    2,048 parameters this gives paper 02's widths exactly: 18, 12, 13, 16 and
-    16. Parameter counts rise with width, so a bisection finds it.
+    does not exceed the budget; the CNN takes the narrowest that reaches it,
+    as paper 02's CNN, one width over its budget, does. On 16 rows at 2,048
+    parameters this gives paper 02's widths exactly: 18, 10, 13, 16 and 16.
+    Parameter counts rise with width, so a bisection finds it.
     """
     _, lo, step = _WIDTH[arch]
     count = lambda w: trained_params(arch, rows, w)  # noqa: E731
@@ -423,7 +423,9 @@ def train_baseline(arm: Arm, rows: torch.Tensor, tvalid: torch.Tensor, labels: t
     windows = WINDOWS[task]
     with torch.no_grad():
         width = trained_features(backbone, rows[:2], tvalid[:2], windows, span).shape[1]
-    head = nn.Linear(width, n_classes)
+    # the head reads the statistics standardized, as the ridge does: unstandardized, their spread between
+    # clips can be a thousandth of their size (with noise especially), and the loss never leaves chance
+    head = nn.Sequential(nn.BatchNorm1d(width, affine=False), nn.Linear(width, n_classes))
     backbone, head = backbone.to(device), head.to(device)
     params = list(backbone.parameters()) + list(head.parameters())
     steps = epochs * ((len(rows) + BATCH - 1) // BATCH)

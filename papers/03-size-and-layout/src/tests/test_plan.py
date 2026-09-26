@@ -7,7 +7,7 @@ from harness.experiment import run as rn
 from harness.experiment.arms import Arm
 
 #: the run counts the paper's Appendix B states, and how many of each paper 02 ran
-COUNTS = {"leak-check": 30, "reuse-check": 11, "size": 2688, "trained": 825, "sequence": 1296, "design": 3375,
+COUNTS = {"leak-check": 30, "reuse-check": 14, "size": 2688, "trained": 825, "sequence": 1296, "design": 3375,
           "cochlea": 1620, "quadrature": 363, "design-quadrature": 3105}
 REUSED = {"leak-check": 0, "reuse-check": 0, "size": 90, "trained": 15, "sequence": 0, "design": 75, "cochlea": 36,
           "quadrature": 6, "design-quadrature": 12}

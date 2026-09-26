@@ -6,7 +6,7 @@ import torch
 from harness.experiment import arms as am
 from harness.experiment import plan
 
-PAPER02 = {"gru": (18, 1944), "tcn": (12, 1948), "cnn": (13, 2109), "transformer": (16, 1968), "s4d": (16, 1840)}
+PAPER02 = {"gru": (18, 1944), "tcn": (10, 1972), "cnn": (13, 2109), "transformer": (16, 1968), "s4d": (16, 1840)}
 
 
 @pytest.mark.parametrize("arch", am.TRAINED)
@@ -54,3 +54,42 @@ def test_the_hidden_trajectory_is_causal(arch):
     with torch.no_grad():
         h1, h2 = m._hidden(rows), m._hidden(r2)
     assert torch.allclose(h1[:, :-1], h2[:, :-1], atol=1e-5)
+
+
+def test_the_tcn_is_a_dilated_residual_tcn_and_the_cnn_sees_nine_frames():
+    torch.manual_seed(0)
+    tcn, cnn = am.build_trained(am.Arm("trained", arch="tcn")), am.build_trained(am.Arm("trained", arch="cnn"))
+    for model, field in ((tcn, 31), (cnn, 9)):
+        rows = torch.rand(1, 60, 16)
+        hit = rows.clone()
+        hit[:, 20] += 1.0                                  # a frame's influence reaches `field` frames, no further
+        with torch.no_grad():
+            moved = (model._hidden(hit) - model._hidden(rows)).abs().amax(dim=2)[0]
+        reached = (moved > 1e-6).nonzero().flatten() + am.WARMUP_FRAMES
+        assert reached.min().item() == 20 and reached.max().item() == 20 + field - 1, type(model).__name__
+    zero = am.build_trained(am.Arm("trained", arch="tcn"))
+    with torch.no_grad():
+        for block in zero.blocks:
+            for conv in block:
+                conv.weight.zero_()
+                conv.bias.zero_()
+    rows = torch.rand(2, 40, 16)
+    assert torch.equal(zero._hidden(rows), rows[:, am.WARMUP_FRAMES:])     # the residual path passes the input
+
+
+def test_the_s4ds_time_scales_span_2_to_200_frames_and_its_output_is_linear():
+    torch.manual_seed(0)
+    s4d = am.build_trained(am.Arm("trained", arch="s4d"))
+    rates = torch.exp(s4d.log_decay.detach())[0]
+    assert rates[0].item() == pytest.approx(0.5) and rates[-1].item() == pytest.approx(0.005)
+    assert torch.all(rates[1:] < rates[:-1])
+    with torch.no_grad():
+        assert (s4d._hidden(torch.rand(2, 40, 16)) < 0).any()           # no rectifier on the way out
+
+
+def test_the_trained_head_reads_the_statistics_standardized():
+    rows, tvalid = torch.rand(64, 30, 8), torch.full((64,), 30)
+    labels = torch.arange(64) % 10
+    _, head, _ = am.train_baseline(am.Arm("trained", arch="gru", channels=1, grid=8), rows, tvalid, labels,
+                                   "recognition", 0, epochs=1)
+    assert isinstance(head[0], torch.nn.BatchNorm1d) and not head[0].affine and isinstance(head[1], torch.nn.Linear)
