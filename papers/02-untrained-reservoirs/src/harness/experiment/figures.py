@@ -352,8 +352,8 @@ def arms_figure(task: str, stem: str) -> None:
     _save(fig, stem)
 
 
-#: the readout widths the width figure draws, each with its marker: (width, face, size, offset within the row)
-WIDTHS = ((192, "white", 5, -0.2), (1024, None, 4, 0.0), (4096, None, 5, 0.2))
+#: the readout widths the width figure draws, each with its marker: (width, shape, face, size, offset within the row)
+WIDTHS = ((192, "o", "white", 5, -0.2), (1024, "o", None, 4, 0.0), (4096, "s", None, 4.5, 0.2))
 
 
 def width_figure(stem: str = "c9-readout-width") -> None:
@@ -376,7 +376,7 @@ def width_figure(stem: str = "c9-readout-width") -> None:
         for y, (arm, suffix, _, colour, _) in enumerate(rows):
             gain = None if arm == "baseline" or arm.startswith("trained-") else 1.0
             narrow = acc.get((arm, read + suffix, gain, noise, rec.PRIMARY_WIDTH))
-            for w, face, size, dy in WIDTHS:
+            for w, shape, face, size, dy in WIDTHS:
                 r = acc.get((arm, read + suffix, gain, noise, w))
                 if r is None:
                     continue
@@ -385,7 +385,7 @@ def width_figure(stem: str = "c9-readout-width") -> None:
                 dy = dy if narrow is None or w != rec.PRIMARY_WIDTH or any(
                     acc.get((arm, read + suffix, gain, noise, v), narrow)["mean"] != narrow["mean"]
                     for v, *_ in WIDTHS) else 0.0
-                ax.errorbar(r["mean"], y + dy, xerr=r["sd"] or 0, fmt="o", color=colour, markerfacecolor=face or colour,
+                ax.errorbar(r["mean"], y + dy, xerr=r["sd"] or 0, fmt=shape, color=colour, markerfacecolor=face or colour,
                             markersize=size, capsize=2, elinewidth=1, markeredgewidth=1.1)
                 lo, hi = min(lo, r["mean"] - (r["sd"] or 0)), max(hi, r["mean"] + (r["sd"] or 0))
         for y in range(1, len(rows)):
@@ -401,8 +401,8 @@ def width_figure(stem: str = "c9-readout-width") -> None:
         ax.spines[["top", "right"]].set_visible(False)
     axes[0].set_yticks(range(len(rows)), [r[2] for r in rows], fontsize=8.5)
     axes[0].invert_yaxis()
-    handles = [Line2D([], [], marker="o", linestyle="none", color="#555555", markerfacecolor=face or "#555555",
-                      markersize=size, label=f"width {w:,}") for w, face, size, _ in WIDTHS]
+    handles = [Line2D([], [], marker=shape, linestyle="none", color="#555555", markerfacecolor=face or "#555555",
+                      markersize=size, label=f"width {w:,}") for w, shape, face, size, _ in WIDTHS]
     handles.append(Line2D([], [], color="#6E6E6E", linewidth=0.8, linestyle="--", alpha=0.6,
                           label="spectrogram-only baseline, whole clip, width 192"))
     fig.legend(handles=handles, frameon=False, fontsize=8, loc="lower center", ncol=4, bbox_to_anchor=(0.55, -0.02))
