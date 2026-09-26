@@ -485,15 +485,15 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
               f"Leak check: with no input, {lk['cells'] - len(lk['off_chance'])} of the {lk['cells']} cells of the "
               f"{lk['runs']} zero-gain runs read exactly chance (10%)"
               + (f"; off chance: {'; '.join(lk['off_chance'])}." if lk["off_chance"] else ".")), ""]
-    lines += ["## Controls, recognition: accuracy (Section 4.1, 4.2)", "",
+    lines += ["## Controls, recognition: accuracy (Section 4.1)", "",
               f"{rec_cell}; {seeds}, in percent. The spectrogram-only baseline is read both over the whole clip and, "
               f"as every other arm is, from frame 16. {fit}", ""]
     lines += _grid(prim_acc("controls", "recognition"), _arm, _by_noise, _acc)
-    lines += ["", "## Controls, recognition: the coupled network minus each other arm (Section 4.1, 4.2)", "",
+    lines += ["", "## Controls, recognition: the coupled network minus each other arm (Section 4.1)", "",
               f"The cells of the table above, {diff}. The gain in brackets is the coupled network's, and the other arm's when it takes one.", ""]
     lines += _grid([r for r in prim_cmp("controls") if r["task"] == "recognition"], by_gain,
                    _by_noise, _diff)
-    lines += ["", "## Controls, recognition: accuracy by readout width and training size (Section 4.6)", "",
+    lines += ["", "## Controls, recognition: accuracy by readout width and training size (Section 4.7)", "",
               "Each column is a training size (n clips, nested: each set contains the smaller) and a readout width (w); "
               f"the four-window read, tested on the 6,000 clips of speakers 49 to 60; {seeds}, in percent. At each width "
               "an arm with more signals is projected down to it, and one with fewer is read as it is.", ""]
@@ -503,15 +503,15 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
         rows.sort(key=_rank)
         lines += [f"### {snr(noise)}", ""]
         lines += _grid(rows, _arm, _by_size, _acc) + [""]
-    lines += ["## Controls, recognition: readout width 4,096 minus 192 (Section 4.6)", "",
+    lines += ["## Controls, recognition: readout width 4,096 minus 192 (Section 4.7)", "",
               f"Each arm at width 4,096 minus itself at {w}, both at {n:,} training clips, {diff}.", ""]
     lines += _grid([r for r in cmp if r["experiment"] == "controls" and r["task"] == "recognition" and r["n_train"] == n
                     and "width 4,096 minus" in r["comparison"]], by_gain, _by_noise, _diff)
-    lines += ["", "## Controls, order task: accuracy, averaged over the five digit pairs (Section 4.7)", "",
+    lines += ["", "## Controls, order task: accuracy, averaged over the five digit pairs (Section 4.2)", "",
               f"{ord_cell}; each seed's accuracy averaged over the five pairs, then {seeds}, in percent. "
               f"{fit} Chance is 50%.", ""]
     lines += _grid(sorted(_pooled(prim_acc("controls", "order")), key=_rank), _arm, _by_noise, _acc)
-    lines += ["", "## Controls, order task: the coupled network minus each other arm, pooled over the five pairs (Section 4.7)", "",
+    lines += ["", "## Controls, order task: the coupled network minus each other arm, pooled over the five pairs (Section 4.2)", "",
               f"The cells of the table above, {diff}; the pairs' test clips are pooled.", ""]
     lines += _grid([r for r in prim_cmp("controls") if r["task"] == "order"], by_gain,
                    _by_noise, _diff)
@@ -520,12 +520,12 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
     lines += ["", "Order task, the spectrogram-only baseline's 95% interval contains chance (50%) in "
               f"{len(at) - len(off)} of {len(at)} pair and noise cells"
               + (f"; it does not in: {', '.join(off)}." if off else "."), ""]
-    lines += ["## Design: each level minus its reference, over matched configurations (Section 4.3)", "",
+    lines += ["## Design: each level minus its reference, over matched configurations (Sections 4.3 to 4.5)", "",
               f"{rec_cell}. Each level minus its reference over every configuration identical in the other factors, "
               f"{diff}.", ""]
     lines += _grid(prim_cmp("design"), lambda r: r["comparison"], _by_condition, _diff)
     proj = [r for r in acc if r["experiment"] == "projection" and r["width"] == w and r["n_train"] == n]
-    lines += ["", "## Projection: the controls experiment's reservoirs under the fixed and a seeded projection (Section 4.6)", "",
+    lines += ["", "## Projection: the controls experiment's reservoirs under the fixed and a seeded projection (Section 4.7)", "",
               "What the projection does: every arm's standardized summary statistics are multiplied by a random "
               "Gaussian matrix that maps them to the common readout width, so an arm with thousands of signals and one "
               "with 192 are read by readouts of the same size. The fixed projection is one draw, shared by every run "
@@ -563,11 +563,11 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
     lines += _grid([r for r in cmp if r["experiment"] == "projection" and r["width"] == w and r["n_train"] == n],
                    lambda r: f"{r['task']}: {r['comparison']}" + (f" (gain = {r['gain']:g})" if r["gain"] is not None else ""),
                    _by_noise, _diff)
-    lines += ["", "## Sweep: restoring strength, coupling ceiling and gain beyond the design experiment's, each minus its reference (Section 4.4)", "",
+    lines += ["", "## Sweep: restoring strength, coupling ceiling and gain beyond the design experiment's, each minus its reference (Section 4.5)", "",
               f"{rec_cell}. Each coupling function at the reference configuration, {diff}.", ""]
     lines += _grid([r for r in cmp if r["experiment"] == "sweep" and r["width"] == w and r["n_train"] == n],
                    lambda r: r["comparison"], _by_condition, _diff)
-    lines += ["", "## Cochlea: the coil and the cochlea, each minus another geometry, over matched configurations (Section 4.3)", "",
+    lines += ["", "## Cochlea: the coil and the cochlea, each minus another geometry, over matched configurations (Section 4.4)", "",
               f"{rec_cell}. Matched on coupling function and natural frequencies, {diff}.", ""]
     lines += _grid([r for r in cmp if r["experiment"] == "cochlea" and r["width"] == w and r["n_train"] == n],
                    lambda r: r["comparison"], _by_condition, _diff)
@@ -580,7 +580,7 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
               "The cells of the table above, paired on the same test clips and folds: mean ± standard deviation over "
               "the five folds, with the 95% interval from resampling test clips in brackets, in points.", ""]
     lines += _grid(prim_cmp("becker-folds", plan.BECKER_TRAIN), by_gain, _by_noise, _diff)
-    lines += ["", "## Quadrature: each network minus the quadrature front end's own baseline, and minus the same network on the spectrogram pathway (Section 4.5)", "",
+    lines += ["", "## Quadrature: each network minus the quadrature front end's own baseline, and minus the same network on the spectrogram pathway (Section 4.6)", "",
               f"{rec_cell}. {diff[0].upper() + diff[1:]}.", ""]
     lines += _grid([r for r in prim_cmp("quadrature")], lambda r: f"{terms.PATHWAYS[r['pathway']]} pathway: {r['comparison']}",
                    _by_condition, _diff)

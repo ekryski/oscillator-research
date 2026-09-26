@@ -130,11 +130,11 @@ input gain, readout width and training set size, on digit recognition
 and on a temporal order task that order-blind readouts cannot solve. The
 design separates three explanations for an untrained network's accuracy:
 its input representation, the width of its readout, and the oscillator
-dynamics and structure itself. Our ablation study results give future
-studies of trained oscillator networks an untrained baseline to compare
-against for speech recognition tasks, and insight into which factors
-contribute to an oscillator network's effectiveness on time series
-tasks.
+dynamics and structure themselves. Our ablation study results give
+future studies of trained oscillator networks an untrained baseline to
+compare against for speech recognition tasks, and insight into which
+factors contribute to an oscillator network's effectiveness on time
+series tasks.
 \end{abstract}
 
 \section{Introduction}\label{sec-1}
@@ -151,19 +151,20 @@ A recent survey of oscillator networks in machine learning
 \citep{kryski2026} found the ablations that would answer that question
 largely missing: the coupling term had been removed as a single variable
 only three times, coupling functions had been compared only within the
-Kuramoto family \citep{nunley2026} and, on graphs, as Stuart--Landau
-against Kuramoto without fixing the amplitude \citep{zhang2026}. No
-study varied the lattice geometry or its boundaries as a single variable
-at a matched budget, and none contrasted different audio input
-structures under controls. We address those gaps on one task,
-spoken-digit recognition, where automatic speech recognition began
-\citep{davis1952} and a standard benchmark for oscillator reservoirs
-built in hardware \citep{torrejon2017, shougat2023}. An untrained
-coupled oscillator network, read by a linear readout, is tested under
-six coupling functions and eight lattice geometries, among them a coil
-and a cochlea, and compared with the readout applied to its input alone,
-the same network uncoupled, leaky-integrator banks of the same size and
-five trained networks of the same parameter count, on AudioMNIST
+Kuramoto family \citep{nunley2026}; one graph network has since set
+Stuart--Landau against Kuramoto, without fixing the amplitude
+\citep{zhang2026}. No study varied the lattice geometry or its
+boundaries as a single variable at a matched budget, and none contrasted
+different audio input structures under controls. We address those gaps
+on one task, spoken-digit recognition, where automatic speech
+recognition began \citep{davis1952} and a standard benchmark for
+oscillator reservoirs built in hardware
+\citep{torrejon2017, shougat2023}. An untrained coupled oscillator
+network, read by a linear readout, is tested under six coupling
+functions and eight lattice geometries, among them a coil and a cochlea,
+and compared with the readout applied to its input alone, the same
+network uncoupled, leaky-integrator banks of the same size and five
+trained networks of the same parameter count, on AudioMNIST
 \citep{becker2024} with held-out speakers and added noise. Untrained
 networks of coupled oscillators have recognized spoken digits before, in
 simulation and on TI-46 with the same speakers in training and test
@@ -199,8 +200,8 @@ unsupervised object discovery, adversarial robustness, uncertainty
 calibration and Sudoku \citep{miyato2025}, WONN on image recognition,
 Sudoku and maze solving \citep{dai2026}, FSN on character-level language
 modelling \citep{nunley2026}, Un-0 on image generation
-\citep{unconv-ai2026} and coupled oscillatory recurrent networks (coRNN,
-\citet{rusch2021}), one of which reached 89\% on AudioMNIST from the raw
+\citep{unconv-ai2026} and coupled oscillatory recurrent networks, coRNN
+\citep{rusch2021}, one of which reached 89\% on AudioMNIST from the raw
 waveform with a random, not speaker-disjoint, split
 \citep{chandravadia2026}. Most adopt one coupling function and one
 arrangement, and the survey found that few share a benchmark, AKOrN and
@@ -224,9 +225,9 @@ input gain change the answer; how the answer changes with the readout's
 width and the training data; and whether an untrained network can
 \emph{remember} the order of events. It ran as eight experiments with
 6,353 single-control ablation experimentation runs in total. Every run
-is one arm at one noise level, input gain and seed executed three times
-with a different seed each time. The code and every run's record, with a
-README for each experiment and a summary of every result, are in the
+is one arm at one noise level, input gain and seed, and every condition
+is run at three seeds. The code and every run's record, with a README
+for each experiment and a summary of every result, are in the
 supplementary material, and \hyperref[sec-A]{Appendix A} defines every
 term.
 
@@ -363,17 +364,16 @@ read 0.43 to 1.08 points above the uncoupled network, and about 4 points
 above the state-matched leaky-integrator bank with noise but 2.35 points
 below it on clean audio; gain 2 read lower than gain 1 for every control
 reservoir. The Stuart--Landau network read 93.9\%, 80.3\% and 73.0\%
-(gain 1), within its input on clean audio (+0.28 {[}\ensuremath{-}0.19,
-+0.77{]}) and above it in every noisy condition
-(\hyperref[sec-4-3]{Section 4.3}). With noise every trained baseline
-read above the Kuramoto network, from 79.2\% (CNN) to 82.8\% (GRU) at 0
-dB and 72.3\% (transformer) to 76.9\% (GRU) at \ensuremath{-}5 dB, with
-the Stuart--Landau network in their range; on clean audio they read
-94.7\% to 97.0\%. On the speaker folds of \citet{becker2024} (clean,
-18,000 training clips), the baseline read 96.0 \ensuremath{\pm} 1.7\%,
-the network 91.9 \ensuremath{\pm} 3.1\% (96.9 \ensuremath{\pm} 1.3\% at
-width 4,096) and the trained baselines 97.0\% to 98.4\%, against 95.8\%
-reported for AlexNet on spectrograms.
+(gain 1), level with its input on clean audio (+0.28 points) and above
+it in every noisy condition (\hyperref[sec-4-3]{Section 4.3}). With
+noise every trained baseline read above the Kuramoto network, from
+79.2\% (CNN) to 82.8\% (GRU) at 0 dB and 72.3\% (transformer) to 76.9\%
+(GRU) at \ensuremath{-}5 dB, with the Stuart--Landau network in their
+range; on clean audio they read 94.7\% to 97.0\%. On the speaker folds
+of \citet{becker2024} (clean, 18,000 training clips), the baseline read
+96.0 \ensuremath{\pm} 1.7\%, the network 91.9 \ensuremath{\pm} 3.1\%
+(96.9 \ensuremath{\pm} 1.3\% at width 4,096) and the trained baselines
+97.0\% to 98.4\%, against 95.8\% reported for AlexNet on spectrograms.
 
 \begin{figure}
 \centering
@@ -416,12 +416,12 @@ chance.}\label{fig-c8-order-arms}
 
 \subsection{Coupling function}\label{sec-4-3}
 
-The design experiment varied the coupled network one factor at a time
-around the reference: six coupling functions, six lattice geometries and
-three kinds of natural frequencies, crossed with two restoring strengths
-and two coupling ceilings, 312 configurations at 0 and \ensuremath{-}5
-dB, gains 1 and 2 and three seeds, each level paired with its reference
-over every configuration matching it in the other factors
+The design experiment crossed six coupling functions, six lattice
+geometries, three kinds of natural frequencies, two restoring strengths
+and two coupling ceilings (the Stuart--Landau functions on the torus
+only), 312 configurations at 0 and \ensuremath{-}5 dB, gains 1 and 2 and
+three seeds, each level paired with its reference over every
+configuration matching it in the other factors
 (\hyperref[fig-c4-coupling-functions]{Figure 3}). The
 \textbf{Stuart--Landau} network, whose oscillators have a free
 amplitude, read 2.1 to 3.8 points above its Kuramoto match, the largest
@@ -446,14 +446,14 @@ Every \textbf{lattice geometry} in the design experiment read within
 0.65 points of the torus, the sphere and sheet lowest
 (\hyperref[fig-c4-lattice-geometries]{Figure 4}). A \textbf{coil}, one
 open line from base to apex with one octave per turn, read within 0.22
-points of the torus; a \textbf{cochlea}, the coil with a one-way
-base-to-apex coupling and coupling that grows with the coil's curvature
-toward the apex, read 0.41 to 0.97 points below the torus. Part of that
-gap is the cochlea's weaker coupling: capping its curvature weights at
-the apex halves its average coupling, and a control at the coil's
-average coupling read 0.28 to 0.71 points above the cochlea, yet 0.40 to
-0.47 points below the coil at gain 1 and within 0.12 points of it at
-gain 2.
+points of the torus; a \textbf{cochlea}, the coil with coupling three
+times as strong from base to apex as back and growing with the coil's
+curvature toward the apex, read 0.41 to 0.97 points below the torus.
+Part of that gap is the cochlea's weaker coupling: capping its curvature
+weights at the apex halves its average coupling, and a control at the
+coil's average coupling read 0.28 to 0.71 points above the cochlea, yet
+0.40 to 0.47 points below the coil at gain 1 and within 0.12 points of
+it at gain 2.
 
 \begin{figure}
 \centering
@@ -487,12 +487,11 @@ difference.}\label{fig-c4-natural-frequencies}
 \subsection{Restoring strength, coupling ceiling and
 gain}\label{sec-4-5}
 
-How strongly an oscillator returns to it's original position, it's
-restoring strength, of 0.1 read 0.13 to 0.23 points below 0.3, and a
-coupling ceiling of 0.5 read 0.39 to 0.68 points below 1. A sweep beyond
-these levels, for every coupling function at the reference
-configuration, found restoring strengths of 0.5 to 1.0 moving the
-phase-oscillator networks by \ensuremath{-}1.2 to +2.1 points and
+A restoring strength (the pull toward phase 0) of 0.1 read 0.13 to 0.23
+points below 0.3, and a coupling ceiling of 0.5 read 0.39 to 0.68 points
+below 1. A sweep beyond these levels, for every coupling function at the
+reference configuration, found restoring strengths of 0.5 to 1.0 moving
+the phase-oscillator networks by \ensuremath{-}1.2 to +2.1 points and
 lowering the Stuart--Landau network in every condition, by 0.4 to 2.8
 points, and ceilings of 1.5 and 2 moving every coupling function by
 \ensuremath{-}2.4 to +1.7 points. Gain separates the Stuart--Landau
@@ -507,8 +506,8 @@ to 2.5 points above gain 1 and the Stuart--Landau network 0.7 to 1.7
 points below it. At its better low gain every phase-oscillator network
 read above its input at 0 dB, by 0.7 to 1.6 points, and the
 second-harmonic network at \ensuremath{-}5 dB too, by 1.4, which brings
-the best of them within 0.7 points of the Stuart--Landau network at gain
-1.
+the best of them within 0.8 points of the Stuart--Landau network at gain
+1 at 0 dB and level with it at \ensuremath{-}5 dB.
 
 \begin{figure}
 \centering
@@ -540,21 +539,22 @@ value of 0.5.
 
 \subsection{Readout width and training data}\label{sec-4-7}
 
-Widening the readout to 1,024 and 4,096 features raised every arm with
-more than 192 features to read, the Kuramoto network by up to 6.3 points
-and the leaky-integrator banks by up to 6.2, and left the 192-wide arms
-unchanged (\hyperref[fig-c9-readout-width]{Figure 7};
-\hyperref[sec-D-1]{Appendix D.1} shows the reader structure). From 2,048
-to 24,000 training clips, at width 192, the spectrogram-only baseline
-gained 3.5 to 4.1 points, the Kuramoto network 2.0 and the trained
-baselines 7.1 to 12.4, since they learn through their networks as well
-as their readout. At width 4,096 the Kuramoto network read above the
-whole-clip spectrogram-only baseline at every training size, and with
-2,048 clips at 0 dB above the S4D, CNN and transformer (81.4\% against
-79.2\% to 80.8\%), though through a readout with more weights than
-theirs; with 8,192 or 24,000 clips every trained baseline read above
-every reservoir at every width. Read through the seeded projection
-instead of the fixed one, the controls experiment's reservoirs moved by
+Widening the readout to 1,024 and 4,096 features raised nearly every arm
+with more than 192 features to read, the Kuramoto network by up to 3.8
+points at gain 1 (6.3 at gain 2) and the leaky-integrator banks by up to
+6.2, and left the 192-wide arms unchanged
+(\hyperref[fig-c9-readout-width]{Figure 7}; \hyperref[sec-D-1]{Appendix
+D.1} shows the reader structure). From 2,048 to 24,000 training clips,
+at width 192 and with noise, the spectrogram-only baseline gained 3.5 to
+4.1 points, the Kuramoto network 2.0 and the trained baselines 7.1 to
+12.4, since they learn through their networks as well as their readout.
+At width 4,096 the Kuramoto network read above the whole-clip
+spectrogram-only baseline at every training size, and with 2,048 clips
+at 0 dB above the S4D, CNN and transformer (81.4\% against 79.2\% to
+80.8\%), though through a readout with more weights than theirs; with
+8,192 or 24,000 clips every trained baseline read above every reservoir
+at every width with noise. Read through the seeded projection instead of
+the fixed one, the controls experiment's reservoirs moved by
 \ensuremath{-}1.29 to +1.22 points (median \ensuremath{-}0.06), and
 every paired comparison between the controls arms kept its sign.
 
@@ -577,13 +577,14 @@ readout, and the input's format matters as much: driven in quadrature,
 the same networks read near chance (\hyperref[sec-4-6]{Section 4.6}).
 Read directly on the spectrogram, the readout reaches 93.6\%, 78.0\% and
 71.6\%, and at the common width no untrained reservoir adds more than
-2.3 points to that, the most being the Stuart--Landau network's. The
-untrained Kuramoto network does not read above its own input. What it
-adds is memory: read only after its warm-up, it recovers most of what
-the input loses without its first 16 frames, which hold the onset, and
-it carries the order of two digits that an order-free read of the input
-cannot see. A leaky-integrator bank of the same size does both as well
-or better, and both remember by the same means, integration. A leaky
+2.3 points to that, the most being the Stuart--Landau network's. At
+gains 1 and 2 the untrained Kuramoto network does not read above its own
+input. What it adds is memory: read only after its warm-up, it recovers
+most of what the input loses without its first 16 frames, which hold the
+onset, and it carries the order of two digits that an order-free read of
+the input cannot see. A leaky-integrator bank of the same size does
+both, better on order and on clean audio though about 4 points worse
+with noise, and both remember by the same means, integration. A leaky
 integrator keeps a running average of its band's energy; a Kuramoto
 oscillator's phase advances at its natural frequency plus its drive, so,
 apart from the restoring pull and the coupling, its phase is the running
@@ -602,8 +603,9 @@ end, for a spintronic oscillator on TI-46 \citep{abreu-araujo2020} and
 for a piezoelectric reservoir on AudioMNIST, which matched logistic
 regression on its input \citep{buckley2026}; its authors expect a
 reservoir to help most where a linear classifier on the input falls
-short, and in our noisy conditions, where it does, Kuramoto matches the
-input and Stuart--Landau reads 1.1 to 2.3 points above it.
+short, and in our noisy conditions, where it does, Kuramoto reads within
+a point of the input and Stuart--Landau reads 1.1 to 2.3 points above
+it.
 
 \textbf{Network design.} A free amplitude is where the design effect
 sits, not the Stuart--Landau coupling form: with its amplitude fixed,
@@ -614,26 +616,27 @@ did not, places the effect in the amplitude. One reading is that a free
 amplitude lets an oscillator absorb a strong drive in its radius, where
 a phase oscillator can only be pushed faster. The gain sweep agrees: the
 phase-oscillator networks read best at the weakest gains, and the
-Stuart--Landau network at gains 1 and 2. Among phase oscillators the
-coupling function and the geometry each moved accuracy by less than a
-point, and a coil and a cochlea, built to follow the cochlea's shape and
-mechanics, read no better than the torus.
+Stuart--Landau network near gain 1. Among phase oscillators the coupling
+function and the geometry each moved accuracy by less than a point, and
+a coil and a cochlea, built to follow the cochlea's shape and mechanics,
+read no better than the torus.
 
-\textbf{Readout.} More training data raised every arm, the trained
-baselines three to six times as much as the reservoirs, since in a
+\textbf{Readout.} With noise, more training data raised every arm, the
+trained baselines three to six times as much as the Kuramoto network and
+up to three times as much as the leaky-integrator banks, since in a
 reservoir only the readout learns. The common width of 192 favours the
 input: it reads the spectrogram's 192 features whole, but compresses a
 reservoir's 12,288 to 24,576 features by 64 to 128 times through a
 random projection, which keeps the distances between clips only roughly
 at so few dimensions \citep{johnson1984}, so differences between digits
-that the full features hold can blur. Read at 4,096, the reservoirs pass
-their input, but their readout then fits 40,970 (4,096
-\ensuremath{\times} 10 digits + 10 digit biases) weights against the
-1,930 that read the input's 192 features, about 21 times as many, so
-some or all of the task accuracy improvement could come from the extra
-weights rather than the dynamics. The fair comparison is at the common
-width, where the Kuramoto network reads within a point of its input in
-noise.
+that the full features hold can blur. Read at 4,096, the coupled network
+and the leaky-integrator banks at gain 1 pass their input, but their
+readout then fits 40,970 (4,096 \ensuremath{\times} 10 digits + 10 digit
+biases) weights against the 1,930 that read the input's 192 features,
+about 21 times as many, so some or all of the task accuracy improvement
+could come from the extra weights rather than the dynamics. The fair
+comparison is at the common width, where the Kuramoto network reads
+within a point of its input in noise.
 
 \textbf{Data and training.} Many published spoken-digit results share
 speakers between training and test, among them both noisy AudioMNIST
@@ -677,9 +680,9 @@ coupling adds to both tasks, a free amplitude lifts the network above
 its input in noise and a weaker input does so at 0 dB, and the lattice
 geometry and phase coupling function each move it by less than a point.
 Small trained networks read higher with noise, the Stuart--Landau
-network alone reaching their range at gains 1 and 2, and these results
-are the baseline a trained oscillator network of similar size and task
-should beat.
+network alone reaching their range at gain 1, and these results are the
+baseline a trained oscillator network of similar size and task should
+beat.
 
 \section*{Reproducibility statement}\label{reproducibility-statement}
 \addcontentsline{toc}{section}{Reproducibility statement}
@@ -694,11 +697,10 @@ versions. The leak check and the controls and design experiments ran on
 the CPU of an Apple M1 Max, where runs with the same seed are
 bit-identical. The later experiments simulated the reservoirs on its
 GPU, which reproduced 1,262 of 1,296 of the controls experiment's cells
-exactly and all but one within two test clips
-(\hyperref[sec-3-5]{Section 3.5}); the trained baselines train on the
-CPU on every device. The experiment harness has been set up to be able
-to be run on NVIDIA GPUs and Apple Silicon in a Linux or macOS
-environment. We welcome reproductions.
+exactly and all but one within two test clips (the record's summary.md);
+the trained baselines train on the CPU on every device. The experiment
+harness has been set up to be able to be run on NVIDIA GPUs and Apple
+Silicon in a Linux or macOS environment. We welcome reproductions.
 
 \section*{AI use statement}\label{ai-use-statement}
 \addcontentsline{toc}{section}{AI use statement}
@@ -724,8 +726,6 @@ appropriate, all citations and referenced literature.
 
 The authors take responsibility for the final content of this work.
 
-\bibliography{references}
-\appendix
 \section*{Ethics statement}\label{ethics-statement}
 \addcontentsline{toc}{section}{Ethics statement}
 
@@ -736,6 +736,8 @@ test keep speakers apart, and the audio examples in the supplementary
 material are clips from it, shipped with its licence. No new data was
 collected, and every experiment ran on a single Apple M1 Max computer.
 
+\bibliography{references}
+\appendix
 \section*{Appendix}\label{appendix}
 \addcontentsline{toc}{section}{Appendix}
 
@@ -1143,9 +1145,8 @@ geometry is compared against. Wrapped in both directions, it has no
 edges, so every oscillator has the same neighbourhood and no position in
 the lattice is special, and each other geometry departs from it in one
 respect: opening edges, adding a dimension, or laying frequency out
-differently. Pilot runs before this study also found it at least as
-accurate as the alternatives, and here no geometry read above it by more
-than 0.21 points (\hyperref[sec-4-4]{Section 4.4}).
+differently. Here no geometry read above it by more than 0.21 points
+(\hyperref[sec-4-4]{Section 4.4}).
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
