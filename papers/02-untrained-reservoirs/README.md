@@ -27,7 +27,7 @@ Most of the accuracy comes from the input representation and the readout. At a m
 | `resources/figures/` | the paper's figures |
 | [`resources/audio/examples/`](resources/audio/examples/) | clips as the arms hear them: a test digit clean, at 0 dB and at −5 dB, and order-task sequences in both orders |
 | [`resources/notes/`](resources/notes/) | the working design notes, with their decision log, and the AudioMNIST prior-art survey, kept for reference |
-| [`resources/pilot/`](resources/pilot/) | the pilot that preceded the study: the noise calibration script, its clips and record, and the pilot's smaller records |
+| [`resources/pilot/`](resources/pilot/) | the pilot's noise calibration: the script, its clips and its record |
 | `…-supplement.zip` | the anonymized supplementary material for review: `src/`, `results/` and the audio examples; built, not committed ([below](#rebuilding-the-paper)) |
 
 ## Checking the numbers
