@@ -1,6 +1,5 @@
 """The memory tasks: paper 02's order task, and the digit-sequence task, on the small synthetic bank."""
 
-import itertools
 import math
 
 import pytest
@@ -84,11 +83,6 @@ def test_the_chance_levels_are_exact():
         assert c["per_position"] == 0.1 and c["order_free"] == pytest.approx(1 / length)
         assert c["whole"] == pytest.approx(1 / math.perm(10, length))
         assert c["whole_order_free"] == pytest.approx(1 / math.factorial(length))
-    # with repeats: two digits are the same one time in ten, when a reader knowing the digits is right
-    assert pr.order_free_ceiling(2, repeats=True) == pytest.approx(0.55)
-    assert pr.order_free_ceiling(3, repeats=True) == pytest.approx(0.43)
-    brute = sum(max(s.count(d) for d in s) for s in itertools.product(range(10), repeat=4)) / (4 * 10**4)
-    assert pr.order_free_ceiling(4, repeats=True) == pytest.approx(brute) == pytest.approx(0.3835)
 
 
 def test_the_order_task_runs_on_balanced_sets_and_reads_only_the_whole_span(bank, small_sets):  # noqa: F811

@@ -45,7 +45,7 @@ from torch import nn
 from harness.measurement import features as ft
 from harness.measurement.instruments import analytic_row_phase
 from harness.models.baselines import CNNBaseline, GRUBaseline, S4DBaseline, TCNBaseline, TransformerBaseline
-from harness.models.field import OscillatorField, physics_block, tonotopic_omega
+from harness.models.field import OscillatorField, physics_block
 from harness.models.leaky_bank import LeakyBank
 from harness.utils.constants import ALPHA, BETA, PLV_LOCK_THRESH, WARMUP_FRAMES
 
@@ -67,8 +67,6 @@ EPOCHS, BATCH, LR, CLIP, LR_FLOOR = 30, 64, 3e-3, 1.0, 0.1
 #: a trained baseline that did not cut its loss by this much failed to train,
 #: which is a different claim from "cannot do the task"
 HEALTHY_LOSS_DROP = 0.20
-#: the seed offset paper 02 used for the tonotopic frequencies' jitter
-TONOTOPIC_SEED = 8000
 #: paper 02's network: the channel count and lattice every unsuffixed label means
 CHANNELS = 4
 #: a trained baseline within this share of its budget is matched; the record flags any that is not
@@ -88,7 +86,7 @@ class Arm:
     kind: str                       # baseline | network | bank | trained
     coupling: str = "kuramoto"      # a key of CORES
     geometry: str = "torus"         # a key of geometries.GEOMETRIES: torus, ..., sphere, coil, cochlea, ...
-    frequencies: str = "random"     # random | tonotopic | identical
+    frequencies: str = "random"     # paper 03 draws them at random only, as paper 02's reference does
     restoring: float = 0.3          # the restoring strength, lambda
     ceiling: float = 1.0            # the coupling ceiling
     channels: int = CHANNELS
@@ -189,6 +187,8 @@ def build_untrained(arm: Arm, gain: float, seed: int, device: str = "cpu",
         return LeakyBank(channels=arm.channels, grid=arm.grid, gain=gain, seed=seed).to(device)
     if arm.kind != "network":
         raise ValueError(f"{arm.kind} is not an untrained arm")
+    if arm.frequencies != "random":
+        raise ValueError("paper 03 runs random natural frequencies only")
     core, coupling = CORES[arm.coupling]
     torch.manual_seed(seed)              # the kernel and natural-frequency draws
     network = OscillatorField(
@@ -198,11 +198,6 @@ def build_untrained(arm: Arm, gain: float, seed: int, device: str = "cpu",
         harmonic2_beta=BETA if coupling == "harmonic2" else 0.0, kernel_scaling=kernel_scaling)
     block = physics_block(network.core)
     with torch.no_grad():
-        if arm.frequencies == "tonotopic":
-            block.natural_freqs.copy_(tonotopic_omega(
-                arm.channels, arm.grid, DT, SUBSTEPS, torch.Generator().manual_seed(TONOTOPIC_SEED + seed)))
-        elif arm.frequencies == "identical":
-            block.natural_freqs.fill_(1.0)
         if not arm.coupled:
             block.kernel.zero_()
     for p in network.parameters():

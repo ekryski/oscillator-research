@@ -21,9 +21,7 @@ from torch import nn
 
 from harness.models.phase import PhaseCore
 from harness.models.stuart_landau import SLCore
-from harness.stimuli.filterbank import band_edges
 from harness.stimuli.injection import quad_rows_to_drive, rows_to_drive
-from harness.utils.constants import TWO_PI
 
 
 def physics_block(core) -> object:
@@ -74,15 +72,3 @@ class OscillatorField(nn.Module):
             return self.core.forward_scan(drives, drives_quad=quad)[0]
         return self.core.forward_scan(drives)[0]
 
-
-def tonotopic_omega(channels: int, grid: int, dt: float, substeps: int,
-                    gen: torch.Generator, jitter: float = 0.05) -> torch.Tensor:
-    """Tonotopic natural frequencies: row r rotates at the centre of log-spaced band r, with small jitter.
-
-    Kept so paper 02's labels still build; paper 03 runs random natural frequencies only.
-    """
-    e = band_edges(grid)
-    centers = torch.sqrt(e[:-1] * e[1:])  # [G] band centres, cycles/frame
-    theta_dot = (TWO_PI * centers / (dt * substeps)).to(torch.float32)
-    base = theta_dot.view(1, grid, 1).expand(channels, grid, grid)
-    return base * (1 + jitter * torch.randn(channels, grid, grid, generator=gen))

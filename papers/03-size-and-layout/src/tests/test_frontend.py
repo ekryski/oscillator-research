@@ -173,16 +173,6 @@ def test_the_quadrature_phase_is_referenced_to_the_window_at_every_band_count():
     assert torch.isfinite(q16).all() and torch.isfinite(q128).all()
 
 
-def test_the_log_spaced_bands_span_four_octaves_at_every_count_and_are_paper_02s_at_16():
-    from harness.stimuli.filterbank import band_edges
-    from harness.utils.constants import F_LO
-    r = torch.arange(17, dtype=torch.float64)
-    assert torch.equal(band_edges(16), F_LO * (2.0 ** (r / 4)))
-    for bands in (8, 32, 64, 128):
-        e = band_edges(bands)
-        assert e[0] == F_LO and torch.isclose(e[-1], torch.tensor(16 * F_LO, dtype=torch.float64))
-
-
 @pytest.mark.parametrize("bands,window", [(64, 1024), (128, 2048)])
 def test_a_longer_window_keeps_paper_02s_frame_count_and_centres(bands, window):
     """A real window of `window` samples, centred where paper 02's 512-sample frame is centred."""

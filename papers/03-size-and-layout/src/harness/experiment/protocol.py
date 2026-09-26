@@ -26,7 +26,6 @@ Paper 02's Protocol B (Becker et al.'s folds) is not carried over.
 
 from __future__ import annotations
 
-import itertools
 import math
 from pathlib import Path
 
@@ -46,8 +45,6 @@ INT16_SCALE = 32767.0
 
 TRAIN_SPEAKERS = tuple(range(1, 49))
 TEST_SPEAKERS = tuple(range(49, 61))
-#: nested training-set sizes; the last is the whole training pool
-SIZES = (2048, 8192, 24000)
 
 #: seed families, kept apart so no two uses of a generator can collide
 TRAIN_ORDER_SEED = 1000
@@ -261,12 +258,12 @@ def order_clips(bank: dict, first: torch.Tensor, second: torch.Tensor, pair: tup
     return add_noise(waves, lens, ids, noise_db), lens
 
 
-def sequence_set(bank: dict, pool: torch.Tensor, length: int, n: int, set_code: int,
-                 repeats: bool = False) -> tuple[torch.Tensor, torch.Tensor]:
+def sequence_set(bank: dict, pool: torch.Tensor, length: int, n: int,
+                 set_code: int) -> tuple[torch.Tensor, torch.Tensor]:
     """Which recordings make up a digit-sequence set: (bank indices [n, length], digits [n, length]).
 
-    Each sequence's digits are drawn uniformly, without repeats by default (so
-    a sequence holds `length` different digits), and each position's recording
+    Each sequence's digits are drawn uniformly, without repeats (so a
+    sequence holds `length` different digits), and each position's recording
     is an independent draw from the pool's recordings of that digit. The digit
     at every position is therefore uniform over the ten, so chance at every
     position is 1/10. `set_code` 0 is the fixed test set; seed s draws training
@@ -275,10 +272,7 @@ def sequence_set(bank: dict, pool: torch.Tensor, length: int, n: int, set_code: 
     seed = (SEQUENCE_TEST_SET + length if set_code == 0
             else SEQUENCE_SET_SEED + 100 * length + set_code)
     gen = torch.Generator().manual_seed(seed)
-    if repeats:
-        digits = torch.randint(DIGIT_CHOICES, (n, length), generator=gen)
-    else:
-        digits = torch.stack([torch.randperm(DIGIT_CHOICES, generator=gen)[:length] for _ in range(n)])
+    digits = torch.stack([torch.randperm(DIGIT_CHOICES, generator=gen)[:length] for _ in range(n)])
     by_digit = [pool[bank["labels"][pool] == d] for d in range(DIGIT_CHOICES)]
     idx = torch.empty(n, length, dtype=torch.long)
     for p in range(length):
@@ -297,32 +291,17 @@ def sequence_clips(bank: dict, idx: torch.Tensor, length: int, set_code: int, st
     return add_noise(waves, lens, ids, noise_db), lens
 
 
-def order_free_ceiling(length: int, repeats: bool = False) -> float:
-    """The best accuracy at one position for a reader that knows which digits a sequence holds but not
-    their order: the expected share of the sequence taken by its most frequent digit. Exactly 1/length
-    without repeats; with repeats, computed over every one of the 10**length equally likely sequences."""
-    if not repeats:
-        return 1.0 / length
-    best = sum(max(seq.count(d) for d in set(seq))
-               for seq in itertools.product(range(DIGIT_CHOICES), repeat=length))
-    return best / (length * DIGIT_CHOICES ** length)
-
-
-def sequence_chance(length: int, repeats: bool = False) -> dict:
-    """Exact chance levels for a sequence of `length` digits.
+def sequence_chance(length: int) -> dict:
+    """Exact chance levels for a sequence of `length` different digits.
 
     per_position: an uninformed reader, 1/10. order_free: a reader that knows
-    the digits present but not their order (order_free_ceiling). whole: every
-    position right by chance (one sequence among 10 * 9 * ... or 10**length).
-    whole_order_free: every position right knowing the digits present (one
-    ordering among length!, without repeats).
+    the digits present but not their order, 1/length. whole: every position
+    right by chance, one sequence among 10 * 9 * ... (length factors).
+    whole_order_free: every position right knowing the digits present, one
+    ordering among length!.
     """
-    orderings = math.perm(DIGIT_CHOICES, length) if not repeats else DIGIT_CHOICES ** length
-    out = {"per_position": 1.0 / DIGIT_CHOICES, "order_free": order_free_ceiling(length, repeats),
-           "whole": 1.0 / orderings}
-    if not repeats:
-        out["whole_order_free"] = 1.0 / math.factorial(length)
-    return out
+    return {"per_position": 1.0 / DIGIT_CHOICES, "order_free": 1.0 / length,
+            "whole": 1.0 / math.perm(DIGIT_CHOICES, length), "whole_order_free": 1.0 / math.factorial(length)}
 
 
 def recognition_clips(bank: dict, idx: torch.Tensor, noise_db: float | None):

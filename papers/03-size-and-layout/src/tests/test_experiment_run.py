@@ -266,3 +266,8 @@ def test_the_order_parameter_reads_one_for_a_locked_channel_and_near_zero_for_a_
     spread = torch.linspace(0, 2 * math.pi, g * g + 1)[:-1].view(1, 1, 1, g, g).expand(1, t, 1, g, g)
     sig = torch.cat((spread.sin().flatten(2), spread.cos().flatten(2)), dim=2)
     assert am.network_instruments(sig, rows, "spectrogram", 1, g, lo=0)["R"].item() < 1e-5
+
+
+def test_paper_03_draws_natural_frequencies_at_random_only():
+    with pytest.raises(ValueError, match="random natural frequencies"):
+        am.build_untrained(am.Arm("network", frequencies="tonotopic"), 1.0, 0)

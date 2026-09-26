@@ -35,11 +35,6 @@ ARMS = {
     "trained-s4d": "S4D",
 }
 
-#: the design factors, as the Arm fields name them
-FACTORS = {"coupling": "coupling function", "geometry": "lattice geometry", "frequencies": "natural frequencies",
-           "restoring": "restoring strength", "ceiling": "coupling ceiling", "channels": "channels",
-           "grid": "lattice", "bands": "band mapping", "window": "analysis window"}
-
 #: a factor's levels
 LEVELS = {
     "kuramoto": "Kuramoto", "kuramoto-sakaguchi": "Kuramoto–Sakaguchi", "second-harmonic": "second harmonic",
