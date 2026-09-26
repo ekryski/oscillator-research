@@ -39,7 +39,7 @@ SIZES = (128, 256)
 
 
 def spec(arm, **kw):
-    base = dict(tier="size", task="recognition", pathway="spectrogram", noise_db=0.0,
+    base = dict(experiment="size", task="recognition", pathway="spectrogram", noise_db=0.0,
                 gain=2.0 if arm.uses_gain else None, seed=0, arm=arm, sizes=SIZES,
                 widths=(64, 256), native_sizes=(128,), bits="all")
     return rn.Spec(**{**base, **kw})
@@ -47,11 +47,12 @@ def spec(arm, **kw):
 
 def test_a_run_is_named_by_what_decides_its_numbers_in_paper_02s_form():
     a = spec(FIELD)
-    assert a.group() == "size-recognition-spectrogram-16x16"
+    assert a.group() == "size-recognition-16x16"
     assert a.run_id() == "A/0db/g2/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1"
     assert spec(am.Arm("baseline")).run_id() == "A/0db/s0/baseline"              # the baseline has no gain
     assert spec(am.Arm("trained", arch="gru"), sizes=(128,)).run_id().endswith("trained-gru/n128")
-    assert spec(am.Arm("network", coupling="winfree", grid=64), tier="design").group() == "design-recognition-spectrogram-64x64-winfree"
+    assert spec(am.Arm("network", coupling="winfree", grid=64), experiment="design").group() == "design-recognition-64x64-winfree"
+    assert spec(FIELD, experiment="reuse-check", pathway="quadrature").group() == "reuse-check-recognition-quadrature"
     assert spec(FIELD, noise_db=None).run_id().startswith("A/clean/")
     ids = {spec(FIELD, seed=s, gain=g).run_id() for s in (0, 1) for g in (1.0, 2.0)}
     assert len(ids) == 4
@@ -138,9 +139,9 @@ def test_a_trained_network_is_read_at_its_own_training_size(bank):
 
 
 def test_a_smaller_run_reproduces_the_same_cell_of_a_larger_one(bank):
-    # paper 02's tier 1 ran three training sizes; its 2,048-clip cell is the cell a paper 03 run computes
+    # paper 02's controls experiment ran three training sizes; its 2,048-clip cell is the cell a paper 03 run computes
     big = rn.execute(spec(FIELD), bank=bank)
-    small = rn.execute(spec(FIELD, tier="design", sizes=(128,)), bank=bank)
+    small = rn.execute(spec(FIELD, experiment="design", sizes=(128,)), bank=bank)
     key = lambda c: (c["read"], c["n_train"], c["width"], c["projection"])  # noqa: E731
     big_cells = {key(c): c for c in big["cells"]}
     for c in small["cells"]:

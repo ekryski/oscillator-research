@@ -6,7 +6,7 @@ with. Grouped by what each part is for:
 
 | package        | what lives there                                                   |
 |----------------|--------------------------------------------------------------------|
-| `experiment`   | the tiers, one run, the shared read, the summary, the benchmark    |
+| `experiment`   | the experiments, one run, the shared read, the summary, the benchmark |
 | `models`       | the arms: the oscillator network and its cores, the leaky-integrator bank, the trained baselines |
 | `stimuli`      | sound in: the mel front end, the spectrogram and quadrature pathways, the band-to-row routing |
 | `measurement`  | the summary statistics every arm is read by, and the fixed projection |

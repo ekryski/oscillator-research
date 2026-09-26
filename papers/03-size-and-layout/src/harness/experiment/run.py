@@ -2,18 +2,17 @@
 
 A run streams its clips through the arm in batches, keeps each feature block
 once, hands them to the shared readout, and records every cell with its
-per-clip correctness where the plan asks for it. The training block and the
+per-clip correctness where the spec asks for it. The training block and the
 test block are batched separately, so a test clip's features are computed in
-the same batch in every tier that uses it. An arm with more than
+the same batch in every experiment that uses it. An arm with more than
 `stream.STREAM_STATES` states is instead read channel by channel
 (`harness.experiment.stream`).
 
-The record lives under results/, one file per tier, task, input
-pathway and lattice (and coupling function in the design tiers). A run's
-identity is derived from its specification alone, so a sweep can be stopped
-and restarted and each run lands in the same place exactly once. Run
-identities have paper 02's form, so a paper 02 cell and the paper 03 cell it
-stands for share one.
+The record lives under results/, one file per experiment, task and lattice
+(and coupling function in the design experiments). A run's identity is
+derived from its specification alone, so a sweep can be stopped and restarted
+and each run lands in the same place exactly once. Run identities have paper
+02's form, so a paper 02 cell and the paper 03 cell it stands for share one.
 """
 
 from __future__ import annotations
@@ -37,7 +36,7 @@ from harness.experiment import protocol as pr
 from harness.experiment import readout as ro
 from harness.experiment import stream as st
 from harness.utils.device import describe, resolve
-from harness.utils.paths import results_root
+from harness.utils.paths import CACHE_DIR, results_root
 
 #: paper 02's common widths; an arm is never read wider than its native width
 WIDTHS = (192, 1024, 4096)
@@ -55,7 +54,7 @@ MIN_BATCH = 16
 @dataclass(frozen=True)
 class Spec:
     """Everything that decides a run's numbers, and nothing else."""
-    tier: str
+    experiment: str
     task: str                      # recognition | order | sequence
     pathway: str                   # spectrogram | quadrature: the input pathway
     noise_db: float | None         # None is clean audio
@@ -73,11 +72,14 @@ class Spec:
     reads: tuple = ()              # the reads to record; empty records every read the arm has
 
     def group(self) -> str:
-        """The record file: tier, task, pathway and lattice, as paper 02 names its files with the lattice
-        added, and the coupling function in the design tiers."""
-        a = self.arm
-        name = f"{self.tier}-{self.task}-{self.pathway}-{a.grid}x{a.grid}"
-        return f"{name}-{a.coupling}" if self.tier.startswith("design") and a.kind == "network" else name
+        """The record file: the experiment and the task, as paper 02 names its files, then the lattice, and
+        the coupling function in the design experiments. The reuse check, all at paper 02's lattice, is
+        split by input pathway instead, since a network's run identity does not name its pathway."""
+        a, name = self.arm, f"{self.experiment}-{self.task}"
+        if self.experiment == "reuse-check":
+            return name if self.pathway == "spectrogram" else f"{name}-{self.pathway}"
+        name += f"-{a.grid}x{a.grid}"
+        return f"{name}-{a.coupling}" if self.experiment.startswith("design") and a.kind == "network" else name
 
     def run_id(self) -> str:
         parts = [self.protocol]
@@ -132,7 +134,9 @@ def write(spec: Spec, record: dict) -> None:
     """Merge one run into its group file: exclusive lock, merge, atomic swap."""
     path = group_path(spec.group())
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path.with_suffix(".json.lock"), "w") as lock:
+    locks = CACHE_DIR / "locks"                          # beside the caches, so results/ holds only the record
+    locks.mkdir(parents=True, exist_ok=True)
+    with open(locks / f"{spec.group()}.lock", "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         try:
             data = load_group(spec.group())
@@ -322,7 +326,7 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None, trained_d
     """Run one spec and return its record (not yet written). `device` may be "auto" (harness.utils.device).
 
     A trained baseline trains on `trained_device`, the CPU unless asked: paper 02 keeps its trained
-    baselines on the CPU on every machine, and DESIGN.md says when paper 03 moves them to a GPU.
+    baselines on the CPU on every machine, and so does paper 03 unless a run is told otherwise.
     """
     t0 = time.perf_counter()
     device = resolve(device)

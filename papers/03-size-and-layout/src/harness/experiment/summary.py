@@ -17,9 +17,9 @@ unprojected read (a width at or above the arm's own) is tagged "none" and is
 compared with either. Paper 02's cells recorded before it tagged projections
 are its fixed ones.
 
-Cells taken from paper 02 (16 x 16, 4 channels; `plan.reused`) are read from
-paper 02's record and reported under paper 03's tier, marked with their
-source.
+Cells taken from paper 02 (16 x 16, 4 channels; `plan.taken_from_paper02`)
+are read from paper 02's record and reported under paper 03's experiment,
+marked with their source.
 
 The memory tasks add cells of their own, derived from the recorded ones and
 never recorded: on the order task, the five digit pairs pooled ("all" pairs,
@@ -31,6 +31,12 @@ A network's instruments (how synchronized it is, and how locked to its drive;
 harness.experiment.arms.network_instruments) are reported beside its accuracies,
 as the mean over its test clips, then over seeds. They are diagnostics: no
 cell depends on them.
+
+Two checks on the pipeline are reported, and neither scores a result: the
+leak check (with no input, every cell of the leak-check experiment should
+read exactly chance) and the reuse check (the reuse-check experiment's runs,
+paper 02's own runs made again on the CPU, against paper 02's record, cell
+for cell).
 """
 
 from __future__ import annotations
@@ -59,13 +65,14 @@ BOOTSTRAP, CONFIDENCE, BOOT_SEED = 2000, 0.95, 20260923
 #: bootstrap resamples drawn per batch, bounding memory
 CHUNK = 100
 #: record files that are not runs
-NOT_RUNS = ("gates.json", "summary.json")
+NOT_RUNS = ("summary.json",)
+CHANCE = 0.1
 
 
 @dataclass(frozen=True)
 class Cell:
     """One recorded accuracy, with what it belongs to."""
-    tier: str
+    experiment: str
     pathway: str
     noise: float | None
     gain: float | None
@@ -119,7 +126,7 @@ class Cell:
 @dataclass(frozen=True)
 class Instruments:
     """One network run's instruments, over its test clips."""
-    tier: str
+    experiment: str
     task: str
     pair: tuple
     length: int
@@ -137,20 +144,20 @@ def _label(run_id: str, kind: str) -> str:
     return run_id.split("/")[-1] if kind != "trained" else run_id.split("/")[-2]
 
 
-def _cells(tier: str, rec: dict, run_id: str, source: str) -> list[Cell]:
+def _cells(experiment: str, rec: dict, run_id: str, source: str) -> list[Cell]:
     s = rec["spec"]
     label = _label(run_id, s["arm"]["kind"])
-    return [Cell(tier, s["pathway"], s["noise_db"], s["gain"], s["seed"], s["arm"], label, c["read"], c["width"],
+    return [Cell(experiment, s["pathway"], s["noise_db"], s["gain"], s["seed"], s["arm"], label, c["read"], c["width"],
                  c["n_train"], c["acc"], c.get("correct"), rec["n_test"], source, projection_of(c, rec),
                  s.get("task", "recognition"), tuple(s.get("pair", ())), s.get("length", 0), c.get("position"))
             for c in rec["cells"]]
 
 
-def _instruments(tier: str, rec: dict, run_id: str, source: str) -> list[Instruments]:
+def _instruments(experiment: str, rec: dict, run_id: str, source: str) -> list[Instruments]:
     s = rec["spec"]
     if "instruments" not in rec:
         return []
-    return [Instruments(tier, s.get("task", "recognition"), tuple(s.get("pair", ())), s.get("length", 0),
+    return [Instruments(experiment, s.get("task", "recognition"), tuple(s.get("pair", ())), s.get("length", 0),
                         s["pathway"], s["noise_db"], s["gain"], s["seed"], s["arm"], _label(run_id, s["arm"]["kind"]),
                         {k: v["mean"] for k, v in rec["instruments"].items()}, source)]
 
@@ -161,7 +168,7 @@ def _scores(c: Cell) -> np.ndarray:
 
 
 def _same_read(c: Cell) -> tuple:
-    return (c.tier, c.pathway, c.noise, c.gain, c.seed, c.label, c.read, c.width, c.n_train, c.projection, c.task,
+    return (c.experiment, c.pathway, c.noise, c.gain, c.seed, c.label, c.read, c.width, c.n_train, c.projection, c.task,
             c.length, c.source)
 
 
@@ -202,16 +209,16 @@ def load() -> tuple[list[Cell], list[Instruments]]:
         if path.name in NOT_RUNS:
             continue
         for run_id, rec in json.loads(path.read_text())["runs"].items():
-            out += _cells(rec["spec"]["tier"], rec, run_id, "paper 03")
-            inst += _instruments(rec["spec"]["tier"], rec, run_id, "paper 03")
+            out += _cells(rec["spec"]["experiment"], rec, run_id, "paper 03")
+            inst += _instruments(rec["spec"]["experiment"], rec, run_id, "paper 03")
             ours.add((path.stem, run_id))
-    for tier in plan.TIERS.values():
-        for spec in tier():
+    for experiment in plan.EXPERIMENTS.values():
+        for spec in experiment():
             mine = (spec.group(), spec.run_id()) in ours
             rec = plan.paper02_run(spec) if plan.reused(spec) and not mine else None
             if rec is not None:
-                out += _cells(spec.tier, rec, spec.run_id(), "paper 02")
-                inst += _instruments(spec.tier, rec, spec.run_id(), "paper 02")
+                out += _cells(spec.experiment, rec, spec.run_id(), "paper 02")
+                inst += _instruments(spec.experiment, rec, spec.run_id(), "paper 02")
     return out + _derived(out), inst
 
 
@@ -254,16 +261,16 @@ def accuracies(cells: list[Cell]) -> list[dict]:
     """One record per arm, read, condition, width and size, over its seeds."""
     groups, sources = defaultdict(dict), defaultdict(set)
     for c in cells:
-        key = (c.tier, c.task, c.pair, c.length, c.position, c.pathway, c.label, c.read, c.noise, c.gain, c.width,
-               c.n_train, c.projection)
+        key = (c.experiment, c.task, c.pair, c.length, c.position, c.pathway, c.label, c.read, c.noise, c.gain,
+               c.width, c.n_train, c.projection)
         groups[key][f"seed{c.seed}"] = c.acc
         sources[key].add(c.source)
-    fields = ("tier", "task", "pair", "length", "position", "pathway", "arm", "read", "noise", "gain", "width",
+    fields = ("experiment", "task", "pair", "length", "position", "pathway", "arm", "read", "noise", "gain", "width",
               "n_train", "projection")
     out = []
     for k, v in sorted(groups.items(), key=str):
         base, channels, grid, bands = terms.split(k[6])
-        out.append({**dict(zip(fields, k, strict=True)), "name": terms.arm(k[6], k[0]), "grid": grid,
+        out.append({**dict(zip(fields, k, strict=True)), "name": terms.arm(k[6]), "grid": grid,
                     "bands": bands or 0,
                     "window": terms.window_of(k[6]) or 0, "channels": channels, "source": sorted(sources[k]),
                     **spread(v)})
@@ -275,15 +282,15 @@ def instruments(runs: list[Instruments]) -> list[dict]:
     clips). Values are as recorded, not in points."""
     groups, sources = defaultdict(lambda: defaultdict(dict)), defaultdict(set)
     for r in runs:
-        key = (r.tier, r.task, r.pair, r.length, r.pathway, r.label, r.noise, r.gain)
+        key = (r.experiment, r.task, r.pair, r.length, r.pathway, r.label, r.noise, r.gain)
         for name, v in r.values.items():
             groups[key][name][f"seed{r.seed}"] = v
         sources[key].add(r.source)
     out = []
     for k, by in sorted(groups.items(), key=str):
         base, channels, grid, bands = terms.split(k[5])
-        entry = {"tier": k[0], "task": k[1], "pair": k[2], "length": k[3], "pathway": k[4], "arm": k[5],
-                 "name": terms.arm(k[5], k[0]), "noise": k[6], "gain": k[7],
+        entry = {"experiment": k[0], "task": k[1], "pair": k[2], "length": k[3], "pathway": k[4], "arm": k[5],
+                 "name": terms.arm(k[5]), "noise": k[6], "gain": k[7],
                  "grid": grid, "bands": bands or 0, "window": terms.window_of(k[5]) or 0, "channels": channels,
                  "source": sorted(sources[k])}
         for name, values in by.items():
@@ -350,13 +357,13 @@ def compare(cells: list[Cell], name: str, a, b, *, per_channel: bool = True, ign
     return out
 
 
-def _sel(tier: str, kind: str, read: str | None = None, reference: bool | None = True, pathway: str | None = None,
-         task: str = "recognition"):
-    """Cells of one tier, arm kind and task; the task's primary read unless `read` names another."""
+def _sel(experiment: str, kind: str, read: str | None = None, reference: bool | None = True,
+         pathway: str | None = None, task: str = "recognition"):
+    """Cells of one experiment, arm kind and task; the task's primary read unless `read` names another."""
     read = read or am.PRIMARY_READ[task]
 
     def pick(c: Cell) -> bool:
-        return (c.tier == tier and c.task == task and _kind(c) == kind and c.read == read
+        return (c.experiment == experiment and c.task == task and _kind(c) == kind and c.read == read
                 and (pathway is None or c.pathway == pathway)
                 and (reference is None or kind not in ("network", "uncoupled") or _is_reference(c) == reference))
     return pick
@@ -369,25 +376,25 @@ WHOLE = "spectrogram-only baseline, whole clip"
 RATES = "with its rotation rates minus without"
 
 
-def _controls(cells: list[Cell], tier: str, task: str, pathway: str = "spectrogram", suffix: str = "",
+def _controls(cells: list[Cell], experiment: str, task: str, pathway: str = "spectrogram", suffix: str = "",
               bank: bool = True) -> list[dict]:
     """The network against the uncoupled network, the bank and the whole-clip baseline, each of those
     against the baseline too, and each network with its rotation rates against without."""
     read = am.PRIMARY_READ[task]
-    net = _sel(tier, "network", pathway=pathway, task=task)
-    whole = _sel(tier, "baseline", f"{read}@wholeclip", pathway=pathway, task=task)
+    net = _sel(experiment, "network", pathway=pathway, task=task)
+    whole = _sel(experiment, "baseline", f"{read}@wholeclip", pathway=pathway, task=task)
     out = compare(cells, f"{NETWORK} minus the {UNCOUPLED}{suffix}", net,
-                  _sel(tier, "uncoupled", pathway=pathway, task=task))
+                  _sel(experiment, "uncoupled", pathway=pathway, task=task))
     kinds = [("network", NETWORK), ("uncoupled", UNCOUPLED)]
     if bank:
-        out += compare(cells, f"{NETWORK} minus the {BANK}{suffix}", net, _sel(tier, "bank", pathway=pathway, task=task))
+        out += compare(cells, f"{NETWORK} minus the {BANK}{suffix}", net, _sel(experiment, "bank", pathway=pathway, task=task))
         kinds.append(("bank", BANK))
     for kind, name in kinds:
-        out += compare(cells, f"{name} minus the {WHOLE}{suffix}", _sel(tier, kind, pathway=pathway, task=task), whole,
+        out += compare(cells, f"{name} minus the {WHOLE}{suffix}", _sel(experiment, kind, pathway=pathway, task=task), whole,
                        per_channel=False)
     for kind, name in kinds[:2]:
-        out += compare(cells, f"{name} {RATES}{suffix}", _sel(tier, kind, f"{read}+rate", pathway=pathway, task=task),
-                       _sel(tier, kind, pathway=pathway, task=task))
+        out += compare(cells, f"{name} {RATES}{suffix}", _sel(experiment, kind, f"{read}+rate", pathway=pathway, task=task),
+                       _sel(experiment, kind, pathway=pathway, task=task))
     return out
 
 
@@ -401,7 +408,7 @@ def size_comparisons(cells: list[Cell]) -> list[dict]:
     for arch in plan.TRAINED_ARCHS:
         net = terms.ARMS[f"trained-{arch}"]
         out += compare(cells, f"{NETWORK} minus the {net} sized to it", _sel("size", "network"),
-                       lambda c, arch=arch: c.tier == "trained" and c.arm.get("arch") == arch and c.read == READ)
+                       lambda c, arch=arch: c.experiment == "trained" and c.arm.get("arch") == arch and c.read == READ)
     for kind, name in (("network", NETWORK), ("uncoupled", UNCOUPLED), ("bank", BANK), ("baseline", "spectrogram-only "
                                                                                     "baseline")):
         own = _sel("size", kind)
@@ -417,15 +424,16 @@ def size_comparisons(cells: list[Cell]) -> list[dict]:
 def design_comparisons(cells: list[Cell]) -> list[dict]:
     """Each coupling function and geometry minus the reference network, at every size and pathway."""
     out = []
-    for tier, ref_tier, pathway in (("design", "size", "spectrogram"), ("design-quadrature", "quadrature", "quadrature")):
+    for experiment, reference, pathway in (("design", "size", "spectrogram"),
+                                           ("design-quadrature", "quadrature", "quadrature")):
         for coupling, geometry in plan.designs():
             if (coupling, geometry) == plan.REFERENCE:
                 continue
-            def a(c, coupling=coupling, geometry=geometry, tier=tier):
-                return (c.tier == tier and c.read == READ and c.arm.get("coupling") == coupling
+            def a(c, coupling=coupling, geometry=geometry, experiment=experiment):
+                return (c.experiment == experiment and c.read == READ and c.arm.get("coupling") == coupling
                         and c.arm.get("geometry") == geometry)
             label = f"{terms.level(coupling)}, {geometry} minus Kuramoto, torus ({terms.PATHWAYS[pathway]} pathway)"
-            out += compare(cells, label, a, _sel(ref_tier, "network", pathway=pathway),
+            out += compare(cells, label, a, _sel(reference, "network", pathway=pathway),
                            extra={"factor": "coupling function and lattice geometry"})
     return out
 
@@ -442,12 +450,52 @@ def chance() -> dict:
             "sequence": {length: pr.sequence_chance(length) for length in pr.SEQUENCE_LENGTHS}}
 
 
+def leak_check(cells: list[Cell]) -> dict:
+    """With no input a reservoir's state carries nothing about the clip, so every cell of a zero-gain run
+    should read exactly chance, in memory and streamed; anything else would mean the read or the data
+    leaks around the reservoir."""
+    zero = [c for c in cells if c.experiment == "leak-check" and c.gain == 0.0]
+    return {"runs": len({(c.label, c.seed) for c in zero}), "cells": len(zero),
+            "off_chance": [f"{c.label} {c.read} width {c.width} ({c.projection}): {100 * c.acc:.2f}%"
+                           for c in zero if c.acc != CHANCE]}
+
+
+def reuse_check() -> dict:
+    """The reuse-check experiment's runs, made here on the CPU, against paper 02's record of the same
+    runs, cell for cell: every cell both record (the same read, width, training size and projection),
+    identical only if its accuracy and its per-clip correctness are. A run not recorded here yet is
+    listed as such."""
+    runs, compared, identical, differing, missing = 0, 0, 0, [], []
+    for spec in plan.reuse_check():
+        where = f"{spec.group()}/{spec.run_id()}"
+        mine = rn.load_group(spec.group())["runs"].get(spec.run_id())
+        theirs = None if mine is None else plan.paper02_run(spec)
+        if theirs is None:
+            missing.append(where + ("" if mine is None else " (not in paper 02's record)"))
+            continue
+        runs += 1
+        by = {(c["read"], c["n_train"], str(c["width"]), c["projection"]): c for c in theirs["cells"]}
+        for c in mine["cells"]:
+            o = by.get((c["read"], c["n_train"], str(c["width"]), c["projection"]))
+            if o is None:
+                continue
+            compared += 1
+            if o["acc"] == c["acc"] and o.get("correct") == c.get("correct"):
+                identical += 1
+            else:
+                differing.append(f"{where} {c['read']} width {c['width']} ({c['projection']}): "
+                                 f"{100 * c['acc']:.2f}% here, {100 * o['acc']:.2f}% in paper 02")
+    return {"runs": runs, "cells": compared, "identical": identical, "differing": differing,
+            "not_recorded": missing}
+
+
 def summary(cells: list[Cell] | None = None, runs: list[Instruments] | None = None) -> dict:
     if cells is None:
         cells, loaded = load()
         runs = loaded if runs is None else runs
     return {"chance": chance(), "accuracy": accuracies(cells), "instruments": instruments(runs or []),
-            "comparisons": size_comparisons(cells) + design_comparisons(cells) + pathway_comparisons(cells)}
+            "comparisons": size_comparisons(cells) + design_comparisons(cells) + pathway_comparisons(cells),
+            "leak_check": leak_check(cells), "reuse_check": reuse_check()}
 
 
 # ---------------------------------------------------------------------------
@@ -493,16 +541,17 @@ def _instrument(name: str):
 
 
 def progress() -> dict[str, tuple[int, int, int]]:
-    """Runs recorded, runs taken from paper 02, and runs planned, per tier."""
+    """Runs recorded, runs taken from paper 02, and runs planned, per experiment."""
     root, have, out = rn.record_root(), {}, {}
-    for name, tier in plan.TIERS.items():
-        specs = list(tier())
+    for name, experiment in plan.EXPERIMENTS.items():
+        specs = list(experiment())
         for s in specs:
             if s.group() not in have:
                 path = root / f"{s.group()}.json"
                 have[s.group()] = set(json.loads(path.read_text())["runs"]) if path.exists() else set()
-        out[name] = (sum(s.run_id() in have[s.group()] for s in specs),
-                     sum(plan.paper02_run(s) is not None for s in specs if plan.reused(s)), len(specs))
+        mine = [s.run_id() in have[s.group()] for s in specs]
+        out[name] = (sum(mine), sum(plan.taken_from_paper02(s) for s, m in zip(specs, mine, strict=True) if not m),
+                     len(specs))
     return out
 
 
@@ -510,7 +559,7 @@ def _pct(x: float) -> str:
     return f"{100 * x:.3g}%"
 
 
-def _task_section(acc, cmp, projection: str, tier: str, task: str, title: str, note: str, pick=lambda r: True,
+def _task_section(acc, cmp, projection: str, experiment: str, task: str, title: str, note: str, pick=lambda r: True,
                   controls: tuple[str, ...] = ()) -> list[str]:
     """The coupled network's accuracy by lattice and channel count, and its comparisons."""
     read = am.PRIMARY_READ[task]
@@ -519,7 +568,7 @@ def _task_section(acc, cmp, projection: str, tier: str, task: str, title: str, n
         return (r["width"] == PRIMARY_WIDTH and r["n_train"] == PRIMARY_SIZE and r["projection"] == projection
                 and r["task"] == task and pick(r))
     lines = [f"## {title}: coupled oscillator network accuracy ({projection} projection)", "", note, ""]
-    lines += _grid_table([r for r in acc if prim(r) and r["tier"] == tier and r["read"] == read
+    lines += _grid_table([r for r in acc if prim(r) and r["experiment"] == experiment and r["read"] == read
                           and r["arm"].startswith("coupled-")], _acc) + [""]
     for name in controls:
         lines += [f"### {name} ({title[0].lower() + title[1:]}, {projection} projection)", ""]
@@ -532,7 +581,7 @@ def report(s: dict, done: dict[str, tuple[int, int, int]]) -> str:
     noise, gain = plan.NOISES[0], plan.GAINS[0]
     lines = ["# Paper 03: results", "",
              "Generated by `uv run python -m harness.experiment.summary`; every number here and more (every width, "
-             "pair, position and tier) is in `summary.json`. Accuracies are mean ± standard deviation over three "
+             "pair, position and experiment) is in `summary.json`. Accuracies are mean ± standard deviation over three "
              "seeds, in percent. Differences are paired, mean ± standard deviation over seeds, with the 95% "
              "interval from resampling test clips in brackets, in points. Primary cell: width "
              f"{PRIMARY_WIDTH}, {PRIMARY_SIZE:,} training clips, {_noise(noise)}, input gain {gain:g}, the "
@@ -541,7 +590,16 @@ def report(s: dict, done: dict[str, tuple[int, int, int]]) -> str:
              "seed) and the one seeded by each run's seed.", "",
              "Runs recorded: " + "; ".join(f"{k} {d:,} (+{p:,} from paper 02) of {n:,}"
                                            for k, (d, p, n) in done.items())
-             + ". A tier not yet complete is summarized over the runs it has.", ""]
+             + ". An experiment not yet complete is summarized over the runs it has.", ""]
+    lk, ru = s["leak_check"], s["reuse_check"]
+    lines += [("Leak check: not run yet." if not lk["cells"] else
+               f"Leak check: with no input, {lk['cells'] - len(lk['off_chance'])} of the {lk['cells']} cells of the "
+               f"{lk['runs']} zero-gain runs read exactly chance (10%)"
+               + (f"; off chance: {'; '.join(lk['off_chance'])}." if lk["off_chance"] else ".")), "",
+              ("Reuse check: not run yet." if not ru["runs"] else
+               f"Reuse check: {ru['runs']} of paper 02's runs made again here on the CPU; {ru['identical']:,} of the "
+               f"{ru['cells']:,} cells both record are identical to paper 02's, accuracy and per-clip correctness"
+               + (f"; they differ in: {'; '.join(ru['differing'])}." if ru["differing"] else ".")), ""]
     common = [f"{NETWORK} minus the {UNCOUPLED}", f"{NETWORK} minus the {BANK}", f"{NETWORK} minus the {WHOLE}",
               f"{NETWORK} {RATES}"]
     trained = [f"{NETWORK} minus the {terms.ARMS['trained-' + arch]} sized to it" for arch in plan.TRAINED_ARCHS]
@@ -581,11 +639,11 @@ def report(s: dict, done: dict[str, tuple[int, int, int]]) -> str:
             if key == "amplitude":
                 continue
             lines += [f"### {name}: {text}", ""]
-            lines += _grid_table([r for r in inst if r["tier"] == "size" and r["task"] == "recognition"
+            lines += _grid_table([r for r in inst if r["experiment"] == "size" and r["task"] == "recognition"
                                   and r["arm"].startswith(kind)], _instrument(key)) + [""]
     rows = defaultdict(dict)
     for r in inst:
-        if r["tier"] in ("design", "size") and r["task"] == "recognition" and r["arm"].startswith("coupled-") \
+        if r["experiment"] in ("design", "size") and r["task"] == "recognition" and r["arm"].startswith("coupled-") \
                 and r["channels"] == am.CHANNELS and not r["bands"] and not r["window"]:
             m = terms._NETWORK.match(terms.split(r["arm"])[0])
             if m and "R" in r:

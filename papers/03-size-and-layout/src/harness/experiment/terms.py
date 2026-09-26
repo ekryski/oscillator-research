@@ -109,7 +109,7 @@ def _size(channels: int, grid: int, bands: int | None, always: bool = False) -> 
     return parts
 
 
-def arm(label: str, tier: str | None = None) -> str:
+def arm(label: str) -> str:
     """The paper's name for a record label, with its analysis window where it is not paper 02's."""
     name = _arm(label)
     window = window_of(label)

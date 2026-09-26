@@ -94,7 +94,7 @@ def test_the_chance_levels_are_exact():
 def test_the_order_task_runs_on_balanced_sets_and_reads_only_the_whole_span(bank, small_sets):  # noqa: F811
     s = spec(am.Arm("network", channels=2, grid=8), task="order", pair=(3, 7), sizes=(96,), native_sizes=(),
              widths=(64,), reads=("pooled",))
-    assert s.group() == "size-order-spectrogram-8x8" and "/pair37/" in s.run_id()
+    assert s.group() == "size-order-8x8" and "/pair37/" in s.run_id()
     rec = rn.execute(s, bank=bank)
     assert {c["read"] for c in rec["cells"]} == {"pooled"} and rec["n_test"] == 64
     assert {c["projection"] for c in rec["cells"]} == {"fixed", "seeded"}
@@ -103,7 +103,7 @@ def test_the_order_task_runs_on_balanced_sets_and_reads_only_the_whole_span(bank
 def test_the_sequence_task_reads_one_readout_per_position(bank, small_sets):  # noqa: F811
     s = spec(am.Arm("network", channels=2, grid=8), task="sequence", length=3, sizes=(120,), native_sizes=(),
              widths=(64,), reads=("pooled",))
-    assert s.group() == "size-sequence-spectrogram-8x8" and "/seq3/" in s.run_id()
+    assert s.group() == "size-sequence-8x8" and "/seq3/" in s.run_id()
     rec = rn.execute(s, bank=bank)
     assert rec["n_test"] == 80
     assert {(c["position"], c["projection"]) for c in rec["cells"]} == {

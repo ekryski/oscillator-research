@@ -1,4 +1,4 @@
-"""Time one batch of each network on this machine's device, and extrapolate every run and tier from it.
+"""Time one batch of each network on this machine's device, and extrapolate every run and experiment from it.
 
     uv run python -m harness.experiment.plan benchmark --device cuda --out ../results/benchmark/cuda.json
     uv run python -m harness.experiment.plan benchmark --device mps --grids 8 16 --channels 1 4 --no-designs
@@ -24,13 +24,13 @@ for a small, representative fraction of its clips:
    where each trains faster. Runs train them on the CPU unless told
    otherwise (`plan run --trained-device`), as paper 02 does.
 
-From these it extrapolates each run of every tier the way `plan.seconds` does
+From these it extrapolates each run of every experiment the way `plan.seconds` does
 (clips, frames, reads, passes and positions), with the measured times in place
 of the model's. The quadrature pathway, unless timed, is the spectrogram
 pathway times `plan.QUADRATURE_COST`; the trained baselines and the
 spectrogram-only baseline are taken from the cost model on the M1 Max and
 reported as modelled. The JSON report holds the measurements, every run's
-estimated seconds, and each tier's hours by lattice.
+estimated seconds, and each experiment's hours by lattice.
 
 Nothing here reads the digit bank or writes into the record.
 """
@@ -254,15 +254,15 @@ def run_seconds(spec: rn.Spec, m: dict) -> tuple[float, bool]:
     return clips * (per_clip + project) + draws + ridge, True
 
 
-def extrapolate(m: dict, tiers=None) -> tuple[dict, list[dict]]:
-    """Each tier's runs and hours by lattice (the modelled share apart), and every run's seconds. Runs
+def extrapolate(m: dict, experiments=None) -> tuple[dict, list[dict]]:
+    """Each experiment's runs and hours by lattice (the modelled share apart), and every run's seconds. Runs
     taken from paper 02 are left out, as in `plan.estimate`."""
     by = defaultdict(lambda: defaultdict(lambda: {"runs": 0, "hours": 0.0, "modelled_runs": 0,
                                                   "modelled_hours": 0.0, "longest_hours": 0.0}))
     runs = []
-    for name in tiers or plan.TIERS:
-        for spec in plan.TIERS[name]():
-            if plan.reused(spec):
+    for name in experiments or plan.EXPERIMENTS:
+        for spec in plan.EXPERIMENTS[name]():
+            if plan.taken_from_paper02(spec):
                 continue
             secs, measured = run_seconds(spec, m)
             row = by[name][spec.arm.grid]
@@ -272,7 +272,7 @@ def extrapolate(m: dict, tiers=None) -> tuple[dict, list[dict]]:
             if not measured:
                 row["modelled_runs"] += 1
                 row["modelled_hours"] += secs / 3600
-            runs.append({"tier": name, "run": f"{spec.group()}/{spec.run_id()}", "seconds": round(secs, 1),
+            runs.append({"experiment": name, "run": f"{spec.group()}/{spec.run_id()}", "seconds": round(secs, 1),
                          "measured": measured})
     return {t: {str(g): v for g, v in sorted(rows.items())} for t, rows in by.items()}, runs
 
@@ -323,17 +323,17 @@ def benchmark(device: str = "auto", grids=plan.GRIDS, channels=plan.CHANNELS, pa
     for e in m["trained"]:
         log(f"    trained {e['arch']:11s} {e['budget']:7,d} parameters: {e['cpu_s_per_step'] * 1e3:8.1f} ms a step on "
             f"the CPU, {e['device_s_per_step'] * 1e3:8.1f} on {device} ({e['device_speedup']:.2f} times)")
-    tiers, runs = extrapolate(m)
+    experiments, runs = extrapolate(m)
     totals = {name: {"runs": sum(r["runs"] for r in rows.values()), "hours": sum(r["hours"] for r in rows.values()),
                      "modelled_hours": sum(r["modelled_hours"] for r in rows.values())}
-              for name, rows in tiers.items()}
+              for name, rows in experiments.items()}
     report = {
         "when": time.strftime("%Y-%m-%d %H:%M:%S"), "env": env, "benchmark_s": time.perf_counter() - t_all,
         "throughput": t,
         "cells": [{"pathway": d, "grid": g, "channels": c, "kind": k, **v} for (d, g, c, k), v in m["cells"].items()],
         "design_factors": [{"pathway": d, "grid": g, "coupling": fa, "geometry": sh, "factor": v}
                            for (d, g, fa, sh), v in m["designs"].items()],
-        "trained": m["trained"], "tiers": tiers, "totals": totals, "runs": runs,
+        "trained": m["trained"], "experiments": experiments, "totals": totals, "runs": runs,
     }
     for name, tot in totals.items():
         log(f"    {name:18s} {tot['runs']:6d} runs {tot['hours']:11.1f} hours on this device"

@@ -14,7 +14,7 @@ from harness.experiment.arms import Arm
 FAST = {"matmul_flops": 1e11, "randn_per_s": 5e7, "ridge_s": 10.0}
 
 
-def test_a_small_benchmark_times_both_pathways_and_writes_every_tier(tmp_path):
+def test_a_small_benchmark_times_both_pathways_and_writes_every_experiment(tmp_path):
     out = tmp_path / "bench.json"
     report = bm.benchmark("cpu", grids=(8,), channels=(1,), designs=False, max_clips=2, out=out,
                           log=lambda *_: None, throughput=FAST, trained=False)
@@ -23,11 +23,11 @@ def test_a_small_benchmark_times_both_pathways_and_writes_every_tier(tmp_path):
     assert {(c["pathway"], c["kind"]) for c in saved["cells"]} == {
         ("spectrogram", "network"), ("spectrogram", "bank"), ("quadrature", "network")}
     assert all(c["seconds_per_clip"] > 0 and c["clips_timed"] == 2 for c in saved["cells"])
-    assert set(saved["tiers"]) == set(plan.TIERS)
-    runs = sum(len(plan.planned([t])) - sum(map(plan.reused, plan.planned([t]))) for t in plan.TIERS)
+    assert set(saved["experiments"]) == set(plan.EXPERIMENTS)
+    runs = sum(len(plan.planned([e])) - sum(map(plan.taken_from_paper02, plan.planned([e]))) for e in plan.EXPERIMENTS)
     assert len(saved["runs"]) == runs
     measured = {r["run"] for r in saved["runs"] if r["measured"]}
-    assert "quadrature-recognition-quadrature-8x8/A/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1-ch1-8x8" in measured
+    assert "quadrature-recognition-8x8/A/0db/g1/s0/coupled-kuramoto-torus-random-restoring0.3-ceiling1-ch1-8x8" in measured
     assert not any("16x16" in r for r in measured), "only the timed lattice counts as measured"
 
 

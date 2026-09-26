@@ -1,41 +1,42 @@
 #!/usr/bin/env bash
 # Paper 03 on a RunPod pod, or any Linux machine with a GPU, from the pushed branch.
 #
-#   bash pod_run.sh                                                      # set up, test, benchmark; nothing else
-#   bash pod_run.sh /workspace/AudioMNIST gate size -- --grids 8 16 32   # then these tiers, these lattices
+#   bash pod_run.sh                                                            # set up, test, benchmark; nothing else
+#   bash pod_run.sh /workspace/AudioMNIST leak-check size -- --grids 8 16 32   # then these experiments, these lattices
 #
 # First, always: clone or update the repository, sync the environment, run
 # the test suite, and run the benchmark (`plan benchmark`), which times one
 # batch of every lattice and channel count on the GPU, on the spectrogram and
 # quadrature pathways, with every coupling function and geometry, and
-# extrapolates every run and tier. Its report lands in
-# papers/03-size-and-layout/results/benchmark/; nothing else runs unless tiers
-# are named. BENCHMARK=0 skips it, and BENCHMARK_ARGS passes it options (for
-# example "--no-designs").
+# extrapolates every run and experiment. Its report lands in
+# papers/03-size-and-layout/results/benchmark/; nothing else runs unless
+# experiments are named. BENCHMARK=0 skips it, and BENCHMARK_ARGS passes it
+# options (for example "--no-designs").
 #
-# With tiers: the first argument is the AudioMNIST checkout on the attached
-# volume (the folder that holds data/01 ... data/60). The script builds the
-# bank and the row caches, runs the reuse check (paper 02's 16 x 16 cells
-# re-run on the CPU and compared with its record, read from the clone's
-# papers/02-untrained-reservoirs/results/ or from OSC_PAPER02_RESULTS), then
-# the tiers. Every step is resume-safe. Results land in
-# papers/03-size-and-layout/results/; the rsync lines to copy them back are
-# printed at the end.
+# With experiments: the first argument is the AudioMNIST checkout on the
+# attached volume (the folder that holds data/01 ... data/60). The script
+# builds the bank and the row caches, runs the reuse check (a sample of paper
+# 02's 16 x 16 runs made again on the CPU, which the summary compares with
+# paper 02's record, read from the clone's papers/02-untrained-reservoirs/results/
+# or from OSC_PAPER02_RESULTS), then the experiments, then the summary, which
+# also reports the zero-input leak check. Every step is resume-safe. Results
+# land in papers/03-size-and-layout/results/; the rsync lines to copy them
+# back are printed at the end.
 #
 # Pod: one GPU with 24 GB or more (the benchmark halves any batch that does not
 # fit and says so), 32 or more vCPUs, 64 GB or more RAM. A streamed 128 x 128
-# run holds up to about 23 GB of host memory; `plan run <tier> --dry-run`
+# run holds up to about 23 GB of host memory; `plan run <experiment> --dry-run`
 # prints each run's estimate.
 set -euo pipefail
 
 AUDIOMNIST=""
 if [ "$#" -gt 0 ] && [ -d "$1" ]; then AUDIOMNIST="$1"; shift; fi
-TIERS=()
-while [ "$#" -gt 0 ] && [ "$1" != "--" ]; do TIERS+=("$1"); shift; done
+EXPERIMENTS=()
+while [ "$#" -gt 0 ] && [ "$1" != "--" ]; do EXPERIMENTS+=("$1"); shift; done
 [ "${1:-}" = "--" ] && shift
 EXTRA=("$@")
-if [ "${#TIERS[@]}" -gt 0 ] && [ -z "$AUDIOMNIST" ]; then
-    echo "usage: pod_run.sh [<path to the AudioMNIST checkout> tier ... [-- plan run options]]" >&2; exit 1
+if [ "${#EXPERIMENTS[@]}" -gt 0 ] && [ -z "$AUDIOMNIST" ]; then
+    echo "usage: pod_run.sh [<path to the AudioMNIST checkout> experiment ... [-- plan run options]]" >&2; exit 1
 fi
 [ -z "$AUDIOMNIST" ] || [ -d "$AUDIOMNIST/data/01" ] || {
     echo "no data/01 under $AUDIOMNIST: pass the AudioMNIST checkout" >&2; exit 1; }
@@ -72,15 +73,15 @@ if [ "${BENCHMARK:-1}" != 0 ]; then
         | tee "${OUT%.json}.log"
 fi
 
-if [ "${#TIERS[@]}" -gt 0 ]; then
+if [ "${#EXPERIMENTS[@]}" -gt 0 ]; then
     [ -f data/cache/digits_v2.pt ] || uv run python -m harness.experiment.protocol --build-bank
     uv run python -m harness.experiment.plan prepare --workers "$(( CPUS < 16 ? CPUS : 16 ))"
-    uv run python -m harness.experiment.gates reuse            # on the CPU, the only device bit-identical to paper 02
-    for tier in "${TIERS[@]}"; do
-        W=$(( CPUS / 2 < MEM_GB / 12 ? CPUS / 2 : MEM_GB / 12 )); W=$(( W < 1 ? 1 : W )); T=2
-        uv run python -m harness.experiment.plan run "$tier" --workers "$W" --threads "$T" --device "$DEVICE" \
+    W=$(( CPUS / 2 < MEM_GB / 12 ? CPUS / 2 : MEM_GB / 12 )); W=$(( W < 1 ? 1 : W ))
+    # on the CPU whatever the device, the only device bit-identical to paper 02
+    uv run python -m harness.experiment.plan run reuse-check --workers "$W" --threads 2
+    for experiment in "${EXPERIMENTS[@]}"; do
+        uv run python -m harness.experiment.plan run "$experiment" --workers "$W" --threads 2 --device "$DEVICE" \
             ${EXTRA[@]+"${EXTRA[@]}"}
-        if [ "$tier" = gate ]; then uv run python -m harness.experiment.gates check; fi
     done
     uv run python -m harness.experiment.summary > /dev/null
 fi
@@ -88,4 +89,4 @@ fi
 echo
 echo "=== done. From your machine:"
 echo "rsync -avz -e 'ssh -p <PORT> -i ~/.ssh/runpod_ed25519' root@<HOST>:$WORK/papers/03-size-and-layout/results/benchmark/ papers/03-size-and-layout/results/benchmark/"
-[ "${#TIERS[@]}" -eq 0 ] || echo "rsync -avz -e 'ssh -p <PORT> -i ~/.ssh/runpod_ed25519' root@<HOST>:$WORK/papers/03-size-and-layout/results/ papers/03-size-and-layout/results/"
+[ "${#EXPERIMENTS[@]}" -eq 0 ] || echo "rsync -avz -e 'ssh -p <PORT> -i ~/.ssh/runpod_ed25519' root@<HOST>:$WORK/papers/03-size-and-layout/results/ papers/03-size-and-layout/results/"

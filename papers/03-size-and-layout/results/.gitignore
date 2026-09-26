@@ -1,3 +1,2 @@
-# lock files the writers hold while merging, and half-written temporaries
-*.lock
+# half-written temporaries of a record file being merged (the writers' locks live in src/data/cache/locks/)
 *.tmp

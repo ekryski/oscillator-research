@@ -21,13 +21,21 @@ def bits(acc: float, seed: int) -> str:
     return ro.pack(torch.from_numpy(correct))
 
 
-def run(arm: Arm, noise, gain, seed, acc, read, tier="size"):
-    spec = {"tier": tier, "task": "recognition", "pathway": "spectrogram", "noise_db": noise, "gain": gain,
+def run(arm: Arm, noise, gain, seed, acc, read, experiment="size"):
+    spec = {"experiment": experiment, "task": "recognition", "pathway": "spectrogram", "noise_db": noise, "gain": gain,
             "seed": seed, "arm": arm.as_dict(), "span": "fixed"}
     # recorded as paper 02 records: no projection tag, so the summary reads them as the fixed projection
     cells = [{"read": read, "width": 192, "effective_width": 192, "n_train": 2048, "acc": acc,
               "correct": bits(acc, 7 * seed + 2)}]
     return {"spec": spec, "cells": cells, "n_test": N_TEST, "native_widths": {read: 10**6}}
+
+
+def paper02_record(root, **files) -> None:
+    """A paper 02 record at `root`: every file paper 03 reads, empty unless given."""
+    root.mkdir(exist_ok=True)
+    groups = {plan.paper02_group(s) for e in plan.EXPERIMENTS.values() for s in e()} - {None}
+    for group in groups | {f"{plan.PROJECTION02}-{task}" for task in ("recognition", "order")}:
+        (root / f"{group}.json").write_text(json.dumps({"runs": files.get(group, {})}))
 
 
 @pytest.fixture
@@ -43,12 +51,11 @@ def recorded(tmp_path, monkeypatch):
                 net = Arm("network", channels=8, grid=32)
                 runs[f"A/{noise:g}db/g{gain:g}/s{seed}/{net.label()}"] = run(net, noise, gain, seed,
                                                                              0.78 + 0.01 * seed, "windowed")
-                # paper 02's 16 x 16, 4-channel network, recorded in its own tier 1 file
+                # paper 02's 16 x 16, 4-channel network, recorded in its own controls experiment's file
                 old[f"A/{noise:g}db/g{gain:g}/s{seed}/{FIELD_LABEL}"] = run(Arm("network"), noise, gain, seed, 0.75,
-                                                                           "windowed", tier="tier1")
-    (tmp_path / "size-recognition-spectrogram-32x32.json").write_text(json.dumps({"runs": runs}))
-    (tmp_path / "paper02").mkdir()
-    (tmp_path / "paper02" / "tier1-recognition-spectrogram.json").write_text(json.dumps({"runs": old}))
+                                                                           "windowed", experiment="controls")
+    (tmp_path / "size-recognition-32x32.json").write_text(json.dumps({"runs": runs}))
+    paper02_record(tmp_path / "paper02", **{"controls-recognition": old})
     return tmp_path
 
 
@@ -67,10 +74,10 @@ def test_the_network_is_compared_with_its_own_lattices_baseline_at_every_gain(re
         assert r["mean"] == pytest.approx(9.0) and r["n"] == 3 and len(r["ci95"]) == 2
 
 
-def test_paper_02s_cells_are_read_from_its_record_under_paper_03s_tier(recorded):
+def test_paper_02s_cells_are_read_from_its_record_under_paper_03s_experiment(recorded):
     acc = sm.summary()["accuracy"]
     reused = [r for r in acc if r["arm"] == FIELD_LABEL]
-    assert reused and all(r["tier"] == "size" and r["source"] == ["paper 02"] for r in reused)
+    assert reused and all(r["experiment"] == "size" and r["source"] == ["paper 02"] for r in reused)
     assert all(r["mean"] == pytest.approx(75.0) for r in reused)
 
 
@@ -89,7 +96,7 @@ def test_the_report_tabulates_lattices_against_channels(recorded):
 
 
 def _memory_run(arm: Arm, seed: int, task: str, cells: list[dict], **extra) -> dict:
-    spec = {"tier": "size" if task == "order" else "sequence", "task": task, "pathway": "spectrogram", "noise_db": 0.0,
+    spec = {"experiment": "size" if task == "order" else "sequence", "task": task, "pathway": "spectrogram", "noise_db": 0.0,
             "gain": None if arm.kind == "baseline" else 1.0, "seed": seed, "arm": arm.as_dict(), "span": "fixed",
             **extra}
     return {"spec": spec, "cells": cells, "n_test": N_TEST, "native_widths": {"pooled": 10**6}}
@@ -103,6 +110,7 @@ def _cell(acc, seed, read="pooled", **extra):
 def test_the_order_tasks_pairs_are_pooled_and_a_sequences_positions_taken_together(tmp_path, monkeypatch):
     monkeypatch.setenv("OSC_RESULTS_DIR", str(tmp_path))
     monkeypatch.setattr(plan, "PAPER02_RECORD", tmp_path / "paper02")
+    paper02_record(tmp_path / "paper02")
     net = Arm("network", channels=2, grid=8)
     order, seq = {}, {}
     for seed in (0, 1, 2):
@@ -113,8 +121,8 @@ def test_the_order_tasks_pairs_are_pooled_and_a_sequences_positions_taken_togeth
         seq[f"A/seq3/0db/g1/s{seed}/{net.label()}"] = {**_memory_run(net, seed, "sequence", cells, length=3),
                                                        "instruments": {"R": {"mean": 0.2 + 0.1 * seed}}}
     root = tmp_path
-    (root / "size-order-spectrogram-8x8.json").write_text(json.dumps({"runs": order}))
-    (root / "sequence-sequence-spectrogram-8x8.json").write_text(json.dumps({"runs": seq}))
+    (root / "size-order-8x8.json").write_text(json.dumps({"runs": order}))
+    (root / "sequence-sequence-8x8.json").write_text(json.dumps({"runs": seq}))
     s = sm.summary()
     pooled = [r for r in s["accuracy"] if r["task"] == "order" and r["pair"] == "all"]
     assert len(pooled) == 1 and pooled[0]["mean"] == pytest.approx(64.0)
@@ -140,3 +148,30 @@ def test_a_longer_window_is_compared_with_the_same_lattices_own_window_and_nothi
     assert len(rows) == 1 and rows[0]["mean"] == pytest.approx(10.0) and rows[0]["window"] == 1024
     rows = [r for r in sm.size_comparisons(cells) if r["comparison"].endswith("16 bands mapped onto the rows")]
     assert len(rows) == 1 and rows[0]["mean"] == pytest.approx(10.0) and rows[0]["window"] == 0
+
+
+def test_the_leak_check_lists_every_zero_input_cell_off_chance():
+    def cell(arm, acc):
+        return sm.Cell("leak-check", "spectrogram", 0.0, 0.0, 0, arm.as_dict(), arm.label(), "windowed", 192, 2048,
+                       acc, None, N_TEST)
+    big = Arm("network", channels=16, grid=128)
+    lk = sm.leak_check([cell(Arm("network", grid=8), 0.1), cell(big, 0.1), cell(Arm("bank", grid=8), 0.1025)])
+    assert lk["runs"] == 3 and lk["cells"] == 3 and len(lk["off_chance"]) == 1 and "bank" in lk["off_chance"][0]
+
+
+def test_the_reuse_check_compares_every_cell_both_records_hold(tmp_path, monkeypatch):
+    monkeypatch.setenv("OSC_RESULTS_DIR", str(tmp_path))
+    monkeypatch.setattr(plan, "PAPER02_RECORD", tmp_path / "paper02")
+    first = next(plan.reuse_check())
+    same, other = _cell(0.78, 1, "windowed"), _cell(0.61, 2, "windowed", width=1024)
+    theirs = {"spec": {"experiment": "controls", "task": first.task, "pathway": first.pathway,
+                       "noise_db": first.noise_db, "gain": first.gain, "seed": first.seed,
+                       "arm": {k: v for k, v in first.arm.as_dict().items() if k not in ("grid", "bands", "window")}},
+              "cells": [same, {**other, "acc": 0.60}], "native_widths": {"windowed": 24576}}
+    paper02_record(tmp_path / "paper02", **{plan.paper02_group(first): {first.run_id(): theirs}})
+    assert sm.reuse_check()["runs"] == 0                                   # nothing run here yet
+    mine = {**theirs, "spec": first.as_dict(), "cells": [same, other, _cell(0.7, 3, "windowed+rate")]}
+    (tmp_path / f"{first.group()}.json").write_text(json.dumps({"runs": {first.run_id(): mine}}))
+    ru = sm.reuse_check()
+    assert (ru["runs"], ru["cells"], ru["identical"], len(ru["differing"])) == (1, 2, 1, 1)
+    assert len(ru["not_recorded"]) == len(list(plan.reuse_check())) - 1

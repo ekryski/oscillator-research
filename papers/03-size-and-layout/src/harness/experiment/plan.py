@@ -1,20 +1,22 @@
-"""Paper 03's tiers, what they cost, which cells come from paper 02, and the driver that runs them.
+"""The experiments, what they cost, which cells come from paper 02, and the driver that runs them.
 
-    uv run python -m harness.experiment.plan estimate                        # runs, CPU-hours and memory per tier
-    uv run python -m harness.experiment.plan prepare                         # the row caches, once
+    uv run python -m harness.experiment.plan estimate                 # runs, CPU- and GPU-hours and memory
+    uv run python -m harness.experiment.plan prepare                  # the row caches, once
     uv run python -m harness.experiment.plan run size --grids 8 16 32 --dry-run
-    uv run python -m harness.experiment.plan run gate size trained --grids 8 16 32 --workers 6
+    uv run python -m harness.experiment.plan run reuse-check leak-check size trained --grids 8 16 32 --workers 6
     uv run python -m harness.experiment.plan benchmark --device cuda --out ../results/benchmark/cuda.json
 
-Every tier is a list of specs; nothing here is a free choice at run time.
-`--grids` and `--channels` select a stage of a tier (its lattices and channel
-counts), so a tier can be run small lattices first; the specs themselves do
-not change. The driver skips every spec already recorded, and every spec whose
-cell comes from paper 02's record (`reused`), and runs the costliest first so
-the pool drains evenly. A spec that fails is logged with its traceback and
-the sweep carries on; the failure log is part of the record.
+Every experiment is a list of specs fixed in advance; nothing here is a free
+choice at run time. `--grids`, `--channels` and `--task` select part of an
+experiment (its lattices, channel counts or task), so an experiment can be run
+small lattices first or split between machines; the specs themselves do not
+change. The driver skips every spec already recorded, and every spec whose
+cells paper 02's record holds completely (`taken_from_paper02`), and runs the
+costliest first so the pool drains evenly. A spec that fails is logged with
+its traceback and the sweep carries on; the failure log is part of the record.
 
-DESIGN.md states the design these tiers implement, and its open questions.
+The paper's Methods and Appendix B describe the design these experiments
+implement; `results/README.md` says which record file holds each.
 """
 
 from __future__ import annotations
@@ -25,7 +27,7 @@ import math
 import os
 import time
 import traceback
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from collections.abc import Iterator
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import get_context
@@ -40,12 +42,13 @@ from harness.utils.device import DEVICES, resolve
 from harness.utils.paths import PAPER02_ROOT
 
 GRIDS = (8, 16, 32, 64, 128)            # lattices of G x G oscillators per channel
+GRID = am.GRID                          # paper 02's lattice, 16 x 16
 CHANNELS = (1, 2, 4, 8, 16)
 #: band mapping: 0 drives each of a lattice's G rows with its own mel band; 16 maps paper 02's 16
 #: bands onto the rows. At 16 x 16 the two are the same, and it runs once.
 MAPPINGS = (0, 16)
-#: slimmed by the author on 2026-09-24 to one noise level and one input gain: 0 dB (paper 02 ran clean,
-#: 0 and +5 dB; clean audio saturates the task) and gain 1 (paper 02 ran 1 and 2)
+#: one noise level and one input gain: 0 dB SNR (paper 02 also ran clean audio, where the task nearly
+#: saturates, and -5 dB) and gain 1 (paper 02 ran 1 and 2)
 NOISES = (0.0,)
 GAINS = (1.0,)
 SEEDS = (0, 1, 2)
@@ -54,12 +57,11 @@ PHASE_COUPLINGS = ("kuramoto", "kuramoto-sakaguchi", "second-harmonic", "winfree
 AMPLITUDE_COUPLINGS = ("stuart-landau", "stuart-landau-fixed")
 GEOMETRIES = ("torus", "cylinder", "sheet", "helix", "cube", "sphere")
 #: the front end's longer real analysis window, as long as the zero-padded transform at that band count;
-#: the own-band lattices at 64 and 128 run under both windows in the size, trained and quadrature tiers
+#: the own-band lattices at 64 and 128 run under both windows in the size, trained and quadrature experiments
 LONG_WINDOW = {64: 1024, 128: 2048}
-#: the unprojected (native) read is fitted where the features are small enough, as in paper 02's tier 4
+#: the unprojected (native) read is fitted where an arm has this many states or fewer
 NATIVE_STATES = 1024
 REFERENCE = ("kuramoto", "torus")       # paper 02's reference network: its coupling function and geometry
-
 
 
 def lattices(grids: tuple[int, ...] = GRIDS) -> Iterator[tuple[int, int]]:
@@ -92,15 +94,22 @@ def reads_for(arm: Arm, task: str) -> tuple[str, ...]:
     return (base, f"{base}+rate") if arm.kind == "network" else (base,)
 
 
-def _net(tier: str, pathway: str, noise, gain, seed, arm: Arm, task: str = "recognition", **kw) -> rn.Spec:
-    return rn.Spec(tier, task, pathway, noise, gain, seed, arm, native_sizes=_native(arm),
+def _net(experiment: str, pathway: str, noise, gain, seed, arm: Arm, task: str = "recognition", **kw) -> rn.Spec:
+    return rn.Spec(experiment, task, pathway, noise, gain, seed, arm, native_sizes=_native(arm),
                    reads=reads_for(arm, task), **kw)
 
 
-def _baseline(tier: str, pathway: str, noise, seed, grid: int, bands: int, window: int = 0,
+def _baseline(experiment: str, pathway: str, noise, seed, grid: int, bands: int, window: int = 0,
               task: str = "recognition", **kw) -> rn.Spec:
     arm = Arm("baseline", grid=grid, bands=bands, window=window)
-    return rn.Spec(tier, task, pathway, noise, None, seed, arm, reads=reads_for(arm, task), **kw)
+    return rn.Spec(experiment, task, pathway, noise, None, seed, arm, reads=reads_for(arm, task), **kw)
+
+
+def _trained(arch: str, channels: int, grid: int, bands: int, window: int, seed: int,
+             experiment: str = "trained") -> rn.Spec:
+    arm = Arm("trained", arch=arch, channels=channels, grid=grid, bands=bands, window=window)
+    return rn.Spec(experiment, "recognition", "spectrogram", NOISES[0], None, seed, arm,
+                   reads=reads_for(arm, "recognition"))
 
 
 def _reservoirs(channels: int, grid: int, bands: int, window: int = 0, bank: bool = True) -> tuple[Arm, ...]:
@@ -118,16 +127,17 @@ def designs(couplings: tuple[str, ...] = PHASE_COUPLINGS + AMPLITUDE_COUPLINGS) 
 
 
 # ---------------------------------------------------------------------------
-# The tiers
+# The experiments
 # ---------------------------------------------------------------------------
 
-def gate() -> Iterator[rn.Spec]:
-    """No input, at every lattice: every read must be exactly chance. Exercises the streamed read."""
+def leak_check() -> Iterator[rn.Spec]:
+    """No input (input gain 0), at every lattice, in memory and streamed: with nothing driving it an arm's
+    state carries nothing about the clip, so every read should be exactly chance (`summary.leak_check`)."""
     for grid in GRIDS:
         for channels in (1, 16):
             for arm in (Arm("network", channels=channels, grid=grid), Arm("network", channels=channels, grid=grid,
                         coupled=False), Arm("bank", channels=channels, grid=grid)):
-                yield _net("gate", "spectrogram", 0.0, 0.0, 0, arm)
+                yield _net("leak-check", "spectrogram", 0.0, 0.0, 0, arm)
 
 
 def size() -> Iterator[rn.Spec]:
@@ -154,15 +164,12 @@ def size() -> Iterator[rn.Spec]:
 
 
 def trained() -> Iterator[rn.Spec]:
-    """The five trained baselines, each sized to every network of the size tier, on its rows."""
+    """The five trained baselines, each sized to every recognition network of the size experiment, on its rows."""
     for grid, bands, window in front_ends():
         for channels in CHANNELS:
             for arch in TRAINED_ARCHS:
-                for noise in NOISES:
-                    for seed in SEEDS:
-                        arm = Arm("trained", arch=arch, channels=channels, grid=grid, bands=bands, window=window)
-                        yield rn.Spec("trained", "recognition", "spectrogram", noise, None, seed, arm,
-                                      reads=reads_for(arm, "recognition"))
+                for seed in SEEDS:
+                    yield _trained(arch, channels, grid, bands, window, seed)
 
 
 def sequence() -> Iterator[rn.Spec]:
@@ -224,8 +231,27 @@ def quadrature_design() -> Iterator[rn.Spec]:
                             yield _net("design-quadrature", "quadrature", noise, gain, seed, arm)
 
 
-TIERS = {"gate": gate, "size": size, "trained": trained, "sequence": sequence, "design": design,
-         "quadrature": quadrature, "design-quadrature": quadrature_design}
+def reuse_check() -> Iterator[rn.Spec]:
+    """A sample of the runs paper 03 takes from paper 02, run again here, on the CPU: one from each paper 02
+    record file and arm kind it takes cells from. Recorded apart (`reuse-check-*.json`), so nothing
+    reported comes from it; `summary.reuse_check` compares every cell with paper 02's."""
+    ref, recognition = Arm("network"), dict(pathway="spectrogram", noise=NOISES[0], gain=GAINS[0])
+    runs = [("recognition", recognition, 0, ref), ("recognition", recognition, 1, Arm("network", coupled=False)),
+            ("recognition", recognition, 2, Arm("bank", channels=8)),
+            ("recognition", recognition, 0, Arm("network", coupling="winfree", geometry="cube")),
+            ("recognition", recognition, 2, Arm("network", coupling="stuart-landau")),
+            ("recognition", recognition, 1, Arm("network", coupling="kuramoto-sakaguchi", geometry="sheet")),
+            ("order", recognition, 0, ref),
+            ("recognition", {**recognition, "pathway": "quadrature"}, 0, ref)]
+    for task, c, seed, arm in runs:
+        yield _net("reuse-check", c["pathway"], c["noise"], c["gain"], seed, arm, task,
+                   **({"pair": pr.PAIRS[0]} if task == "order" else {}))
+    yield _baseline("reuse-check", "spectrogram", NOISES[0], 0, GRID, 0)
+    yield _trained("gru", am.CHANNELS, GRID, 0, 0, 1, "reuse-check")
+
+
+EXPERIMENTS = {"leak-check": leak_check, "reuse-check": reuse_check, "size": size, "trained": trained,
+               "sequence": sequence, "design": design, "quadrature": quadrature, "design-quadrature": quadrature_design}
 
 
 # ---------------------------------------------------------------------------
@@ -238,94 +264,130 @@ TIERS = {"gate": gate, "size": size, "trained": trained, "sequence": sequence, "
 # cell is read from paper 02's record rather than run again. Exact kernel
 # scaling leaves every 16 x 16 network bit-identical to paper 02's
 # (tests/test_kernel_scaling.py), the read of an arm this size is paper 02's
-# own code, and `harness.experiment.gates reuse` re-runs a sample and compares
-# every accuracy with paper 02's.
+# own code, and the reuse-check experiment re-runs a sample on the CPU, which
+# the summary compares cell for cell with paper 02's.
 #
 # Paper 02's record is read from papers/02-untrained-reservoirs/results/, with
 # paper 02's labels, spec keys and run identities (which are paper 03's for
-# these runs). OSC_PAPER02_RESULTS points elsewhere: on a branch whose copy of
-# paper 02 predates that record, at paper 02's own checkout.
+# these runs). OSC_PAPER02_RESULTS points elsewhere, at the results/ of another
+# checkout of paper 02.
 
 PAPER02_RECORD = Path(os.environ.get("OSC_PAPER02_RESULTS", PAPER02_ROOT / "results"))
-
-
-TIER1, QUAD02 = "tier1-recognition-spectrogram", "tier3-recognition-quadrature"
-ORDER02 = "tier1-order-spectrogram"
-#: paper 02's projection tier: its record files are f"{PAPER02_PROJECTION}-{task}-{pathway}"
-PAPER02_PROJECTION = "projection"
+#: paper 02's record files: `<experiment>-<task>`, and its design experiment's one per coupling function
+CONTROLS, QUADRATURE02, PROJECTION02 = "controls", "quadrature-recognition", "projection"
+#: paper 02's reference configuration's other factors: random natural frequencies, restoring strength 0.3,
+#: coupling ceiling 1
+REFERENCE_FACTORS = ("random", 0.3, 1.0)
 
 
 def paper02_group(spec: rn.Spec) -> str | None:
     """The paper 02 record file that holds this spec's run, if paper 02 ran it.
 
-    Paper 02 ran, at 16 x 16 with one band per row: the spectrogram-only
-    baseline on every pathway; the reference network, its uncoupled copy and
+    Paper 02 ran, at 16 x 16 with one band per row, 4 channels, 0 dB and
+    gains 1 and 2, three seeds: in its controls experiment, the
+    spectrogram-only baseline, the reference network and its uncoupled copy,
     both banks (`bank-state` and `bank-width`, 4 and 8 channels, the second
-    being paper 03's state-matched bank at 8 channels) on the spectrogram
-    pathway; every coupling function
-    and geometry at 4 channels (its tier 2); the trained baselines at 2,048
-    parameters; and a diagonal of coupling functions and geometries on the
-    quadrature pathway (its tier 3). On the order task (its tier 1) it ran the spectrogram-only
-    baseline, the reference network, its uncoupled copy and both banks. It did
-    not run the digit-sequence task, or any window but its 512 samples.
+    being paper 03's state-matched bank at 8 channels) and the trained
+    baselines at 2,048 parameters, on recognition, and the same untrained arms
+    on the order task; in its design experiment, every coupling function and
+    geometry (one file per coupling function); and in its quadrature
+    experiment, the pathway's baseline and a diagonal of coupling functions
+    and geometries (no uncoupled network). It did not run the digit-sequence
+    task, or any window but its 512 samples. The leak checks differ in their
+    channel counts, so none is shared.
     """
     a = spec.arm
-    if spec.tier == "gate" or a.grid != 16 or a.n_bands != 16 or a.n_window != am.WINDOW:
+    if spec.experiment == "leak-check" or spec.task == "sequence":
         return None
-    if spec.task == "sequence":
+    if a.grid != GRID or a.n_bands != GRID or a.n_window != am.WINDOW:
         return None
     if spec.task == "order":
         if a.kind == "trained" or (a.kind == "bank" and a.channels not in (4, 8)):
             return None
-        if a.kind == "network" and (a.channels != 4 or (a.coupling, a.geometry) != REFERENCE
-                                    or (a.frequencies, a.restoring, a.ceiling) != ("random", 0.3, 1.0)):
+        if a.kind == "network" and (a.channels != am.CHANNELS or (a.coupling, a.geometry) != REFERENCE
+                                    or (a.frequencies, a.restoring, a.ceiling) != REFERENCE_FACTORS):
             return None
-        return ORDER02
+        return f"{CONTROLS}-order"
     if a.kind == "baseline":
-        return {"spectrogram": TIER1, "quadrature": QUAD02}[spec.pathway]
+        return {"spectrogram": f"{CONTROLS}-recognition", "quadrature": QUADRATURE02}[spec.pathway]
     if a.kind == "trained":
-        return TIER1 if a.channels == 4 and spec.pathway == "spectrogram" else None
+        return f"{CONTROLS}-recognition" if a.channels == am.CHANNELS and spec.pathway == "spectrogram" else None
     if a.kind == "bank":
-        return TIER1 if spec.pathway == "spectrogram" and a.channels in (4, 8) else None
-    if a.channels != 4 or (a.frequencies, a.restoring, a.ceiling) != ("random", 0.3, 1.0):
+        return f"{CONTROLS}-recognition" if spec.pathway == "spectrogram" and a.channels in (4, 8) else None
+    if a.channels != am.CHANNELS or (a.frequencies, a.restoring, a.ceiling) != REFERENCE_FACTORS:
         return None
     design = (a.coupling, a.geometry)
     if spec.pathway == "spectrogram":
         if design == REFERENCE:
-            return TIER1
-        return f"tier2-recognition-spectrogram-{a.coupling}" if a.coupled else None
+            return f"{CONTROLS}-recognition"
+        return f"design-recognition-{a.coupling}" if a.coupled else None
     diagonal = a.coupled and (a.geometry == "torus" or design == ("kuramoto", "helix"))
-    return QUAD02 if diagonal and a.coupling in PHASE_COUPLINGS else None
+    return QUADRATURE02 if diagonal and a.coupling in PHASE_COUPLINGS else None
 
 
 def reused(spec: rn.Spec) -> bool:
-    return paper02_group(spec) is not None
+    """Whether the spec's cells are to be taken from paper 02's record. The reuse check's are not: it
+    runs them again, to compare."""
+    return spec.experiment != "reuse-check" and paper02_group(spec) is not None
 
 
-def _paper02_record(group: str, run_id: str) -> dict | None:
+#: paper 02's record files read so far, the most recent few (a design file is 6 MB)
+_PAPER02_FILES: OrderedDict[tuple, dict] = OrderedDict()
+PAPER02_FILES_KEPT = 4
+
+
+def _paper02_file(group: str) -> dict:
+    """One of paper 02's record files, its runs by run id. Every paper 02 experiment has run, so a file
+    that is missing means a wrong name, and raises rather than passing for runs paper 02 did not make."""
     path = PAPER02_RECORD / f"{group}.json"
-    return json.loads(path.read_text())["runs"].get(run_id) if path.exists() else None
+    if not path.exists():
+        raise FileNotFoundError(f"no paper 02 record file {path}: the group name is wrong, or "
+                                "OSC_PAPER02_RESULTS does not point at paper 02's results/")
+    key = (path, path.stat().st_mtime_ns)
+    if key in _PAPER02_FILES:
+        _PAPER02_FILES.move_to_end(key)
+    else:
+        while len(_PAPER02_FILES) >= PAPER02_FILES_KEPT:
+            _PAPER02_FILES.popitem(last=False)
+        _PAPER02_FILES[key] = json.loads(path.read_text())["runs"]
+    return _PAPER02_FILES[key]
+
+
+def _same_run(spec: rn.Spec, recorded: dict) -> bool:
+    """Whether paper 02's recorded spec is this spec's run: the same task, pathway, noise, gain, seed and
+    arm (paper 02's arms have no size of their own, and are 16 x 16)."""
+    arm = spec.arm.as_dict()
+    return (recorded["task"], recorded["pathway"], recorded["noise_db"], recorded["gain"], recorded["seed"],
+            tuple(recorded.get("pair", ()))) == (spec.task, spec.pathway, spec.noise_db, spec.gain, spec.seed,
+                                                 tuple(spec.pair)) and all(
+        arm[k] == v for k, v in recorded["arm"].items())
 
 
 def paper02_run(spec: rn.Spec) -> dict | None:
-    """Paper 02's recorded run for a reused spec, with every cell tagged by its projection, or None if
-    paper 02 has not recorded it (yet).
+    """Paper 02's recorded run for a spec paper 02 ran, with every cell tagged by its projection, or
+    None if paper 02 did not record it.
 
-    Paper 02's earlier tiers recorded only the fixed projection and tagged
-    nothing: an untagged cell is read as fixed, or as "none" where it was read
-    unprojected. Its projection tier re-reads the reference reservoirs of its
-    tier 1 (recognition and the order task) under both projections, tagging
-    each cell "fixed", "seeded" or "none", under the same run identities; its
-    seeded cells are added to the run here.
+    Most of paper 02's experiments recorded only the fixed projection and
+    tagged nothing: an untagged cell is read as fixed, or as "none" where it
+    was read unprojected. Its projection experiment re-reads its controls
+    experiment's reservoirs (recognition and the order task, on the
+    spectrogram pathway) under both projections, tagging each cell "fixed",
+    "seeded" or "none", under the same run identities; their seeded cells are
+    added to the run here.
     """
     group = paper02_group(spec)
-    rec = None if group is None else _paper02_record(group, spec.run_id())
+    if group is None:
+        return None
+    rec = _paper02_file(group).get(spec.run_id())
     if rec is None:
         return None
+    if not _same_run(spec, rec["spec"]):
+        raise ValueError(f"paper 02's {group}/{spec.run_id()} is not the run of {spec}")
     cells = [{**c, "projection": ro.projection_of(c, rec)} for c in rec["cells"]]
-    again = _paper02_record(f"{PAPER02_PROJECTION}-{spec.task}-{spec.pathway}", spec.run_id())
-    if again is not None:
-        cells += [c for c in again["cells"] if c.get("projection") == "seeded"]
+    if group.startswith(f"{CONTROLS}-"):
+        again = _paper02_file(f"{PROJECTION02}-{spec.task}").get(spec.run_id())
+        if again is not None:
+            cells += [c for c in again["cells"] if c.get("projection") == "seeded"]
     return {**rec, "cells": cells}
 
 
@@ -343,6 +405,13 @@ def paper02_complete(spec: rn.Spec, rec: dict | None) -> bool:
     return bool(cells("fixed") | cells("none")) and cells("fixed") <= cells("seeded")
 
 
+def taken_from_paper02(spec: rn.Spec) -> bool:
+    """Whether the spec's cells come from paper 02's record: paper 02 ran it, and recorded every cell
+    paper 03 reports for it. A spec paper 02 ran but did not record completely (a read without its seeded
+    projection) is run here, on the CPU, and that run is the one reported."""
+    return reused(spec) and paper02_complete(spec, paper02_run(spec))
+
+
 # ---------------------------------------------------------------------------
 # Cost and memory, for ordering and for the estimate
 # ---------------------------------------------------------------------------
@@ -353,7 +422,7 @@ def paper02_complete(spec: rn.Spec, rec: dict | None) -> bool:
 # there (models/phase.py). Measured on this project's Mac, an M1 Max with 64 GB:
 #
 #   cpu  one thread, 2026-09-23, while paper 02's runs held the other cores;
-#        paper 02's tier 2 measured 16 x 16 x 4 at about 5 ms a clip, which
+#        paper 02's design experiment measured 16 x 16 x 4 at about 5 ms a clip, which
 #        these reproduce.
 #   mps  its 32-core GPU, 2026-09-24, same load on the CPU, batches of 512
 #        clips (8, 16), 256 (32), 64 (64) and 32 (128), after warm-up. The
@@ -513,35 +582,35 @@ def _select(specs, grids, channels) -> list[rn.Spec]:
             and (not channels or s.arm.kind == "baseline" or s.arm.channels in channels)]
 
 
-def planned(names: list[str], grids=(), channels=()) -> list[rn.Spec]:
-    specs = _select([s for name in names for s in TIERS[name]()], grids, channels)
+def planned(names: list[str], grids=(), channels=(), task: str | None = None) -> list[rn.Spec]:
+    specs = _select([s for name in names for s in EXPERIMENTS[name]()], grids, channels)
+    specs = [s for s in specs if task is None or s.task == task]
     ids = [(s.group(), s.run_id()) for s in specs]
     if len(set(ids)) != len(ids):
-        raise RuntimeError("two specs share a record address; the tier definitions are wrong")
+        raise RuntimeError("two specs share a record address; the experiment definitions are wrong")
     return specs
 
 
 def pending(specs: list[rn.Spec]) -> list[rn.Spec]:
-    """Specs not yet recorded here, and not recorded completely by paper 02. A reused spec whose paper 02
-    run is missing (a paper 02 tier that has not run) or lacks the seeded projection is run here
-    instead, and that run is the one reported; its fixed cells equal paper 02's (the reuse check)."""
+    """Specs not yet recorded here, and not taken from paper 02's record. A spec paper 02 ran but did
+    not record completely is run here instead, and that run is the one reported."""
     done = {g: rn.recorded_ids(g) for g in {s.group() for s in specs}}
-    return sorted((s for s in specs if s.run_id() not in done[s.group()] and not paper02_complete(s, paper02_run(s))),
+    return sorted((s for s in specs if s.run_id() not in done[s.group()] and not taken_from_paper02(s)),
                   key=seconds, reverse=True)
 
 
 def estimate(names: list[str] | None = None) -> list[dict]:
-    """Per tier and lattice: runs, runs reused from paper 02, hours on one CPU thread and on the M1 Max's
-    GPU, the longest run on each, and the largest memory."""
+    """Per experiment and lattice: runs, runs taken from paper 02, hours on one CPU thread and on the M1
+    Max's GPU, the longest run on each, and the largest memory."""
     rows = []
-    for name in names or list(TIERS):
+    for name in names or list(EXPERIMENTS):
         by = defaultdict(list)
-        for s in TIERS[name]():
+        for s in EXPERIMENTS[name]():
             by[s.arm.grid].append(s)
         for grid in sorted(by):
             specs = by[grid]
-            todo = [s for s in specs if not reused(s)]
-            row = {"tier": name, "grid": grid, "runs": len(specs), "reused": len(specs) - len(todo),
+            todo = [s for s in specs if not taken_from_paper02(s)]
+            row = {"experiment": name, "grid": grid, "runs": len(specs), "reused": len(specs) - len(todo),
                    "peak_gb": max(memory_gb(s) for s in specs), "streamed": sum(s.streamed for s in specs)}
             for device in COST_DEVICES:
                 row[f"{device}_hours"] = sum(seconds(s, device) for s in todo) / 3600
@@ -551,28 +620,28 @@ def estimate(names: list[str] | None = None) -> list[dict]:
 
 
 def _print_estimate(rows: list[dict]) -> None:
-    print(f"{'tier':18s} {'grid':>5s} {'runs':>6s} {'reused':>6s} {'streamed':>8s} {'CPU-h':>9s} "
+    print(f"{'experiment':18s} {'grid':>5s} {'runs':>6s} {'reused':>6s} {'streamed':>8s} {'CPU-h':>9s} "
           f"{'MPS-h':>8s} {'longest CPU':>11s} {'longest MPS':>11s} {'peak GB':>8s}")
     totals = defaultdict(lambda: [0, 0, 0.0, 0.0])
     for r in rows:
-        print(f"{r['tier']:18s} {r['grid']:5d} {r['runs']:6d} {r['reused']:6d} {r['streamed']:8d} "
+        print(f"{r['experiment']:18s} {r['grid']:5d} {r['runs']:6d} {r['reused']:6d} {r['streamed']:8d} "
               f"{r['cpu_hours']:9.1f} {r['mps_hours']:8.1f} {r['cpu_longest_hours']:10.2f}h "
               f"{r['mps_longest_hours']:10.2f}h {r['peak_gb']:8.1f}")
-        t = totals[r["tier"]]
+        t = totals[r["experiment"]]
         t[0] += r["runs"]
         t[1] += r["reused"]
         t[2] += r["cpu_hours"]
         t[3] += r["mps_hours"]
     print()
-    for tier, (runs, re, cpu, mps) in totals.items():
-        print(f"{tier:18s} {runs:6d} runs, {re:4d} from paper 02, {cpu:8.0f} CPU-hours, {mps:7.1f} MPS-hours")
+    for name, (runs, re, cpu, mps) in totals.items():
+        print(f"{name:18s} {runs:6d} runs, {re:4d} from paper 02, {cpu:8.0f} CPU-hours, {mps:7.1f} MPS-hours")
     print(f"{'all':18s} {sum(t[0] for t in totals.values()):6d} runs, {sum(t[1] for t in totals.values()):4d} "
           f"from paper 02, {sum(t[2] for t in totals.values()):8.0f} CPU-hours, "
           f"{sum(t[3] for t in totals.values()):7.1f} MPS-hours")
 
 
 def cache_jobs(grids=GRIDS) -> list[tuple]:
-    """Every row cache the tiers read: the bank's rows on the spectrogram and quadrature pathways at each
+    """Every row cache the experiments read: the bank's rows on the spectrogram and quadrature pathways at each
     band count and window, and each order-task and digit-sequence set (its test set and every seed's
     training set) at each band count."""
     counts = sorted({16} | {g for g, b in lattices(grids) if b == 0})
@@ -605,7 +674,7 @@ def cache_clips(job: tuple, bank_clips: int) -> int:
 
 
 def prepare(workers: int, grids=GRIDS) -> None:
-    """Build every row cache the tiers read, in parallel, skipping those that exist."""
+    """Build every row cache the experiments read, in parallel, skipping those that exist."""
     n = len(pr.load_bank()["labels"])
     jobs = [j for j in cache_jobs(grids) if pr.load_rows(cache_path(j), cache_clips(j, n)) is None]
     print(f"=== prepare: {len(jobs)} row cache(s) to build with {workers} worker(s)")
@@ -623,20 +692,20 @@ def _build(job: tuple) -> str:
 
 
 def _work(spec: rn.Spec, device: str, threads: int, trained_device: str = "cpu") -> tuple[str, float]:
-    """One run. A paper 02 cell run here (paper 02 has not recorded it completely) runs on the CPU,
-    the only device on which it is bit-identical to paper 02's."""
+    """One run. A run paper 02 made (the reuse check's, or one paper 02 did not record completely) runs
+    on the CPU, the only device on which it is bit-identical to paper 02's."""
     t0 = time.perf_counter()
-    if reused(spec):
+    if paper02_group(spec) is not None:
         device = trained_device = "cpu"
     return rn.run(spec, device, threads, trained_device), time.perf_counter() - t0
 
 
 def drive(names: list[str], workers: int, threads: int, device: str, dry_run: bool,
-          grids=(), channels=(), trained_device: str = "cpu") -> None:
+          grids=(), channels=(), trained_device: str = "cpu", task: str | None = None) -> None:
     device, trained_device = resolve(device), resolve(trained_device)
-    specs = planned(names, grids, channels)
+    specs = planned(names, grids, channels, task)
     todo = pending(specs)
-    n_reused = sum(paper02_complete(s, paper02_run(s)) for s in specs)
+    n_reused = sum(map(taken_from_paper02, specs))
     cost = "mps" if device == "mps" else "cpu"
     hours = sum(seconds(s, cost, trained_device) for s in todo) / 3600
     print(f"=== {' + '.join(names)}: {len(specs)} runs planned, {n_reused} from paper 02, "
@@ -675,17 +744,19 @@ def drive(names: list[str], workers: int, threads: int, device: str, dry_run: bo
 
 
 def main(argv: list[str] | None = None) -> None:
-    ap = argparse.ArgumentParser(description="paper 03's tiers")
+    ap = argparse.ArgumentParser(description="paper 03's experiments")
     sub = ap.add_subparsers(dest="command", required=True)
-    e = sub.add_parser("estimate", help="runs, CPU-hours and memory per tier and lattice")
-    e.add_argument("tiers", nargs="*", choices=sorted(TIERS))
-    p = sub.add_parser("prepare", help="build the row caches the tiers read")
+    e = sub.add_parser("estimate", help="runs, CPU- and GPU-hours and memory per experiment and lattice")
+    e.add_argument("experiments", nargs="*", choices=sorted(EXPERIMENTS))
+    p = sub.add_parser("prepare", help="build the row caches the experiments read")
     p.add_argument("--workers", type=int, default=4)
     p.add_argument("--grids", type=int, nargs="+", default=list(GRIDS))
-    r = sub.add_parser("run", help="run one or more tiers")
-    r.add_argument("tiers", nargs="+", choices=sorted(TIERS))
+    r = sub.add_parser("run", help="run one or more experiments")
+    r.add_argument("experiments", nargs="+", choices=sorted(EXPERIMENTS))
     r.add_argument("--grids", type=int, nargs="+", default=[], help="only these lattices (a stage)")
     r.add_argument("--channels", type=int, nargs="+", default=[], help="only these channel counts")
+    r.add_argument("--task", choices=("recognition", "order", "sequence"),
+                   help="only this task's specs, so two machines can split an experiment without sharing a file")
     r.add_argument("--workers", type=int, default=3)
     r.add_argument("--threads", type=int, default=2)
     r.add_argument("--device", default="auto", choices=DEVICES,
@@ -695,7 +766,7 @@ def main(argv: list[str] | None = None) -> None:
                    help="where the trained baselines train: the CPU (the default, as in paper 02) unless the "
                         "benchmark shows a GPU faster for them")
     r.add_argument("--dry-run", action="store_true")
-    b = sub.add_parser("benchmark", help="time one batch of each network on a device, and extrapolate every tier")
+    b = sub.add_parser("benchmark", help="time one batch of each network on a device, and extrapolate every run")
     b.add_argument("--device", default="auto", choices=DEVICES)
     b.add_argument("--grids", type=int, nargs="+", default=list(GRIDS))
     b.add_argument("--channels", type=int, nargs="+", default=list(CHANNELS))
@@ -707,7 +778,7 @@ def main(argv: list[str] | None = None) -> None:
     b.add_argument("--out", type=Path, help="the JSON report")
     a = ap.parse_args(argv)
     if a.command == "estimate":
-        _print_estimate(estimate(a.tiers or None))
+        _print_estimate(estimate(a.experiments or None))
     elif a.command == "prepare":
         prepare(a.workers, tuple(a.grids))
     elif a.command == "benchmark":
@@ -715,8 +786,8 @@ def main(argv: list[str] | None = None) -> None:
         benchmark(a.device, tuple(a.grids), tuple(a.channels), tuple(a.pathways), not a.no_designs, a.max_clips,
                   a.out, trained=not a.no_trained)
     else:
-        drive(a.tiers, a.workers, a.threads, a.device, a.dry_run, tuple(a.grids), tuple(a.channels),
-              a.trained_device)
+        drive(a.experiments, a.workers, a.threads, a.device, a.dry_run, tuple(a.grids), tuple(a.channels),
+              a.trained_device, a.task)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 Every clip is a fixed object. Its recording comes from the 50-repetition bank,
 and its noise from a generator seeded by the clip's own identity and the noise
-level, so a clip is the same clip in every arm, seed, tier and process. A seed
+level, so a clip is the same clip in every arm, seed, experiment and process. A seed
 chooses which training clips a readout is fitted on and an arm's own random
 draws; it never changes what a clip sounds like.
 
