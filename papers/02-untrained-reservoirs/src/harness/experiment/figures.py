@@ -352,6 +352,64 @@ def arms_figure(task: str, stem: str) -> None:
     _save(fig, stem)
 
 
+#: the readout widths the width figure draws, each with its marker: (width, face, size, offset within the row)
+WIDTHS = ((192, "white", 5, -0.2), (1024, None, 4, 0.0), (4096, None, 5, 0.2))
+
+
+def width_figure(stem: str = "c9-readout-width") -> None:
+    """Every recognition arm's accuracy at readout widths 192, 1,024 and 4,096, per noise level: the mean over three
+    seeds and one standard deviation, reservoirs at gain 1, 2,048 training clips. An arm no wider than 192 is read
+    as it is at every width, so it gets the one marker."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+
+    cells = sm.accuracies(rec.load(["controls-recognition", "design-recognition-stuart-landau"]))
+    acc = {(r["arm"], r["read"], r["gain"], r["noise"], r["width"]): r for r in cells
+           if r["n_train"] == rec.PRIMARY_SIZE and r.get("projection", "fixed") == "fixed"}
+    read = sm.READ["recognition"]
+    rows = [r for r in ARM_ROWS if (r[0], r[1]) != ("baseline", "")]
+    fig, axes = plt.subplots(1, len(NOISES), figsize=(10.0, 0.3 * len(rows) + 1.3), sharey=True)
+    for ax, (noise, title) in zip(axes, NOISES, strict=True):
+        lo, hi = 100.0, 0.0
+        for y, (arm, suffix, _, colour, _) in enumerate(rows):
+            gain = None if arm == "baseline" or arm.startswith("trained-") else 1.0
+            narrow = acc.get((arm, read + suffix, gain, noise, rec.PRIMARY_WIDTH))
+            for w, face, size, dy in WIDTHS:
+                r = acc.get((arm, read + suffix, gain, noise, w))
+                if r is None:
+                    continue
+                if w != rec.PRIMARY_WIDTH and narrow is not None and r["mean"] == narrow["mean"]:
+                    continue              # no wider than 192, so read as it is: one marker, drawn at the row's centre
+                dy = dy if narrow is None or w != rec.PRIMARY_WIDTH or any(
+                    acc.get((arm, read + suffix, gain, noise, v), narrow)["mean"] != narrow["mean"]
+                    for v, *_ in WIDTHS) else 0.0
+                ax.errorbar(r["mean"], y + dy, xerr=r["sd"] or 0, fmt="o", color=colour, markerfacecolor=face or colour,
+                            markersize=size, capsize=2, elinewidth=1, markeredgewidth=1.1)
+                lo, hi = min(lo, r["mean"] - (r["sd"] or 0)), max(hi, r["mean"] + (r["sd"] or 0))
+        for y in range(1, len(rows)):
+            if rows[y][4] != rows[y - 1][4]:
+                ax.axhline(y - 0.5, color="#DDDDDD", linewidth=0.8)
+        base = acc.get(("baseline", read + "@wholeclip", None, noise, rec.PRIMARY_WIDTH))
+        if base is not None:
+            ax.axvline(base["mean"], color="#6E6E6E", linewidth=0.8, linestyle="--", alpha=0.6)
+        pad = 0.06 * (hi - lo)
+        ax.set_xlim(lo - pad, hi + pad)
+        ax.set_title(title, fontsize=10)
+        ax.set_xlabel("task accuracy (%)")
+        ax.spines[["top", "right"]].set_visible(False)
+    axes[0].set_yticks(range(len(rows)), [r[2] for r in rows], fontsize=8.5)
+    axes[0].invert_yaxis()
+    handles = [Line2D([], [], marker="o", linestyle="none", color="#555555", markerfacecolor=face or "#555555",
+                      markersize=size, label=f"width {w:,}") for w, face, size, _ in WIDTHS]
+    handles.append(Line2D([], [], color="#6E6E6E", linewidth=0.8, linestyle="--", alpha=0.6,
+                          label="spectrogram-only baseline, whole clip, width 192"))
+    fig.legend(handles=handles, frameon=False, fontsize=8, loc="lower center", ncol=4, bbox_to_anchor=(0.55, -0.02))
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    _save(fig, stem)
+
+
 def _save(fig, stem: str) -> None:
     import matplotlib.pyplot as plt
     path = FIGURES_DIR / stem
@@ -653,6 +711,7 @@ def main(argv: list[str] | None = None) -> None:
     size_figure()
     arms_figure("recognition", "c3-recognition-arms")
     arms_figure("order", "c8-order-arms")
+    width_figure()
     design_panels_figure()
     by = _design_rows()
     for panel, stem, across in DESIGN_FIGURES:
