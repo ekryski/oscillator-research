@@ -9,7 +9,7 @@ how the grid's edges are glued. Each geometry is drawn twice: the flat grid,
 with its glued edges and one oscillator's nearest neighbours, and the shape the
 gluing makes, with the same oscillator and neighbours. The neighbour rules
 follow harness/models/geometries/. Writes
-resources/figures/a2-lattice-geometries.{pdf,png}.
+resources/figures/fig09-appC-lattice-geometries.{pdf,png}.
 """
 
 from __future__ import annotations
@@ -267,7 +267,7 @@ def main() -> None:
              "Right: the shape the gluing makes.\nColour: the mel band that drives each row (lowest dark, highest "
              "yellow). Star: one oscillator. Dots: its nearest neighbours under that geometry.",
              ha="center", fontsize=9, color=INK, linespacing=1.5)
-    stem = FIGURES_DIR / "a2-lattice-geometries"
+    stem = FIGURES_DIR / "fig09-appC-lattice-geometries"
     for suffix, kwargs in ((".pdf", {"metadata": {"CreationDate": None, "Creator": None, "Producer": None}}),
                            (".png", {"dpi": 200, "metadata": {"Software": None}})):
         fig.savefig(stem.with_suffix(suffix), bbox_inches="tight", **kwargs)

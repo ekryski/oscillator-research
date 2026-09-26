@@ -16,7 +16,6 @@ Most of the accuracy comes from the input representation and the readout. At a m
 |---|---|
 | [`spoken-digit-recognition-without-training.md`](spoken-digit-recognition-without-training.md) | the manuscript, and the file to edit |
 | [`….pdf`](spoken-digit-recognition-without-training.pdf) · [`.html`](spoken-digit-recognition-without-training.html) · [`.epub`](spoken-digit-recognition-without-training.epub) · [`.docx`](spoken-digit-recognition-without-training.docx) | the same paper to read or download |
-| [`…-tmlr.pdf`](spoken-digit-recognition-without-training-tmlr.pdf) | the TMLR submission build, anonymous, in the journal's own style |
 | [`…-iclr.pdf`](spoken-digit-recognition-without-training-iclr.pdf) | the ICLR 2027 submission build, anonymous and line-numbered, in ICLR's own style |
 | [`…-preprint.pdf`](spoken-digit-recognition-without-training-preprint.pdf) | the preprint build, with the author named and no venue claimed |
 | [`…-arxiv.tar.gz`](spoken-digit-recognition-without-training-arxiv.tar.gz) | LaTeX source, style files, bibliography and figures, ready to upload |

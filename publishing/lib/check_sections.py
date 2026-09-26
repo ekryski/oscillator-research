@@ -93,8 +93,9 @@ def issues(text: str) -> list[tuple[str, str]]:
                 found.append((f"{label} {ref}", f"…{context.strip()}…"))
     # a figure named by its file must be one of the manuscript's figures
     names = {Path(src).stem for src in re.findall(r"(?m)^!\[.*?\]\(([^)\s]+)\)", text)}
-    for m in re.finditer(r"\bFigures?\s+([a-z]\d[\w-]*(?:(?:,\s*|,?\s+and\s+)[a-z]\d[\w-]*)*)", text):
-        for name in re.findall(r"[a-z]\d[\w-]*", m.group(1)):
+    name_pattern = r"(?:fig|[a-z])\d[\w-]*"
+    for m in re.finditer(rf"\bFigures?\s+({name_pattern}(?:(?:,\s*|,?\s+and\s+){name_pattern})*)", text):
+        for name in re.findall(name_pattern, m.group(1)):
             if name not in names:
                 context = re.sub(r"\s+", " ", text[max(0, m.start() - 62):m.end() + 10])
                 found.append((f"Figure {name}", f"…{context.strip()}…"))

@@ -18,7 +18,7 @@ The numbering is the one `check_sections` computes, so a reference that does not
 resolve stays plain text here and is reported there. A list continues its
 reference: in "Appendix H.2, H.6 and H.7" all three become links.
 
-Figures are referred to by their file's name, "Figure c4-lattice-geometries",
+Figures are referred to by their file's name, "Figure fig04-sec4-4-lattice-geometries",
 so the Markdown never carries a number that moving a figure would falsify. Each
 figure is numbered by its order in the document, as LaTeX numbers it, gets the
 id `fig-<name>`, and a reference becomes a link reading "Figure 4". The captions
@@ -48,8 +48,8 @@ SKIP = re.compile(r"(?m)^#{1,6}\s.*$|!?\[[^\]\n]*\]\([^)\n]*\)|`[^`\n]*`|<!--[\s
 
 #: a figure: an image alone on its line, its caption allowed one level of nested brackets, and any attributes
 FIGURE = re.compile(r"(?m)^!\[((?:[^\]\[\\]|\\.|\[[^\]\[]*\])*)\]\(([^)\s]+)\)(\{[^}\n]*\})?[ \t]*$")
-#: a figure named by its file, the name opening with a letter and a digit: "Figure c4-lattice-geometries"
-FIGURE_NAME = r"[a-z]\d[\w-]*"
+#: a figure named by its file, the name opening with "fig" or a letter, then a digit: "Figure fig04-sec4-4-lattice-geometries"
+FIGURE_NAME = r"(?:fig|[a-z])\d[\w-]*"
 FIGURE_REF = re.compile(rf"\bFigures?\s+({FIGURE_NAME}(?:(?:,\s*|,?\s+and\s+){FIGURE_NAME})*)")
 
 

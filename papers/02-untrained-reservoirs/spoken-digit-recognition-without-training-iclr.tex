@@ -351,12 +351,12 @@ comparison is reported at the primary cell, the four-window read at
 \subsection{The network against its controls and the trained
 baselines}\label{sec-4-1}
 
-\hyperref[fig-c3-recognition-arms]{Figure 1} shows every arm at the
-primary cell, and the supplementary material gives the tables. The
-spectrogram-only baseline read 93.6\%, 78.0\% and 71.6\% on clean audio,
-at 0 dB and at \ensuremath{-}5 dB, and the Kuramoto network at gain 1
-read 91.1\%, 77.8\% and 70.7\%: within a point of its input with noise
-(\ensuremath{-}0.23 {[}\ensuremath{-}0.99, +0.52{]} at 0 dB,
+\hyperref[fig-fig01-sec4-1-recognition-arms]{Figure 1} shows every arm
+at the primary cell, and the supplementary material gives the tables.
+The spectrogram-only baseline read 93.6\%, 78.0\% and 71.6\% on clean
+audio, at 0 dB and at \ensuremath{-}5 dB, and the Kuramoto network at
+gain 1 read 91.1\%, 77.8\% and 70.7\%: within a point of its input with
+noise (\ensuremath{-}0.23 {[}\ensuremath{-}0.99, +0.52{]} at 0 dB,
 \ensuremath{-}0.88 {[}\ensuremath{-}1.66, \ensuremath{-}0.09{]} at
 \ensuremath{-}5 dB) and 2.53 points below it on clean audio, but 7.5 to
 15.9 points above the input read over the same frames, from frame 16. It
@@ -377,22 +377,22 @@ of \citet{becker2024} (clean, 18,000 training clips), the baseline read
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Recognition accuracy per arm and noise level at the primary cell (width 192, 2,048 training clips); mean  one standard deviation over three seeds. Reservoirs at gain 1 (filled) and 2 (open). The oscillator networks are the Kuramoto reference configuration and the same with Stuart--Landau coupling. Dashed line: the whole-clip spectrogram-only baseline.}]{resources/figures/c3-recognition-arms.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Recognition accuracy per arm and noise level at the primary cell (width 192, 2,048 training clips); mean  one standard deviation over three seeds. Reservoirs at gain 1 (filled) and 2 (open). The oscillator networks are the Kuramoto reference configuration and the same with Stuart--Landau coupling. Dashed line: the whole-clip spectrogram-only baseline.}]{resources/figures/fig01-sec4-1-recognition-arms.pdf}}
 \caption{Recognition accuracy per arm and noise level at the primary
 cell (width 192, 2,048 training clips); mean \ensuremath{\pm} one
 standard deviation over three seeds. Reservoirs at gain 1 (filled) and 2
 (open). The oscillator networks are the Kuramoto reference configuration
 and the same with Stuart--Landau coupling. Dashed line: the whole-clip
-spectrogram-only baseline.}\label{fig-c3-recognition-arms}
+spectrogram-only baseline.}\label{fig-fig01-sec4-1-recognition-arms}
 \end{figure}
 
 \subsection{Temporal order}\label{sec-4-2}
 
-\hyperref[fig-c8-order-arms]{Figure 2} shows every arm on the two digit
-ordered classification task, averaged over the five digit pairs; the
-supplementary material gives the table. The spectrogram-only baseline
-read 49.8\% to 50.6\% on the order task in every condition. The Kuramoto
-network read 97.7\%, 96.2\% and 95.5\% at gain 1 (clean, 0 dB,
+\hyperref[fig-fig02-sec4-2-order-arms]{Figure 2} shows every arm on the
+two digit ordered classification task, averaged over the five digit
+pairs; the supplementary material gives the table. The spectrogram-only
+baseline read 49.8\% to 50.6\% on the order task in every condition. The
+Kuramoto network read 97.7\%, 96.2\% and 95.5\% at gain 1 (clean, 0 dB,
 \ensuremath{-}5 dB), 45.4 to 47.9 points above it; uncoupled, it read
 2.2 to 8.5 points lower at gain 1 and 10.4 to 18.7 points lower at gain
 2. Both leaky-integrator banks read 98.7\% to 99.9\%, 2.2 to 7.5 points
@@ -405,13 +405,13 @@ noise masks.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Temporal-order accuracy per arm and noise level, averaged over five digit pairs; mean  one standard deviation over three seeds, at most 0.8 points and hidden by the markers. Reservoirs at gain 1 (filled) and 2 (open), read at width 192; the baselines' 48 to 54 features are read as they are. Dotted line: chance.}]{resources/figures/c8-order-arms.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Temporal-order accuracy per arm and noise level, averaged over five digit pairs; mean  one standard deviation over three seeds, at most 0.8 points and hidden by the markers. Reservoirs at gain 1 (filled) and 2 (open), read at width 192; the baselines' 48 to 54 features are read as they are. Dotted line: chance.}]{resources/figures/fig02-sec4-2-order-arms.pdf}}
 \caption{Temporal-order accuracy per arm and noise level, averaged over
 five digit pairs; mean \ensuremath{\pm} one standard deviation over
 three seeds, at most 0.8 points and hidden by the markers. Reservoirs at
 gain 1 (filled) and 2 (open), read at width 192; the baselines' 48 to 54
 features are read as they are. Dotted line:
-chance.}\label{fig-c8-order-arms}
+chance.}\label{fig-fig02-sec4-2-order-arms}
 \end{figure}
 
 \subsection{Coupling function}\label{sec-4-3}
@@ -422,7 +422,7 @@ and two coupling ceilings (the Stuart--Landau functions on the torus
 only), 312 configurations at 0 and \ensuremath{-}5 dB, gains 1 and 2 and
 three seeds, each level paired with its reference over every
 configuration matching it in the other factors
-(\hyperref[fig-c4-coupling-functions]{Figure 3}). The
+(\hyperref[fig-fig03-sec4-3-coupling-functions]{Figure 3}). The
 \textbf{Stuart--Landau} network, whose oscillators have a free
 amplitude, read 2.1 to 3.8 points above its Kuramoto match, the largest
 difference in the experiment, and at the reference configuration it read
@@ -433,36 +433,37 @@ differed from Kuramoto by at most 0.46 points.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Each coupling function minus Kuramoto, per noise level and gain, paired over matching configurations: mean over three seeds (marker) and 95\% paired bootstrap interval (line). Dotted line: no difference.}]{resources/figures/c4-coupling-functions.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Each coupling function minus Kuramoto, per noise level and gain, paired over matching configurations: mean over three seeds (marker) and 95\% paired bootstrap interval (line). Dotted line: no difference.}]{resources/figures/fig03-sec4-3-coupling-functions.pdf}}
 \caption{Each coupling function minus Kuramoto, per noise level and
 gain, paired over matching configurations: mean over three seeds
 (marker) and 95\% paired bootstrap interval (line). Dotted line: no
-difference.}\label{fig-c4-coupling-functions}
+difference.}\label{fig-fig03-sec4-3-coupling-functions}
 \end{figure}
 
 \subsection{Lattice geometry and natural frequencies}\label{sec-4-4}
 
 Every \textbf{lattice geometry} in the design experiment read within
 0.65 points of the torus, the sphere and sheet lowest
-(\hyperref[fig-c4-lattice-geometries]{Figure 4}). A \textbf{coil}, one
-open line from base to apex with one octave per turn, read within 0.22
-points of the torus; a \textbf{cochlea}, the coil with coupling three
-times as strong from base to apex as back and growing with the coil's
-curvature toward the apex, read 0.41 to 0.97 points below the torus.
-Part of that gap is the cochlea's weaker coupling: capping its curvature
-weights at the apex halves its average coupling, and a control at the
-coil's average coupling read 0.28 to 0.71 points above the cochlea, yet
-0.40 to 0.47 points below the coil at gain 1 and within 0.12 points of
-it at gain 2.
+(\hyperref[fig-fig04-sec4-4-lattice-geometries]{Figure 4}). A
+\textbf{coil}, one open line from base to apex with one octave per turn,
+read within 0.22 points of the torus; a \textbf{cochlea}, the coil with
+coupling three times as strong from base to apex as back and growing
+with the coil's curvature toward the apex, read 0.41 to 0.97 points
+below the torus. Part of that gap is the cochlea's weaker coupling:
+capping its curvature weights at the apex halves its average coupling,
+and a control at the coil's average coupling read 0.28 to 0.71 points
+above the cochlea, yet 0.40 to 0.47 points below the coil at gain 1 and
+within 0.12 points of it at gain 2.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Each lattice geometry minus the torus, per noise level and gain: mean over three seeds (marker) and 95\% paired bootstrap interval (line). Left of the grey line, the design experiment, paired over matching configurations; right, the cochlea experiment, paired over its twelve. Dotted line: no difference.}]{resources/figures/c4-lattice-geometries.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Each lattice geometry minus the torus, per noise level and gain: mean over three seeds (marker) and 95\% paired bootstrap interval (line). Left of the grey line, the design experiment, paired over matching configurations; right, the cochlea experiment, paired over its twelve. Dotted line: no difference.}]{resources/figures/fig04-sec4-4-lattice-geometries.pdf}}
 \caption{Each lattice geometry minus the torus, per noise level and
 gain: mean over three seeds (marker) and 95\% paired bootstrap interval
 (line). Left of the grey line, the design experiment, paired over
 matching configurations; right, the cochlea experiment, paired over its
-twelve. Dotted line: no difference.}\label{fig-c4-lattice-geometries}
+twelve. Dotted line: no
+difference.}\label{fig-fig04-sec4-4-lattice-geometries}
 \end{figure}
 
 Each oscillator's \textbf{natural frequency} is its rate of rotation
@@ -473,15 +474,15 @@ orders pitch by place: the rate rises a quarter octave per row, from
 0.41 in the row of the lowest mel band to 5.5 in the highest, jittered
 by 5\%. \textbf{Identical} frequencies set every rate to 1. Tonotopic
 frequencies read 0.38 to 1.16 percentage points below random ones, and
-identical ones within 0.1 (\hyperref[fig-c4-natural-frequencies]{Figure
-5}).
+identical ones within 0.1
+(\hyperref[fig-fig05-sec4-4-natural-frequencies]{Figure 5}).
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Identical and tonotopic natural frequencies minus random ones, paired and drawn as for the coupling functions. Dotted line: no difference.}]{resources/figures/c4-natural-frequencies.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Identical and tonotopic natural frequencies minus random ones, paired and drawn as for the coupling functions. Dotted line: no difference.}]{resources/figures/fig05-sec4-4-natural-frequencies.pdf}}
 \caption{Identical and tonotopic natural frequencies minus random ones,
 paired and drawn as for the coupling functions. Dotted line: no
-difference.}\label{fig-c4-natural-frequencies}
+difference.}\label{fig-fig05-sec4-4-natural-frequencies}
 \end{figure}
 
 \subsection{Restoring strength, coupling ceiling and
@@ -495,29 +496,30 @@ the phase-oscillator networks by \ensuremath{-}1.2 to +2.1 points and
 lowering the Stuart--Landau network in every condition, by 0.4 to 2.8
 points, and ceilings of 1.5 and 2 moving every coupling function by
 \ensuremath{-}2.4 to +1.7 points. Gain separates the Stuart--Landau
-network from the rest (\hyperref[fig-c6-restoring-ceiling-gain]{Figure
-6}): from gain 1 to gain 8 it lost 4.3 points at 0 dB and 2.8 at
-\ensuremath{-}5 dB, while every phase-oscillator network lost 15 to 19
-points and the Stuart--Landau network with its amplitude fixed 25 to 28;
-beyond gain 8 it also gave way, losing 8.4 points by gain 10 and 20.8 by
-gain 12 at 0 dB. Below gain 1 the order reverses: at gains 0.25 and 0.5
-the phase-oscillator networks and the fixed-amplitude network read 0.3
-to 2.5 points above gain 1 and the Stuart--Landau network 0.7 to 1.7
-points below it. At its better low gain every phase-oscillator network
-read above its input at 0 dB, by 0.7 to 1.6 points, and the
-second-harmonic network at \ensuremath{-}5 dB too, by 1.4, which brings
-the best of them within 0.8 points of the Stuart--Landau network at gain
-1 at 0 dB and level with it at \ensuremath{-}5 dB.
+network from the rest
+(\hyperref[fig-fig06-sec4-5-restoring-ceiling-gain]{Figure 6}): from
+gain 1 to gain 8 it lost 4.3 points at 0 dB and 2.8 at \ensuremath{-}5
+dB, while every phase-oscillator network lost 15 to 19 points and the
+Stuart--Landau network with its amplitude fixed 25 to 28; beyond gain 8
+it also gave way, losing 8.4 points by gain 10 and 20.8 by gain 12 at 0
+dB. Below gain 1 the order reverses: at gains 0.25 and 0.5 the
+phase-oscillator networks and the fixed-amplitude network read 0.3 to
+2.5 points above gain 1 and the Stuart--Landau network 0.7 to 1.7 points
+below it. At its better low gain every phase-oscillator network read
+above its input at 0 dB, by 0.7 to 1.6 points, and the second-harmonic
+network at \ensuremath{-}5 dB too, by 1.4, which brings the best of them
+within 0.8 points of the Stuart--Landau network at gain 1 at 0 dB and
+level with it at \ensuremath{-}5 dB.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Accuracy of each coupling function at the reference configuration against restoring strength and coupling ceiling (gain 1) and against input gain, at 0 dB (top) and 5 dB (bottom), 2,048 training clips; mean  one standard deviation over three seeds. Dotted line: the reference setting.}]{resources/figures/c6-restoring-ceiling-gain.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Accuracy of each coupling function at the reference configuration against restoring strength and coupling ceiling (gain 1) and against input gain, at 0 dB (top) and 5 dB (bottom), 2,048 training clips; mean  one standard deviation over three seeds. Dotted line: the reference setting.}]{resources/figures/fig06-sec4-5-restoring-ceiling-gain.pdf}}
 \caption{Accuracy of each coupling function at the reference
 configuration against restoring strength and coupling ceiling (gain 1)
 and against input gain, at 0 dB (top) and \ensuremath{-}5 dB (bottom),
 2,048 training clips; mean \ensuremath{\pm} one standard deviation over
 three seeds. Dotted line: the reference
-setting.}\label{fig-c6-restoring-ceiling-gain}
+setting.}\label{fig-fig06-sec4-5-restoring-ceiling-gain}
 \end{figure}
 
 \subsection{Quadrature pathway}\label{sec-4-6}
@@ -543,30 +545,31 @@ Widening the readout to 1,024 and 4,096 features raised nearly every arm
 with more than 192 features to read, the Kuramoto network by up to 3.8
 points at gain 1 (6.3 at gain 2) and the leaky-integrator banks by up to
 6.2, and left the 192-wide arms unchanged
-(\hyperref[fig-c9-readout-width]{Figure 7}; \hyperref[sec-D-1]{Appendix
-D.1} shows the reader structure). From 2,048 to 24,000 training clips,
-at width 192 and with noise, the spectrogram-only baseline gained 3.5 to
-4.1 points, the Kuramoto network 2.0 and the trained baselines 7.1 to
-12.4, since they learn through their networks as well as their readout.
-At width 4,096 the Kuramoto network read above the whole-clip
-spectrogram-only baseline at every training size, and with 2,048 clips
-at 0 dB above the S4D, CNN and transformer (81.4\% against 79.2\% to
-80.8\%), though through a readout with more weights than theirs; with
-8,192 or 24,000 clips every trained baseline read above every reservoir
-at every width with noise. Read through the seeded projection instead of
-the fixed one, the controls experiment's reservoirs moved by
-\ensuremath{-}1.29 to +1.22 points (median \ensuremath{-}0.06), and
-every paired comparison between the controls arms kept its sign.
+(\hyperref[fig-fig07-sec4-7-readout-width]{Figure 7};
+\hyperref[sec-D-1]{Appendix D.1} shows the reader structure). From 2,048
+to 24,000 training clips, at width 192 and with noise, the
+spectrogram-only baseline gained 3.5 to 4.1 points, the Kuramoto network
+2.0 and the trained baselines 7.1 to 12.4, since they learn through
+their networks as well as their readout. At width 4,096 the Kuramoto
+network read above the whole-clip spectrogram-only baseline at every
+training size, and with 2,048 clips at 0 dB above the S4D, CNN and
+transformer (81.4\% against 79.2\% to 80.8\%), though through a readout
+with more weights than theirs; with 8,192 or 24,000 clips every trained
+baseline read above every reservoir at every width with noise. Read
+through the seeded projection instead of the fixed one, the controls
+experiment's reservoirs moved by \ensuremath{-}1.29 to +1.22 points
+(median \ensuremath{-}0.06), and every paired comparison between the
+controls arms kept its sign.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Recognition accuracy per arm and noise level at readout widths 192 (open circle), 1,024 (small circle) and 4,096 (square), 2,048 training clips, reservoirs at gain 1; mean  one standard deviation over three seeds. Arms no wider than 192 are read as they are, with one marker; the GRU is 216 wide. Dashed line: the whole-clip spectrogram-only baseline.}]{resources/figures/c9-readout-width.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Recognition accuracy per arm and noise level at readout widths 192 (open circle), 1,024 (small circle) and 4,096 (square), 2,048 training clips, reservoirs at gain 1; mean  one standard deviation over three seeds. Arms no wider than 192 are read as they are, with one marker; the GRU is 216 wide. Dashed line: the whole-clip spectrogram-only baseline.}]{resources/figures/fig07-sec4-7-readout-width.pdf}}
 \caption{Recognition accuracy per arm and noise level at readout widths
 192 (open circle), 1,024 (small circle) and 4,096 (square), 2,048
 training clips, reservoirs at gain 1; mean \ensuremath{\pm} one standard
 deviation over three seeds. Arms no wider than 192 are read as they are,
 with one marker; the GRU is 216 wide. Dashed line: the whole-clip
-spectrogram-only baseline.}\label{fig-c9-readout-width}
+spectrogram-only baseline.}\label{fig-fig07-sec4-7-readout-width}
 \end{figure}
 
 \section{Discussion and conclusion}\label{sec-5}
@@ -594,18 +597,18 @@ statistics of that state over the clip differ with the order of its
 inputs, where the same statistics of the input do not. Oscillation
 therefore adds no memory the bank lacks; the phase is an integrator
 whose sum wraps. An analysis of variance per band and time window shows
-it (\hyperref[fig-c7-anova-f]{Figure 11}; \hyperref[sec-D-2]{Appendix
-D.2}): the input's class information peaks at the onset, and every
-reservoir carries it into later windows. Coupling adds about a point on
-noisy recognition and 2 to 19 points on order. Our results align with
-the reports that much of a reservoir's accuracy comes from its front
-end, for a spintronic oscillator on TI-46 \citep{abreu-araujo2020} and
-for a piezoelectric reservoir on AudioMNIST, which matched logistic
-regression on its input \citep{buckley2026}; its authors expect a
-reservoir to help most where a linear classifier on the input falls
-short, and in our noisy conditions, where it does, Kuramoto reads within
-a point of the input and Stuart--Landau reads 1.1 to 2.3 points above
-it.
+it (\hyperref[fig-fig11-appD2-class-information]{Figure 11};
+\hyperref[sec-D-2]{Appendix D.2}): the input's class information peaks
+at the onset, and every reservoir carries it into later windows.
+Coupling adds about a point on noisy recognition and 2 to 19 points on
+order. Our results align with the reports that much of a reservoir's
+accuracy comes from its front end, for a spintronic oscillator on TI-46
+\citep{abreu-araujo2020} and for a piezoelectric reservoir on
+AudioMNIST, which matched logistic regression on its input
+\citep{buckley2026}; its authors expect a reservoir to help most where a
+linear classifier on the input falls short, and in our noisy conditions,
+where it does, Kuramoto reads within a point of the input and
+Stuart--Landau reads 1.1 to 2.3 points above it.
 
 \textbf{Network design.} A free amplitude is where the design effect
 sits, not the Stuart--Landau coupling form: with its amplitude fixed,
@@ -1045,8 +1048,8 @@ Kuramoto family, in FSN \citep{nunley2026}, and called the choice
 between families ``a convention rather than a finding''
 \citep{kryski2026}; one graph network sets Stuart--Landau against
 Kuramoto and reads above it, but does not fix the amplitude
-\citep{zhang2026}. \hyperref[fig-a3-coupling-functions]{Figure 8}
-illustrates how each pushes an oscillator.
+\citep{zhang2026}. \hyperref[fig-fig08-appB-coupling-functions]{Figure
+8} illustrates how each pushes an oscillator.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
@@ -1121,7 +1124,7 @@ separates what the amplitude adds & none recorded \\
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Coupling functions, for one neighbour j with a positive kernel weight. Left: the push on an oscillator at each phase while j sits at the top (arrows). Right: that push against   ; filled dots, stable rest; open dots, unstable or neutral. Kuramoto pulls toward the neighbour; Kuramoto--Sakaguchi aims  = /4 behind it; the second harmonic ( = 0.5) strengthens the pull and removes the push away from opposite phase; Winfree pushes toward phase 0, the neighbour setting only how hard; Stuart--Landau pulls straight toward the neighbour in the plane, so out-of-phase neighbours shrink each other's amplitude, and at fixed amplitude it reduces to Kuramoto. A negative weight reverses every arrow.}]{resources/figures/a3-coupling-functions.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Coupling functions, for one neighbour j with a positive kernel weight. Left: the push on an oscillator at each phase while j sits at the top (arrows). Right: that push against   ; filled dots, stable rest; open dots, unstable or neutral. Kuramoto pulls toward the neighbour; Kuramoto--Sakaguchi aims  = /4 behind it; the second harmonic ( = 0.5) strengthens the pull and removes the push away from opposite phase; Winfree pushes toward phase 0, the neighbour setting only how hard; Stuart--Landau pulls straight toward the neighbour in the plane, so out-of-phase neighbours shrink each other's amplitude, and at fixed amplitude it reduces to Kuramoto. A negative weight reverses every arrow.}]{resources/figures/fig08-appB-coupling-functions.pdf}}
 \caption{Coupling functions, for one neighbour j with a positive kernel
 weight. Left: the push on an oscillator at each phase while j sits at
 the top (arrows). Right: that push against \ensuremath{\theta_{j}}
@@ -1134,7 +1137,7 @@ phase 0, the neighbour setting only how hard; Stuart--Landau pulls
 straight toward the neighbour in the plane, so out-of-phase neighbours
 shrink each other's amplitude, and at fixed amplitude it reduces to
 Kuramoto. A negative weight reverses every
-arrow.}\label{fig-a3-coupling-functions}
+arrow.}\label{fig-fig08-appB-coupling-functions}
 \end{figure}
 
 \section{Lattice geometries}\label{sec-C}
@@ -1230,7 +1233,7 @@ boundary conditions at a matched budget \citep{kryski2026}.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Lattice geometries. Each channel is a 16  16 grid whose row r is driven by mel band r (colour, lowest band dark); a geometry changes only how the grid's edges are glued. Left: the grid, glued edges marked by a shared colour and arrow, open edges dark, one oscillator (star) and its nearest neighbours (dots); right: the shape this makes. The torus joins the highest band's row to the lowest; the cylinder and the sphere leave the frequency axis open; the helix threads the 256 sites into one closed ring, an octave per turn; the cube folds each row into a 4  4 slab and wraps all three axes; the coil threads them into one open line, apex (lowest band) at the centre; the cochlea adds the base-to-apex direction (arrows) and coupling that grows toward the apex (thicker line).}]{resources/figures/a2-lattice-geometries.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Lattice geometries. Each channel is a 16  16 grid whose row r is driven by mel band r (colour, lowest band dark); a geometry changes only how the grid's edges are glued. Left: the grid, glued edges marked by a shared colour and arrow, open edges dark, one oscillator (star) and its nearest neighbours (dots); right: the shape this makes. The torus joins the highest band's row to the lowest; the cylinder and the sphere leave the frequency axis open; the helix threads the 256 sites into one closed ring, an octave per turn; the cube folds each row into a 4  4 slab and wraps all three axes; the coil threads them into one open line, apex (lowest band) at the centre; the cochlea adds the base-to-apex direction (arrows) and coupling that grows toward the apex (thicker line).}]{resources/figures/fig09-appC-lattice-geometries.pdf}}
 \caption{Lattice geometries. Each channel is a 16 \ensuremath{\times} 16
 grid whose row r is driven by mel band r (colour, lowest band dark); a
 geometry changes only how the grid's edges are glued. Left: the grid,
@@ -1243,7 +1246,7 @@ each row into a 4 \ensuremath{\times} 4 slab and wraps all three axes;
 the coil threads them into one open line, apex (lowest band) at the
 centre; the cochlea adds the base-to-apex direction (arrows) and
 coupling that grows toward the apex (thicker
-line).}\label{fig-a2-lattice-geometries}
+line).}\label{fig-fig09-appC-lattice-geometries}
 \end{figure}
 
 \section{The readout}\label{sec-D}
@@ -1252,14 +1255,14 @@ line).}\label{fig-a2-lattice-geometries}
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={The readout for each kind of arm: the same three statistics over the same four windows, classified by a ridge readout fitted to each arm. The spectrogram-only baseline's 192 features are read as they are; a reservoir's 12,288 to 24,576 are standardized and projected to 192 by a fixed random matrix; a trained baseline's 192 (the GRU's 216, projected) are read after the network is trained end to end through a learned linear head.}]{resources/figures/a4-the-read.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={The readout for each kind of arm: the same three statistics over the same four windows, classified by a ridge readout fitted to each arm. The spectrogram-only baseline's 192 features are read as they are; a reservoir's 12,288 to 24,576 are standardized and projected to 192 by a fixed random matrix; a trained baseline's 192 (the GRU's 216, projected) are read after the network is trained end to end through a learned linear head.}]{resources/figures/fig10-appD1-readout.pdf}}
 \caption{The readout for each kind of arm: the same three statistics
 over the same four windows, classified by a ridge readout fitted to each
 arm. The spectrogram-only baseline's 192 features are read as they are;
 a reservoir's 12,288 to 24,576 are standardized and projected to 192 by
 a fixed random matrix; a trained baseline's 192 (the GRU's 216,
 projected) are read after the network is trained end to end through a
-learned linear head.}\label{fig-a4-the-read}
+learned linear head.}\label{fig-fig10-appD1-readout}
 \end{figure}
 
 \subsection{Where each arm carries class information}\label{sec-D-2}
@@ -1284,16 +1287,16 @@ to 16. Every reservoir peaks later and lower (the Kuramoto network at
 leaky-integrator bank at 378, in the fifth or sixth window) and holds
 more information afterwards, averaging 151 to 158 over windows 7 to 16,
 and 165 to 172 in the lower eight bands, where the input averages 110
-(\hyperref[fig-c7-anova-f]{Figure 11}).
+(\hyperref[fig-fig11-appD2-class-information]{Figure 11}).
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Where each arm carries class information, by one-way ANOVA F over the 2,048 training clips of seed 0 (0 dB, gain 1). Top: mean F per mel band. Below: F per mel band and sixteenth of the clip, each panel on its own colour scale; the dotted line ends the 16-frame warm-up.}]{resources/figures/c7-anova-f.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Where each arm carries class information, by one-way ANOVA F over the 2,048 training clips of seed 0 (0 dB, gain 1). Top: mean F per mel band. Below: F per mel band and sixteenth of the clip, each panel on its own colour scale; the dotted line ends the 16-frame warm-up.}]{resources/figures/fig11-appD2-class-information.pdf}}
 \caption{Where each arm carries class information, by one-way ANOVA F
 over the 2,048 training clips of seed 0 (0 dB, gain 1). Top: mean F per
 mel band. Below: F per mel band and sixteenth of the clip, each panel on
 its own colour scale; the dotted line ends the 16-frame
-warm-up.}\label{fig-c7-anova-f}
+warm-up.}\label{fig-fig11-appD2-class-information}
 \end{figure}
 
 \end{document}

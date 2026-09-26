@@ -137,7 +137,7 @@ def arms_figure(task: str, stem: str) -> None:
 WIDTHS = ((192, "o", "white", 5, -0.24), (1024, "o", None, 4, 0.0), (4096, "s", None, 4.5, 0.24))
 
 
-def width_figure(stem: str = "c9-readout-width") -> None:
+def width_figure(stem: str = "fig07-sec4-7-readout-width") -> None:
     """Every recognition arm's accuracy at readout widths 192, 1,024 and 4,096, per noise level: the mean over three
     seeds and one standard deviation, reservoirs at gain 1, 2,048 training clips. An arm no wider than 192 is read
     as it is at every width, so it gets the one marker."""
@@ -273,11 +273,11 @@ def design_factor_figure(panel: int, stem: str, across: bool = False, by: dict |
 
 
 #: the design experiment's factors as figures of their own: (panel in DESIGN_PANELS, file stem, levels across)
-DESIGN_FIGURES = ((0, "c4-coupling-functions", False), (1, "c4-natural-frequencies", False),
-                  (2, "c4-lattice-geometries", True))
+DESIGN_FIGURES = ((0, "fig03-sec4-3-coupling-functions", False), (1, "fig05-sec4-4-natural-frequencies", False),
+                  (2, "fig04-sec4-4-lattice-geometries", True))
 
 
-def sweep_figure(stem: str = "c6-restoring-ceiling-gain") -> None:
+def sweep_figure(stem: str = "fig06-sec4-5-restoring-ceiling-gain") -> None:
     """Accuracy against restoring strength, coupling ceiling and input gain for every coupling function at the
     reference configuration, at 0 and -5 dB: the design experiment's levels with the sweep's, gain 1 in the
     first two columns."""
@@ -377,7 +377,7 @@ def anova_maps(windows: int = 16, noise: float = 0.0, gain: float = 1.0, seed: i
     return out
 
 
-def anova_figure(maps: dict[str, torch.Tensor] | None = None, stem: str = "c7-anova-f") -> None:
+def anova_figure(maps: dict[str, torch.Tensor] | None = None, stem: str = "fig11-appD2-class-information") -> None:
     """The mean F per band across the top, and below it a heat map per arm of the mean F per mel band and
     time window, two by two."""
     import matplotlib
@@ -414,8 +414,8 @@ def anova_figure(maps: dict[str, torch.Tensor] | None = None, stem: str = "c7-an
 
 def main(argv: list[str] | None = None) -> None:
     argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args(argv)
-    arms_figure("recognition", "c3-recognition-arms")
-    arms_figure("order", "c8-order-arms")
+    arms_figure("recognition", "fig01-sec4-1-recognition-arms")
+    arms_figure("order", "fig02-sec4-2-order-arms")
     width_figure()
     by = _design_rows()
     for panel, stem, across in DESIGN_FIGURES:
