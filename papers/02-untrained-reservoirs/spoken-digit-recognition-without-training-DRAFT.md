@@ -120,6 +120,10 @@ The authors take responsibility for the final content of this work.
 
 <!-- appendix -->
 
+## Ethics statement {-}
+
+This work uses AudioMNIST, a public corpus of spoken digits released under the MIT licence; we use nothing about its speakers beyond their anonymous voice recordings, numbered by speaker so that training and test keep speakers apart, and the audio examples in the supplementary material are clips from it, shipped with its licence. No new data was collected, and every experiment ran on a single Apple M1 Max computer.
+
 ## Appendix {-}
 
 ## A Glossary
