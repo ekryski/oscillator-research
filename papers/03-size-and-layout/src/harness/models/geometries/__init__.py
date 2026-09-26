@@ -1,10 +1,11 @@
 """The lattice geometries, one module per geometry.
 
-The six geometries of paper 02 reuse one [C, G, G] parameter and state storage
-and read it as different lattices, so varying the geometry varies exactly one
-thing. Every internal layout puts the geometry's frequency axis on storage row
-b for input band b, which is what makes the one broadcast rule (band b -> row
-b, all channels and columns) correct everywhere:
+The eight geometries of paper 02, and its cochlea at the coil's average
+coupling, reuse one [C, G, G] parameter and state storage and read it as
+different lattices, so varying the geometry varies exactly one thing. Every
+internal layout puts the geometry's frequency axis on storage row b for input
+band b, which is what makes the one broadcast rule (band b -> row b, all
+channels and columns) correct everywhere:
 
 | geometry | frequency axis                          | band b drives                   |
 |----------|-----------------------------------------|---------------------------------|
@@ -14,11 +15,15 @@ b, all channels and columns) correct everywhere:
 | helix    | along the coil, G/4 rows per turn       | ring positions G*b .. G*b+G-1   |
 | cube     | the z axis (fully periodic)             | z-slice b (an a x b slab)       |
 | sphere   | latitude, south = low -> north          | latitude ring b                 |
+| coil     | along the open coil, apex = low         | coil positions G*b .. G*b+G-1   |
+| cochlea  | the coil, with direction and curvature  | coil positions G*b .. G*b+G-1   |
+| cochlea-matched | the cochlea, the coil's average coupling | coil positions G*b .. G*b+G-1 |
 """
 
 from __future__ import annotations
 
 from harness.models.geometries.base import Geometry, PlanarGeometry
+from harness.models.geometries.coil import Cochlea, CochleaMatched, Coil
 from harness.models.geometries.cube import Cube, cube_dims
 from harness.models.geometries.cylinder import Cylinder
 from harness.models.geometries.helix import Helix
@@ -27,7 +32,8 @@ from harness.models.geometries.sphere import Sphere, sphere_cos_weights, sphere_
 from harness.models.geometries.torus import Torus
 
 #: name -> class, in the order the paper's tables list them
-GEOMETRIES: dict[str, type[Geometry]] = {g.name: g for g in (Torus, Cylinder, Sheet, Helix, Cube, Sphere)}
+GEOMETRIES: dict[str, type[Geometry]] = {
+    g.name: g for g in (Torus, Cylinder, Sheet, Helix, Cube, Sphere, Coil, Cochlea, CochleaMatched)}
 BOUNDARIES = tuple(GEOMETRIES)
 
 
@@ -38,5 +44,6 @@ def build_geometry(boundary: str, grid: int) -> Geometry:
     return GEOMETRIES[boundary](grid)
 
 
-__all__ = ["BOUNDARIES", "GEOMETRIES", "Cube", "Cylinder", "Geometry", "Helix", "PlanarGeometry", "Sheet",
-           "Sphere", "Torus", "build_geometry", "cube_dims", "sphere_cos_weights", "sphere_latitudes"]
+__all__ = ["BOUNDARIES", "GEOMETRIES", "Cochlea", "CochleaMatched", "Coil", "Cube", "Cylinder", "Geometry", "Helix",
+           "PlanarGeometry", "Sheet", "Sphere", "Torus", "build_geometry", "cube_dims", "sphere_cos_weights",
+           "sphere_latitudes"]

@@ -321,13 +321,14 @@ MATCH = ("grid", "bands", "window", "channels")
 
 
 def compare(cells: list[Cell], name: str, a, b, *, per_channel: bool = True, ignore: tuple = (),
-            extra: dict | None = None) -> list[dict]:
+            extra: dict | None = None, by=None) -> list[dict]:
     """a minus b over matched cells: `a` and `b` select cells, matched on task and its set (pair, length,
     position), lattice, band mapping, window (and channel count if `per_channel`), noise, gain, width,
     training size, seed and projection; `ignore` drops some of the size's terms from the match (for
-    one band mapping or window against another). A cell without gain (the spectrogram-only baseline, a
-    trained baseline) matches the other at every gain, and an unprojected cell of b (projection "none")
-    matches a under either projection."""
+    one band mapping or window against another), and `by(cell)` adds terms of its own, so that one
+    comparison pools several matched configurations (the cochlea's coupling functions). A cell without
+    gain (the spectrogram-only baseline, a trained baseline) matches the other at every gain, and an
+    unprojected cell of b (projection "none") matches a under either projection."""
     bs = [c for c in cells if b(c)]
     b_gain = any(c.gain is not None for c in bs)
     drop = set(ignore) | (set() if per_channel else {"channels"})
@@ -337,7 +338,7 @@ def compare(cells: list[Cell], name: str, a, b, *, per_channel: bool = True, ign
 
     def key(c: Cell, projection: str) -> tuple:
         return (c.condition, c.pathway, size(c), c.noise, c.gain if b_gain else None, c.width, c.n_train, c.seed,
-                projection)
+                projection, by(c) if by else ())
     idx = {key(c, c.projection): c for c in bs}
     groups = defaultdict(list)
     for c in cells:
@@ -387,13 +388,15 @@ def _controls(cells: list[Cell], experiment: str, task: str, pathway: str = "spe
                   _sel(experiment, "uncoupled", pathway=pathway, task=task))
     kinds = [("network", NETWORK), ("uncoupled", UNCOUPLED)]
     if bank:
-        out += compare(cells, f"{NETWORK} minus the {BANK}{suffix}", net, _sel(experiment, "bank", pathway=pathway, task=task))
+        out += compare(cells, f"{NETWORK} minus the {BANK}{suffix}", net,
+                       _sel(experiment, "bank", pathway=pathway, task=task))
         kinds.append(("bank", BANK))
     for kind, name in kinds:
-        out += compare(cells, f"{name} minus the {WHOLE}{suffix}", _sel(experiment, kind, pathway=pathway, task=task), whole,
-                       per_channel=False)
+        out += compare(cells, f"{name} minus the {WHOLE}{suffix}", _sel(experiment, kind, pathway=pathway, task=task),
+                       whole, per_channel=False)
     for kind, name in kinds[:2]:
-        out += compare(cells, f"{name} {RATES}{suffix}", _sel(experiment, kind, f"{read}+rate", pathway=pathway, task=task),
+        out += compare(cells, f"{name} {RATES}{suffix}",
+                       _sel(experiment, kind, f"{read}+rate", pathway=pathway, task=task),
                        _sel(experiment, kind, pathway=pathway, task=task))
     return out
 
@@ -435,6 +438,37 @@ def design_comparisons(cells: list[Cell]) -> list[dict]:
             label = f"{terms.level(coupling)}, {geometry} minus Kuramoto, torus ({terms.PATHWAYS[pathway]} pathway)"
             out += compare(cells, label, a, _sel(reference, "network", pathway=pathway),
                            extra={"factor": "coupling function and lattice geometry"})
+    return out
+
+
+#: the cochlea experiment's comparisons, as paper 02 makes them: each geometry minus another
+COCHLEA_PAIRS = (("coil", "torus"), ("cochlea", "torus"), ("cochlea", "coil"), ("coil", "helix"),
+                 ("cochlea-matched", "coil"), ("cochlea-matched", "torus"), ("cochlea", "cochlea-matched"))
+
+
+def _geometry(geometry: str):
+    """The coupled network's cells with a lattice geometry, from the experiment that runs it: the cochlea
+    experiment for the coil and the cochleas, the size experiment for Kuramoto on the torus (the
+    reference), and the design experiment for every other phase coupling function and geometry."""
+    def pick(c: Cell) -> bool:
+        a = c.arm
+        if c.read != READ or c.pathway != "spectrogram" or _kind(c) != "network" or a.get("geometry") != geometry:
+            return False
+        if geometry in plan.COCHLEA_GEOMETRIES:
+            return c.experiment == "cochlea"
+        return c.experiment == ("size" if (a.get("coupling"), geometry) == plan.REFERENCE else "design")
+    return pick
+
+
+def cochlea_comparisons(cells: list[Cell]) -> list[dict]:
+    """The coil, the cochlea and the cochlea at the coil's average coupling against the torus and the helix,
+    and against each other, at every size, each over the four phase coupling functions (matched on coupling
+    function, as paper 02 pairs them over its configurations)."""
+    phase = [c for c in cells if c.arm.get("coupling") in plan.PHASE_COUPLINGS]
+    out = []
+    for a, b in COCHLEA_PAIRS:
+        out += compare(phase, f"lattice geometry: {terms.level(a)} minus {terms.level(b)}", _geometry(a), _geometry(b),
+                       by=lambda c: c.arm.get("coupling"), extra={"factor": "lattice geometry"})
     return out
 
 
@@ -494,7 +528,8 @@ def summary(cells: list[Cell] | None = None, runs: list[Instruments] | None = No
         cells, loaded = load()
         runs = loaded if runs is None else runs
     return {"chance": chance(), "accuracy": accuracies(cells), "instruments": instruments(runs or []),
-            "comparisons": size_comparisons(cells) + design_comparisons(cells) + pathway_comparisons(cells),
+            "comparisons": (size_comparisons(cells) + design_comparisons(cells) + cochlea_comparisons(cells)
+                            + pathway_comparisons(cells)),
             "leak_check": leak_check(cells), "reuse_check": reuse_check()}
 
 
@@ -628,6 +663,11 @@ def report(s: dict, done: dict[str, tuple[int, int, int]]) -> str:
             lines += [f"## Recognition, {name} ({projection} projection)", ""]
             lines += _grid_table([r for r in cmp if r["comparison"] == name and r["projection"] == projection
                                   and r["width"] == PRIMARY_WIDTH and r["n_train"] == PRIMARY_SIZE], _diff) + [""]
+        for a, b in COCHLEA_PAIRS:
+            name = f"lattice geometry: {terms.level(a)} minus {terms.level(b)}"
+            lines += [f"## Recognition, {name}, over the four phase coupling functions ({projection} projection)", ""]
+            lines += _grid_table([r for r in cmp if r["comparison"] == name and r["projection"] == projection
+                                  and r["width"] == PRIMARY_WIDTH and r["n_train"] == PRIMARY_SIZE], _diff) + [""]
     lines += ["## Synchronization and locking", "",
               "Each network's instruments over its test clips, mean ± standard deviation over seeds: the order "
               "parameter R (1 when every oscillator of a channel shares one phase), each oscillator's phase "
@@ -643,7 +683,8 @@ def report(s: dict, done: dict[str, tuple[int, int, int]]) -> str:
                                   and r["arm"].startswith(kind)], _instrument(key)) + [""]
     rows = defaultdict(dict)
     for r in inst:
-        if r["experiment"] in ("design", "size") and r["task"] == "recognition" and r["arm"].startswith("coupled-") \
+        if r["experiment"] in ("design", "cochlea", "size") and r["task"] == "recognition" \
+                and r["arm"].startswith("coupled-") \
                 and r["channels"] == am.CHANNELS and not r["bands"] and not r["window"]:
             m = terms._NETWORK.match(terms.split(r["arm"])[0])
             if m and "R" in r:

@@ -56,6 +56,8 @@ TRAINED_ARCHS = ("gru", "tcn", "cnn", "transformer", "s4d")
 PHASE_COUPLINGS = ("kuramoto", "kuramoto-sakaguchi", "second-harmonic", "winfree")
 AMPLITUDE_COUPLINGS = ("stuart-landau", "stuart-landau-fixed")
 GEOMETRIES = ("torus", "cylinder", "sheet", "helix", "cube", "sphere")
+#: paper 02's coil and cochlea, and its cochlea at the coil's average coupling (harness.models.geometries.coil)
+COCHLEA_GEOMETRIES = ("coil", "cochlea", "cochlea-matched")
 #: the front end's longer real analysis window, as long as the zero-padded transform at that band count;
 #: the own-band lattices at 64 and 128 run under both windows in the size, trained and quadrature experiments
 LONG_WINDOW = {64: 1024, 128: 2048}
@@ -203,6 +205,20 @@ def design() -> Iterator[rn.Spec]:
                             yield _net("design", "spectrogram", noise, gain, seed, arm)
 
 
+def cochlea() -> Iterator[rn.Spec]:
+    """The coil, the cochlea and the cochlea at the coil's average coupling, for every phase coupling
+    function, at every lattice, channel count and band mapping, the coupled network only. Paired with the
+    design experiment's torus and helix, and with each other, at the same size."""
+    for grid, bands in lattices():
+        for channels in CHANNELS:
+            for geometry in COCHLEA_GEOMETRIES:
+                for coupling in PHASE_COUPLINGS:
+                    for seed in SEEDS:
+                        arm = Arm("network", coupling=coupling, geometry=geometry, channels=channels, grid=grid,
+                                  bands=bands)
+                        yield _net("cochlea", "spectrogram", NOISES[0], GAINS[0], seed, arm)
+
+
 def quadrature() -> Iterator[rn.Spec]:
     """The quadrature pathway at every size: the reference and uncoupled networks, and the pathway's
     own spectrogram-only baseline. The bank has no phase to take it, as in paper 02."""
@@ -241,6 +257,7 @@ def reuse_check() -> Iterator[rn.Spec]:
             ("recognition", recognition, 0, Arm("network", coupling="winfree", geometry="cube")),
             ("recognition", recognition, 2, Arm("network", coupling="stuart-landau")),
             ("recognition", recognition, 1, Arm("network", coupling="kuramoto-sakaguchi", geometry="sheet")),
+            ("recognition", recognition, 1, Arm("network", geometry="cochlea")),
             ("order", recognition, 0, ref),
             ("recognition", {**recognition, "pathway": "quadrature"}, 0, ref)]
     for task, c, seed, arm in runs:
@@ -251,7 +268,8 @@ def reuse_check() -> Iterator[rn.Spec]:
 
 
 EXPERIMENTS = {"leak-check": leak_check, "reuse-check": reuse_check, "size": size, "trained": trained,
-               "sequence": sequence, "design": design, "quadrature": quadrature, "design-quadrature": quadrature_design}
+               "sequence": sequence, "design": design, "cochlea": cochlea, "quadrature": quadrature,
+               "design-quadrature": quadrature_design}
 
 
 # ---------------------------------------------------------------------------
@@ -292,7 +310,9 @@ def paper02_group(spec: rn.Spec) -> str | None:
     on the order task; in its design experiment, every coupling function and
     geometry (one file per coupling function); and in its quadrature
     experiment, the pathway's baseline and a diagonal of coupling functions
-    and geometries (no uncoupled network). It did not run the digit-sequence
+    and geometries (no uncoupled network); and in its cochlea experiment, the
+    coil, the cochlea and the cochlea at the coil's average coupling for the
+    four phase coupling functions. It did not run the digit-sequence
     task, or any window but its 512 samples. The leak checks differ in their
     channel counts, so none is shared.
     """
@@ -320,7 +340,11 @@ def paper02_group(spec: rn.Spec) -> str | None:
     if spec.pathway == "spectrogram":
         if design == REFERENCE:
             return f"{CONTROLS}-recognition"
-        return f"design-recognition-{a.coupling}" if a.coupled else None
+        if not a.coupled:
+            return None
+        if a.geometry in COCHLEA_GEOMETRIES:
+            return "cochlea-recognition" if a.coupling in PHASE_COUPLINGS else None
+        return f"design-recognition-{a.coupling}"
     diagonal = a.coupled and (a.geometry == "torus" or design == ("kuramoto", "helix"))
     return QUADRATURE02 if diagonal and a.coupling in PHASE_COUPLINGS else None
 
@@ -437,10 +461,14 @@ FEAT_MS = {"cpu": {8: 0.3, 16: 0.5, 32: 2.4, 64: 7.5, 128: 27.0},
            "mps": {8: 0.01, 16: 0.034, 32: 0.14, 64: 0.57, 128: 2.05}}
 #: relative simulation cost of each geometry and coupling function. CPU: measured at 64 x 64 (FFT). MPS:
 #: the dense operator (up to 64 x 64) does not depend on the geometry, and the second harmonic couples
-#: four fields instead of two; at 128 x 128 (FFT) the factors measured with FFT at 64 x 64.
-GEOMETRY_COST = {"cpu": {"torus": 1.0, "cylinder": 1.9, "sheet": 2.4, "helix": 0.74, "cube": 1.66, "sphere": 1.19},
-              "mps-fft": {"torus": 1.0, "cylinder": 1.06, "sheet": 1.66, "helix": 0.21, "cube": 2.43,
-                          "sphere": 1.08}}
+#: four fields instead of two; at 128 x 128 (FFT) the factors measured with FFT at 64 x 64. The coil
+#: and the two cochleas were measured on 2026-09-25, on the CPU at 64 x 64 and on MPS with FFT at
+#: 128 x 128, against the torus measured with them (their dense operator on MPS, at 64 x 64, costs what
+#: the torus's does).
+GEOMETRY_COST = {"cpu": {"torus": 1.0, "cylinder": 1.9, "sheet": 2.4, "helix": 0.74, "cube": 1.66, "sphere": 1.19,
+                         "coil": 1.47, "cochlea": 1.49, "cochlea-matched": 1.51},
+                 "mps-fft": {"torus": 1.0, "cylinder": 1.06, "sheet": 1.66, "helix": 0.21, "cube": 2.43,
+                             "sphere": 1.08, "coil": 0.70, "cochlea": 0.75, "cochlea-matched": 0.76}}
 COUPLING_COST = {"cpu": {"kuramoto": 1.0, "kuramoto-sakaguchi": 1.2, "second-harmonic": 2.6, "winfree": 2.2},
                "mps": {"kuramoto": 1.0, "kuramoto-sakaguchi": 1.0, "second-harmonic": 2.0, "winfree": 1.0},
                "mps-fft": {"kuramoto": 1.0, "kuramoto-sakaguchi": 0.93, "second-harmonic": 1.08, "winfree": 0.81}}
@@ -520,12 +548,15 @@ def seconds(spec: rn.Spec, device: str = "cpu", trained_device: str = "cpu") -> 
     """Estimated seconds for one run: on one CPU thread (`cpu`) or on the M1 Max's GPU (`mps`).
 
     A trained baseline trains on `trained_device`, the CPU unless a run asks
-    otherwise (`plan run --trained-device`). Both include what runs on the CPU either way: drawing the two projection
-    matrices, and the ridge readout under each projection, for every read (and,
-    on the digit-sequence task, every position). The frame counts and the
-    number of clips scale the per-clip times measured on recognition; a streamed
-    arm simulates its channels once per read.
+    otherwise (`plan run --trained-device`), and a run paper 02 made runs on the
+    CPU whatever the device (`_work`). Both include what runs on the CPU either
+    way: drawing the two projection matrices, and the ridge readout under each
+    projection, for every read (and, on the digit-sequence task, every
+    position). The frame counts and the number of clips scale the per-clip times
+    measured on recognition; a streamed arm simulates its channels once per read.
     """
+    if paper02_group(spec) is not None:
+        device = trained_device = "cpu"
     a = spec.arm
     reads = spec.reads or tuple(am.reads(a, spec.task))
     positions = spec.length if spec.task == "sequence" else 1

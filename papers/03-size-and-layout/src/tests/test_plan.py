@@ -7,9 +7,9 @@ from harness.experiment import run as rn
 from harness.experiment.arms import Arm
 
 #: the run counts the paper's Appendix B states, and how many of each paper 02 ran
-COUNTS = {"leak-check": 30, "reuse-check": 10, "size": 2688, "trained": 825, "sequence": 1296, "design": 3375,
-          "quadrature": 363, "design-quadrature": 3105}
-REUSED = {"leak-check": 0, "reuse-check": 0, "size": 90, "trained": 15, "sequence": 0, "design": 75,
+COUNTS = {"leak-check": 30, "reuse-check": 11, "size": 2688, "trained": 825, "sequence": 1296, "design": 3375,
+          "cochlea": 1620, "quadrature": 363, "design-quadrature": 3105}
+REUSED = {"leak-check": 0, "reuse-check": 0, "size": 90, "trained": 15, "sequence": 0, "design": 75, "cochlea": 36,
           "quadrature": 6, "design-quadrature": 12}
 
 
@@ -33,7 +33,7 @@ def test_the_reuse_check_reruns_paper_02s_runs_on_the_cpu_into_a_record_of_its_o
     assert all(plan.paper02_group(s) and not plan.reused(s) for s in specs)
     assert {s.group() for s in specs} == {"reuse-check-recognition", "reuse-check-order",
                                           "reuse-check-recognition-quadrature"}
-    same = {(s.task, s.pathway, s.run_id()) for s in plan.planned(["size", "trained", "design", "quadrature"])}
+    same = {(s.task, s.pathway, s.run_id()) for s in plan.planned(["size", "trained", "design", "cochlea", "quadrature"])}
     assert all((s.task, s.pathway, s.run_id()) in same for s in specs)
     ran = []
     monkeypatch.setattr(rn, "run", lambda spec, device, threads, trained_device: ran.append((device, trained_device)))
@@ -84,6 +84,11 @@ def test_the_reused_cells_are_paper_02s_16x16_4_channel_runs_under_their_own_ids
     for arm in (Arm("network", channels=8), Arm("network", grid=32), Arm("network", coupled=False, coupling="winfree"),
                 Arm("bank", channels=2), Arm("trained", arch="gru", channels=8)):
         assert plan.paper02_group(rn.Spec("size", "recognition", "spectrogram", 0.0, 1.0, 0, arm)) is None
+    for geometry in plan.COCHLEA_GEOMETRIES:
+        c = rn.Spec("cochlea", "recognition", "spectrogram", 0.0, 1.0, 1, Arm("network", coupling="winfree", geometry=geometry))
+        assert plan.paper02_group(c) == "cochlea-recognition"
+    assert plan.paper02_group(rn.Spec("cochlea", "recognition", "spectrogram", 0.0, 1.0, 1,
+                                      Arm("network", geometry="coil", channels=8))) is None
     q = rn.Spec("design-quadrature", "recognition", "quadrature", 0.0, 1.0, 0, Arm("network", coupling="winfree"))
     assert plan.paper02_group(q) == "quadrature-recognition"
     assert plan.paper02_group(rn.Spec("quadrature", "recognition", "quadrature", 0.0, 1.0, 0,
@@ -204,3 +209,20 @@ def test_paper_02s_own_record_holds_every_run_it_made_under_its_labels():
         specs = [s for s in plan.planned([experiment]) if plan.reused(s)]
         assert all(plan.paper02_run(s) is not None for s in specs), experiment
         assert sum(map(plan.taken_from_paper02, specs)) == TAKEN.get(experiment, 0), experiment
+
+
+def test_the_cochlea_experiment_runs_paper_02s_coil_and_cochleas_at_every_size_like_the_design_experiment():
+    specs = plan.planned(["cochlea"])
+    assert {s.arm.geometry for s in specs} == {"coil", "cochlea", "cochlea-matched"}
+    assert {s.arm.coupling for s in specs} == set(plan.PHASE_COUPLINGS)
+    assert {(s.arm.frequencies, s.arm.restoring, s.arm.ceiling, s.arm.kind, s.arm.coupled) for s in specs} == {
+        ("random", 0.3, 1.0, "network", True)}
+    assert {(s.arm.grid, s.arm.bands) for s in specs} == set(plan.lattices()) and not any(s.arm.window for s in specs)
+    assert {s.arm.channels for s in specs} == set(plan.CHANNELS) and {s.seed for s in specs} == set(plan.SEEDS)
+    assert {s.group() for s in specs} == {f"cochlea-recognition-{g}x{g}" for g in plan.GRIDS}
+    # every configuration pairs with the design experiment's torus and helix at the same size
+    design = {(s.arm.coupling, s.arm.geometry, s.arm.channels, s.arm.grid, s.arm.bands, s.seed)
+              for s in plan.planned(["design", "size"]) if s.task == "recognition" and s.arm.kind == "network"}
+    for s in specs:
+        for geometry in ("torus", "helix"):
+            assert (s.arm.coupling, geometry, s.arm.channels, s.arm.grid, s.arm.bands, s.seed) in design

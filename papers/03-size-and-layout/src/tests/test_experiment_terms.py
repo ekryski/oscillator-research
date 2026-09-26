@@ -28,6 +28,11 @@ def test_a_design_configuration_names_where_it_departs_from_the_reference():
         "coupled oscillator network (Stuart–Landau, fixed amplitude, 2 channels, 64 × 64 lattice, 64 mel bands)")
     assert terms.arm(Arm("network", coupling="winfree", geometry="cube", coupled=False).label()) == (
         "uncoupled oscillator network (Winfree, cube)")
+    matched = Arm("network", coupling="second-harmonic", geometry="cochlea-matched", channels=1, grid=8).label()
+    assert matched == "coupled-second-harmonic-cochlea-matched-random-restoring0.3-ceiling1-ch1-8x8"
+    assert terms.arm(matched) == ("coupled oscillator network (second harmonic, cochlea at the coil's average "
+                                  "coupling, 1 channel, 8 × 8 lattice, 8 mel bands)")
+    assert terms.arm(Arm("network", geometry="coil").label()) == "coupled oscillator network (coil)"
 
 
 def test_every_bank_is_state_matched_to_its_own_network_and_keeps_paper_02s_names():

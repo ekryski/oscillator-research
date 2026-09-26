@@ -45,6 +45,7 @@ LEVELS = {
     "kuramoto": "Kuramoto", "kuramoto-sakaguchi": "Kuramoto–Sakaguchi", "second-harmonic": "second harmonic",
     "winfree": "Winfree", "stuart-landau": "Stuart–Landau", "stuart-landau-fixed": "Stuart–Landau, fixed amplitude",
     "random": "random", "tonotopic": "tonotopic", "identical": "identical",
+    "cochlea-matched": "cochlea at the coil's average coupling",
 }
 
 #: the input pathways
@@ -60,7 +61,8 @@ _SUFFIX = re.compile(r"^(?P<base>.*?)(?:-ch(?P<channels>\d+))?(?:-(?P<grid>\d+)x
                      r"(?:-w(?P<window>\d+))?$")
 _NETWORK = re.compile(r"^(coupled|uncoupled)-"
                       r"(?P<coupling>kuramoto-sakaguchi|second-harmonic|stuart-landau-fixed|stuart-landau|[a-z]+)-"
-                      r"(?P<geometry>[a-z]+)-(?P<frequencies>[a-z]+)-restoring(?P<restoring>[0-9.]+)"
+                      r"(?P<geometry>[a-z-]+?)-(?P<frequencies>random|tonotopic|identical)"
+                      r"-restoring(?P<restoring>[0-9.]+)"
                       r"-ceiling(?P<ceiling>[0-9.]+)$")
 
 
@@ -142,7 +144,7 @@ def _arm(label: str) -> str:
         return label
     name = "uncoupled oscillator network" if label.startswith("uncoupled") else "coupled oscillator network"
     parts = [level(m["coupling"]) if m["coupling"] != REFERENCE["coupling"] else "",
-             m["geometry"] if m["geometry"] != REFERENCE["geometry"] else "",
+             level(m["geometry"]) if m["geometry"] != REFERENCE["geometry"] else "",
              f"{level(m['frequencies'])} ω" if m["frequencies"] != REFERENCE["frequencies"] else "",
              f"λ {m['restoring']}" if float(m["restoring"]) != REFERENCE["restoring"] else "",
              f"ceiling {m['ceiling']}" if float(m["ceiling"]) != REFERENCE["ceiling"] else "",

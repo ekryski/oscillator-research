@@ -25,9 +25,11 @@ SEEDS = (0, 1, 2)
 
 
 def _arms_16():
-    """Every 16 x 16 network either paper runs: every coupling function, geometry, channel count and
-    ceiling, and paper 02's restoring strengths and natural frequencies (they draw nothing extra)."""
-    for coupling, geometry in plan.designs():
+    """Every 16 x 16 network either paper runs: every coupling function, geometry (the coil and the
+    cochleas among them), channel count and ceiling, and paper 02's restoring strengths and natural
+    frequencies (they draw nothing extra)."""
+    cochlea = [(c, g) for g in plan.COCHLEA_GEOMETRIES for c in plan.PHASE_COUPLINGS]
+    for coupling, geometry in [*plan.designs(), *cochlea]:
         for channels in plan.CHANNELS:
             for ceiling in (1.0, 0.5):
                 yield am.Arm("network", coupling=coupling, geometry=geometry, channels=channels, ceiling=ceiling)

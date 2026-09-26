@@ -14,8 +14,9 @@ for a small, representative fraction of its clips:
    statistics computed, after a warm-up. A streamed arm is timed on one of its
    channels, as it runs, and multiplied by its channel count. The uncoupled
    network costs what the coupled one does (its kernel is zero, not absent).
-2. For each pathway and lattice, every other coupling function and geometry is
-   timed the same way at one channel, as a factor on the reference network.
+2. For each pathway and lattice, every other coupling function and geometry
+   (the coil and the cochleas among them) is timed the same way at one
+   channel, as a factor on the reference network.
 3. Once: the device's matrix-product rate (the projection), the CPU's
    Gaussian draws (the projection matrices) and one read's ridge fits (the
    CPU, float64).
@@ -223,9 +224,10 @@ def _model_factor(spec: rn.Spec) -> float:
 
 def run_seconds(spec: rn.Spec, m: dict) -> tuple[float, bool]:
     """(seconds, measured) for one run, from the measurements `m`; modelled for the trained and the
-    spectrogram-only baselines, and for any arm the benchmark did not time."""
+    spectrogram-only baselines, for a run paper 02 made (it runs on the CPU), and for any arm the benchmark
+    did not time."""
     a = spec.arm
-    if a.kind in ("trained", "baseline"):
+    if a.kind in ("trained", "baseline") or plan.paper02_group(spec) is not None:
         return plan.seconds(spec, "mps"), False
     kind = "bank" if a.kind == "bank" else "network"
     pathway, factor = spec.pathway, 1.0
@@ -310,7 +312,9 @@ def benchmark(device: str = "auto", grids=plan.GRIDS, channels=plan.CHANNELS, pa
             if ref is None:
                 continue
             couplings = plan.PHASE_COUPLINGS + (() if pathway == "quadrature" else plan.AMPLITUDE_COUPLINGS)
-            for coupling, geometry in plan.designs(couplings):
+            cochleas = () if pathway == "quadrature" else plan.COCHLEA_GEOMETRIES
+            coil = [(c, g) for g in cochleas for c in plan.PHASE_COUPLINGS]
+            for coupling, geometry in [*plan.designs(couplings), *coil]:
                 if (coupling, geometry) == plan.REFERENCE:
                     continue
                 arm = am.Arm("network", coupling=coupling, geometry=geometry, grid=grid, channels=1)

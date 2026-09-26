@@ -175,3 +175,20 @@ def test_the_reuse_check_compares_every_cell_both_records_hold(tmp_path, monkeyp
     ru = sm.reuse_check()
     assert (ru["runs"], ru["cells"], ru["identical"], len(ru["differing"])) == (1, 2, 1, 1)
     assert len(ru["not_recorded"]) == len(list(plan.reuse_check())) - 1
+
+
+def test_the_coil_is_compared_with_the_torus_over_the_phase_coupling_functions_at_each_size():
+    def cell(experiment, coupling, geometry, seed, acc):
+        arm = Arm("network", coupling=coupling, geometry=geometry, channels=2, grid=8)
+        return sm.Cell(experiment, "spectrogram", 0.0, 1.0, seed, arm.as_dict(), arm.label(), "windowed", 192, 2048,
+                       acc, bits(acc, seed), N_TEST)
+    cells = []
+    for seed in (0, 1, 2):
+        cells += [cell("cochlea", "kuramoto", "coil", seed, 0.70), cell("size", "kuramoto", "torus", seed, 0.66),
+                  cell("cochlea", "winfree", "coil", seed, 0.60), cell("design", "winfree", "torus", seed, 0.60),
+                  cell("design", "winfree", "helix", seed, 0.50)]
+    rows = {r["comparison"]: r for r in sm.cochlea_comparisons(cells)}
+    coil = rows["lattice geometry: coil minus torus"]
+    assert coil["n_pairs"] == 6 and coil["mean"] == pytest.approx(2.0) and (coil["grid"], coil["channels"]) == (8, 2)
+    assert rows["lattice geometry: coil minus helix"]["mean"] == pytest.approx(10.0)     # Winfree's only
+    assert "lattice geometry: cochlea minus coil" not in rows
