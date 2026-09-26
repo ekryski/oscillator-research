@@ -54,9 +54,8 @@ def paper_dir(paper: str) -> Path:
 
 
 def manuscript(paper: Path) -> Path:
-    """The paper's Markdown source, named -DRAFT.md or not, never its README or its -FULL.md."""
-    found = sorted(paper.glob("*-DRAFT.md")) or [p for p in sorted(paper.glob("*.md"))
-                                                 if p.name != "README.md" and not p.stem.endswith("-FULL")]
+    """The paper's Markdown source, named -DRAFT.md or not, never its README."""
+    found = sorted(paper.glob("*-DRAFT.md")) or [p for p in sorted(paper.glob("*.md")) if p.name != "README.md"]
     if len(found) != 1:
         sys.exit(f"expected one manuscript in {paper}, found {found}")
     return found[0]

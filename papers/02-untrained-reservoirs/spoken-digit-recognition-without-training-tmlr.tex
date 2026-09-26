@@ -80,11 +80,16 @@
 \bibliographystyle{tmlr}
 \usepackage{tmlr}
 \renewcommand{\arraystretch}{1.35}
-\setlength{\extrarowheight}{3pt}
+\ifdefined\extrarowheight\setlength{\extrarowheight}{3pt}\fi
 % Table rows in a survey carry paragraphs, not single words, and pandoc's
 % longtables set them solid. Both knobs are needed: \arraystretch scales the
 % row strut, \extrarowheight lifts the text off the rule above it.
 \renewcommand{\arraystretch}{1.35}
+% pandoc loads these only when the main text has a table; a paper whose tables all sit
+% in the appendix still needs them, and \extrarowheight needs array either way
+\usepackage{longtable,booktabs,array,calc}
+% pandoc numbers a caption-less table against a counter named none, defined with the rest
+\makeatletter\@ifundefined{c@none}{\newcounter{none}}{}\makeatother
 \setlength{\extrarowheight}{3pt}
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
@@ -100,7 +105,7 @@
 \@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
 \makeatother
 \hypersetup{
-  pdftitle={Spoken-Digit Recognition Without Training: Geometry{,} Coupling{,} and Drive Effects in Frozen Oscillator Fields},
+  pdftitle={Spoken-Digit Recognition Without Training: Geometry{,} Coupling{,} and Drive Effects in Oscillator Networks},
   pdflang={en-GB},
   pdfkeywords={\xmpquote{coupled oscillators}, \xmpquote{reservoir
 computing}, \xmpquote{speech recognition}, \xmpquote{Kuramoto
@@ -153,1019 +158,683 @@ model}, \xmpquote{Stuart-Landau}, \xmpquote{lattice geometry}},
 \makeatother
 
 \hypersetup{pdfauthor={}}
-
+\hypersetup{pdfcreator={}, pdfproducer={}}
+\ifdefined\pdftrailerid\pdftrailerid{}\fi
+\ifdefined\pdfsuppressptexinfo\pdfsuppressptexinfo=-1\fi
+\ifdefined\pdfinfoomitdate\pdfinfoomitdate=1\fi
+\ifdefined\pdfvariable\pdfvariable suppressoptionalinfo 1023\relax\fi
 \def\month{MM}
 \def\year{YYYY}
 \def\openreview{\url{https://openreview.net/forum?id=XXXX}}
 
 \title{Spoken-Digit Recognition Without Training: Geometry, Coupling,
-and Drive Effects in Frozen Oscillator Fields}
+and Drive Effects in Oscillator Networks}
 
-\author{\name }
+\author{\name Eric Kryski \email hello@erickryski.com \\
+      \addr Independent researcher}
 \date{}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-Recent work has revived coupled-oscillator networks as a computational
-substrate, with several lines reporting that oscillator dynamics carry
-useful task structure even without training. We test that proposition
-for speech at a deliberately small, fully controlled scale. We freeze
-every physics parameter of a 1,024-oscillator field (\textasciitilde2k
-parameters) and measure spoken-digit recognition (AudioMNIST, speaker-
-disjoint) across a full factorial of six coupling laws, six lattice
-geometries, three natural-frequency structures, pinning, spectral clamp,
-and three drive pathways, at three noise and gain conditions, against
-five trained conventional baselines at exact parameter parity, a
-no-dynamics linear floor, and published oscillator-reservoir anchors.
-Untrained fields sit at a statics plateau roughly three points above a
-linear ridge on band statistics at every condition tested, above every
-trained conventional baseline at the same parameter budget, yet never
-far above what their own input representation supports linearly, and no
-design axis we varied moved that margin, with one exception:
-phase-referenced drive is not merely worse untrained but unreadable. On
-an order-discrimination task built so that order-free readouts provably
-cannot answer it, the same frozen fields read temporal order at 0.97 to
-1.00, and a severed-coupling control attributes that memory
-predominantly to per-oscillator phase integration.
+Coupled-oscillator networks are gaining interest as a machine-learning
+substrate, on the premise that oscillator physics turns signals into
+useful structure. Yet the ablations that would isolate what the
+oscillator dynamics contribute are rarely run. We run them for untrained
+coupled oscillator networks, using spoken-digit classification on
+AudioMNIST as the measure. A small untrained network is read by a
+closed-form linear readout and compared with trained conventional
+networks matched in parameters and with three controls: the same network
+with its coupling removed, a non-oscillating bank of leaky integrators
+with the same states and parameters, and the same readout fitted
+directly to the network's input. Every experimental arm's state is
+summarized by the same time-pooled statistics and spoken digits
+classified using the same number of features, so that readout capacity
+cannot masquerade as dynamics. A sweep then varies the coupling
+function, lattice geometry, input pathway, readout width and training
+set size, on digit recognition and on a temporal order task that
+order-blind readouts cannot solve. The design separates three
+explanations for an untrained network's accuracy: its input
+representation, the width of its readout, and the oscillator dynamics
+and structure itself. Most of the accuracy comes from the input
+representation and the readout: at a matched width, an untrained
+Kuramoto network reads within a percentage point of the readout fitted
+to its input alone in noise, and near chance when the same audio drives
+it through a quadrature input, though it carries the temporal order that
+its input cannot. Within the coupling functions, lattice geometry and
+natural frequencies, a free oscillator amplitude (Stuart--Landau) moved
+accuracy most, lifting the network above its input and into the range of
+the trained networks, which otherwise read higher; the lattice geometry,
+a cochlea-like coil included, moved it by less than a point. These
+results give studies of trained oscillator networks an untrained
+baseline to compare against for speech recognition tasks, and insight
+into which factors contribute to an oscillator network's effectiveness
+on time series tasks.
 \end{abstract}
 
 \section{Introduction}\label{introduction}
 
-Coupled oscillators are having a revival as a machine-learning
-substrate. Hardware reservoirs classify spoken digits with a handful of
-spintronic oscillators \citep{torrejon2017}; oscillator-inspired
-recurrent networks post competitive accuracy on speech-adjacent
-benchmarks \citep{rusch2021}; trained Kuramoto dynamics generate images
-\citep{unconv-ai2026} and function as computational primitives for
-vision and reasoning \citep{miyato2025}. Much of this literature
-carries, implicitly or explicitly, a reservoir premise: that oscillator
-physics \emph{by itself}, before any training, transduces signals into
-computationally useful structure.
+Every sense we have transduces a physical signal, and the oscillation
+and synchronization recorded in neural populations as they track speech
+\citep{assaneo2020, doelling2023, pittman-polletta2021, dogonasheva2026}
+are consistent with neurons acting, in part, as coupled oscillators. We
+do not test that conjecture here. It motivates a narrower question:
+where are the useful boundaries of oscillatory neural networks, and what
+do their dynamics contribute?
 
-This paper tests that premise for speech, under controls, at small
-scale. Our overarching hypothesis, stated so it can fail:
-\textbf{untrained oscillator fields possess reservoir properties useful
-for speech recognition.} We commit to both outcomes. If the hypothesis
-holds, the experiments say which geometries and coupling laws carry the
-effect and why the data suggests so. If it does not, the experiments say
-what bounds it, which design limitations could mask a real effect
-(readout capacity, readout data size, field size, frontend
-conditioning), each with a measured control or a named future test, and
-what would refute or rescue the claim.
+A recent survey of oscillator networks in machine learning
+\citep{kryski2026} found the ablations that would answer that question
+largely missing: the coupling term had been removed as a single variable
+only three times, no study compared coupling functions, no study varied
+the lattice geometry or its boundaries as a single variable at a matched
+budget, and none contrasted two ways of injecting the input under
+controls. We address those gaps on one task, spoken-digit recognition,
+where automatic speech recognition began \citep{davis1952} and a
+standard benchmark for oscillator reservoirs built in hardware
+\citep{torrejon2017, shougat2023}. An untrained coupled oscillator
+network, read by a linear readout, is tested under six coupling
+functions and eight lattice geometries, among them a coil and a cochlea,
+and compared with the readout applied to its input alone, the same
+network uncoupled, leaky-integrator banks of the same size and five
+trained networks of the same parameter count, on AudioMNIST
+\citep{becker2024} with held-out speakers and added noise. Untrained
+networks of coupled oscillators have recognized spoken digits before, in
+simulation and on TI-46 with the same speakers in training and test
+\citep{opala2019, coulombe2017}. To our knowledge none has been tested
+on held-out speakers in added noise against its input alone and its own
+uncoupled form, and we found no AudioMNIST result that combines held-out
+speakers with added noise; the two studies we found that add noise on
+AudioMNIST share speakers between training and test
+\citep{beoletto2026, young2026}.
 
-We evaluate spoken digits 0--9 (AudioMNIST \citep{becker2024},
-speaker-disjoint split), the standard task of the oscillator-reservoir
-literature, which makes our numbers placeable against published anchors
-without head-to-head claims. The design principles throughout:
+In brief: most of the accuracy comes from the input and the readout. At
+a common readout width the untrained Kuramoto network reads about as
+well as its own input on recognition, and carries the order of events by
+integrating its input, as a non-oscillating leaky-integrator bank does.
+A free oscillator amplitude (Stuart--Landau) is the one design choice
+that moved accuracy by more than about a point, and it also lets the
+network tolerate a stronger input; the lattice geometry, a cochlear coil
+included, moved it by less than a point. Small trained networks read
+above every untrained reservoir with noise but the Stuart--Landau
+network.
 
-\begin{itemize}
-\tightlist
-\item
-  \textbf{One change at a time.} Every comparison differs from its twin
-  by exactly one factor; every scaffold is shared verbatim across arms.
-\item
-  \textbf{Pre-registration.} Decision bars were recorded before each
-  launch; verdicts are scored per the criteria as written. Two
-  registered predictions were refuted by their own tests; both
-  refutations are reported.
-\item
-  \textbf{Attribution by construction.} The only fitted object anywhere
-  in the primary protocol is a closed-form linear probe; a no-dynamics
-  floor (the identical probe on the raw frontend features) decomposes
-  every accuracy into what the representation carries plus what the
-  dynamics add.
-\item
-  \textbf{The full matrix is the result.} Dead regions are reported as
-  data; no runs were pruned.
-\end{itemize}
+\section{Background}\label{background}
 
-Contributions:
+Coupled oscillators synchronize, form clusters, lock to a drive or split
+into coherent and incoherent domains, depending on how they are coupled
+and arranged
+\citep{pikovsky2001, strogatz2000, kuramoto2002, abrams2004}. Machine
+learning has used them two ways. Untrained, as reservoirs read by a
+trained linear readout \citep{jaeger2001, maass2002, tanaka2019}: a
+spintronic oscillator recognized spoken digits in hardware
+\citep{torrejon2017}, though much of that accuracy came from its
+cochlear front end \citep{abreu-araujo2020}, whose authors therefore
+report a reservoir's gain over its front end alone and test it on
+held-out speakers in noise on another corpus. On AudioMNIST, a simulated
+network of 128 coupled protonic nickelate devices, a neuromorphic
+element that does not oscillate, read above the same network uncoupled
+and above a readout of the unprocessed input, the controls used here
+\citep{zhou2026}. Spiking reservoirs, whose liquid of neurons is shaped
+by unsupervised plasticity rather than left untrained, recognize TI-46
+digits better as they grow, from 77.7\% with 800 neurons to 86.7\% with
+3,200, on the digits of 16 speakers \citep{srinivasan2018}. Trained, as
+layers whose coupling or frequencies are learned: coupled oscillatory
+recurrent networks \citep{rusch2021}, one of which reached 89\% on
+AudioMNIST from the raw waveform with a random, not speaker-disjoint,
+split \citep{chandravadia2026}, Neural Wave Machines on an oscillator
+lattice \citep{keller2023}, AKOrN \citep{miyato2025}, WONN
+\citep{dai2026}, FSN \citep{nunley2026} and Un-0 \citep{unconv-ai2026}.
+Each adopts one coupling function and one arrangement, and the survey
+found no benchmark any two share \citep{kryski2026}. Here one task is
+held fixed and the coupling function, the geometry and the input are
+varied across it, on untrained networks, so that each can be compared
+with controls before any training enters.
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  The first controlled comparison of lattice geometry in an oscillator
-  network (six shapes at identical parameter budget and coupling
-  stencil); measured effects fell well below the pre-registered
-  threshold at this scale.
-\item
-  A three-rung transduction ladder (envelope, phase-referenced, carrier)
-  that isolates \emph{how audio enters the field} as an experimental
-  factor, with a drive-unit calibration protocol and an
-  integrator-validity bound that any cross-frontend comparison needs.
-\item
-  A measured account of the phase-referenced collapse: untrained fields
-  cannot read Adler-form drive at any gain, while the same pathway
-  trains healthily, with the locking-range analysis that explains both
-  regimes of the failure.
-\item
-  A readout-sufficiency control showing the linear probe is
-  near-complete for these features, and quantifying the one regime where
-  it is not.
-\item
-  Direct evidence against tonotopic frequency design under every drive
-  form tested, including the case where the designed rows demonstrably
-  lock to their carriers.
-\item
-  A suggested, evidence-bounded non-monotone relation between field
-  coherence and readability.
-\item
-  A statics-proof order-discrimination task, floored at chance by
-  construction, on which untrained oscillator state reads temporal order
-  at 0.97--1.00, with a severed-coupling control that attributes the
-  memory predominantly to per-oscillator integration.
-\end{enumerate}
+\section{Methods}\label{methods}
 
-\section{Background: the physics under
-test}\label{background-the-physics-under-test}
+\subsection{Design}\label{design}
 
-\subsection{Coupling laws}\label{coupling-laws}
+The study asks whether an untrained coupled oscillator network carries
+information for recognizing spoken digits beyond its input alone, beyond
+a non-oscillating memory of the same size and beyond the same
+oscillators uncoupled; how trained networks of the same parameter count
+compare; whether the coupling function, lattice geometry, natural
+frequencies, restoring strength, coupling ceiling, input pathway and
+input gain change the answer; how the answer changes with the readout's
+width and the training data; and whether the network carries the order
+of events. It ran as eight experiments of 6,275 runs in all (Appendix
+B). Every run is one arm at one noise level, input gain and seed; each
+condition is run at three seeds. The code and every run's record are in
+the supplementary material, Appendix A defines every term, and Appendix
+G gives the methods in full.
 
-All six families share the update \ensuremath{\dot{\theta}_{i}} =
-\ensuremath{\omega_{i}} + coupling\ensuremath{_{i}}(\ensuremath{\theta};
-K) + drive\ensuremath{_{i}} \ensuremath{-} \ensuremath{\lambda\cdot}sin
-\ensuremath{\theta_{i}}, where K is a per-channel spatial coupling
-kernel applied convolutionally over the lattice, \ensuremath{\omega} the
-natural frequencies, \ensuremath{\lambda} a pinning toward rest, and the
-drive enters per the pathway (§4.3). The families differ only in the
-coupling term, a controlled deviation series from the Kuramoto base:
+Every oscillator network is 4 channels of a 16 \ensuremath{\times} 16
+lattice, 1,024 oscillators, and each oscillator's phase evolves as
+\ensuremath{\dot{\theta}_{i}} = \ensuremath{\omega_{i}} +
+coupling\ensuremath{_{i}} + g\ensuremath{\cdot}u\ensuremath{_{i}}
+\ensuremath{-} \ensuremath{\lambda} sin \ensuremath{\theta_{i}}: its
+natural frequency, the coupling from the other oscillators of its
+channel through a random kernel whose spectrum is capped at the coupling
+ceiling, the input at gain g, and a restoring pull of strength
+\ensuremath{\lambda}. Row r of every channel is driven by mel band r.
+The six coupling functions (Kuramoto, Kuramoto--Sakaguchi, second
+harmonic, Winfree, and Stuart--Landau with and without its amplitude)
+differ only in the coupling term, and a lattice geometry changes only
+which oscillators are neighbours; Appendix F defines both. The reference
+configuration is Kuramoto coupling on the torus with random natural
+frequencies, restoring strength 0.3 and coupling ceiling 1.
 
-{\def\LTcaptype{none} % do not increment counter
+The arms compared with it are the \textbf{spectrogram-only baseline},
+the readout applied directly to the input; the \textbf{uncoupled
+oscillator network}, the same network with its coupling kernels set to
+zero; two untrained \textbf{leaky-integrator banks}, one matched to the
+network's 1,024 states and 2,048 parameters and one to its 2,048 exposed
+signals; and five \textbf{trained baselines} (GRU, a dilated residual
+TCN, CNN, transformer and S4D) of 1,840 to 2,109 parameters, trained end
+to end (AdamW, 30 epochs) through a learned linear layer on the same
+statistics the readout reads, standardized. The four untrained dynamical
+arms are the reservoirs.
+
+\subsection{Task, data and noise}\label{task-data-and-noise}
+
+AudioMNIST \citep{becker2024} holds 30,000 recordings of the ten digits
+by 60 speakers. Every result keeps speakers apart. Under Protocol A the
+arms train on speakers 1 to 48 and test on all 6,000 recordings of
+speakers 49 to 60, an 80/20 split by speaker, with training sets of
+2,048 clips (8,192 and 24,000 in the training-size comparison); under
+Protocol B they follow Becker et al.'s five speaker folds (60/20/20).
+Because the clean task nearly saturates, white noise is added to every
+clip at signal-to-noise ratios of 0 dB (as loud as the speech) and
+\ensuremath{-}5 dB (5 dB louder), the levels at which \citet{young2026}
+trained hybrid real- and complex-valued convolutional networks on
+AudioMNIST, though on a random split; clean audio is also reported. In
+the order task, two digits of a pair are spoken one after the other and
+the arm must say which came first, on five digit pairs; statistics of an
+input read over the whole span cannot tell the orders apart, so the
+spectrogram-only baseline reads chance, 50\%. Every arm hears the same
+fixed front end, a 16-band log-mel spectrogram at 62.5 frames per
+second, with nothing learned.
+
+\subsection{Readout}\label{readout}
+
+Every arm is read the same way. Each of its signals (a band energy, the
+sine or cosine of an oscillator's phase, a leaky integrator's state or a
+trained baseline's hidden unit) is summarized by its mean, standard
+deviation and mean absolute change over each of four equal windows of
+frames 16 to 61, after a 16-frame warm-up (frames 16 to 147 as one
+window for the order task). So that readout capacity cannot pass for
+dynamics, every arm's summaries are standardized and projected by a
+random Gaussian matrix to a common width of 192 (1,024 and 4,096 in the
+width comparison) \citep{johnson1984}, and classified by one linear
+layer fitted by ridge regression in closed form, the reservoir-computing
+standard \citep{jaeger2001, lukosevicius2012} and the weakest reader
+that can be fitted identically for every arm. The projection is one
+fixed draw; the controls experiment's reservoirs are also read under a
+draw per seed. The spectrogram-only baseline is read over the whole
+clip, its primary form, and from frame 16, the frames every other arm is
+read over.
+
+\subsection{Input pathways and gain}\label{input-pathways-and-gain}
+
+The audio drives a reservoir in one of two ways (\citet{kryski2026}
+found none contrasted under controls): the \textbf{spectrogram} pathway
+adds each band's energy to the rotation rate of its row's oscillators,
+and the \textbf{quadrature} pathway adds a phase-referenced push
+g\ensuremath{\cdot}A\ensuremath{_{r}} sin(\ensuremath{\varphi_{r}}
+\ensuremath{-} \ensuremath{\theta_{i}}), the injection form of
+\citet{adler1946}, so an oscillator can lock to its band's own cycle.
+Driving the oscillators with the waveform itself is left to a companion
+study. Input gain scales the input into a reservoir; it is run at 1 and
+2 throughout and swept to 12 for the reference configuration of each
+coupling function, below the integrator's bound \citep{hairer1993}. The
+spectrogram-only baseline and the trained baselines take no gain: the
+readout's standardization removes any fixed scale from the one, and the
+other learns its own.
+
+\subsection{Reporting}\label{reporting}
+
+No threshold decides a result. Every accuracy is the mean over
+replicates (three seeds; five folds under Protocol B) \ensuremath{\pm}
+the sample standard deviation, and every comparison between two arms is
+paired on the same test clips, condition and seed, reported as the mean
+difference \ensuremath{\pm} its standard deviation over seeds and a 95\%
+interval from 2,000 paired bootstrap resamples of the test clips. The
+primary cell is width 192, 2,048 training clips and the four-window
+read. The runs used an Apple M1 Max; the reservoirs of the controls and
+design experiments were simulated on its CPU and the later experiments'
+on its GPU, which agree within two test clips in all but one of 1,296
+recorded cells (Appendix G).
+
+\section{Results}\label{results}
+
+\subsection{The network against its
+controls}\label{the-network-against-its-controls}
+
+At the primary cell (figure), the spectrogram-only baseline read 93.6\%,
+78.0\% and 71.6\% on clean audio, at 0 dB and at \ensuremath{-}5 dB, and
+the Kuramoto network at gain 1 read 91.1\%, 77.8\% and 70.7\%: 2.53
+points below the baseline on clean audio and within a point of it with
+noise (\ensuremath{-}0.23 {[}\ensuremath{-}0.99, +0.52{]} at 0 dB,
+\ensuremath{-}0.88 {[}\ensuremath{-}1.66, \ensuremath{-}0.09{]} at
+\ensuremath{-}5 dB). It read 7.5 to 15.9 points above the baseline read
+over its own frames, from frame 16. It read above the uncoupled network
+by 0.43 {[}\ensuremath{-}0.02, +0.88{]}, 0.91 {[}0.34, 1.46{]} and 1.08
+{[}0.57, 1.62{]} points, and above the state-matched leaky-integrator
+bank by about 4 points with noise, but 2.35 points below it on clean
+audio. Gain 2 read lower than gain 1 for every reservoir, by 0.7 to 3.5
+points. On the speaker folds of \citet{becker2024} (clean, 18,000
+training clips), the baseline read 96.0 \ensuremath{\pm} 1.7\%, the
+network 91.9 \ensuremath{\pm} 3.1\% (96.9 \ensuremath{\pm} 1.3\% at
+width 4,096), the trained baselines 97.0\% to 98.4\%, and Becker et
+al.~report 95.8\% for AlexNet on spectrograms. Appendix H gives every
+table.
+
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\caption{Single spoken-digit recognition accuracy (\%) on AudioMNIST at
+the primary cell, mean \ensuremath{\pm} standard deviation over three
+seeds.}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-family
+arm
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-coupling (essence)
+clean
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-primary source
+0 dB
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-why it is in the matrix
+\ensuremath{-}5 dB
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+arm
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+clean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0 dB
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\ensuremath{-}5 dB
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-kuramoto & \ensuremath{\Sigma_{j}} K\ensuremath{_{ij}}
-sin(\ensuremath{\theta_{j}-\theta_{i}}) &
-\citep{winfree1967, kuramoto1975} & the minimal, exactly analyzed
-synchronization law; every other family is a controlled deviation from
-it \\
-\cmidrule{1-4}sakaguchi & sin(\ensuremath{\theta_{j}-\theta_{i}-\alpha})
-& \citep{sakaguchi1986} & frustration shifts the synchronization
-transition and admits travelling/partially coherent regimes
-\citep{abrams2004} \\
-\cmidrule{1-4}harmonic2 & + \ensuremath{\beta\cdot}sin
-2(\ensuremath{\theta_{j}-\theta_{i}}) & \citep{daido1992, hansel1993} &
-higher harmonics create multi-cluster attractors; cluster states as
-candidate feature diversity \\
-\cmidrule{1-4}winfree & sensitivity \ensuremath{\times} influence
-product & \citep{winfree1967}; ML neighbor \citep{dai2026} & the
-ancestral population model, a genuinely different signal pathway \\
-\cmidrule{1-4}stuart--landau (sl) & complex ż =
-(\ensuremath{\mu}+i\ensuremath{\omega})z \ensuremath{-}
-\textbar z\textbar{}\ensuremath{^{2}}z + coupling &
-\citep{stuart1960, aranson2002} & adds the amplitude channel: extra
-state per oscillator \\
-\cmidrule{1-4}sl-fixedamp & SL coupling, amplitude clamped & this work &
-isolates coupling-form credit from amplitude-channel credit \\
+\textbf{Spectrogram-only baseline}: the readout reads the 16 mel band
+energies directly; no reservoir & 93.6 \ensuremath{\pm} 0.3 & 78.0
+\ensuremath{\pm} 0.6 & 71.6 \ensuremath{\pm} 1.6 \\
+\cmidrule{1-4}\textbf{Coupled oscillator network} (gain = 1): 1,024
+Kuramoto oscillators, untrained & 91.1 \ensuremath{\pm} 0.4 & 77.8
+\ensuremath{\pm} 0.8 & 70.7 \ensuremath{\pm} 0.3 \\
+\cmidrule{1-4}\textbf{Uncoupled oscillator network} (gain = 1): the same
+network with its coupling removed & 90.6 \ensuremath{\pm} 0.3 & 76.9
+\ensuremath{\pm} 0.5 & 69.7 \ensuremath{\pm} 0.4 \\
+\cmidrule{1-4}\textbf{Leaky-integrator bank, state-matched} (gain = 1):
+1,024 leaky integrators with the network's states and parameters,
+untrained & 93.4 \ensuremath{\pm} 0.2 & 73.8 \ensuremath{\pm} 0.5 & 66.6
+\ensuremath{\pm} 0.8 \\
+\cmidrule{1-4}\textbf{GRU}: a trained baseline, 1,944 parameters,
+trained end to end & 96.5 \ensuremath{\pm} 0.3 & 82.8 \ensuremath{\pm}
+1.3 & 76.9 \ensuremath{\pm} 1.6 \\
 \end{longtable}
-}
-
-Untrained sakaguchi/harmonic2 runs run at canonical nonzero parameters
-(\ensuremath{\alpha} = \ensuremath{\pi}/4, \ensuremath{\beta} = 0.5)
-because their zero values are exactly the Kuramoto reference (zero is
-the correct \emph{training} initialization, where the deviation is
-learned; it is not a distinct untrained physics). Both canonical values
-are sensitivity-tested in §5.5.
-
-\subsection{Lattice geometries}\label{lattice-geometries}
-
-Six shapes share the identical local coupling stencil and parameter
-budget; only the wrap rule at the lattice edge differs: sheet (both axes
-open), cylinder (one periodic axis), torus (both periodic), helix (a 1-D
-circulant winding with octave-per-turn tonotopy), cube (a 3-torus), and
-a latitude--longitude sphere lattice. Why shape could plausibly matter
-for audio, each hypothesis falsifiable in the matrix: (i) \emph{tonotopy
-\ensuremath{\times} topology}: geometry decides which frequency bands
-are dynamical neighbors (the torus wraps the top band back to the
-bottom; the helix makes octave-related bands adjacent across turns; open
-edges make band order strictly linear, like the cochlea's); (ii)
-\emph{travelling-wave recirculation}: periodic axes sustain circulating
-waves (a memory mechanism), open edges terminate them, and
-sheet/cylinder/torus form a 0/1/2-periodic-axis series; (iii)
-\emph{dimensionality and path length}: the cube shortens interaction
-paths at matched oscillator count; the sphere adds curvature and poles.
-(iv) To our knowledge no published oscillator-network work varies
-lattice topology under controls, so either a positive effect or its
-absence is a new datum.
-
-\subsection{Why oscillator physics might matter for audio at
-all}\label{why-oscillator-physics-might-matter-for-audio-at-all}
-
-Speech is oscillation at every scale: prosody (\textasciitilde1 Hz),
-syllable rhythm (4--8 Hz), phone transitions (10--40 Hz), pitch and
-formants (100--3,000 Hz). An oscillator field is a frequency-selective
-medium: intrinsic timescales, locking behavior, and spatial wave modes
-are its native representational resources.
-
-The premise is not ours and is best established in neuroscience, where
-oscillator models of cortical speech processing are a developed
-literature rather than a proposal. Reviewing it, \citep{dogonasheva2026}
-set three families of theta-rhythmic segmentation model against each
-other and separate them by where the flexibility to track a variable
-speech rate comes from, which is precisely the question a \emph{frozen}
-field has to answer without training. In the motor-coupled model,
-top-down motor onsets force a phase reset in auditory cortex and the
-auditory oscillation tracks the short interval to the next reset,
-reproducing individual variability in speech-rhythm perception
-\citep{assaneo2020}. In the adaptive-frequency model the oscillator's
-own natural frequency moves continuously toward the average period of
-incoming events, reproducing human timing judgements and tolerating
-temporal jitter up to about 20\% \citep{doelling2023}. In the
-biophysical model the flexibility is intrinsic: an m-current interacting
-with a super-slow potassium current lets a Hodgkin-Huxley cell
-phase-lock across a broad frequency range, and the resulting
-segmentation was validated against the TIMIT corpus
-\citep{pittman-polletta2021}. Two points carry over to this paper.
-First, all three achieve their flexibility by \emph{adapting} something,
-whether phase, frequency or intrinsic current, which is exactly what the
-frozen field tested here is not allowed to do, so their success is a
-reason to expect a fixed field to have a ceiling. Second, the review's
-own criticism of the field is that the first two models are abstracted
-away from real biophysics and the third has static parameters and no
-network dynamics, which is the same attribution problem this paper
-addresses by measurement rather than by argument. The hypothesis space
-is that frequency matching (tonotopic design), interaction topology
-(geometry), and state richness (amplitude) tune which acoustic structure
-a frozen field transduces. The matrix turns each supposition into a
-measured factor rather than an architectural assumption.
-
-\section{The system under test}\label{the-system-under-test}
-
-Everything upstream and downstream of the field is fixed and
-parameter-free (or frozen-random); the only fitted object in the primary
-protocol is a linear ridge probe.
-
-\textbf{Field.} 1,024 phase (or Stuart--Landau) oscillators: 4 channels
-\ensuremath{\times} a 16\ensuremath{\times}16 lattice. Per-channel
-coupling kernel K {[}4\ensuremath{\times}16\ensuremath{\times}16{]} plus
-natural frequencies \ensuremath{\omega}
-{[}4\ensuremath{\times}16\ensuremath{\times}16{]} \ensuremath{\approx}
-2k parameters, all drawn at seed-pinned random initialization and never
-trained. Coupling is evaluated spectrally, with \ensuremath{\hat{K}} =
-FFT(K) under the boundary geometry's wrap, so the geometry factor lives
-in the wrap rule and nowhere else. A spectral clamp caps
-\textbar{}\ensuremath{\hat{K}}\textbar; integration is explicit Euler at
-dt = 0.1.
-
-\textbf{Drive.} Band r of the frontend drives every oscillator of
-lattice row r, in all channels, scaled by a gain g (tonotopic broadcast;
-per-shape mappings pre-declared).
-
-\textbf{Probe (the attribution logic).} Each clip's trajectory (sin
-\ensuremath{\theta}, cos \ensuremath{\theta} for every oscillator, valid
-frames only) is compressed to a fixed-width feature vector
-\ensuremath{\Phi}(x) of masked pooled statistics (mean, spread,
-frame-delta) over the full span and per quarter-window. The probe asks
-one question: are the ten digits' feature vectors linearly separable?
-The reader is ridge regression, W = (\ensuremath{\Phi^{\mathsf{T}}\Phi}
-+ \ensuremath{\lambda}I)\ensuremath{^{-1}\Phi^{\mathsf{T}}}Y: one
-closed-form hyperplane per class, chosen as the \emph{weakest} reader
-precisely so attribution is unambiguous: a linear scorer cannot compute,
-so any separation it finds must pre-exist in the features; the dynamics
-wrote it. The probe measures the outcome (class-separable response), not
-mechanism; locking and coherence are measured separately by
-instrumentation (§4.6). The weakest-reader choice is itself tested, not
-assumed (§5.4).
-
-\textbf{Floor.} The identical ridge on the frontend features directly,
-field bypassed, per condition and per representation. Every accuracy
-decomposes into representation (floor) + dynamics (run \ensuremath{-}
-floor).
-
-\textbf{Parity.} Fields and conventional baselines expose features to
-the identical masked featurization, ridge, and best-validation selection
-protocol at a matched \textasciitilde2k parameter budget.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Order of operations, from audio to verdict. Every arm of the study passes through the same stages in the same order; only the boxed stage differs between an oscillator arm and its floor.}]{resources/figures/g0-pipeline-order.pdf}}
-\caption{Order of operations, from audio to verdict. Every arm of the
-study passes through the same stages in the same order; only the boxed
-stage differs between an oscillator arm and its floor.}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Recognition accuracy by noise level for each reservoir at input gain 1 (solid) and 2 (hatched), beside the spectrogram-only baseline and the GRU, which take no gain. The oscillator networks are the Kuramoto reference configuration. Mean over three seeds; error bars, one standard deviation; dotted line, chance.}]{resources/figures/c3-recognition-both-gains.pdf}}
+\caption{Recognition accuracy by noise level for each reservoir at input
+gain 1 (solid) and 2 (hatched), beside the spectrogram-only baseline and
+the GRU, which take no gain. The oscillator networks are the Kuramoto
+reference configuration. Mean over three seeds; error bars, one standard
+deviation; dotted line, chance.}
 \end{figure}
+
+\subsection{Trained baselines}\label{trained-baselines}
+
+With noise, every trained baseline read above the Kuramoto network and
+the whole-clip spectrogram-only baseline at the primary cell: 78.5\%
+(S4D) to 82.8\% (GRU) at 0 dB and 72.3\% (transformer) to 76.9\% (GRU)
+at \ensuremath{-}5 dB, and on clean audio 93.2\% to 97.0\%. With 24,000
+training clips at 0 dB they reached 86.7\% (CNN) to 90.6\%
+(transformer); the S4D belongs to a family that compares well on
+time-series classification \citep{saadatmand2026}. Every recognition run
+trained. A first recipe, whose learned head read the statistics
+unstandardized and whose TCN was a two-layer convolution, left many CNN,
+TCN and S4D runs at the chance loss; every trained baseline was rerun
+with the recipe reported here, gaining up to 66 points in noise.
+
+\subsection{Network design}\label{network-design}
+
+The design experiment varied the coupled network one factor at a time
+around the reference: six coupling functions, six lattice geometries and
+three kinds of natural frequencies, crossed with two restoring strengths
+and two coupling ceilings, 312 configurations at 0 and \ensuremath{-}5
+dB, gains 1 and 2 and three seeds, each level paired with its reference
+over every configuration matching it in the other factors (figure). The
+\textbf{Stuart--Landau} network, whose oscillators have a free
+amplitude, read 2.1 to 3.8 points above its Kuramoto match, the largest
+difference in the experiment, and at the reference configuration it read
+above the whole-clip baseline in all four noisy conditions, by 1.14 to
+2.31 points with every interval above zero; with its amplitude fixed it
+read within 0.3 points of Kuramoto. The other phase coupling functions
+differed from Kuramoto by at most 0.46 points. Every \textbf{lattice
+geometry} read within 0.65 points of the torus, the sphere and sheet
+lowest. \textbf{Tonotopic} natural frequencies read 0.38 to 1.16 points
+below random ones, identical ones within 0.1. A \textbf{coil}, one open
+line from base to apex with one octave per turn, read within 0.22 points
+of the torus; a \textbf{cochlea}, the coil with a one-way base-to-apex
+coupling and coupling that grows with the coil's curvature toward the
+apex, read 0.41 to 0.97 points below the torus. Part of that gap is the
+cochlea's weaker coupling: capping its curvature weights at the apex
+halves its average coupling, and a control at the coil's average
+coupling read 0.28 to 0.71 points above the cochlea, yet 0.40 to 0.47
+points below the coil at gain 1 and within 0.12 points of it at gain 2.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={The linear-probe attribution protocol. The probe is deliberately the weakest available reader, so that any separation it finds must already exist in the features rather than being computed by the readout.}]{resources/figures/g7-probe-mechanism.pdf}}
-\caption{The linear-probe attribution protocol. The probe is
-deliberately the weakest available reader, so that any separation it
-finds must already exist in the features rather than being computed by
-the readout.}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Each design level minus its reference level, per noise level and gain: the mean over three seeds (marker) and the 95\% paired bootstrap interval over test clips (line). Dotted line, no difference.}]{resources/figures/c4-design-differences.pdf}}
+\caption{Each design level minus its reference level, per noise level
+and gain: the mean over three seeds (marker) and the 95\% paired
+bootstrap interval over test clips (line). Dotted line, no difference.}
 \end{figure}
 
-\section{Methods}\label{methods}
+\subsection{Restoring strength, coupling ceiling and
+gain}\label{restoring-strength-coupling-ceiling-and-gain}
 
-\subsection{Task and data}\label{task-and-data}
-
-AudioMNIST \citep{becker2024}: 30,000 recordings, 60 speakers
-\ensuremath{\times} 10 digits \ensuremath{\times} 50 repetitions at 48
-kHz. Bank: repetitions 0--19 per speaker\ensuremath{\times}digit,
-resampled to 16 kHz, peak-normalized to 0.5, energy-trimmed at 1\% of
-peak, \ensuremath{\leq}1 s, true lengths stored; speaker-disjoint split
-(speakers 1--48 train / 49--60 test; overlap verified zero). Median
-digit 0.62 s = 38 hop frames. Training/evaluation sets are drawn from
-the bank with replacement (repeated clips receive fresh noise draws);
-the protocol size is 2,048 training / 512 test clips per run, and all
-decision bars are scored only at this size.
-
-\subsection{Primary frontend (mel
-envelope)}\label{primary-frontend-mel-envelope}
-
-512-sample/256-hop Hann STFT \ensuremath{\to} 16 mel bands
-\ensuremath{\to} log \ensuremath{\to} fixed affine (v+10)/10 clamped at
-0 \ensuremath{\to} rows {[}T\ensuremath{\times}16{]} at 62.5 fps. Zero
-trainable parameters and no per-utterance statistics (streaming
-honesty); deliberately lightweight so bookend projections cannot
-dominate attribution. Constants calibrated on the digit bank (1,024
-clips, valid frames only): raw log-mel first percentile
-\ensuremath{-}7.74 (the \ensuremath{-}10 offset sits below it);
-post-affine mean 0.84 / p95 1.52 / max 1.80; clamped fraction 0.02\%.
-Disclosures: 50\% window overlap \ensuremath{\Rightarrow} adjacent-frame
-correlation, identical for every arm; no overlap across clips. A
-lens-cost control runs one conventional baseline at 40 mel bands so the
-16-band bottleneck's cost is a measured number in anchor comparisons.
-
-\subsection{The transduction ladder (drive
-pathways)}\label{the-transduction-ladder-drive-pathways}
-
-Three pathways are chosen so each adds exactly one kind of information
-or mechanism over the last, making result differences attributable to
-that addition:
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Envelope (mel)}. Loudness only: the frontend above; drive
-  \ensuremath{\dot{\theta}_{i}} +=
-  g\ensuremath{\cdot}A\ensuremath{_{r}}(t), additive and
-  state-independent. The base rung: literature-standard representation,
-  comparable to the baselines and anchors.
-\item
-  \textbf{Quadrature}. Adds reference-relative phase at the same rate
-  and bands: the per-band analytic signal demodulated at band center
-  yields a baseband phase \ensuremath{\varphi_{r}}(t)
-  (\ensuremath{\pm}31 Hz by the hop Nyquist, never raw carrier cycles);
-  drive \ensuremath{\dot{\theta}_{i}} +=
-  g\ensuremath{\cdot}A\ensuremath{_{r}\cdot}sin(\ensuremath{\varphi_{r}}
-  \ensuremath{-} \ensuremath{\theta_{i}}), the canonical Adler injection
-  form \citep{adler1946}.
-\item
-  \textbf{Carrier (direct)}. Removes the transcoder: a full-clip FFT
-  band-split (16 bands, 96--1,536 Hz) delivers the band waveforms
-  themselves at 16 kHz; drive \ensuremath{\dot{\theta}_{i}} +=
-  g\ensuremath{\cdot}x\ensuremath{_{r}}(t), additive and oscillatory, so
-  genuine injection locking becomes possible. Its band limit trades the
-  \textgreater1.5 kHz envelope information the mel path keeps for
-  in-band carrier phase, priced by computing every floor on the carrier
-  representation itself (§5.3).
-\end{itemize}
+A restoring strength of 0.1 read 0.13 to 0.23 points below 0.3, and a
+coupling ceiling of 0.5 read 0.39 to 0.68 points below 1. A sweep beyond
+these levels, for every coupling function at the reference
+configuration, found restoring strengths of 0.5 to 1.0 moving the
+phase-oscillator networks by \ensuremath{-}1.2 to +2.1 points and
+lowering the Stuart--Landau network in every condition, by 0.4 to 2.8
+points, and ceilings of 1.5 and 2 moving every coupling function by
+\ensuremath{-}2.4 to +1.7 points. Gain separates the Stuart--Landau
+network from the rest (figure): from gain 1 to gain 8 it lost 4.3 points
+at 0 dB and 2.8 at \ensuremath{-}5 dB, while every phase-oscillator
+network lost 15 to 19 points and the Stuart--Landau network with its
+amplitude fixed 25 to 28; beyond gain 8 it also gave way, losing 8.4
+points by gain 10 and 20.8 by gain 12 at 0 dB.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={The three drive pathways. Each rung adds exactly one kind of information or mechanism over the one below it, so a difference in result is attributable to that addition.}]{resources/figures/g8-drive-pathways.pdf}}
-\caption{The three drive pathways. Each rung adds exactly one kind of
-information or mechanism over the one below it, so a difference in
-result is attributable to that addition.}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Recognition accuracy against input gain for each coupling function at the reference configuration, at 0 dB (left) and 5 dB (right). Mean over three seeds; error bars, one standard deviation.}]{resources/figures/c6-gain-sweep.pdf}}
+\caption{Recognition accuracy against input gain for each coupling
+function at the reference configuration, at 0 dB (left) and
+\ensuremath{-}5 dB (right). Mean over three seeds; error bars, one
+standard deviation.}
 \end{figure}
 
-Evidence notes carried with the ladder: envelope pushes accumulate into
-readable loudness statistics (measured throughout §5.2), and the
-measured weak envelope-rate locking (drive-phase PLV
-\ensuremath{\approx} 0.16 at the calibrated operating point, decaying
-with gain) \emph{suggests additive drive} can weakly phase-lock through
-the pinning nonlinearity, the Shapiro-step mechanism
-\citep{pikovsky2001}, while carrying no claim that it must. Quadrature
-collapsed at every gain tested (§5.2, §6), consistent with Adler theory;
-trainability of the required phase relation is suggested, not shown.
-Carrier drive admits injection locking when
-\textbar{}\ensuremath{\Delta\omega}\textbar{} \ensuremath{\leq} A
-(single-oscillator idealization; measured in §5.3).
+\subsection{Quadrature pathway}\label{quadrature-pathway}
 
-\subsection{Noise protocol}\label{noise-protocol}
+On the quadrature pathway, ten coupled networks (the four phase coupling
+functions on the torus and Kuramoto on the helix, each with random and
+tonotopic natural frequencies) read 11.7\% to 15.1\%, near the chance
+level of 10\% and 55.7 to 66.0 points below the same networks on the
+spectrogram pathway, while the spectrogram-only baseline on the
+quadrature front end read 36.1\% at 0 dB. Their oscillators did not lock
+to the drive: in no run did more than 0.3\% of them lock to their band
+above a phase-locking value of 0.5.
 
-Added white noise with \ensuremath{\sigma} = RMS(speech)
-\ensuremath{\cdot} 10\^{}(dB/20), drawn i.i.d. per sample over the full
-padded window; 0 dB means noise at speech-equal power (not clean audio),
-\ensuremath{-}10 dB means 0.32\ensuremath{\times}, +5 dB means
-1.78\ensuremath{\times}. Why noise at all: the unmodified samples
-saturate the models under test (untrained arms reach 0.939 already at
-\ensuremath{-}10 dB, brushing our 0.95 kill line), and a near-ceiling
-task cannot discriminate design points. Calibration: a
-\{\ensuremath{-}10\ldots+10 dB\} grid over four untrained arms; pick the
-level whose strongest untrained arm lands in {[}0.70, 0.90{]}.
-Conditions of record: \textbf{0 dB primary, +5 dB as the harsher-noise
-robustness companion}, both fully run under both baseline protocols,
-both reported. Listenable examples (the same clip at every level, one
-seeded noise draw rescaled per level) ship with the paper, regenerable
-by a committed script.
+\subsection{Readout width and training
+data}\label{readout-width-and-training-data}
 
-\subsection{Drive scale, gain, and the integrator-validity
-bound}\label{drive-scale-gain-and-the-integrator-validity-bound}
+Widening the readout from 192 to 4,096 features raised the Kuramoto
+network by 2.1 to 6.3 points and the leaky-integrator banks by up to 6.2
+points; the spectrogram-only baseline and four trained baselines are 192
+wide and unchanged. From 2,048 to 24,000 training clips, at width 192,
+the baseline gained 3.5 to 4.1 points, the Kuramoto network 2.0, and the
+trained baselines 7.1 to 12.4 (Appendix H). With 24,000 clips and width
+4,096, the network read 85.9\% at 0 dB and the state-matched bank
+84.8\%, against 82.1\% for the baseline and 86.7\% to 90.6\% for the
+trained baselines. Read through a projection drawn per seed rather than
+one fixed draw, the controls experiment's reservoirs moved by
+\ensuremath{-}1.29 to +1.22 points, 35 of 48 paired intervals containing
+zero, and every paired comparison between the controls arms kept its
+sign.
 
-The gain dial multiplies frontend-relative units, so cross-frontend gain
-equality is meaningless: measured row scales at 0 dB are mel-affine RMS
-1.32 versus carrier RMS 0.021, a 62.5\ensuremath{\times} units gap. Each
-frontend therefore runs at its own gate-calibrated gain, with effective
-drive (g \ensuremath{\times} row RMS) reported at every operating point.
-Gains of record: mel g = 1.0 (the calibrated units unamplified; its gate
-read flat \ensuremath{\pm}0.6 across \{0.5, 1, 2\}); carrier g = 32 by
-its own gate. Every sweep obeys an integrator-validity bound: a point is
-valid iff every per-tick drive phase increment stays below
-\ensuremath{\pi} (max-criterion; standard explicit-integrator discipline
-\citep{hairer1993}), with rms increment \ensuremath{\leq} 0.5 rad as an
-accuracy annotation. Measured bounds: carrier valid to g
-\ensuremath{\approx} 75, mel to g \ensuremath{\approx} 17 at dt = 0.1.
-Per-run increment statistics are recorded by instrumentation in every
-run. Higher physical drive, when a question needs it, is reached by
-increasing substeps, never by gain past the bound. Prior art for the
-response shape: input scaling is a canonical reservoir hyperparameter
-with an interior optimum \citep{lukosevicius2012}.
+\subsection{Temporal order}\label{temporal-order}
 
-\subsection{Instrumentation (mechanism, never
-verdicts)}\label{instrumentation-mechanism-never-verdicts}
+The spectrogram-only baseline read 49.8\% to 50.6\% on the order task in
+every condition. The Kuramoto network read 97.7\%, 96.2\% and 95.5\% at
+gain 1 (clean, 0 dB, \ensuremath{-}5 dB), 45.4 to 47.9 points above it;
+uncoupled, it read 2.2 to 8.5 points lower at gain 1 and 10.4 to 18.7
+points lower at gain 2. Both leaky-integrator banks read 98.7\% to
+99.9\%, 2.2 to 7.5 points above the network. The transformer and GRU
+read 99.0\% to 99.9\% and the TCN 91.1\% to 99.9\%; the S4D and CNN read
+99.5\% and 92.2\% on clean audio and chance with noise.
 
-Drive-phase PLV per band: each oscillator's phase is compared against
-the analytic (Hilbert) phase of its own row's \emph{delivered drive};
-entrained fraction is the share above a 0.5 lock threshold. Rationale:
-natural stimuli have no single analytic stimulus phase, but the
-delivered drive is fully known, and locking to it is the physically
-meaningful question and is well-defined for every stimulus class here.
-On pure tones, where a stimulus phase is analytic, the drive-phase
-reader agrees with the stimulus-phase reader (committed test). The
-global order parameter \(R = |\langle e^{i\theta}\rangle|\) (no
-reference; the field against itself) and the per-tick drive-increment
-statistics complete the instrument set. Instruments are diagnostics;
-verdicts come only from the pre-registered accuracy bars.
-
-\subsection{Evidential standard}\label{evidential-standard}
-
-\textbf{Scope and evidence.} Speech recognition from frozen oscillator
-fields. Every number reported here comes from a pre-registered,
-protocol-complete run; decision criteria were written before each run
-and verdicts scored per the criteria as written. All code, per-run
-results, and audio and figure assets accompany the paper (§9).
-
-Pre-registration with bars written before launch; frozen controls
-through identical scaffolding; replication (screens at one seed; claims
-need three seeds plus same-seed replicates, seeds matched across arms);
-cross-run and same-seed determinism checks (bit-identical replication
-verified); best-validation selection under one rule for all arms. Every
-run records command + commit + seed, accuracies per feature family,
-instruments, and drive-increment statistics.
-
-\section{Results}\label{results}
-
-Throughout: ``windowed'' is the primary metric (the ridge on
-per-quarter-window pooled statistics); floors are per-condition and
-per-representation; chance is 0.100.
-
-\subsection{Conventional references at exact parameter
-parity}\label{conventional-references-at-exact-parameter-parity}
-
-Five trained baselines (GRU, TCN, small CNN, tiny transformer, minimal
-S4D-style SSM) at the matched \textasciitilde2k budget, identical
-frontend, featurization, ridge, and selection protocol, under two
-protocols: the \emph{frozen-probe} protocol (training against a fixed
-random readout direction, the physics-symmetric objective used by field
-arms) and the \emph{trained-head} protocol (a learned classifier head,
-conventional practice), three seeds each, at both noise conditions.
-
-Trained-head windowed means (per-seed tables in the supplementary
-results):
-
-{\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}lll@{}}
-\toprule\noalign{}
-arm & +5 dB & 0 dB \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-GRU & \textbf{0.737} & 0.772 \\
-\cmidrule{1-3}CNN & 0.703 & 0.741 \\
-\cmidrule{1-3}Transformer & 0.697 & \textbf{0.776} \\
-\cmidrule{1-3}TCN & 0.693 & 0.767 \\
-\cmidrule{1-3}S4D & 0.685 & 0.746 \\
-\end{longtable}
-}
-
-Two findings frame everything downstream. First, \textbf{at the 2k
-budget, trained conventional networks approximately equal a linear ridge
-on band statistics}: at +5 dB only one trained run of thirty (GRU seed
-2, 0.762) exceeds the windowed floor (0.750), and at 0 dB zero
-trained-head runs clear the floor (0.805; closest 0.801). Second, a
-scaffold finding: the frozen-probe objective is hostile to ReLU
-feed-forward architectures (CNN/TCN collapse under it while training
-fine conventionally at the same size), measured by a
-scaffold-versus-size control with learned heads at the identical budget.
-Both protocols are therefore reported for every conventional arm.
-Literature anchors, with protocol caveats and never as head-to-head
-claims: spintronic hardware reservoirs \textasciitilde99.6\% on TI-46
-\citep{torrejon2017}; coRNN on AudioMNIST 78--91\% under different
-frontends \citep{rusch2021}.
-
-\subsection{The untrained matrix: a statics plateau, with design effects
-bounded below
-threshold}\label{the-untrained-matrix-a-statics-plateau-with-design-effects-bounded-below-threshold}
-
-The full factorial (six physics \ensuremath{\times} six geometries
-\ensuremath{\times} three \ensuremath{\omega} levels \ensuremath{\times}
-two \ensuremath{\lambda} \ensuremath{\times} two clamp
-\ensuremath{\times} two frontends) ran at three conditions: A (+5 dB,
-g=2), B (0 dB, g=2), C (+5 dB, g=1): 600 supported runs each (documented
-implementation scopes exclude SL \ensuremath{\times} non-torus and SL
-\ensuremath{\times} quadrature), with the sakaguchi/harmonic2 columns
-measured at their canonical nonzero parameters. Verdicts per the
-pre-registered bars:
-
-\textbf{The plateau.} Envelope-driven untrained fields hold
-\ensuremath{\approx} floor+3 at every condition. Means (vs windowed
-floors): A 0.774 (0.750), B 0.836 (0.805), C 0.783 (0.750); maxima
-0.79--0.87, topping every trained conventional mean at the 2k budget
-under both protocols at both noise levels, while never exceeding their
-own representation's linear content by more than a few points. At this
-scale, digit identity is statics-dominated, and everything reaches it.
-
-\textbf{Geometry: little impact beyond the control, replicated.} Every
-shape is compared against its torus twin, the run identical to it in
-physics family, \ensuremath{\omega} structure, pinning, clamp, and
-operating condition, differing only in the lattice wrap rule. Under
-envelope drive each shape has 48 such twins per condition (four phase
-families \ensuremath{\times} three \ensuremath{\omega}
-\ensuremath{\times} two \ensuremath{\lambda} \ensuremath{\times} two
-clamp; the amplitude cores are torus-only and so contribute none), and
-144 pooled across the three conditions.
-
-No shape came close to the pre-registered +3 threshold. Pooled over the
-three conditions, the per-shape mean deltas run from \ensuremath{-}0.13
-(sphere) to +0.39 (helix); helix, the best shape, is positive in 61\% of
-its 144 twins. Read one condition at a time, the extremes widen only to
-\ensuremath{-}0.63 (sphere, +5 dB g=1) and +0.58 (helix, +5 dB g=2),
-still under a fifth of the threshold, and not consistent in sign across
-conditions for any shape but helix. The quadrature pathway agrees
-despite sitting near chance: \ensuremath{-}0.53 to +0.29 over the same
-144 twins per shape. To our knowledge this is the first controlled
-geometry comparison in an oscillator network; at this scale, the
-measured effect of lattice shape is bounded well below our decision
-threshold.
-
-\textbf{Tonotopic design: no measured benefit over its randomized
-control, replicated.} The pre-registered criterion required designed
-\ensuremath{\omega} to exceed \emph{randomized} \ensuremath{\omega} (the
-randomized-twin discipline of \citep{caranzano}) by +5. It was not met
-on any read, at any scope.
-
-Per physics family, pooled over the three conditions under envelope
-drive (72 twins per phase family, 12 per amplitude family), designed
-\ensuremath{-} random runs from +0.28 (kuramoto) down to
-\ensuremath{-}1.21 (harmonic2), with no family reaching a tenth of the
-bar, and harmonic2 and winfree negative in all three conditions. Pooling
-families within a condition (104 twins), the envelope deltas are
-\ensuremath{-}0.31, \ensuremath{-}0.42 and \ensuremath{-}0.56; on the
-widest read available, all families and both drive pathways at one
-condition (200 twins), they are \ensuremath{-}0.12, +0.52 and
-\ensuremath{-}0.60. Under envelope drive the carrier is absent at hop
-rate, so \ensuremath{\omega} structure can act only as a timescale
-prior, and we measured no untrained benefit from it.
-
-\textbf{Gain: near-dead, with one named interaction.} Full-matrix
-C\ensuremath{-}A deltas: +0.9 mean (73\% positive), a small real tilt
-toward g=1, with every factor summary below the \ensuremath{\pm}3
-yardstick except one: \textbf{fixed-amplitude SL recovers +3.3 at g=1},
-erasing its Matrix-A deficit. The physics-family spread is therefore
-operating-point-conditioned (3.3 points at g=2 compressing to
-\textasciitilde1.2 at g=1), and amplitude freedom reads as the absorber
-of drive-scale mismatch: full SL was gain-insensitive; only the
-amplitude-clamped variant moved.
-
-\textbf{Coupling law barely matters untrained.} With genuinely distinct
-physics (\ensuremath{\alpha} = \ensuremath{\pi}/4, \ensuremath{\beta} =
-0.5), per-twin deviations from kuramoto are +0.1 to +0.9 points
-(\ensuremath{\approx} half positive; 72 twins per family per condition):
-sl 0.783 \textgreater{} kuramoto \ensuremath{\approx} sakaguchi
-\ensuremath{\approx} harmonic2 (\ensuremath{\approx}0.776)
-\textgreater{} winfree 0.773 \textgreater{} sl-fixedamp 0.750 at g=2.
-Within phase cores, the coupling law is worth under a point untrained;
-the amplitude channel is the only physics lever above one.
-
-\textbf{Phase-referenced drive: collapsed at every gain.} Quadrature
-runs sit at 0.24--0.33 absolute (chance 0.10), \ensuremath{-}0.53 below
-their magnitude twins at 100\% of 288 twin pairs, and a diagnostic sweep
-at g \ensuremath{\in} \{8, 32, 128\} plus the matrix's g
-\ensuremath{\in} \{1, 2\} never recovers half the magnitude read
-(non-monotone, \ensuremath{\leq}0.324 throughout). The identical
-quadrature pathway trains healthily (+39.8\% loss drop in harness
-verification). Section 6 gives the model analysis; the scoped claim is
-that \textbf{phase-referenced input is trainable-but-not-reservoir}.
-
-\textbf{Settle-versus-stream.} Every frozen run was read both ways: from
-the driven streaming trajectory, and from a 32-frame drive-free
-ring-down. Settle loses everywhere: \ensuremath{-}10 points mean, 0\%
-positive across 600 runs. For untrained envelope-driven fields, the
-driven trajectory carries the information.
-
-\subsection{The transduction test: carrier drive does not rescue the
-plateau}\label{the-transduction-test-carrier-drive-does-not-rescue-the-plateau}
-
-If the mel transcoder were compressing a dynamical margin, driving the
-field with the band-split waveform itself (the carrier pathway) should
-restore it. We measured carrier floors first (0 dB: standard 0.533,
-windowed 0.680; the \ensuremath{\approx}12-point gap to the mel floors
-is the band-limit's measured cost), gate-calibrated the carrier gain
-(g=32), and ran a 14-run diagonal (six physics \ensuremath{\times} torus
-\ensuremath{\times} \{random, designed\} \ensuremath{\omega} + a helix
-pair) at protocol size, with three pre-registered bars. All three came
-back negative:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  \textbf{Transduction:} best run 0.701 = carrier floor +2.1 (bar: +5 to
-  claim restoration; \ensuremath{\leq}+3 \ensuremath{\Rightarrow}
-  statics-bound is frontend-invariant). Thirteen of fourteen runs sit at
-  or below the carrier floor. The statics-bound picture holds under both
-  transduction modes.
-\item
-  \textbf{Tonotopic design under carrier drive:} designed \ensuremath{-}
-  random averaged \textbf{\ensuremath{-}2.0} across the diagonal's seven
-  designed/random twins, and the same to one decimal over the six torus
-  families alone (criterion: +5). The no-benefit finding extends to the
-  drive form the design was meant for. The instrument sharpens the
-  point: designed rows demonstrably lock to their carriers (drive-phase
-  PLV 0.17 vs 0.03 for random rows, 5--6\ensuremath{\times}) \emph{and
-  score lower}. Our results showed that entrainment occurs; it did not
-  improve accuracy on this task at this scale.
-\item
-  \textbf{Helix octave-per-turn:} +1.0 / \ensuremath{-}1.0 vs torus
-  (criterion: +3). The geometry finding extends unchanged to carrier
-  drive.
-\end{enumerate}
-
-\textbf{Drive-pathway mechanism, summarized from the measurements
-above.} Our results showed the envelope representation's floor at 0.805
-against the carrier's 0.680: the representation itself carries
-\textasciitilde12.5 points more linearly readable content, because the
-band-split path discards all envelope information above 1.5 kHz, while
-the field added a similar small margin above each floor. The instruments
-showed weak envelope-rate locking on the winning pathway (drive-phase
-PLV \ensuremath{\approx} 0.16) and strong carrier locking on the losing
-designed rows (5--6\ensuremath{\times} the random arm's PLV). Together
-these measurements support a representation-content account of the
-pathway ordering and count against a resonance-matching account: the
-pathway with the least locking won, and the pathway with the most
-locking gained nothing from it. We therefore attribute the envelope
-path's advantage to what its representation carries, not to how its
-drive engages the physics; we hypothesize that locking becomes valuable
-only when the task requires the temporal structure it encodes, a
-hypothesis §5.7 begins to test and that direct per-band transduction
-instrumentation would settle.
-
-The gain-response curves behind the operating points were re-verified at
-three seeds with the drive-phase reader and the increment instrument
-(quotable table in supplementary): designed-\ensuremath{\omega} holds a
-seed-robust +3--4 point edge over random at gate size in the mid-gain
-band, an edge that vanishes at protocol size, which is why the scored
-Caranzano verdict is negative. Locking is a mechanism; the probe scores
-outcomes.
-
-\subsection{Readout sufficiency: the linear probe,
-tested}\label{readout-sufficiency-the-linear-probe-tested}
-
-The weakest-reader design choice is a measured control, not an
-assumption. On one scored-condition run and its floor twin, an MLP head
-(2\ensuremath{\times}128) and a small window-token transformer ran on
-the \emph{identical} features, identical splits and selection, three
-head seeds, across training sizes 512\ensuremath{\to}16,384
-(with-replacement caveat: the pool holds 9,600 unique clips; the largest
-size is an augmentation regime and labeled as such).
-
-At protocol size (2,048): the transformer reads +2.6 over ridge on run
-features (all three seeds above) while reading \ensuremath{-}10 on the
-floor twin: a real, seed-robust, run-side-only nonlinear margin, and the
-honest caveat to linear-completeness. It is a small-data phenomenon: by
-4,096 the ridge saturates the run read (0.871), by 16,384 the ridge
-leads everything (0.881), and the floor's own nonlinear readers close
-most of the remaining gap (floor MLP +2.3 over floor ridge at 8,192;
-generic band-statistic nonlinearity, not field structure). Across the
-whole curve, the field's best-reader edge over its floor's best reader
-is stable at +1.7 to +2.9 points. Overfitting is reported, not assumed:
-every nonlinear head shows train--test gaps of +0.09 to +0.20, and the
-floor MLP memorizes its training set outright. All heads carry more
-parameters than the entire oscillator field.
-
-\subsection{Sensitivity of the canonical physics
-values}\label{sensitivity-of-the-canonical-physics-values}
-
-\textbf{harmonic2 \ensuremath{\beta}:} deviations from kuramoto are
-identical (\ensuremath{-}0.98) at \ensuremath{\beta} \ensuremath{\in}
-\{0.25, 0.5, 1.0\}, insensitive across the literature range
-\citep{hansel1993, daido1992} (verified to be a genuine accuracy
-plateau, not a plumbing artifact: the trajectories differ substantially
-between \ensuremath{\beta} values). \ensuremath{\beta} \textgreater{} 1
-is excluded by design: the second-harmonic weight multiplies its term
-unnormalized, confounding coupling shape with total strength; a future
-extension would use normalized mixing (1,
-\ensuremath{\beta})/(1+\ensuremath{\beta}).
-
-\textbf{sakaguchi \ensuremath{\alpha}:} the five-point response
-\{\ensuremath{\pi}/8, \ensuremath{\pi}/4, 3\ensuremath{\pi}/8, 1.39,
-\ensuremath{\pi}/2\} traces a non-monotone curve: +0.2 /
-\ensuremath{-}2.7 / \ensuremath{-}3.9 / \ensuremath{-}0.4 / +1.2 versus
-kuramoto (each point \ensuremath{\leq}1.7\ensuremath{\sigma}
-individually; the trough \ensuremath{\approx}2.4\ensuremath{\sigma}). A
-registered mechanistic prediction, that the deviation tracks frustration
-energy \ensuremath{\propto} sin 2\ensuremath{\alpha} and is therefore
-symmetric about \ensuremath{\pi}/4, was \textbf{refuted} by the
-3\ensuremath{\pi}/8 point. The instruments show the lag desynchronizing
-the field monotonically (R 0.095 \ensuremath{\to} 0.066 across the
-range; textbook Sakaguchi behavior) while envelope locking stays flat,
-so readability does not track coherence, and the least synchronized
-field (\ensuremath{\alpha} = \ensuremath{\pi}/2, the zero-attraction
-boundary) reads best, slightly above kuramoto. \ensuremath{\alpha}
-therefore enters the record as a measured factor level with its response
-curve (\ensuremath{\pi}/4 = mid-range lag; 1.39 = \ensuremath{\pi}/2
-\ensuremath{-} 0.18, the canonical chimera value \citep{abrams2004};
-\ensuremath{\pi}/2 = the boundary), not an assumed constant.
-Matrix-wide, the family deviation at \ensuremath{\alpha} =
-\ensuremath{\pi}/4 is +0.1--0.2 (§5.2): the crown-configuration trough
-did not generalize.
-
-\subsection{Coherence and readability: an inverted-U,
-suggested}\label{coherence-and-readability-an-inverted-u-suggested}
-
-A registered scatter over the corrected protocol-size matrices (936
-envelope runs: 312 at each of the three conditions) tested whether
-readability anti-correlates with global coherence. The anti-correlation
-bar (Spearman \ensuremath{\rho} \ensuremath{\leq} \ensuremath{-}0.3 in
-\ensuremath{\geq}2 of 3 conditions) came back 0/3: the across-run trend
-at low coherence is mildly \emph{positive} and consistent
-(\ensuremath{\rho} = +0.256, +0.254, +0.227; winfree +0.51 to +0.62 per
-condition). Meanwhile every high-coherence state we measured reads worse
-than its less-coherent twin: the reference-slaved quadrature regime; the
-most coherent carrier run (R 0.65) losing to its incoherent twin (R
-0.32); the \ensuremath{\alpha}-curve's locked extremes. The recorded
-suggestion, which is a suggestion and not a mechanism, is
-\textbf{non-monotone: mild coherence helps, locking hurts} (an
-inverted-U in R). Across-run correlations are confounded (R co-varies
-with pinning, clamp, and family), so the named discriminating experiment
-is a causal within-family R-response curve, driving R from
-\textasciitilde0.05 to \textasciitilde0.6 with everything else fixed.
-This reading is consistent with the over-synchronization concerns raised
-independently in the trained-oscillator literature
-\citep{unconv-ai2026, nunley2026}.
-
-\begin{figure}
-\centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Readability against coherence across the swept conditions. The relation is not monotone: mild coherence accompanies the best reads, and the most strongly locked fields read worse than their less coherent twins.}]{resources/figures/g9-readability-vs-coherence.pdf}}
-\caption{Readability against coherence across the swept conditions. The
-relation is not monotone: mild coherence accompanies the best reads, and
-the most strongly locked fields read worse than their less coherent
-twins.}
-\end{figure}
-
-\subsection{The task axis: untrained state carries temporal order
-near-perfectly}\label{the-task-axis-untrained-state-carries-temporal-order-near-perfectly}
-
-Every task above is statics-dominated, so the field's dynamics are
-barely interrogated. We therefore built a task that statics provably
-cannot answer: classify two-digit sequences whose unordered content is
-identical (digit a then b, versus b then a; independent recordings
-joined by a 100 ms gap; a 272 ms silent leader absorbs the featurization
-warmup so the readout window is order-symmetric by design). The primary
-read is the full-span pooled protocol, which is order-free by
-construction: any permutation-invariant statistic of the frame multiset
-is identical for both classes regardless of its richness: the defense is
-mathematical, not empirical, though the empirical check agrees (matched
-floors 0.465--0.518 across all five pairs; chance 0.500; the
-\textbar{}\ensuremath{\Delta}\textbar{} feature's single-junction
-sensitivity is the stated exception and is measurably negligible). Any
-accuracy above chance through this readout must come from state that
-persists across time.
-
-Results (five digit pairs, three seeds, protocol size; full-span
-accuracy):
-
-{\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1667}}@{}}
+\caption{Temporal-order accuracy (\%), averaged over the five digit
+pairs, mean \ensuremath{\pm} standard deviation over three seeds; chance
+is 50\%.}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-pair
+arm
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-matched floor
+clean
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-kuramoto (frozen)
+0 dB
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-SL (frozen)
+\ensuremath{-}5 dB
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+arm
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-GRU (trained)
+clean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0 dB
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\ensuremath{-}5 dB
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-3,7 & 0.486 & 0.970 \ensuremath{\pm}0.003 & 0.990 \ensuremath{\pm}0.004
-& 0.977 \ensuremath{\pm}0.015 \\
-\cmidrule{1-5}1,8 & 0.496 & 0.997 \ensuremath{\pm}0.003 & \textbf{1.000
-\ensuremath{\pm}0.000} & 0.995 \ensuremath{\pm}0.001 \\
-\cmidrule{1-5}2,5 & 0.490 & 0.997 \ensuremath{\pm}0.002 & 0.996
-\ensuremath{\pm}0.004 & 0.992 \ensuremath{\pm}0.005 \\
-\cmidrule{1-5}4,9 & 0.518 & 0.988 \ensuremath{\pm}0.005 & 0.995
-\ensuremath{\pm}0.001 & 0.990 \ensuremath{\pm}0.004 \\
-\cmidrule{1-5}0,6 & 0.465 & 0.988 \ensuremath{\pm}0.003 & 0.996
-\ensuremath{\pm}0.002 & 0.995 \ensuremath{\pm}0.003 \\
+spectrogram-only baseline, whole clip & 49.9 \ensuremath{\pm} 0.5 & 49.9
+\ensuremath{\pm} 0.3 & 50.1 \ensuremath{\pm} 0.6 \\
+\cmidrule{1-4}coupled oscillator network (gain = 1) & 97.7
+\ensuremath{\pm} 0.6 & 96.2 \ensuremath{\pm} 0.4 & 95.5 \ensuremath{\pm}
+0.7 \\
+\cmidrule{1-4}coupled oscillator network (gain = 2) & 92.9
+\ensuremath{\pm} 0.5 & 93.5 \ensuremath{\pm} 0.1 & 91.4 \ensuremath{\pm}
+0.6 \\
+\cmidrule{1-4}uncoupled oscillator network (gain = 1) & 95.5
+\ensuremath{\pm} 0.6 & 90.7 \ensuremath{\pm} 0.1 & 87.0 \ensuremath{\pm}
+0.4 \\
+\cmidrule{1-4}uncoupled oscillator network (gain = 2) & 82.5
+\ensuremath{\pm} 0.8 & 77.8 \ensuremath{\pm} 0.4 & 72.7 \ensuremath{\pm}
+0.3 \\
+\cmidrule{1-4}state-matched bank (gain = 1) & 99.9 \ensuremath{\pm} 0.0
+& 99.6 \ensuremath{\pm} 0.1 & 98.8 \ensuremath{\pm} 0.1 \\
+\cmidrule{1-4}state-matched bank (gain = 2) & 99.7 \ensuremath{\pm} 0.0
+& 99.6 \ensuremath{\pm} 0.1 & 98.9 \ensuremath{\pm} 0.1 \\
+\cmidrule{1-4}width-matched bank (gain = 1) & 99.9 \ensuremath{\pm} 0.1
+& 99.5 \ensuremath{\pm} 0.1 & 98.7 \ensuremath{\pm} 0.3 \\
+\cmidrule{1-4}width-matched bank (gain = 2) & 99.8 \ensuremath{\pm} 0.0
+& 99.6 \ensuremath{\pm} 0.1 & 99.0 \ensuremath{\pm} 0.1 \\
+\cmidrule{1-4}transformer & 99.9 \ensuremath{\pm} 0.0 & 99.6
+\ensuremath{\pm} 0.1 & 99.3 \ensuremath{\pm} 0.1 \\
+\cmidrule{1-4}GRU & 99.8 \ensuremath{\pm} 0.1 & 99.6 \ensuremath{\pm}
+0.1 & 99.0 \ensuremath{\pm} 0.1 \\
+\cmidrule{1-4}S4D & 99.5 \ensuremath{\pm} 0.1 & 50.1 \ensuremath{\pm}
+0.2 & 49.8 \ensuremath{\pm} 0.5 \\
+\cmidrule{1-4}CNN & 92.2 \ensuremath{\pm} 0.6 & 50.0 \ensuremath{\pm}
+0.4 & 50.0 \ensuremath{\pm} 0.4 \\
+\cmidrule{1-4}TCN & 99.9 \ensuremath{\pm} 0.1 & 95.0 \ensuremath{\pm}
+0.4 & 91.1 \ensuremath{\pm} 0.3 \\
 \end{longtable}
-}
-
-(\ensuremath{\pm} = half-range over three seeds; audio examples of the
-stimuli, both orders of two pairs at the experimental condition, ship
-with the paper in \texttt{resources/audio/order/}, regenerable by
-committed script.)
-
-The pre-registered bar (\ensuremath{\geq}0.60 on \ensuremath{\geq}3 of 5
-valid pairs) passes 5/5 with \textasciitilde40 points to spare:
-\textbf{untrained oscillator state reads temporal order at 0.97--1.00
-through readouts that are blind to it without the dynamics.} Frozen
-Stuart--Landau is the best arm everywhere (amplitude as memory; one
-perfect score), and the frozen fields match the trained GRU, a
-comparison scoped strictly to the shared order-free readout protocol (a
-recurrent network with a sequence head would answer this task trivially;
-the point is that under identical readout constraints, training the
-recurrence added nothing beyond what the frozen physics provides).
-
-A severed-coupling control (spectral cap \ensuremath{\to} 0, same runs)
-attributes the mechanism: uncoupled oscillators alone read 0.947--0.980,
-with coupling adding +1.7--2.3, closely matching the coupling term's
-measured contribution on the statics task. \textbf{The order memory is
-predominantly per-oscillator phase integration}: each oscillator's phase
-is an integral of its own drive history, with collective dynamics
-contributing a small consistent margin. Scope notes: this is synthetic
-sequencing of natural units (no co-articulation), one gap length, near
-ceiling, a single demonstration with a registered hardness ladder
-(longer sequences, variable gaps, memory-horizon curves), not a
-characterized capability. It is also consistent with the settle result
-(§5.2): the memory lives in the \emph{driven} evolution of the state,
-not in autonomous ring-down persistence.
-
-\section{The phase-referenced collapse: model and
-mechanism}\label{the-phase-referenced-collapse-model-and-mechanism}
-
-The magnitude push is oscillator-state-independent; the Adler torque
-g\ensuremath{\cdot}A\ensuremath{_{r}\cdot}sin(\ensuremath{\varphi_{r}}
-\ensuremath{-} \ensuremath{\theta_{i}}) depends on each oscillator's
-phase relative to a shared reference. The Adler equation
-\ensuremath{\dot{\theta}} = \ensuremath{\Delta\omega} +
-A\ensuremath{\cdot}sin(\ensuremath{\varphi-\theta}) locks iff
-\textbar{}\ensuremath{\Delta\omega}\_eff\textbar{} \ensuremath{\leq} A
-\citep{adler1946}; locking is the only mechanism by which a
-reference-relative torque produces a persistent readable phase relation.
-
-The untrained field sits outside the readable regime at every gain, for
-two reasons that meet in the middle. At low gain, the baseband reference
-rotates at up to \ensuremath{\pm\pi} rad/frame (the \ensuremath{\pm}31
-Hz Nyquist edge) while intrinsic rates are \textasciitilde0.1 rad/frame
-and per-frame torque \ensuremath{\lesssim}0.2 rad: far outside the
-locking range, sin(\ensuremath{\varphi-\theta}) time-averages toward
-zero, and residual torques across a population with random initial
-phases and dispersed \ensuremath{\omega} are mutually incoherent. At
-high gain, the torque dominates any detuning and the population is
-dragged onto the shared reference, \ensuremath{\theta_{i}}
-\ensuremath{\to} \ensuremath{\varphi_{r}}(t): a reference-slaved state
-is nearly input-invariant in the informative dimensions: within a row
-all oscillators carry the same \ensuremath{\varphi_{r}}, and the
-amplitude pattern A\ensuremath{_{r}}(t), which carries most digit
-identity (the magnitude path's 0.77+ demonstrates it), is projected out
-of the phase state. The measured non-monotone middle (0.168/0.275/0.314
-at g = 8/32/128) is consistent with the crossover between the two
-failure regimes. This account is labeled consistent-with-data; the
-per-gain drive-phase instrumentation that would test it directly is left
-to future work.
-
-What training changes is neither the drive nor the phases but the
-coupling kernel: reshaping the field's autonomous dynamics until the
-population maintains a consistent phase relation to the reference, at
-which point reference-relative torques sum constructively, the identical
-pathway trains healthily. Hence the scoped claim:
-\textbf{phase-referenced input is trainable-but-not-reservoir}: it
-requires co-organization with the reference, which trained dynamics can
-supply and random dynamics cannot. Because of this phenomenon, the
-carrier pathway removes the transcoder and drives the field with the
-band-filtered waveform itself: an additive oscillatory drive engages
-entrainment, creating phase organization through the locking dynamics
-with no pre-organization required, turning the untrained-phase question
-into one about locking range rather than co-organization. Section 5.3
-reports the outcome: locking occurs, and the plateau stands.
 
 \section{Discussion}\label{discussion}
 
-\textbf{The hypothesis, scored.} As tested, at \textasciitilde2k
-parameters, on spoken digits, under three drive forms and three
-conditions, the reservoir premise splits along the task axis. On
-statics-dominated recognition, it survives only in a bounded form:
-untrained fields carry digit information consistently above every
-trained conventional baseline at the same budget, yet only +2--3 points
-above their own representation's linear content, and that margin was
-indifferent to every design axis we varied but one: geometry and
-tonotopic design each showed little impact beyond their controls (the
-latter even with measured locking), the coupling law was worth under a
-point, and gain was nearly inert; the exception is the drive pathway,
-where phase-referenced input was unreadable rather than merely worse. On
-the order task, the one task whose answer requires memory, the premise
-holds emphatically: near-ceiling accuracy over chance-blind floors,
-carried predominantly by per-oscillator integration. The synthesis:
-\textbf{the input representation determines what the field can encode
-(measured by floors, not by resonance-matching); the task determines
-whether the dynamics are interrogated at all; the readout determines how
-much of the whole stack is harvested; and the field's untrained design,
-whether shape, frequency structure or coupling law, determines almost
-nothing.} The strong version of the design premise is refuted at this
-scale by the bars as written; the state-memory premise is confirmed. The
-amplitude channel is the one design element that mattered on both axes
-(family lead on statics; best arm on order), and since
-\ensuremath{\alpha}/\ensuremath{\beta} are precisely the parameters
-training can adjust, amplitude trainability is the sharpest hypothesis a
-trained-dynamics study should test next.
+\textbf{What the dynamics add.} Most of every arm's accuracy comes from
+the front end and the linear readout, and the input's format matters as
+much: driven in quadrature, the same networks read near chance (Section
+4.5). Read directly on the spectrogram, the readout reaches 93.6\%,
+78.0\% and 71.6\%, and at the common width no untrained reservoir adds
+more than 2.3 points to that, the most being the Stuart--Landau
+network's. The untrained Kuramoto network does not read above its own
+input. What it adds is memory: read only after its warm-up, it recovers
+most of what the input loses without its first 16 frames, which hold the
+onset, and it carries the order of two digits that an order-free read of
+the input cannot see. A leaky-integrator bank of the same size does both
+as well or better, and both remember by the same means, integration. A
+leaky integrator keeps a running average of its band's energy; a
+Kuramoto oscillator's phase advances at its natural frequency plus its
+drive, so, apart from the restoring pull and the coupling, its phase is
+the running sum of its band's energy wrapped around the circle. Because
+an integrator's state at each moment depends on what came before it,
+statistics of that state over the clip differ with the order of its
+inputs, where the same statistics of the input do not. Oscillation
+therefore adds no memory the bank lacks; the phase is an integrator
+whose sum wraps. An analysis of variance per band and time window shows
+it (figure; Appendix E): the input's class information peaks at the
+onset, and every reservoir carries it into later windows. Coupling adds
+about a point on noisy recognition and 2 to 19 points on order. Our
+results align with the reports that much of a reservoir's accuracy comes
+from its front end, for a spintronic oscillator on TI-46
+\citep{abreu-araujo2020} and for a piezoelectric reservoir on
+AudioMNIST, which matched logistic regression on its input
+\citep{buckley2026}; its authors expect a reservoir to help most where a
+linear classifier on the input falls short, and in our noisy conditions,
+where it does, Kuramoto matches the input and Stuart--Landau reads 1.1
+to 2.3 points above it.
 
-\textbf{What bounds the conclusion.} Four limitations, each with its
-measured control or named test: readout capacity (controlled in §5.4,
-near-complete, with a quantified small-data exception); readout data
-size (measured to the bank's ceiling; an expanded bank is the named next
-test); field size (2k parameters is one point on the size axis, and the
-size-scaling curve is unmeasured here); and frontend conditioning (two
-of three pathways here are lossy in different ways, so transduction
-itself wants direct instrumentation). The statics-dominance of digit
-identity is itself a scope condition: tasks with heavier temporal
-structure may separate dynamics from statics where digits cannot.
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={One-way ANOVA F per mel band and sixteenth of the clip for the input (the spectrogram) and three reservoirs at 0 dB and gain 1, over the 2,048 training clips of seed 0; the dotted line marks the end of the 16-frame warm-up, and each panel has its own colour scale. Right: mean F per band.}]{resources/figures/c7-anova-f.pdf}}
+\caption{One-way ANOVA F per mel band and sixteenth of the clip for the
+input (the spectrogram) and three reservoirs at 0 dB and gain 1, over
+the 2,048 training clips of seed 0; the dotted line marks the end of the
+16-frame warm-up, and each panel has its own colour scale. Right: mean F
+per band.}
+\end{figure}
 
-\textbf{What the no-effect findings are worth.} The geometry result
-answers an open question no controlled experiment had touched; the
-design results (tonotopy, coupling law) bound how much of the oscillator
-revival's promise can come for free; the phase-collapse analysis
-converts a failed factor into a mechanism with a testable training-side
-prediction; and the coherence--readability inverted-U, if it survives
-its causal test, connects the untrained record to the
-over-synchronization failure mode reported in trained oscillator
-systems. The evaluation frame, comprising floors, parity, drive-unit
-calibration with a validity bound, drive-phase instrumentation and
-pre-registered bars, is reusable as-is for trained-dynamics studies, and
-ships with this paper for exactly that purpose.
+\textbf{Network design.} A free amplitude is where the design effect
+sits, not the Stuart--Landau coupling form: with its amplitude fixed,
+the network reads like Kuramoto, and loses the most to a strong input.
+One reading is that a free amplitude lets an oscillator take up a strong
+drive in its radius, where a phase oscillator can only be pushed faster.
+Among phase oscillators the coupling function and the geometry each
+moved accuracy by less than a point, and a coil and a cochlea, built to
+follow the cochlea's shape and mechanics, read no better than the torus.
 
-\section{Related work}\label{related-work}
+\textbf{Readout, data and training.} More training data raised the
+trained baselines three to six times as much as the reservoirs, since in
+a reservoir only the readout learns; with noise and 2,048 clips every
+trained baseline already reads above the Kuramoto network, and only the
+Stuart--Landau network reaches their range. Many published spoken-digit
+results share speakers between training and test, among them both noisy
+AudioMNIST studies \citep{beoletto2026, young2026} and the TI-46
+reservoirs \citep{torrejon2017, opala2019, coulombe2017}; a classifier
+there, a trained network or a readout alike, can learn the test
+speakers' voices, which likely raises its accuracy, so those results are
+not comparable with ours. Training the oscillator network itself is the
+step these results leave open. A trained coupled-oscillator network
+reaches 89\% on AudioMNIST from the raw waveform where a plain recurrent
+network fails \citep{chandravadia2026}, trained end to end on a random
+split; running such a network through the controls used here, on
+held-out speakers, would show what its oscillators contribute.
 
-Hardware oscillator reservoirs establish the premise's strongest
-published support \citep{torrejon2017}; reservoir computing supplies the
-frame and its cautions
-\citep{jaeger2001, maass2002, lukosevicius2012, tanaka2019}.
-Oscillator-inspired trained networks (coRNN \citep{rusch2021}; Neural
-Wave Machines \citep{keller2023}; WONN \citep{dai2026}; AKOrN
-\citep{miyato2025}) and Kuramoto-based generation \citep{unconv-ai2026}
-motivate the frozen-versus-trained distinction this paper measures from
-the frozen side. Synchronization theory supplies the analytical spine
-\citep{winfree1967, kuramoto1975, sakaguchi1986, adler1946, pikovsky2001, strogatz2000};
-chimera states \citep{kuramoto2002, abrams2004} ground the
-partial-coherence readings. The randomized-twin discipline for designed
-structure follows \citep{caranzano}; frequency- learning front-ends
-\citep{lostanlen, zeghidour} are the trained counterpoint to our fixed
-tonotopy. The closest body of work to this paper's premise is the
-neuro-oscillatory speech literature reviewed by \citet{dogonasheva2026},
-whose three model families
-\citep{assaneo2020, doelling2023, pittman-polletta2021} all obtain their
-rate flexibility from adaptation of some parameter, and none of which is
-evaluated against a parameter-matched conventional baseline on a
-recognition task. To our knowledge, no prior work varies
-oscillator-network lattice topology under controls, runs a
-pre-registered factorial of coupling laws untrained, or instruments
-drive-phase locking against delivered drive in a speech setting.
+\textbf{Future directions.} The input's format decided more than the
+network's design, so other formats should be tested, such as MFCCs,
+cochleagrams or a cochlea-like resonator's tonogram, on which a linear
+readout reached about 98\% in hardware against 75.5\% for a linear
+spectrogram, with shared speakers \citep{beoletto2026}. An untrained
+network needs no training and runs causally, so with a better front end
+and a streaming readout it could suit low-power, real-time audio, which
+our clip-pooled readout leaves untested.
 
-\section{Reproducibility}\label{reproducibility}
+\textbf{Limitations.} Three seeds give a spread but not a precise
+estimate of it. The readout is one structure, a ridge on three
+statistics per signal. The trained baselines are matched at about 2,000
+parameters and trained with one recipe, not tuned per architecture;
+since fixing a first recipe raised them by up to 66 points in noise
+(Section 4.2), a trained baseline's accuracy can depend as much on its
+recipe as on its architecture. The later experiments ran on a GPU that
+rounds differently from the CPU, and a reproduction on a CUDA GPU is
+planned.
 
-Everything the paper rests on is published alongside it. The record
-holds 1,940 runs: the 1,800-run two-pathway factorial, the 14-run
-carrier diagonal, and 126 gates, controls, sweeps, and conventional
-references.
+\section{Conclusion}\label{conclusion}
+
+An untrained coupled oscillator network, read by a linear readout at a
+common width, reads about as well as its own input on noisy
+speaker-disjoint spoken-digit recognition, and carries the order of
+events by integrating its input, as a leaky-integrator bank does;
+coupling adds to both. A free oscillator amplitude is the one design
+choice that moved accuracy by more than about a point, putting the
+network above its input in every noisy condition and letting it tolerate
+a much stronger input; the lattice geometry, a cochlear coil included,
+and the phase coupling function moved it by less than a point. Small
+trained networks read higher with noise, the Stuart--Landau network
+alone reaching their range, and these results are the baseline a trained
+oscillator network should beat.
+
+\section*{Reproducibility statement}\label{reproducibility-statement}
+\addcontentsline{toc}{section}{Reproducibility statement}
+
+The code and the complete run record (every run's specification, results
+and per-clip correctness) are in the anonymized supplementary material
+and will be released with the paper; AudioMNIST is public
+\citep{becker2024}. From the record alone, one command regenerates every
+table and figure in this paper, and from the audio, the harness reruns
+any experiment, resuming without repeating a finished run. Every run
+records its code version, hardware and library versions. The leak check
+and the controls and design experiments ran on the CPU of an Apple M1
+Max, where runs with the same seed are bit-identical. The later
+experiments simulated the reservoirs on its GPU, which reproduced 1,262
+of 1,296 of the controls experiment's cells exactly and all but one
+within two test clips (Section 3.5); the trained baselines train on the
+CPU on every device. We welcome reproductions.
+
+\section*{AI use statement}\label{ai-use-statement}
+\addcontentsline{toc}{section}{AI use statement}
+
+This work was carried out by the authors working with an AI coding
+agent, Claude (Anthropic), for the following purposes:
+
+\textbf{Implementing code and tests.} Under the authors' direction the
+agent wrote most of the experiment harness and the test suite. The
+authors verified and independently reviewed, refactored and ran the
+code.
+
+\textbf{Refining experiments and summarizing results.} The authors set
+the research questions and directed the work. The agent contributed to
+flagging flaws in experimental designs, and wrote first-draft
+interpretations of raw result data, which the author reviewed and
+accepted, revised or rejected.
+
+\textbf{Writing.} The agent drafted sections of this paper, including
+the abstract, from the experiment logs, and edited the text for
+readability; it also helped find and check related literature and built
+the tooling that produces the paper's formats and checks its
+bibliography.
+
+\textbf{Verification.} Every number in the paper is regenerated from the
+committed record by a script rather than transcribed. The harness
+carries tests for each mechanism the paper relies on, and same-seed runs
+on the CPU are bit-identical. The author takes responsibility for the
+final content of this work.
+
+\bibliography{references}
+\appendix
+\section*{Appendix}\label{appendix}
+\addcontentsline{toc}{section}{Appendix}
+
+\section{Glossary}\label{glossary}
+
+The terms as this paper uses them. The code and the run record keep
+their own labels; src/README.md maps each term to its label.
+
+\subsection{The pipeline}\label{the-pipeline}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -1173,37 +842,1413 @@ references.
   >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-what
+Term
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-where
+As used in this paper
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-experiment harness (field cores, the nine geometries, frontends, probes,
-instruments, baselines) & \texttt{harness/} \\
-\cmidrule{1-2}the sweep driver and the launch, scoring, figure, and
-audio scripts & \texttt{harness/sweep.py}, \texttt{scripts/} \\
-\cmidrule{1-2}harness test suite (contracts for every mechanism the
-paper claims) & \texttt{tests/} \\
-\cmidrule{1-2}the complete record: 1,940 runs, grouped one file per
-drive variant and coupling law, each carrying its full configuration and
-every metric & \texttt{results/} \\
-\cmidrule{1-2}authored figures and the generated coherence scatter &
-\texttt{resources/figures/} \\
-\cmidrule{1-2}noise-calibration and order-task audio examples &
-\texttt{resources/audio/} \\
+\textbf{Front end} & The fixed first stage every arm shares. It turns a
+clip's 16 kHz waveform into a mel spectrogram: a 512-point Fourier
+transform every 256 samples (16 ms), 16 mel bands, the log of each
+band's energy, and a fixed rescaling. Nothing in it is trained or fitted
+to the data. \\
+\cmidrule{1-2}\textbf{Mel band} & One of the 16 frequency ranges the
+front end splits the audio into, spaced on the mel scale, which follows
+pitch perception: narrow at low frequencies, wide at high ones. \\
+\cmidrule{1-2}\textbf{Band energy} & The log energy in one mel band, one
+value per frame: the signal the front end produces for that band. \\
+\cmidrule{1-2}\textbf{Mel spectrogram} & A clip's 16 band energies
+together, frame by frame. The spectrogram-only baseline reads it
+directly; every reservoir is driven by it. \\
+\cmidrule{1-2}\textbf{Frame} & One 16 ms step of the front end, 62.5 per
+second. \\
+\cmidrule{1-2}\textbf{Reservoir} & An untrained dynamical system between
+the front end and the readout: here the coupled and uncoupled oscillator
+networks and the two leaky-integrator banks. The term is reservoir
+computing's \citep{jaeger2001, maass2002}. \\
+\cmidrule{1-2}\textbf{Readout} & The reader shared by every arm, and the
+only fitted part of an untrained arm: one linear layer from 192 features
+to 10 digit scores (1,930 weights), fitted by ridge regression, that is
+least squares with an L2 penalty, solved in closed form. The penalty is
+chosen from four values on the last eighth of the training clips, then
+the readout is refit on all of them. It is the same for every arm, so it
+is held constant across comparisons. \\
+\cmidrule{1-2}\textbf{Untrained} & Parameters drawn at random once, from
+the seed, and never updated. In an untrained arm only the readout is
+fitted. \\
+\cmidrule{1-2}\textbf{Input gain} & The factor that scales the input
+before it drives a reservoir: 1 or 2. It applies only to the reservoirs:
+the spectrogram-only baseline has no dynamics for it to act on, and a
+trained baseline learns its own input scale. \\
+\cmidrule{1-2}\textbf{Input pathway} & How the audio drives a reservoir.
+Spectrogram: each band energy of the mel spectrogram adds to the
+rotation rate of the oscillators in its row. Quadrature: each band's
+energy and phase, so the push depends on where an oscillator is relative
+to the band's own cycle, a phase-referenced drive of the kind
+\citet{adler1946} analysed. \\
 \end{longtable}
 }
 
-Every run records its full configuration and seed in its own
-\texttt{results.json}; all matrices, gates, floors, and controls are
-regenerable from the committed scripts. Same-seed replication is
-bit-identical (verified cross-run and cross-run); cross-seed spreads are
-reported wherever claims rest on them. Both registered predictions that
-their own tests refuted (§5.5, §5.6) are reported in full above rather
-than dropped.
+\subsection{Arms and baselines}\label{arms-and-baselines}
 
-\bibliography{references}
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Term
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+As used in this paper
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Arm} & One system under comparison, read the same way as every
+other. The term comes from experimental design. \\
+\cmidrule{1-2}\textbf{Spectrogram-only baseline} & The front end and the
+readout with nothing between them: the readout reads the band energies
+directly, so it measures what the input alone supports. Read from the
+first frame, over the whole clip, it is the primary control, because it
+sees everything a reservoir is driven with; read from frame 16, it sees
+the frames every other arm is read over. On the quadrature pathway it
+reads that pathway's front end instead. \\
+\cmidrule{1-2}\textbf{Coupled oscillator network} & The system under
+test: 1,024 untrained oscillators in 4 channels of a 16
+\ensuremath{\times} 16 lattice, coupled within each channel through a
+coupling kernel, with 2,048 parameters (the kernels and the natural
+frequencies). Also ``the oscillator network''. Its reference
+configuration: Kuramoto coupling, torus geometry, random natural
+frequencies, restoring strength 0.3, coupling ceiling 1. \\
+\cmidrule{1-2}\textbf{Uncoupled oscillator network} & The same network
+with every coupling kernel set to zero: each oscillator keeps its
+natural frequency, restoring strength and input, but none acts on
+another. It isolates what the coupling contributes. \\
+\cmidrule{1-2}\textbf{Leaky integrator} & A unit that holds one number x
+and, at each frame, moves a fraction a of the way toward its input: x
+\ensuremath{\leftarrow} (1 \ensuremath{-} a)\ensuremath{\cdot}x +
+a\ensuremath{\cdot}tanh(g\_in\ensuremath{\cdot}g\ensuremath{\cdot}u),
+where u is the input, g the input gain, g\_in the unit's own input
+weight, and \emph{tanh} bounds the input. The old value decays
+exponentially, or ``leaks'', so the unit is a running average of its
+recent input with a time constant set by a; in signal-processing terms
+it is a first-order low-pass filter. The term is standard. In
+computational neuroscience it is the leaky-integrator neuron, the leaky
+integrate-and-fire model without the firing; in reservoir computing it
+is the unit of leaky-integrator echo state networks \citep{jaeger2007},
+whose a is the ``leaking rate'' \citep{lukosevicius2012}. \\
+\cmidrule{1-2}\textbf{Leaky-integrator bank} & A reservoir of
+independent leaky integrators, routed like the oscillator network: mel
+band r drives every unit in row r. Time constants are spaced
+logarithmically from 16 ms to 1 s, input weights g\_in are drawn from
+N(1, 0.1\ensuremath{^{2}}), and no unit is connected to another: nothing
+rotates and nothing is coupled. State-matched: 1,024 units, the
+oscillator network's number of states and parameters. Width-matched:
+2,048 units, the number of signals the oscillator network exposes (sin
+\ensuremath{\theta} and cos \ensuremath{\theta} of each oscillator), at
+twice the parameters. \\
+\cmidrule{1-2}\textbf{Trained baselines} & Five conventional networks of
+1,840 to 2,109 parameters, trained end to end (AdamW, 30 epochs) through
+a learned linear layer on the same statistics, standardized, then read
+by the same readout. GRU: a gated recurrent network. TCN: a temporal
+convolutional network, two residual blocks of dilated causal
+convolutions (receptive field 31 frames). CNN: two causal
+one-dimensional convolutions. Transformer: one causal self-attention
+layer, width 16 with two heads, and a two-layer feed-forward block. S4D:
+a diagonal state-space model. \\
+\cmidrule{1-2}\textbf{Matched pair} & Two runs identical in every factor
+but the one compared, at the same noise level, input gain and seed. A
+design factor's effect is the mean difference over its matched pairs. \\
+\cmidrule{1-2}\textbf{Seed} & Sets an arm's random parameters and which
+training clips it draws. Every condition is run at three seeds, and
+results are reported as their mean with the standard deviation. \\
+\end{longtable}
+}
+
+\subsection{The oscillator network}\label{the-oscillator-network}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Term
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+As used in this paper
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Oscillator} & A unit whose state advances around a cycle. A
+phase oscillator keeps only its phase \ensuremath{\theta}, an angle; a
+Stuart--Landau oscillator also keeps an amplitude. The readout sees sin
+\ensuremath{\theta} and cos \ensuremath{\theta} of each. \\
+\cmidrule{1-2}\textbf{Natural frequency \ensuremath{\omega}} & The rate
+at which an oscillator would advance if nothing acted on it. Random:
+drawn from N(1, 0.1\ensuremath{^{2}}). Tonotopic: each row set to the
+centre frequency of the mel band that drives it, with small jitter.
+Identical: all 1. \\
+\cmidrule{1-2}\textbf{Lattice} & The 16 \ensuremath{\times} 16 grid a
+channel's oscillators sit on. Rows follow frequency: mel band r drives
+row r, from lowest to highest. \\
+\cmidrule{1-2}\textbf{Row} & The 16 oscillators of one channel that a
+single mel band drives. The only grouping built into the network. \\
+\cmidrule{1-2}\textbf{Channel} & One independent 16 \ensuremath{\times}
+16 lattice of 256 oscillators, with its own coupling kernel and natural
+frequencies. Every channel receives the same input, and channels do not
+act on each other; the network's 4 channels are four differently drawn
+copies, read side by side (Appendix C). The name follows the channels of
+a convolutional network, where each channel likewise has its own
+kernel. \\
+\cmidrule{1-2}\textbf{Coupling kernel} & A channel's table of coupling
+weights: a 16 \ensuremath{\times} 16 array whose entry at an offset of
+so many rows and columns sets how strongly an oscillator is acted on by
+the one at that offset. The same table applies at every site, so the
+coupling is a convolution, and ``kernel'' is meant as in a convolutional
+network, not as a GPU compute kernel. It covers every offset, so each
+oscillator is coupled to every other in its channel. The weights are
+drawn from N(0, 0.05\ensuremath{^{2}}): a positive weight pulls a pair
+toward the same phase, a negative one pushes it apart. Each channel has
+its own kernel. \\
+\cmidrule{1-2}\textbf{Coupling function} & How the phases of two coupled
+oscillators turn into a push on one of them (A.4). \\
+\cmidrule{1-2}\textbf{Coupling ceiling} & A cap on each channel's
+overall coupling strength, 1 or 0.5. It limits the channel's coupling as
+a whole, the largest factor by which the kernel amplifies any spatial
+pattern of phases across the channel (the peak of the kernel's
+spectrum), and enforces it by scaling every weight of that channel's
+kernel by the same factor. It does not cap individual pairs, neighbours
+or regions. Random kernels always exceed it here (peaks of 1.4 to 2.9 on
+the torus), so in practice the ceiling sets every channel's coupling
+strength. \\
+\cmidrule{1-2}\textbf{Restoring strength \ensuremath{\lambda}} & The
+strength of a pull on every oscillator back toward phase 0, the term
+\ensuremath{-\lambda} sin \ensuremath{\theta}, 0.3 or 0.1. It has the
+form of the restoring torque that returns a pendulum to rest, but the
+oscillators have no inertia, so nothing swings back past 0: an
+oscillator whose natural frequency is below \ensuremath{\lambda} is held
+in place, or locked \citep{adler1946}, and a faster one keeps rotating,
+slowed where the pull opposes it. For Stuart--Landau oscillators it is a
+pull toward phase 0 at unit amplitude. \\
+\cmidrule{1-2}\textbf{Cluster} & A group of oscillators that move
+together, in phase or in fixed opposition, because of the dynamics
+rather than the wiring. Nothing in a kernel assigns an oscillator to a
+cluster; clusters form, or do not, as the network runs
+\citep{pikovsky2001}. \\
+\cmidrule{1-2}\textbf{Rotation rate} & How far an oscillator's phase
+advances between frames, read as the mean of cos
+\ensuremath{\Delta\theta} and sin \ensuremath{\Delta\theta} over a
+window. An additional read, beside the statistics. \\
+\end{longtable}
+}
+
+\subsection{Coupling functions}\label{coupling-functions}
+
+Defined in Appendix F and drawn in Appendix D.
+
+\subsection{Lattice geometries}\label{lattice-geometries}
+
+Defined and drawn in Appendix F.
+
+\subsection{The read and the
+evaluation}\label{the-read-and-the-evaluation}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Term
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+As used in this paper
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Signal} & A time series an arm exposes to the readout: a band
+energy for the spectrogram-only baseline, sin \ensuremath{\theta} or cos
+\ensuremath{\theta} of an oscillator, a leaky integrator's state, or a
+trained baseline's hidden unit. \\
+\cmidrule{1-2}\textbf{Summary statistics} & Per signal and window: the
+mean, the standard deviation and the mean absolute frame-to-frame
+change. None is an endpoint, and the absolute change cannot tell a
+rising signal from a falling one. \\
+\cmidrule{1-2}\textbf{Window} & For recognition, frames 16 to 61 split
+into four equal windows; for the order task, frames 16 to 147 as one.
+Every clip is read over the same frames. \\
+\cmidrule{1-2}\textbf{Warm-up} & The first 16 frames (256 ms), which
+every arm but the whole-clip spectrogram-only baseline skips. Reading
+every arm over the same frames after the warm-up means an arm with no
+input reads chance. \\
+\cmidrule{1-2}\textbf{Width} & The number of features the readout sees:
+192, 1,024 or 4,096, reached by a random Gaussian projection shared by
+every arm, either the fixed draw or a draw of its own for each run seed
+(Section 3.3). An arm's native width is its feature count before
+projection: 192 for the spectrogram-only baseline, 24,576 for the
+oscillator network. \\
+\cmidrule{1-2}\textbf{Primary cell} & Width 192, 2,048 training clips,
+and the four-window read (the whole-span read for the order task). \\
+\cmidrule{1-2}\textbf{Protocols A and B} & A: train on speakers 1 to 48
+and test on the 6,000 clips of speakers 49 to 60. B: the five speaker
+folds of \citet{becker2024}. \\
+\cmidrule{1-2}\textbf{Noise level} & White noise added to each clip at a
+level set by its speech, given as the signal-to-noise ratio: at 0 dB the
+noise is as loud as the speech, and at \ensuremath{-}5 dB it is 5 dB
+louder. \\
+\cmidrule{1-2}\textbf{Order task} & Two digits of a pair spoken one
+after the other; the task is to say which came first. The mean and
+spread of a signal do not depend on the order of its frames, so the
+input alone read over the whole span cannot answer it, and the
+spectrogram-only baseline reads chance, 50\%. \\
+\end{longtable}
+}
+
+\section{Experimental design}\label{experimental-design}
+
+The study's eight experiments and their run counts. Each experiment's
+runs are recorded in files named after it, one per task (and, for the
+design and sweep experiments, one per coupling function); the record's
+README lists them.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+experiment
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+question
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+arms
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+varied
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+fixed
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+runs
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+leak check & Does the pipeline leak? & the coupled and uncoupled
+oscillator networks and both leaky-integrator banks, with no input; the
+coupled network read over each clip's own length & the per-clip read at
+input gain 0, 1 and 2, seeds 0--2 & 0 dB; the no-input cells at seed 0 &
+13 \\
+\cmidrule{1-6}controls & Do the dynamics add anything beyond the input,
+a leaky-integrator bank, or uncoupled oscillators, and how do trained
+baselines compare? & spectrogram-only baseline, coupled oscillator
+network, uncoupled oscillator network, state-matched and width-matched
+leaky-integrator banks, and the trained baselines GRU, TCN, CNN,
+transformer and S4D & noise clean, 0 and \ensuremath{-}5 dB; input gain
+1 and 2 (reservoirs); seeds 0--2; recognition at 2,048, 8,192 and 24,000
+training clips, each trained baseline trained at each size; the order
+task on 5 digit pairs & coupled network: Kuramoto coupling, torus,
+random natural frequencies, restoring strength 0.3, coupling ceiling 1;
+order task at 2,048 training and 2,048 test sequences & 846 (216
+recognition, 630 order) \\
+\cmidrule{1-6}design & Does network design move accuracy? & coupled
+oscillator network only & coupling function (6), lattice geometry (6;
+the Stuart--Landau functions on the torus only), natural frequencies
+(random, tonotopic, identical), restoring strength (0.3, 0.1), coupling
+ceiling (1, 0.5); noise 0 and \ensuremath{-}5 dB; input gain 1 and 2;
+seeds 0--2 & 2,048 training clips; the four-window read, with and
+without rotation rates & 3,744 \\
+\cmidrule{1-6}Becker folds & Where do we sit against published numbers?
+& the controls arms & the 5 speaker folds of \citet{becker2024}; input
+gain 1 and 2 & clean audio; 18,000 training, 6,000 validation and 6,000
+test clips; seed 0 & 70 \\
+\cmidrule{1-6}quadrature & Does the quadrature pathway beat its own
+spectrogram-only baseline? & spectrogram-only baseline and 10
+coupled-network configurations: the 4 phase coupling functions on the
+torus and Kuramoto on the helix, each with random and tonotopic natural
+frequencies & noise 0 and \ensuremath{-}5 dB; input gain 1 and 2; seeds
+0--2 & quadrature pathway; 2,048 training clips & 126 \\
+\cmidrule{1-6}projection & Does the fixed projection's draw move the
+controls experiment's reservoir results? & the coupled and uncoupled
+oscillator networks and both leaky-integrator banks & noise clean, 0 and
+\ensuremath{-}5 dB; input gain 1 and 2; seeds 0--2; recognition and the
+order task on 5 digit pairs; each read under the fixed and a seeded
+projection & 2,048 training clips & 432 \\
+\cmidrule{1-6}sweep & How far do restoring strength, coupling ceiling
+and gain move accuracy beyond the design experiment's levels? & coupled
+oscillator network, all six coupling functions & restoring strength 0.5,
+0.8, 1.0 and coupling ceiling 1.5, 2.0 at input gain 1 and 2; input gain
+3, 4, 5, 6, 8, 10, 12; noise 0 and \ensuremath{-}5 dB; seeds 0--2 &
+torus, random natural frequencies; 2,048 training clips & 612 \\
+\cmidrule{1-6}cochlea & What does a cochlear geometry do? & coupled
+oscillator network, the four phase coupling functions & the coil, the
+cochlea, and the cochlea at the coil's average coupling (Appendix F);
+natural frequencies random, tonotopic, identical; noise 0 and
+\ensuremath{-}5 dB; input gain 1 and 2; seeds 0--2 & restoring strength
+0.3, coupling ceiling 1; 2,048 training clips & 432 \\
+\end{longtable}
+}
+
+\textbf{Arms.} The spectrogram-only baseline is the front end and the
+readout with nothing between them: the readout reads the 16 mel band
+energies directly. The coupled oscillator network is 1,024 untrained
+oscillators, 4 channels of a 16 \ensuremath{\times} 16 lattice, with
+2,048 parameters, exposing sin \ensuremath{\theta} and cos
+\ensuremath{\theta} of each oscillator. The uncoupled oscillator network
+is the same network with its coupling kernels set to zero. The
+state-matched leaky-integrator bank has the network's 1,024 states and
+2,048 parameters; the width-matched bank has 2,048 units, matching the
+network's 2,048 exposed signals at twice the parameters. These four
+untrained dynamical systems are the reservoirs. The five trained
+baselines are trained end to end, at 1,840 to 2,109 parameters each.
+Input gain applies only to the reservoirs (Section 3.4).
+
+\section{Channels and layers}\label{channels-and-layers}
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Layers and channels. (a) A deep network or a transformer stacks layers: each transforms the output of the one before it, so layers add depth. (b) The coupled oscillator network's channels sit side by side: each is a 16  16 lattice driven by the same mel spectrogram, mel band r driving row r, with its own coupling kernel and natural frequencies and no coupling to the other channels, so channels add width. The readout reads the signals of all four channels together, as the outputs of the attention heads in one transformer layer are combined.}]{resources/figures/a1-channels-and-layers.pdf}}
+\caption{Layers and channels. (a) A deep network or a transformer stacks
+layers: each transforms the output of the one before it, so layers add
+depth. (b) The coupled oscillator network's channels sit side by side:
+each is a 16 \ensuremath{\times} 16 lattice driven by the same mel
+spectrogram, mel band r driving row r, with its own coupling kernel and
+natural frequencies and no coupling to the other channels, so channels
+add width. The readout reads the signals of all four channels together,
+as the outputs of the attention heads in one transformer layer are
+combined.}
+\end{figure}
+
+\section{Coupling functions}\label{coupling-functions-1}
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Coupling functions, each for one neighbour j with a positive kernel weight. Left: the push an oscillator would feel at each phase around the circle while j sits at the top; arrows point the way it is pushed. Right: that push against the phase difference   , with filled dots where a pair rests stably and open dots where it rests but is unstable or neutral. Kuramoto pulls each oscillator along the circle toward its neighbour. Kuramoto--Sakaguchi aims  = /4 behind it, admitting partial coherence. The second harmonic ( = 0.5) strengthens the pull and removes the push away from opposite phase. Winfree pushes every oscillator toward phase 0, the neighbour's phase setting only how hard. Stuart--Landau pulls each oscillator straight toward its neighbour in the plane, so out-of-phase neighbours also shrink each other's amplitude; at fixed amplitude only the pull along the circle is left, which is Kuramoto. A negative kernel weight reverses every arrow, and each oscillator feels the sum over every other oscillator in its channel.}]{resources/figures/a3-coupling-functions.pdf}}
+\caption{Coupling functions, each for one neighbour j with a positive
+kernel weight. Left: the push an oscillator would feel at each phase
+around the circle while j sits at the top; arrows point the way it is
+pushed. Right: that push against the phase difference
+\ensuremath{\theta_{j}} \ensuremath{-} \ensuremath{\theta_{i}}, with
+filled dots where a pair rests stably and open dots where it rests but
+is unstable or neutral. Kuramoto pulls each oscillator along the circle
+toward its neighbour. Kuramoto--Sakaguchi aims \ensuremath{\alpha} =
+\ensuremath{\pi}/4 behind it, admitting partial coherence. The second
+harmonic (\ensuremath{\beta} = 0.5) strengthens the pull and removes the
+push away from opposite phase. Winfree pushes every oscillator toward
+phase 0, the neighbour's phase setting only how hard. Stuart--Landau
+pulls each oscillator straight toward its neighbour in the plane, so
+out-of-phase neighbours also shrink each other's amplitude; at fixed
+amplitude only the pull along the circle is left, which is Kuramoto. A
+negative kernel weight reverses every arrow, and each oscillator feels
+the sum over every other oscillator in its channel.}
+\end{figure}
+
+\section{Where each arm carries class
+information}\label{where-each-arm-carries-class-information}
+
+Following \citet{beoletto2026}, a one-way analysis of variance measures
+where in time and frequency each arm carries information about the
+digit. Every signal of an arm is averaged over each sixteenth of the
+padded clip (frames 0 to 61, warm-up included, so the input's onset
+shows), and each average is tested for a difference between the ten
+digits over the 2,048 training clips of seed 0 at 0 dB (gain 1 for the
+reservoirs); F is the variance between digits over the variance within
+them, each over its degrees of freedom. The maps average F over the
+signals of each mel band: the band itself for the spectrogram, and the
+sine and cosine of every oscillator, or every integrator's state, in
+that band's row, over channels and columns. They describe where the
+information sits; they do not compare accuracy.
+
+The input carries its information in a burst at the onset: its F peaks
+at 425 in band 4 in the fourth window, and averages 119 over windows 7
+to 16. Every reservoir peaks later and lower (the Kuramoto network at
+307, the Stuart--Landau network at 284 and the state-matched
+leaky-integrator bank at 378, in the fifth or sixth window) and holds
+more information afterwards, averaging 151 to 158 over windows 7 to 16,
+and 165 to 172 in the lower eight bands, where the input averages 110
+(figure in Section 5).
+
+\section{Coupling functions and lattice
+geometries}\label{coupling-functions-and-lattice-geometries}
+
+\subsection{Coupling functions}\label{coupling-functions-2}
+
+Each oscillator's phase \ensuremath{\theta_{i}} evolves as
+\ensuremath{\dot{\theta}_{i}} = \ensuremath{\omega_{i}} +
+coupling\ensuremath{_{i}} + g\ensuremath{\cdot}u\ensuremath{_{i}}
+\ensuremath{-} \ensuremath{\lambda} sin \ensuremath{\theta_{i}}: its
+natural frequency, the coupling from the other oscillators of its
+channel, the input and a restoring pull toward phase 0. The six coupling
+functions differ only in the coupling term. Four are phase models that
+machine-learning systems have built on or that physics offers as
+controlled departures from Kuramoto's; two are Stuart--Landau
+amplitude-phase oscillators, with and without their amplitude. A recent
+survey found no oscillator machine learning study compares coupling
+functions as direct controls, so the choice of one over another
+``remains a convention rather than a finding'' \citep{kryski2026}.
+\textbf{Appendix D} illustrates how each pushes an oscillator.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\caption{The six coupling functions. K\ensuremath{_{ij}} is the kernel
+weight between oscillators i and j, positive or negative, and each term
+is summed over the other oscillators of the channel. Machine-learning
+uses are those recorded by the survey of
+\citet{kryski2026}.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+coupling function
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+coupling term
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+what it adds
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+in machine learning
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+coupling function
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+coupling term
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+what it adds
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+in machine learning
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Kuramoto} & \ensuremath{\Sigma_{j}} K\ensuremath{_{ij}}
+sin(\ensuremath{\theta_{j}} \ensuremath{-} \ensuremath{\theta_{i}}) &
+pulls each oscillator toward the others' phases: the minimal model of
+synchronization \citep{kuramoto1975}, and the reference & trained
+all-to-all in Un-0 \citep{unconv-ai2026}; a D-dimensional generalization
+in AKOrN \citep{miyato2025} \\
+\cmidrule{1-4}\textbf{Kuramoto--Sakaguchi} & \ensuremath{\Sigma_{j}}
+K\ensuremath{_{ij}} sin(\ensuremath{\theta_{j}} \ensuremath{-}
+\ensuremath{\theta_{i}} \ensuremath{-} \ensuremath{\alpha}),
+\ensuremath{\alpha} = \ensuremath{\pi}/4 & a phase lag that breaks the
+pull's symmetry and admits partial coherence
+\citep{sakaguchi1986, abrams2004} & with Daido harmonics and a delay in
+FSN \citep{nunley2026} \\
+\cmidrule{1-4}\textbf{Second harmonic} & Kuramoto plus
+\ensuremath{\beta} \ensuremath{\Sigma_{j}} K\ensuremath{_{ij}} sin
+2(\ensuremath{\theta_{j}} \ensuremath{-} \ensuremath{\theta_{i}}),
+\ensuremath{\beta} = 0.5 & favours two-cluster states, pairs in phase or
+in opposition \citep{daido1992, hansel1993} & none recorded \\
+\cmidrule{1-4}\textbf{Winfree} & \ensuremath{-}sin
+\ensuremath{\theta_{i}} \ensuremath{\Sigma_{j}} K\ensuremath{_{ij}} (1 +
+cos \ensuremath{\theta_{j}}) & separates an oscillator's sensitivity,
+set by its own phase, from its influence, set by its neighbour's
+\citep{winfree1967} & generalized, with attention-defined coupling, in
+WONN \citep{dai2026} \\
+\cmidrule{1-4}\textbf{Stuart--Landau} & \ensuremath{\Sigma_{j}}
+K\ensuremath{_{ij}} (z\ensuremath{_{j}} \ensuremath{-}
+z\ensuremath{_{i}}), z = x + iy & amplitude as well as phase: each
+oscillator relaxes to a cycle of unit radius
+\citep{stuart1960, aranson2002} & one graph network \\
+\cmidrule{1-4}\textbf{Stuart--Landau, fixed amplitude} & the same,
+amplitude held at 1 & the phase-only limit, which reduces to Kuramoto:
+separates what the amplitude adds & none recorded \\
+\end{longtable}
+
+\subsection{Lattice geometries}\label{lattice-geometries-1}
+
+In our experiment, every channel stores its 256 oscillators as a 16
+\ensuremath{\times} 16 grid whose row r is driven by mel band r. A
+lattice geometry changes only which oscillators are neighbours, that is,
+how the grid's edges are glued; each of a network's four channels is a
+separate copy of the same shape, and the kernel, the parameters and the
+oscillators are the same under every geometry, so a comparison between
+geometries varies one thing.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\caption{The eight lattice geometries. The first six run in the design
+experiment; the coil and the cochlea in the cochlea experiment (Appendix
+B).}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Geometry
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+How the grid is shaped
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Geometry
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+How the grid is shaped
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Torus} & Both axes wrap: the top row is coupled to the bottom,
+and the left column to the right. The reference geometry. \\
+\cmidrule{1-2}\textbf{Cylinder} & Columns wrap, rows do not: the
+frequency axis is open, as in the cochlea, so the highest band is not
+coupled around to the lowest. \\
+\cmidrule{1-2}\textbf{Sheet} & Neither axis wraps, and coupling stops at
+every edge. With the cylinder and the torus it varies the number of
+wrapped axes from zero to two. \\
+\cmidrule{1-2}\textbf{Helix} & The 256 sites read as one closed ring,
+one octave (64 sites, four rows) per turn, so an offset of one turn
+joins bands an octave apart. \\
+\cmidrule{1-2}\textbf{Cube} & Each row's 16 columns read as a 4
+\ensuremath{\times} 4 slab, giving a 16 \ensuremath{\times} 4
+\ensuremath{\times} 4 lattice that wraps on all three axes: the same
+oscillators, with shorter paths between them. \\
+\cmidrule{1-2}\textbf{Sphere} & Rows as latitudes with open poles and
+columns as longitudes that wrap, each oscillator's influence weighted by
+the cosine of its latitude: an approximation to a sphere, not exact
+spherical coupling. \\
+\cmidrule{1-2}\textbf{Coil} & The 256 sites read as one open line from
+the base (highest band) to the apex (lowest band), one octave per turn:
+the helix with its ends apart, as the cochlea's spiral is open at both
+ends, so an offset of one turn joins sites that sit side by side on
+adjacent turns. \\
+\cmidrule{1-2}\textbf{Cochlea} & The coil with two features of the
+cochlea's mechanics: influence runs three times as strongly from base to
+apex as back, as the travelling wave does, and the coupling into each
+site grows with the coil's curvature, from a quarter at the base to full
+strength at the apex, as the spiral tightens. A control keeps both at
+the coil's average coupling. \\
+\end{longtable}
+
+The first six vary the number of wrapped axes (sheet, cylinder, torus),
+the dimension (the cube, which shortens the paths between oscillators)
+and how frequency is laid out: the cylinder and the sphere leave the
+frequency axis open, as the cochlea does, and the helix puts bands an
+octave apart next to each other, as the pitch helix of music perception
+does \citep{shepard1982}. The helix is not a cochlea: it is closed, and
+nothing in it runs one way. The coil and the cochlea follow the cochlea
+itself, whose coiled, tonotopic shape a spiral metamaterial resonator
+has used to classify AudioMNIST digits \citep{beoletto2026}; with
+tonotopic natural frequencies, each coil position's frequency falls
+exponentially from base to apex, as along the basilar membrane.
+Oscillator lattices are a long-studied setting in physics
+\citep{sakaguchi1987}, and machine-learning systems couple oscillators
+all-to-all \citep{unconv-ai2026}, through attention, or locally on a
+lattice \citep{keller2023, miyato2025}. Geometry has been varied in four
+of the systems the survey covers, ``and in none of them as a single
+variable'', and it found no work that varies coupling range or boundary
+conditions at a matched budget \citep{kryski2026}.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Lattice geometries. Every channel stores its 256 oscillators the same way, as a 16  16 grid whose row r is driven by mel band r (colour, lowest band dark). A geometry changes only which oscillators are neighbours, that is, how the grid's edges are glued, and each of a network's four channels is a separate copy of the same shape. For each geometry, left: the grid, with glued edges marked by a shared colour and arrow, open edges dark, one oscillator (star) and its nearest neighbours (dots); right: the shape the gluing makes, with the same oscillator and neighbours. On the torus the highest band's row meets the lowest; on the cylinder and the sphere the frequency axis is open; the helix threads all 256 sites into one closed ring, one octave per turn; the cube folds each row into a 4  4 slab and wraps all three axes; the coil threads the same sites into one open line, apex (lowest band) at the centre and base outside, and the cochlea adds the base-to-apex direction (arrows) and coupling that grows with curvature toward the apex (a thicker line).}]{resources/figures/a2-lattice-geometries.pdf}}
+\caption{Lattice geometries. Every channel stores its 256 oscillators
+the same way, as a 16 \ensuremath{\times} 16 grid whose row r is driven
+by mel band r (colour, lowest band dark). A geometry changes only which
+oscillators are neighbours, that is, how the grid's edges are glued, and
+each of a network's four channels is a separate copy of the same shape.
+For each geometry, left: the grid, with glued edges marked by a shared
+colour and arrow, open edges dark, one oscillator (star) and its nearest
+neighbours (dots); right: the shape the gluing makes, with the same
+oscillator and neighbours. On the torus the highest band's row meets the
+lowest; on the cylinder and the sphere the frequency axis is open; the
+helix threads all 256 sites into one closed ring, one octave per turn;
+the cube folds each row into a 4 \ensuremath{\times} 4 slab and wraps
+all three axes; the coil threads the same sites into one open line, apex
+(lowest band) at the centre and base outside, and the cochlea adds the
+base-to-apex direction (arrows) and coupling that grows with curvature
+toward the apex (a thicker line).}
+\end{figure}
+
+\section{Methods in full}\label{methods-in-full}
+
+\subsection{Experimental design}\label{experimental-design-1}
+
+Our study asks six questions:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Does an untrained coupled oscillator network carry information for
+  recognizing spoken digits beyond its input alone, beyond a
+  non-oscillating memory of the same size, and beyond the same
+  oscillators uncoupled?
+\item
+  How do trained networks of the same parameter count compare?
+\item
+  Do the coupling function, the lattice geometry, the natural
+  frequencies, the restoring strength and the coupling ceiling change
+  the answer?
+\item
+  Does the way the audio enters the network matter?
+\item
+  How do the answers change with the readout's width and the amount of
+  training data?
+\item
+  Does the network carry the order of events, on a task its input's
+  summary statistics cannot solve?
+\end{enumerate}
+
+The code and every run's record are in the supplementary material.
+
+It ran as eight experiments of 6,275 runs in all (Appendix B). Every run
+is one arm, one of the systems compared, at one noise level, input gain
+and random seed; every oscillator network is 4 channels of a 16
+\ensuremath{\times} 16 lattice. Each arm's signals are summarized,
+brought to a common width and classified by the same linear readout
+(Section 3.3), each condition is run at three seeds, and every accuracy
+is measured on speakers held out from training (Section 3.2). The runs
+used an Apple M1 Max (10 cores, 64 GB). The leak check and the controls
+and design experiments ran on its CPU; in the other five the reservoirs
+were simulated on its GPU, while the readout and the trained baselines
+stayed on the CPU. The two devices round differently: rerun on the GPU,
+the controls experiment's reservoir runs reproduced 1,262 of their 1,296
+recorded cells exactly and all but one within two test clips, and in the
+last the readout chose a different penalty and read 0.63 points lower.
+Appendix A defines every term.
+
+\subsection{Task and data}\label{task-and-data}
+
+AudioMNIST \citep{becker2024} holds 30,000 recordings of the ten spoken
+digits by 60 speakers, 50 of each digit per speaker. Each recording is
+resampled from 48 kHz to 16 kHz, peak-normalized, trimmed of leading and
+trailing silence below 1\% of its peak, and capped at 1 s. We use it
+rather than TI-46, the corpus of the oscillator hardware result, because
+it is open, has four times as many speakers, and has published
+speaker-disjoint folds.
+
+Every result keeps speakers apart, so the accuracy measures recognition
+of voices the readout has never heard; a split that spreads each speaker
+across training and test would let it learn the speakers too. Under
+Protocol A, the arms are trained on speakers 1 to 48 (24,000 recordings)
+and tested on all 6,000 recordings of speakers 49 to 60, an 80/20 split
+by speaker. A seed fixes a permutation of the training recordings, and
+its training set is the first 2,048 of them (8,192 and 24,000 for the
+training-size comparison), so a larger set contains the smaller. Under
+Protocol B, used only to place results beside published ones, the arms
+follow the five folds of \citet{becker2024}: each fold splits the 60
+speakers into 36 for training, 12 for validation and 12 for testing
+(18,000, 6,000 and 6,000 recordings, a 60/20/20 split by speaker), and
+every speaker is tested in exactly one fold, so a fold plays the part a
+seed plays under Protocol A.
+
+The order task tests whether an arm carries the order of events. Two
+digits of a pair (0 and 6, 1 and 8, 2 and 5, 3 and 7, 4 and 9) are
+spoken one after the other, and the arm must say which came first; each
+pair has 2,048 training sequences from the training speakers and 2,048
+test sequences from the test speakers, balanced between the two orders.
+The summary statistics of an input read over the whole span do not
+depend on the order of its frames, so the spectrogram-only baseline
+reads chance, 50\%, and anything above it must come from the arm's own
+dynamics.
+
+\subsection{Front end: the mel
+spectrogram}\label{front-end-the-mel-spectrogram}
+
+Every experimental arm hears the audio through the same fixed front end:
+a log-mel spectrogram of 16 mel bands, computed with a 512-point Fourier
+transform every 256 samples (16 ms, 62.5 frames per second) and rescaled
+by a fixed affine map, with nothing learned and no per-utterance
+normalization. We chose a fixed, basic front end over a learned one
+\citep{zeghidour, lostanlen} so that nothing trained sits before the
+arms being compared. A learned front end would be fitted differently for
+each arm, a difference in accuracy could come from it rather than from
+what follows, and it would favour the trained baselines, which can adapt
+to a richer input, over the untrained reservoirs, which cannot. Sixteen
+bands also fit every arm at once: mel band r drives row r of each of the
+lattice's 16 rows, and every trained baseline takes the same 16 signals
+as its input. The choice of front end matters on this corpus: on 3,000
+AudioMNIST clips from six speakers, shared between training and test, a
+linear classifier reads 98.7\% from the tonogram of a passive
+cochlea-shaped metamaterial resonator, 98.6\% from MFCCs and 98.4\% from
+a cochleagram, but 75.5\% from a linear spectrogram
+\citep{beoletto2026}.
+
+\subsection{Readout}\label{readout}
+
+Every arm is read the same way. Each of its signals (a band energy, the
+sine or cosine of an oscillator's phase, a leaky integrator's state, or
+a trained baseline's hidden unit) is summarized by three statistics, its
+mean, its standard deviation and its mean absolute change from frame to
+frame, over each of four equal windows of the same frames for every
+clip: frames 16 to 61, after a 16-frame warm-up, and frames 16 to 147 as
+one window for the order task. The arms expose very different numbers of
+signals, from 16 band energies to 2,048 oscillator signals, so their
+summaries range from 192 to 24,576 numbers. So that readout capacity
+cannot pass for dynamics, every arm is brought to the same width: its
+summaries are standardized with the training set's own statistics and
+multiplied by a random Gaussian matrix to 192 features (and to 1,024 and
+4,096 in the width comparison), a projection that approximately
+preserves distances between feature vectors \citep{johnson1984}. The
+spectrogram-only baseline and four of the trained baselines are 192 wide
+and are not projected; the GRU's 216 features are.
+
+A single linear layer then maps the 192 features to ten digit scores. It
+is fitted by ridge regression, least squares with an L2 penalty solved
+in closed form, with the penalty chosen from four values on the last
+eighth of the training clips. We use this readout, the
+reservoir-computing standard \citep{jaeger2001, lukosevicius2012},
+rather than a learned decoder because it is the weakest reader that can
+be fitted identically for every arm: whatever it separates must already
+be in the features. The trained baselines are trained end to end through
+a learned linear layer on the same statistics, standardized as the
+readout standardizes them, and then read by the same readout.
+
+The projection matrix is fixed, one draw used for every run, or seeded,
+a draw of its own for each run seed. Every result is reported under the
+fixed projection. Because a single draw leaves the projection's own
+variability out of the spread over seeds, the controls experiment's
+reservoirs are also read under the seeded projection, and both are
+reported.
+
+\subsection{Input pathways}\label{input-pathways}
+
+The survey found no study that contrasts two ways of injecting the input
+under controls \citep{kryski2026}, so the audio drives a reservoir in
+one of two ways, the second adding one kind of information to the first.
+\textbf{Spectrogram}: each band energy of the mel spectrogram adds to
+the rotation rate of the oscillators in its row,
+\ensuremath{\dot{\theta}_{i}} +=
+g\ensuremath{\cdot}A\ensuremath{_{r}}(t), the standard reservoir input;
+every experiment uses it unless stated otherwise. \textbf{Quadrature}:
+each band's energy together with the phase of its signal relative to the
+band's centre frequency, entering as a phase-referenced push
+g\ensuremath{\cdot}A\ensuremath{_{r}} sin(\ensuremath{\varphi_{r}}
+\ensuremath{-} \ensuremath{\theta_{i}}), the injection form of
+\citet{adler1946}, so an oscillator can lock to the band's own cycle.
+Each pathway's spectrogram-only baseline reads that pathway's own front
+end. Driving the oscillators with each band's waveform itself, at the
+full 16 kHz, as a physical oscillator array would be driven, is left to
+a companion study.
+
+\subsection{Noise protocol}\label{noise-protocol}
+
+White noise is added to every clip, in training and in test alike, at a
+level set by the clip's own speech and given as the signal-to-noise
+ratio: at 0 dB the noise is as loud as the speech, and at
+\ensuremath{-}5 dB it is 5 dB louder. These are the two signal-to-noise
+ratios at which \citet{young2026} trained hybrid real- and
+complex-valued convolutional networks on AudioMNIST, testing them from
+\ensuremath{-}10 to +10 dB, though on a random split of the clips rather
+than one by speaker. Each clip's noise is drawn from a generator seeded
+by the clip's identity, so every arm hears exactly the same noisy clip,
+and clean audio is also reported. We add noise because the clean task
+nearly saturates: on clean audio the spectrogram-only baseline reads
+93.6\% and the coupled oscillator network 91.1\% (gain 1, 2,048 training
+clips), leaving little room to tell designs apart. The two levels were
+set before the runs to put the strongest untrained arm between 70\% and
+90\%, and they do: the coupled oscillator network reads 77.8\% at 0 dB
+and 70.7\% at \ensuremath{-}5 dB (gain 1). Two levels keep the design
+affordable while showing whether an effect holds as the noise grows.
+
+\subsection{Input gain and the integrator-validity
+bound}\label{input-gain-and-the-integrator-validity-bound}
+
+Input gain is the factor that scales the mel spectrogram before it
+drives a reservoir. It applies only to the reservoirs: the coupled and
+uncoupled oscillator networks and the leaky-integrator banks. Both of
+these types of reservoirs are nonlinear, so the strength of the input
+relative to their own dynamics changes how they respond. For an
+oscillator, the input competes with its natural frequency, its coupling
+and the restoring pull; for a leaky integrator, it sets how far into the
+saturating \emph{tanh} the input reaches. How hard the input pushes,
+relative to a reservoir's own dynamics, therefore sets how much of the
+input its state carries: a weak push barely perturbs the oscillators'
+own rotation, and a strong one makes them follow the input.
+
+The reservoirs are run at gains 1 and 2. At gain 1 the band energies,
+rescaled to lie roughly between 0 and 2, push with the same magnitude as
+the natural frequencies (about 1) and more than the restoring strength
+(0.3 or 0.1); gain 2 doubles that push. The two values are fixed in
+advance rather than tuned, and both are reported: gain 2 reads lower
+than gain 1 for every reservoir at every noise level, by 0.7 to 3.5
+points at 2,048 training clips, and a sweep to gain 12 (Section 4.4)
+shows how far each coupling function tolerates a stronger push. The gain
+is positive because the input is an energy: a negative gain would make
+louder sound slow the oscillators rather than speed them, a different
+model rather than a different strength. It is bounded above by the
+integrator: the network advances in time steps of 0.1, and the phase an
+oscillator gains from the input in one step must stay below
+\ensuremath{\pi} for the step to be valid \citep{hairer1993}, a bound
+the spectrogram pathway reaches near gain 17.
+
+The spectrogram-only baseline has no dynamics for gain to act on. Its
+features are summary statistics of the band energies, and each scales in
+proportion to the input: doubling the input doubles every mean, standard
+deviation and mean absolute change, and the readout's standardization
+divides that factor out exactly, so the baseline at gain 2 would be
+identical to the baseline at gain 1. The trained baselines learn their
+own input scale: a fixed gain could be undone by the first layer's
+weights, so it would relabel the same experiment rather than define a
+new one. Each trained baseline is therefore trained once per noise
+level, on the input as it is.
+
+\subsection{Reporting and uncertainty}\label{reporting-and-uncertainty}
+
+No threshold decides a result. Every accuracy is reported as its mean
+over replicates, with the sample standard deviation and each replicate's
+value. A replicate is one seed under Protocol A, which sets the arm's
+random parameters and which training clips it draws, and one fold under
+Protocol B (Section 3.2). Every comparison between two arms, for example
+the coupled oscillator network against the spectrogram-only baseline, is
+paired: both are scored on the same test clips, at the same noise level,
+gain and seed. It is reported as the mean difference in accuracy, the
+standard deviation of that difference over seeds, and a 95\% interval
+from a paired bootstrap: the test clips are resampled with replacement
+2,000 times, the difference is recomputed on each resample, and the
+interval holds the middle 95\% of those differences.
+
+These measure different sources of variation. The standard deviation
+over seeds is how much a result moves when the random draws and the
+training clips change; the bootstrap interval is how precisely the fixed
+test set measures a difference. Scoring both arms on the same clips
+cancels the clips every arm finds easy or hard, so the paired interval
+is narrower than one for two unpaired accuracies, but it covers test-set
+sampling only. Neither covers the fixed projection's own draw, which is
+why the controls experiment's reservoirs are also read under the seeded
+projection (Section 3.3). The primary cell for every comparison is width
+192, 2,048 training clips and the four-window read (the whole-span read
+for the order task).
+
+\section{Results in full}\label{results-in-full}
+
+\subsection{The network against its
+controls}\label{the-network-against-its-controls}
+
+Every coupled and uncoupled oscillator network in this section, and in
+Sections 4.2, 4.6 and 4.7, is the reference configuration: Kuramoto
+coupling on the torus, with random natural frequencies, restoring
+strength 0.3 and coupling ceiling 1; the other coupling functions, among
+them Stuart--Landau, are compared in Section 4.3. The table gives
+recognition accuracy at the primary cell for the spectrogram-only
+baseline, the three reservoirs at input gain 1, and the GRU, the trained
+baseline with the highest accuracy with noise; the figure in Section 4.1
+adds each reservoir at gain 2.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\caption{Single spoken-digit recognition accuracy (\%) on AudioMNIST,
+mean \ensuremath{\pm} standard deviation over three
+seeds.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+arm
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+clean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0 dB
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\ensuremath{-}5 dB
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+arm
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+clean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0 dB
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\ensuremath{-}5 dB
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Spectrogram-only baseline}: the readout reads the 16 mel band
+energies directly; no reservoir & 93.6 \ensuremath{\pm} 0.3 & 78.0
+\ensuremath{\pm} 0.6 & 71.6 \ensuremath{\pm} 1.6 \\
+\cmidrule{1-4}\textbf{Coupled oscillator network} (gain = 1): 1,024
+Kuramoto oscillators, untrained & 91.1 \ensuremath{\pm} 0.4 & 77.8
+\ensuremath{\pm} 0.8 & 70.7 \ensuremath{\pm} 0.3 \\
+\cmidrule{1-4}\textbf{Uncoupled oscillator network} (gain = 1): the same
+network with its coupling removed & 90.6 \ensuremath{\pm} 0.3 & 76.9
+\ensuremath{\pm} 0.5 & 69.7 \ensuremath{\pm} 0.4 \\
+\cmidrule{1-4}\textbf{Leaky-integrator bank, state-matched} (gain = 1):
+1,024 leaky integrators with the network's states and parameters,
+untrained & 93.4 \ensuremath{\pm} 0.2 & 73.8 \ensuremath{\pm} 0.5 & 66.6
+\ensuremath{\pm} 0.8 \\
+\cmidrule{1-4}\textbf{GRU}: a trained baseline, 1,944 parameters,
+trained end to end & 96.5 \ensuremath{\pm} 0.3 & 82.8 \ensuremath{\pm}
+1.3 & 76.9 \ensuremath{\pm} 1.6 \\
+\end{longtable}
+
+\subsection{Trained baselines}\label{trained-baselines}
+
+The five trained baselines, each trained end to end on the same clips
+and read by the same readout, reached the accuracies below at the
+primary cell. With noise the GRU and TCN read highest, 82.8\% and 82.6\%
+at 0 dB, and every trained baseline read above the Kuramoto network and
+the whole-clip spectrogram-only baseline there. Every recognition run
+trained, cutting its loss by more than 20\%. With 24,000 training clips
+at 0 dB, the transformer reached 90.6\%, the GRU 89.9\%, the TCN 89.7\%,
+the S4D 88.5\% and the CNN 86.7\%; the S4D is a diagonal state-space
+model, a family that compares well with other architectures on
+time-series classification, audio included \citep{saadatmand2026}.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
+\caption{The trained baselines: parameters, recognition accuracy (\%) at
+the primary cell as mean \ensuremath{\pm} standard deviation over three
+seeds, and runs with added noise, over all three training sizes, whose
+training failed (loss cut by less than 20\%).}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+trained baseline
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+parameters
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+clean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0 dB
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\ensuremath{-}5 dB
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+failed runs with noise
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+trained baseline
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+parameters
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+clean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0 dB
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\ensuremath{-}5 dB
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+failed runs with noise
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+GRU & 1,944 & 96.5 \ensuremath{\pm} 0.3 & 82.8 \ensuremath{\pm} 1.3 &
+76.9 \ensuremath{\pm} 1.6 & 0 of 18 \\
+\cmidrule{1-6}TCN & 1,972 & 97.0 \ensuremath{\pm} 0.7 & 82.6
+\ensuremath{\pm} 1.3 & 76.2 \ensuremath{\pm} 0.4 & 0 of 18 \\
+\cmidrule{1-6}CNN & 2,109 & 94.7 \ensuremath{\pm} 0.6 & 79.2
+\ensuremath{\pm} 2.0 & 73.9 \ensuremath{\pm} 1.6 & 0 of 18 \\
+\cmidrule{1-6}transformer & 1,968 & 96.3 \ensuremath{\pm} 0.7 & 79.8
+\ensuremath{\pm} 0.6 & 72.3 \ensuremath{\pm} 0.4 & 0 of 18 \\
+\cmidrule{1-6}S4D & 1,840 & 93.2 \ensuremath{\pm} 0.6 & 78.5
+\ensuremath{\pm} 0.5 & 74.2 \ensuremath{\pm} 0.6 & 0 of 18 \\
+\end{longtable}
+
+On the five speaker folds of \citet{becker2024} (clean audio, 18,000
+training clips, one run per fold), at width 192, the whole-clip
+spectrogram-only baseline read 96.0 \ensuremath{\pm} 1.7\%, the coupled
+oscillator network 91.9 \ensuremath{\pm} 3.1\% at gain 1 and 88.9
+\ensuremath{\pm} 3.1\% at gain 2, the uncoupled network 92.3
+\ensuremath{\pm} 2.7\%, and the state-matched leaky-integrator bank 93.9
+\ensuremath{\pm} 1.8\% (gain 1). The trained baselines read 97.0\% (CNN)
+to 98.4\% (transformer). Read at width 4,096, the coupled network
+reached 96.9 \ensuremath{\pm} 1.3\% and the state-matched bank 96.8
+\ensuremath{\pm} 1.1\% (gain 1). On the same folds Becker et al.~report
+95.82 \ensuremath{\pm} 1.49\% for AlexNet on spectrograms and 92.53
+\ensuremath{\pm} 2.04\% for their AudioNet on the raw waveform.
+
+\subsection{Network design: coupling function, lattice geometry and
+natural
+frequencies}\label{network-design-coupling-function-lattice-geometry-and-natural-frequencies}
+
+The design experiment varies the coupled oscillator network one factor
+at a time around the reference configuration (Kuramoto coupling, torus,
+random natural frequencies, restoring strength 0.3, coupling ceiling 1):
+six coupling functions, six lattice geometries and three kinds of
+natural frequencies, crossed with two restoring strengths and two
+coupling ceilings (Section 4.4). The two Stuart--Landau functions run on
+the torus only, so there are 312 configurations, each at 0 and
+\ensuremath{-}5 dB, gains 1 and 2 and three seeds, read at the primary
+cell. A level's difference from its reference is paired over every
+configuration that matches it in the other four factors, on the same
+test clips and seeds: 72 configurations for each phase coupling
+function, 12 for each Stuart--Landau function, 48 for each geometry and
+104 for each kind of natural frequencies.
+
+Across the 312 configurations, accuracy at gain 1 ran from 75.2\% to
+80.3\% at 0 dB (median 77.4\%) and from 68.3\% to 73.0\% at
+\ensuremath{-}5 dB (median 70.0\%); the reference configuration read
+77.8\% and 70.7\%. At gain 2 the ranges were 73.6\% to 80.1\% (median
+74.8\%) and 66.5\% to 73.0\% (median 68.3\%).
+
+The Stuart--Landau network, whose oscillators have a free amplitude,
+read 2.1 to 3.8 points above its Kuramoto match, the largest difference
+in the experiment. At gain 2 its twelve configurations were the twelve
+highest of the 312 at both noise levels; at gain 1 they ran from 78.1\%
+to 80.3\% at 0 dB, against 78.7\% for the best phase-oscillator
+configuration. At the reference configuration it read above the
+whole-clip spectrogram-only baseline in all four conditions: by 2.31
+points {[}1.63, 3.01{]} at 0 dB and 1.36 {[}0.62, 2.11{]} at
+\ensuremath{-}5 dB at gain 1, and by 1.14 {[}0.46, 1.88{]} and 1.38
+{[}0.63, 2.16{]} at gain 2. With its amplitude fixed, the same network
+read within 0.3 points of Kuramoto. The other phase coupling functions
+differed from Kuramoto by at most 0.46 points: second harmonic above it
+by 0.15 to 0.46, Winfree below it by 0.15 to 0.34, and
+Kuramoto--Sakaguchi within 0.1.
+
+Every lattice geometry read within 0.65 points of the torus. The sphere
+read lowest (0.30 to 0.64 points below), then the sheet (0.17 to 0.45
+below) and the cylinder (0.01 to 0.26 below); the cube and the helix
+read within 0.21 points of the torus. Tonotopic natural frequencies read
+0.38 to 1.16 points below random ones, and identical frequencies within
+0.1 points of random ones.
+
+The coil and the cochlea (Appendix F) ran for the four phase coupling
+functions and the three kinds of natural frequencies, and pair with the
+design experiment's torus and helix over those twelve configurations.
+The coil read within 0.22 points of the torus, and 0.10 to 0.28 points
+below the helix, the same line closed into a ring. The cochlea read 0.41
+to 0.97 points below the torus and 0.27 to 0.83 points below the coil:
+75.5\% to 77.6\% at 0 dB and gain 1 across its twelve configurations,
+against 77.8\% for the torus reference, and 76.0\% with Kuramoto
+coupling and tonotopic frequencies, its most cochlea-like configuration.
+Its curvature weighting also lowers its average coupling to 0.54 of the
+coil's, because the ceiling caps the coupling where it is strongest, at
+the apex, and its drop below the coil is the size of halving the
+coupling ceiling in the design experiment (0.39 to 0.68 points). A
+control with the cochlea's direction and shape of weighting at the
+coil's average coupling, run on the same twelve configurations,
+recovered 0.28 to 0.71 points of that drop, yet still read 0.40 to 0.47
+points below the coil at gain 1 and within 0.12 points of it at gain 2.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2571}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1857}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1857}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1857}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1857}}@{}}
+\caption{Each design level minus its reference level, over matched
+configurations: difference in recognition accuracy (points), mean
+\ensuremath{\pm} standard deviation over three seeds;
+\ensuremath{\omega}, natural frequencies; \ensuremath{\lambda},
+restoring strength; ceiling, coupling ceiling. The coil and cochlea rows
+pair the four phase coupling functions and three kinds of natural
+frequencies at the reference restoring strength and ceiling. The 95\%
+paired intervals for the design experiment's rows are in the figure of
+Section 4.3.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+level minus reference
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0 dB, gain = 1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0 dB, gain = 2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\ensuremath{-}5 dB, gain = 1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\ensuremath{-}5 dB, gain = 2
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+level minus reference
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0 dB, gain = 1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0 dB, gain = 2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\ensuremath{-}5 dB, gain = 1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\ensuremath{-}5 dB, gain = 2
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Kuramoto--Sakaguchi minus Kuramoto & \ensuremath{-}0.05 \ensuremath{\pm}
+0.23 & \ensuremath{-}0.01 \ensuremath{\pm} 0.25 & +0.04 \ensuremath{\pm}
+0.07 & \ensuremath{-}0.09 \ensuremath{\pm} 0.09 \\
+\cmidrule{1-5}second harmonic minus Kuramoto & +0.24 \ensuremath{\pm}
+0.09 & +0.15 \ensuremath{\pm} 0.20 & +0.46 \ensuremath{\pm} 0.21 & +0.30
+\ensuremath{\pm} 0.06 \\
+\cmidrule{1-5}Stuart--Landau minus Kuramoto & +2.06 \ensuremath{\pm}
+0.26 & +3.84 \ensuremath{\pm} 0.32 & +2.30 \ensuremath{\pm} 0.18 & +3.48
+\ensuremath{\pm} 0.12 \\
+\cmidrule{1-5}Stuart--Landau, fixed amplitude minus Kuramoto & +0.07
+\ensuremath{\pm} 0.12 & \ensuremath{-}0.24 \ensuremath{\pm} 0.07 & +0.30
+\ensuremath{\pm} 0.23 & \ensuremath{-}0.26 \ensuremath{\pm} 0.33 \\
+\cmidrule{1-5}Winfree minus Kuramoto & \ensuremath{-}0.34
+\ensuremath{\pm} 0.06 & \ensuremath{-}0.16 \ensuremath{\pm} 0.14 &
+\ensuremath{-}0.17 \ensuremath{\pm} 0.09 & \ensuremath{-}0.15
+\ensuremath{\pm} 0.09 \\
+\cmidrule{1-5}cube minus torus & +0.00 \ensuremath{\pm} 0.30 & +0.04
+\ensuremath{\pm} 0.21 & +0.12 \ensuremath{\pm} 0.10 & +0.05
+\ensuremath{\pm} 0.08 \\
+\cmidrule{1-5}cylinder minus torus & \ensuremath{-}0.26 \ensuremath{\pm}
+0.04 & \ensuremath{-}0.01 \ensuremath{\pm} 0.13 & \ensuremath{-}0.26
+\ensuremath{\pm} 0.16 & \ensuremath{-}0.18 \ensuremath{\pm} 0.10 \\
+\cmidrule{1-5}helix minus torus & +0.05 \ensuremath{\pm} 0.13 & +0.04
+\ensuremath{\pm} 0.22 & +0.16 \ensuremath{\pm} 0.17 & +0.21
+\ensuremath{\pm} 0.10 \\
+\cmidrule{1-5}sheet minus torus & \ensuremath{-}0.45 \ensuremath{\pm}
+0.32 & \ensuremath{-}0.17 \ensuremath{\pm} 0.22 & \ensuremath{-}0.41
+\ensuremath{\pm} 0.14 & \ensuremath{-}0.26 \ensuremath{\pm} 0.06 \\
+\cmidrule{1-5}sphere minus torus & \ensuremath{-}0.64 \ensuremath{\pm}
+0.15 & \ensuremath{-}0.30 \ensuremath{\pm} 0.28 & \ensuremath{-}0.64
+\ensuremath{\pm} 0.26 & \ensuremath{-}0.57 \ensuremath{\pm} 0.04 \\
+\cmidrule{1-5}identical minus random \ensuremath{\omega} &
+\ensuremath{-}0.04 \ensuremath{\pm} 0.05 & +0.09 \ensuremath{\pm} 0.05 &
+\ensuremath{-}0.05 \ensuremath{\pm} 0.17 & +0.01 \ensuremath{\pm}
+0.14 \\
+\cmidrule{1-5}tonotopic minus random \ensuremath{\omega} &
+\ensuremath{-}1.16 \ensuremath{\pm} 0.34 & \ensuremath{-}0.38
+\ensuremath{\pm} 0.09 & \ensuremath{-}0.68 \ensuremath{\pm} 0.34 &
+\ensuremath{-}0.61 \ensuremath{\pm} 0.11 \\
+\cmidrule{1-5}\ensuremath{\lambda} 0.1 minus 0.3 & \ensuremath{-}0.16
+\ensuremath{\pm} 0.09 & \ensuremath{-}0.13 \ensuremath{\pm} 0.08 &
+\ensuremath{-}0.14 \ensuremath{\pm} 0.09 & \ensuremath{-}0.23
+\ensuremath{\pm} 0.01 \\
+\cmidrule{1-5}ceiling 0.5 minus 1 & \ensuremath{-}0.59 \ensuremath{\pm}
+0.12 & \ensuremath{-}0.39 \ensuremath{\pm} 0.08 & \ensuremath{-}0.68
+\ensuremath{\pm} 0.15 & \ensuremath{-}0.56 \ensuremath{\pm} 0.08 \\
+\cmidrule{1-5}coil minus torus & \ensuremath{-}0.22 \ensuremath{\pm}
+0.31 & \ensuremath{-}0.15 \ensuremath{\pm} 0.25 & +0.01 \ensuremath{\pm}
+0.48 & \ensuremath{-}0.06 \ensuremath{\pm} 0.27 \\
+\cmidrule{1-5}cochlea minus torus & \ensuremath{-}0.97 \ensuremath{\pm}
+0.06 & \ensuremath{-}0.41 \ensuremath{\pm} 0.11 & \ensuremath{-}0.76
+\ensuremath{\pm} 0.53 & \ensuremath{-}0.89 \ensuremath{\pm} 0.20 \\
+\cmidrule{1-5}cochlea minus coil & \ensuremath{-}0.75 \ensuremath{\pm}
+0.26 & \ensuremath{-}0.27 \ensuremath{\pm} 0.36 & \ensuremath{-}0.77
+\ensuremath{\pm} 0.21 & \ensuremath{-}0.83 \ensuremath{\pm} 0.07 \\
+\cmidrule{1-5}coil minus helix & \ensuremath{-}0.28 \ensuremath{\pm}
+0.30 & \ensuremath{-}0.10 \ensuremath{\pm} 0.13 & \ensuremath{-}0.17
+\ensuremath{\pm} 0.20 & \ensuremath{-}0.24 \ensuremath{\pm} 0.11 \\
+\cmidrule{1-5}cochlea at the coil's coupling minus coil &
+\ensuremath{-}0.47 \ensuremath{\pm} 0.38 & +0.07 \ensuremath{\pm} 0.36 &
+\ensuremath{-}0.40 \ensuremath{\pm} 0.35 & \ensuremath{-}0.12
+\ensuremath{\pm} 0.34 \\
+\cmidrule{1-5}cochlea minus cochlea at the coil's coupling &
+\ensuremath{-}0.28 \ensuremath{\pm} 0.12 & \ensuremath{-}0.34
+\ensuremath{\pm} 0.16 & \ensuremath{-}0.37 \ensuremath{\pm} 0.47 &
+\ensuremath{-}0.71 \ensuremath{\pm} 0.32 \\
+\end{longtable}
+
+\subsection{Sensitivity of the canonical physics
+values}\label{sensitivity-of-the-canonical-physics-values}
+
+The restoring strength and the coupling ceiling are crossed with every
+other factor in the design experiment, so each difference is paired over
+156 configurations. A restoring strength of 0.1 read 0.13 to 0.23 points
+below 0.3, and a coupling ceiling of 0.5 read 0.39 to 0.68 points below
+1, in all four conditions (the last rows of the table in Appendix H.3).
+
+Adding each oscillator's rotation rates to the read raised accuracy by
+0.13 to 0.17 points at gain 1 and by 0.47 to 0.49 points at gain 2,
+averaged over all 312 configurations. Per-clip correctness is kept only
+for the primary read in the design experiment, so this difference has no
+bootstrap interval.
+
+A sweep extends the restoring strength, the coupling ceiling and the
+gain beyond the design experiment's levels, for every coupling function
+at the reference configuration, paired with the design experiment's
+reference cells on the same clips and seeds (the sweep's reservoirs ran
+on the Apple GPU and the design experiment's on its CPU, which agree
+within two test clips in all but one of 1,296 recorded cells; Section
+3.5). Restoring strengths of 0.5, 0.8 and 1.0 moved the phase-oscillator
+networks by \ensuremath{-}1.2 to +2.1 points against 0.3, with Kuramoto
+0.2 to 0.8 points above; they lowered the Stuart--Landau network in
+every condition, by 0.4 to 2.8 points, more as the restoring strength
+grew. Coupling ceilings of 1.5 and 2 moved every coupling function by
+\ensuremath{-}2.4 to +1.7 points against 1, with no direction common to
+them.
+
+Gain separates the Stuart--Landau network from the rest. From gain 1 to
+gain 8 it lost 4.3 points at 0 dB and 2.8 at \ensuremath{-}5 dB, while
+every phase-oscillator network lost 15 to 19 points and the
+Stuart--Landau network with its amplitude fixed 25 to 28. Beyond gain 8
+it also gave way, losing 8.4 points by gain 10 and 20.8 by gain 12 at 0
+dB (7.0 and 19.4 at \ensuremath{-}5 dB), against 24 to 38 points for the
+others.
+
+\subsection{Alternative input format:
+quadrature}\label{alternative-input-format-quadrature}
+
+Rather than just test a mel spectrogram front-end drive we wanted to see
+what a quadrature format would produce. The quadrature experiment ran
+ten coupled oscillator networks on the quadrature pathway: the four
+phase coupling functions on the torus and Kuramoto on the helix, each
+with random and tonotopic natural frequencies. They read 11.7\% to
+15.1\% at gain 1 and 12.2\% to 14.3\% at gain 2, against a chance level
+of 10\%. The spectrogram-only baseline read on the quadrature front end
+reached 36.1\% at 0 dB and 28.2\% at \ensuremath{-}5 dB over the whole
+clip, and 26.9\% and 21.7\% from frame 16. On the same clips and seeds,
+each network read 55.7 to 66.0 points below the same network driven
+through the spectrogram pathway. Within any one noise level and gain,
+the ten networks spanned at most 2.5 points, and Winfree with tonotopic
+frequencies read highest in three of the four conditions. The
+oscillators did not lock to the quadrature drive: their mean
+phase-locking value to their own band's drive ranged from 0.16 to 0.21
+across runs, and in no run did more than 0.3\% of them lock above 0.5.
+
+\subsection{Readout sufficiency: width and training
+size}\label{readout-sufficiency-width-and-training-size}
+
+Widening the readout from 192 to 4,096 features, at 2,048 training
+clips, raised the coupled oscillator network's recognition accuracy by
+2.1 to 3.8 points at gain 1 and 2.8 to 6.3 points at gain 2, the
+uncoupled network's by 0.3 to 2.4 and 1.3 to 4.0 points, and the
+leaky-integrator banks' by 1.3 to 1.8 points on clean audio at gain 1,
+2.9 to 3.9 points at gain 2, and 5.0 to 6.2 points with noise. The
+spectrogram-only baseline and four of the trained baselines are 192
+wide, so a wider read leaves them unchanged; the GRU, 216 wide, gained
+0.3 to 1.2 points.
+
+At width 192, going from 2,048 to 24,000 training clips raised the
+whole-clip baseline by 4.1 points at 0 dB and 3.5 points at
+\ensuremath{-}5 dB, and the coupled network by 2.0 points at both; the
+trained baselines gained 7.1 to 10.8 points at 0 dB and 7.5 to 12.4 at
+\ensuremath{-}5 dB, the transformer most. With 24,000 clips and width
+4,096, the coupled network read 85.9\% at 0 dB and 78.3\% at
+\ensuremath{-}5 dB, the state-matched bank 84.8\% and 78.6\%, and the
+whole-clip baseline 82.1\% and 75.1\%, against 86.7\% to 90.6\% at 0 dB
+and 81.4\% to 84.9\% at \ensuremath{-}5 dB for the trained baselines.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio,alt={Recognition accuracy against the number of training clips, at 0 dB (left) and 5 dB (right), for the reservoirs at gain 1 read at width 192 (solid) and 4,096 (dashed), and for the arms that are 192 wide natively. Mean over three seeds; error bars, one standard deviation.}]{resources/figures/c5-training-size.pdf}}
+\caption{Recognition accuracy against the number of training clips, at 0
+dB (left) and \ensuremath{-}5 dB (right), for the reservoirs at gain 1
+read at width 192 (solid) and 4,096 (dashed), and for the arms that are
+192 wide natively. Mean over three seeds; error bars, one standard
+deviation.}
+\end{figure}
+
+Read through a projection drawn for each run seed instead of the one
+fixed draw, the controls experiment's reservoirs moved by
+\ensuremath{-}1.29 to +0.88 points on recognition and \ensuremath{-}0.63
+to +1.22 points on order (seeded minus fixed, 48 paired comparisons, 35
+of whose 95\% intervals contain zero). Under the seeded projection the
+coupled network read 2.27, 0.40 and 0.69 points below the whole-clip
+baseline on recognition at gain 1 (clean, 0 dB, \ensuremath{-}5 dB),
+against 2.53, 0.23 and 0.88 under the fixed one; 0.58 to 1.46 points
+above the uncoupled network (0.43 to 1.08 fixed); and 4.0 to 4.8 points
+above the state-matched bank with noise (4.0 to 4.2 fixed).
+
+\subsection{Temporal order}\label{temporal-order}
+
+The order task asks which of two recordings came first, digit a then b
+or b then a, on five digit pairs; the table averages each arm over the
+pairs, at 2,048 training clips and width 192, on the whole-span read.
+The spectrogram-only baseline read between 49.8\% and 50.6\% in every
+condition, whole clip or from frame 16. Its 95\% interval over test
+clips contained chance (50\%) in 14 of the 15 pair and noise cells; in
+the fifteenth, pair 3--7 at 0 dB, it read 48.4\% {[}47.1, 49.8{]} over
+the whole clip.
+
+At gain 1 the coupled oscillator network read 97.7\%, 96.2\% and 95.5\%
+on clean audio, at 0 dB and at \ensuremath{-}5 dB, 45.4 to 47.9 points
+above the whole-clip baseline; at gain 2 it read 91.4\% to 93.5\%. The
+uncoupled network read below the coupled one by 2.2, 5.5 and 8.5 points
+at gain 1 (clean, 0 dB, \ensuremath{-}5 dB) and by 10.4, 15.7 and 18.7
+points at gain 2. Both leaky-integrator banks read 98.7\% to 99.9\% at
+both gains, 2.2 to 7.5 points above the coupled network. Of the trained
+baselines, the transformer and the GRU read 99.0\% to 99.9\% and the TCN
+91.1\% to 99.9\%. The S4D read 99.5\% and the CNN 92.2\% on clean audio,
+and both read chance with noise (49.8\% to 50.1\%); all 30 of the S4D's
+runs with noise and 15 of the CNN's cut their loss by less than 20\%.
+Adding rotation rates to the coupled network's read changed its accuracy
+by \ensuremath{-}0.10 to +0.55 points at gain 1 and by +1.04 to +3.01
+points at gain 2.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1667}}@{}}
+\caption{Temporal-order accuracy (\%), averaged over the five digit
+pairs, mean \ensuremath{\pm} standard deviation over three seeds; chance
+is 50\%.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+arm
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+clean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0 dB
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\ensuremath{-}5 dB
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+arm
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+clean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+0 dB
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\ensuremath{-}5 dB
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+spectrogram-only baseline, whole clip & 49.9 \ensuremath{\pm} 0.5 & 49.9
+\ensuremath{\pm} 0.3 & 50.1 \ensuremath{\pm} 0.6 \\
+\cmidrule{1-4}coupled oscillator network (gain = 1) & 97.7
+\ensuremath{\pm} 0.6 & 96.2 \ensuremath{\pm} 0.4 & 95.5 \ensuremath{\pm}
+0.7 \\
+\cmidrule{1-4}coupled oscillator network (gain = 2) & 92.9
+\ensuremath{\pm} 0.5 & 93.5 \ensuremath{\pm} 0.1 & 91.4 \ensuremath{\pm}
+0.6 \\
+\cmidrule{1-4}uncoupled oscillator network (gain = 1) & 95.5
+\ensuremath{\pm} 0.6 & 90.7 \ensuremath{\pm} 0.1 & 87.0 \ensuremath{\pm}
+0.4 \\
+\cmidrule{1-4}uncoupled oscillator network (gain = 2) & 82.5
+\ensuremath{\pm} 0.8 & 77.8 \ensuremath{\pm} 0.4 & 72.7 \ensuremath{\pm}
+0.3 \\
+\cmidrule{1-4}leaky-integrator bank, state-matched (gain = 1) & 99.9
+\ensuremath{\pm} 0.0 & 99.6 \ensuremath{\pm} 0.1 & 98.8 \ensuremath{\pm}
+0.1 \\
+\cmidrule{1-4}leaky-integrator bank, state-matched (gain = 2) & 99.7
+\ensuremath{\pm} 0.0 & 99.6 \ensuremath{\pm} 0.1 & 98.9 \ensuremath{\pm}
+0.1 \\
+\cmidrule{1-4}leaky-integrator bank, width-matched (gain = 1) & 99.9
+\ensuremath{\pm} 0.1 & 99.5 \ensuremath{\pm} 0.1 & 98.7 \ensuremath{\pm}
+0.3 \\
+\cmidrule{1-4}leaky-integrator bank, width-matched (gain = 2) & 99.8
+\ensuremath{\pm} 0.0 & 99.6 \ensuremath{\pm} 0.1 & 99.0 \ensuremath{\pm}
+0.1 \\
+\cmidrule{1-4}transformer & 99.9 \ensuremath{\pm} 0.0 & 99.6
+\ensuremath{\pm} 0.1 & 99.3 \ensuremath{\pm} 0.1 \\
+\cmidrule{1-4}GRU & 99.8 \ensuremath{\pm} 0.1 & 99.6 \ensuremath{\pm}
+0.1 & 99.0 \ensuremath{\pm} 0.1 \\
+\cmidrule{1-4}S4D & 99.5 \ensuremath{\pm} 0.1 & 50.1 \ensuremath{\pm}
+0.2 & 49.8 \ensuremath{\pm} 0.5 \\
+\cmidrule{1-4}CNN & 92.2 \ensuremath{\pm} 0.6 & 50.0 \ensuremath{\pm}
+0.4 & 50.0 \ensuremath{\pm} 0.4 \\
+\cmidrule{1-4}TCN & 99.9 \ensuremath{\pm} 0.1 & 95.0 \ensuremath{\pm}
+0.4 & 91.1 \ensuremath{\pm} 0.3 \\
+\end{longtable}
+
 \end{document}

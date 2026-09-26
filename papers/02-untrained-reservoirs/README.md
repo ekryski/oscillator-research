@@ -19,7 +19,6 @@ Most of the accuracy comes from the input representation and the readout. At a m
 | [`…-tmlr.pdf`](spoken-digit-recognition-without-training-tmlr.pdf) | the TMLR submission build, anonymous, in the journal's own style |
 | [`…-iclr.pdf`](spoken-digit-recognition-without-training-iclr.pdf) | the ICLR 2027 submission build, anonymous and line-numbered, in ICLR's own style |
 | [`…-preprint.pdf`](spoken-digit-recognition-without-training-preprint.pdf) | the preprint build, with the author named and no venue claimed |
-| [`…-FULL.md`](spoken-digit-recognition-without-training-FULL.md) · [`…-FULL-iclr.pdf`](spoken-digit-recognition-without-training-FULL-iclr.pdf) | the full-length paper, saved before the draft was cut to ICLR's nine pages; the draft keeps its methods and results in full in Appendices F to H |
 | [`…-arxiv.tar.gz`](spoken-digit-recognition-without-training-arxiv.tar.gz) | LaTeX source, style files, bibliography and figures, ready to upload |
 | [`references/bibliography.bib`](references/bibliography.bib) | the works it cites |
 | [`metadata/`](metadata/) | its front matter, and how to cite it |
