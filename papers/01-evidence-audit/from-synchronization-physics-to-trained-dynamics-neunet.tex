@@ -53,6 +53,11 @@
 % longtables set them solid. Both knobs are needed: \arraystretch scales the
 % row strut, \extrarowheight lifts the text off the rule above it.
 \renewcommand{\arraystretch}{1.35}
+% pandoc loads these only when the main text has a table; a paper whose tables all sit
+% in the appendix still needs them, and \extrarowheight needs array either way
+\usepackage{longtable,booktabs,array,calc}
+% pandoc numbers a caption-less table against a counter named none, defined with the rest
+\makeatletter\@ifundefined{c@none}{\newcounter{none}}{}\makeatother
 \setlength{\extrarowheight}{3pt}
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
@@ -64,8 +69,13 @@
   pdflang={en-GB},
   pdfkeywords={coupled oscillators, Kuramoto model, reservoir
 computing, synchronization, neural architectures, literature survey},
-  pdfcreator={LaTeX via pandoc}}
-
+  pdfcreator={}}
+\hypersetup{pdfcreator={}, pdfproducer={}}
+\ifdefined\pdftrailerid\pdftrailerid{}\fi
+\ifdefined\pdfsuppressptexinfo\pdfsuppressptexinfo=-1\fi
+\ifdefined\pdfinfoomitdate\pdfinfoomitdate=1\fi
+\ifdefined\pdfvariable\pdfvariable suppressoptionalinfo 1023\relax\fi
+\ifdefined\pdfgentounicode\input{glyphtounicode}\pdfgentounicode=1\fi
 \ExplSyntaxOn
 \str_if_eq:nnT { submission } { preprint }
 {
@@ -78,7 +88,7 @@ computing, synchronization, neural architectures, literature survey},
     \else
       \__short_authors: :~
     \fi
-    { \rmfamily \itshape Preprint,~2026-09-11 }
+    { \rmfamily \itshape Preprint,~2026-09-26 }
     \group_end:
   }
 }
@@ -142,9 +152,9 @@ survey
 
 \maketitle
 
-\section{Introduction and background}\label{introduction-and-background}
+\section{Introduction and background}\label{sec-1}
 
-\subsection{What is an oscillator}\label{what-is-an-oscillator}
+\subsection{What is an oscillator}\label{sec-1-1}
 
 An \textbf{oscillator} is a system that keeps a rhythm of its own. Left
 undisturbed it does not settle at a resting point; it returns to a
@@ -166,7 +176,8 @@ cycle self-sustaining: started from rest, as all of them are, they
 oscillate with whatever amplitude the input gives them rather than
 returning to a rhythm of their own. Only coRNN among them is damped in
 the model itself; UnICORNN is undamped by construction and LinOSS has no
-damping term, a distinction Section 2.3.1 returns to.
+damping term, a distinction \hyperref[sec-2-3-1]{Section 2.3.1} returns
+to.
 
 \begin{figure}
 \centering
@@ -177,7 +188,7 @@ is a circle. (b) An amplitude-phase oscillator keeps a radius as well,
 so its state space is a plane, and trajectories started away from the
 limit cycle relax onto it. (c) A network keeps N of them and couples
 each unit to others with strength K. The phases and trajectories drawn
-are illustrative, not simulated.}
+are illustrative, not simulated.}\label{fig-fig1-oscillator-anatomy}
 \end{figure}
 
 \textbf{Coupling} is what makes a population of oscillators one system
@@ -200,7 +211,7 @@ literature, drawn schematically. Full synchrony leaves no degrees of
 freedom to carry a signal and incoherence leaves nothing organized; the
 useful regime is the partial coherence between them, which finite-range
 nonlocal coupling generically produces. The phases shown are
-illustrative, not simulated.}
+illustrative, not simulated.}\label{fig-fig2-coupling-regimes}
 \end{figure}
 
 That partial regime is also where recurrent computation is reported to
@@ -212,10 +223,10 @@ tuning \citep{kusmierz2025}, a result about autonomous dynamics rather
 than about trainability. Every design decision surveyed here, whether
 coupling range, damping, spectral placement or sparsity, is a way of
 steering the field toward that regime and holding it there, which is
-also why the same decisions reappear in Section 3.1 as failure modes.
+also why the same decisions reappear in \hyperref[sec-3-1]{Section 3.1}
+as failure modes.
 
-\subsection{The evolution of oscillator
-understanding}\label{the-evolution-of-oscillator-understanding}
+\subsection{The evolution of oscillator understanding}\label{sec-1-2}
 
 Literature from three different fields arrives at similar observations
 from different directions. Physics and mathematics come first
@@ -225,8 +236,7 @@ that cortex runs on rhythms and uses them to route information.
 Applications within machine learning are much more recent, and almost
 every system we surveyed aligns with findings from the other two fields.
 
-\subsubsection{Within physics and
-mathematics}\label{within-physics-and-mathematics}
+\subsubsection{Within physics and mathematics}\label{sec-1-2-1}
 
 The observed coupling of oscillators has been on record since 1665, when
 Christiaan Huygens found that two pendulum clocks hung from the same
@@ -284,8 +294,8 @@ directly \citep{bacic2026}. Separately, the oscillator itself was moved
 off the circle: \citet{chandra2019} wrote the units as unit vectors in D
 dimensions with rotation-matrix natural frequencies, and
 \citet{de-aguiar2023} replaced the scalar coupling constant with a
-matrix. Appendix B tabulates the full lineage and what each step's
-coupling gained over the one before it.
+matrix. \hyperref[sec-B]{Appendix B} tabulates the full lineage and what
+each step's coupling gained over the one before it.
 
 \begin{figure}
 \centering
@@ -294,17 +304,18 @@ coupling gained over the one before it.
 date order. The upper track is the account of when a coupled population
 locks; the lower track is what structure and operating regime do to it.
 The axis is piecewise, because four entries predate 1930 and most
-postdate 1990. Almost every machine-learning system in Section 2 takes
-its coupling law from the upper track, and from the 1967 to 1992 stretch
-of it in particular. The exceptions are AKOrN \citep{akorn} and, through
-it, HoloGraph \citep{dan2025}, built on the D-dimensional generalization
-of \citet{chandra2019} in the lower track. The rest of the lower track
-is untouched by the surveyed systems, and its earliest two entries are
-arguments that physics can compute at all rather than coupling laws to
-build with.}
+postdate 1990. Almost every machine-learning system in
+\hyperref[sec-2]{Section 2} takes its coupling law from the upper track,
+and from the 1967 to 1992 stretch of it in particular. The exceptions
+are AKOrN \citep{akorn} and, through it, HoloGraph \citep{dan2025},
+built on the D-dimensional generalization of \citet{chandra2019} in the
+lower track. The rest of the lower track is untouched by the surveyed
+systems, and its earliest two entries are arguments that physics can
+compute at all rather than coupling laws to build
+with.}\label{fig-fig3-physics-timeline}
 \end{figure}
 
-\subsubsection{Within neuroscience}\label{within-neuroscience}
+\subsubsection{Within neuroscience}\label{sec-1-2-2}
 
 Neuroscience researchers began observing oscillatory coupling directly
 in cortical tissue: neurons in the feline visual cortex oscillate at 40
@@ -352,7 +363,8 @@ intermittent by construction: groups couple during the excitable window
 and decouple after it. Whether the coupling and decoupling of a trained
 oscillator network falls into comparable gamma and theta relationships,
 and whether it does so on visual tasks in particular, is an open and
-directly checkable question, and one Section 3.2 returns to.
+directly checkable question, and one \hyperref[sec-3-2]{Section 3.2}
+returns to.
 
 Beyond the gamma band, \citet{buzsaki2006} makes the broader claim that
 self-emerged oscillatory timing is the brain's fundamental organizer of
@@ -378,11 +390,12 @@ is the same one used for coupled oscillators generally, a correspondence
 \citet{stiefel2016} set out explicitly. The reductions this rests on
 were built for it: \citet{morris1981} keeps two variables of the
 \citet{hodgkin1952} conductance dynamics, few enough to analyse and
-enough to spike. One consequence matters for everything in Section 2:
-cortex is not quiet when undriven. Resting-state functional connectivity
-is reproduced by networks of local oscillators running with no stimulus
-at all \citep{cabral2011}, which is the biological counterpart of a
-field that computes before it is trained.
+enough to spike. One consequence matters for everything in
+\hyperref[sec-2]{Section 2}: cortex is not quiet when undriven.
+Resting-state functional connectivity is reproduced by networks of local
+oscillators running with no stimulus at all \citep{cabral2011}, which is
+the biological counterpart of a field that computes before it is
+trained.
 
 Sensory transduction offers a sharper precedent, because there the
 frequencies are not learned. The cochlea is modelled as a bank of active
@@ -424,10 +437,11 @@ static, so it cannot say whether a population-level mechanism
 contributes. No model in the review spans both levels, so the
 flexibility that lets any of them track a variable speech rate cannot
 presently be attributed to the cell or to the network. That is
-structurally the problem Section 3.1.1 describes on the machine-learning
-side, where a system's result cannot be attributed to its oscillator
-dynamics because the control that would isolate it has not been run. Two
-fields arrived at the same impasse without reference to each other.
+structurally the problem \hyperref[sec-3-1-1]{Section 3.1.1} describes
+on the machine-learning side, where a system's result cannot be
+attributed to its oscillator dynamics because the control that would
+isolate it has not been run. Two fields arrived at the same impasse
+without reference to each other.
 
 Disruption of these rhythms is a recognized signature across
 neurological and psychiatric disorders rather than a correlate of one
@@ -444,15 +458,15 @@ pulse travelling in the lipid membrane near its melting transition
 mechanical wave medium rather than a circuit, and the oscillator framing
 would be closer to the underlying physics than to a convenient
 abstraction. We record it as a live minority hypothesis and take no
-position on it: it is contested, it is not what the systems in Section 2
-assume, and nothing in this survey depends on it. It is an interesting
-supposition nonetheless, and one we would expect continued work on
-oscillatory models of cognition to bear on. Were it to hold, the
-electrical action potential would be a byproduct of an underlying
-electromechanical oscillation rather than the mechanism itself, which
-would make the oscillator description of a neuron the literal one rather
-than the useful one. We flag that as a direction worth watching and not
-as a claim this survey makes or tests.
+position on it: it is contested, it is not what the systems in
+\hyperref[sec-2]{Section 2} assume, and nothing in this survey depends
+on it. It is an interesting supposition nonetheless, and one we would
+expect continued work on oscillatory models of cognition to bear on.
+Were it to hold, the electrical action potential would be a byproduct of
+an underlying electromechanical oscillation rather than the mechanism
+itself, which would make the oscillator description of a neuron the
+literal one rather than the useful one. We flag that as a direction
+worth watching and not as a claim this survey makes or tests.
 
 \begin{figure}
 \centering
@@ -462,35 +476,37 @@ The upper track is the population account the architectures in Section 2
 draw most of their hypotheses from; the lower track is what makes the
 oscillator description of a neuron literal rather than figurative,
 together with the transduction and speech work where the frequencies are
-designed rather than learned.}
+designed rather than learned.}\label{fig-fig4-neuro-timeline}
 \end{figure}
 
 Two of the neuroscience findings in this section translate directly into
-testable machine-learning claims, and both reappear in Section 3 as
-gaps. The binding result \citep{gray1989} predicts that removing the
-synchronization term should hurt grouping tasks specifically. The
-Hopf-cochlea precedent \citep{camalet2000} predicts that designed
-frequency placement should beat learned placement.
+testable machine-learning claims, and both reappear in
+\hyperref[sec-3]{Section 3} as gaps. The binding result \citep{gray1989}
+predicts that removing the synchronization term should hurt grouping
+tasks specifically. The Hopf-cochlea precedent \citep{camalet2000}
+predicts that designed frequency placement should beat learned
+placement.
 
-\subsubsection{Within machine learning}\label{within-machine-learning}
+\subsubsection{Within machine learning}\label{sec-1-2-3}
 
-\textbf{What an oscillator network is.} Section 1.2.1 gives a rule for
-how coupled units pull on each other, and Section 1.2.2 gives a reason
-to expect that rule to compute something. An oscillator network is what
-results when both are pointed at a machine-learning task. An
-\textbf{oscillator network}, or oscillatory neural network (ONN), is a
-machine-learning system whose state is a population of oscillators and
-whose computation is the evolution of that population under a coupling
-law. Three choices define one. The \textbf{coupling function} is
-borrowed from the physics. It is the rule that turns the phase
-difference between two units into a contribution to each one's rate of
-change, and choosing Kuramoto rather than Winfree or Sakaguchi fixes
-which collective states the population can reach at all; Section 2.3.1
-sets the forms actually in use side by side. The \textbf{geometry} is
-which units are coupled to which, and it decides both the parameter cost
-and the operating regime. The \textbf{input and readout} decide how a
-task reaches the field and how an answer is taken out of it. Everything
-else is the same machinery any other neural network uses.
+\textbf{What an oscillator network is.} \hyperref[sec-1-2-1]{Section
+1.2.1} gives a rule for how coupled units pull on each other, and
+\hyperref[sec-1-2-2]{Section 1.2.2} gives a reason to expect that rule
+to compute something. An oscillator network is what results when both
+are pointed at a machine-learning task. An \textbf{oscillator network},
+or oscillatory neural network (ONN), is a machine-learning system whose
+state is a population of oscillators and whose computation is the
+evolution of that population under a coupling law. Three choices define
+one. The \textbf{coupling function} is borrowed from the physics. It is
+the rule that turns the phase difference between two units into a
+contribution to each one's rate of change, and choosing Kuramoto rather
+than Winfree or Sakaguchi fixes which collective states the population
+can reach at all; \hyperref[sec-2-3-1]{Section 2.3.1} sets the forms
+actually in use side by side. The \textbf{geometry} is which units are
+coupled to which, and it decides both the parameter cost and the
+operating regime. The \textbf{input and readout} decide how a task
+reaches the field and how an answer is taken out of it. Everything else
+is the same machinery any other neural network uses.
 
 Geometry deserves its own picture because it is treated as an
 implementation detail in most of the surveyed work and is not one.
@@ -506,9 +522,10 @@ between them. All-to-all coupling costs O(N\ensuremath{^{2}}) parameters
 and is the bulk of the largest system surveyed here. Finite-range
 nonlocal coupling is the case in which the physics reports coexisting
 locked and drifting domains \citep{kuramoto2002}, which is the regime
-Section 1.1 identified as the useful one. And no published work we found
-holds a core fixed and varies the geometry, which is why Section 3.1
-treats it as an open axis rather than a settled one.
+\hyperref[sec-1-1]{Section 1.1} identified as the useful one. And no
+published work we found holds a core fixed and varies the geometry,
+which is why \hyperref[sec-3-1]{Section 3.1} treats it as an open axis
+rather than a settled one.
 
 \begin{figure}
 \centering
@@ -522,7 +539,7 @@ fixed neighbourhood. Finite coupling range is the case the physics canon
 reports chimera states in. A lattice is the geometry of Neural Wave
 Machines. The modular fabric is the best performer in the one published
 sparsity study of a trained oscillator network, which is blog-published
-and covers one system.}
+and covers one system.}\label{fig-fig5-geometries}
 \end{figure}
 
 \textbf{Recent contributions.} The systems fall into three groups by
@@ -548,21 +565,22 @@ where the dynamics sits.
   phase-space volume, which is what its gradient bounds rest on; layers
   are stacked densely, each unit carries a trainable time step, and the
   result runs thirty to forty times faster than coRNN. One consequence
-  matters for Section 2.3.2: UnICORNN trains nonlinear dynamics with
-  full backpropagation through the 17,984-step EigenWorms sequences and
-  reaches 90.3\% there, a record set in 2021. Their linear descendants
-  trade the nonlinearity for scale: LinOSS \citep{rusch2025} is a bank
-  of uncoupled forced harmonic oscillators, y'\,' = \ensuremath{-}Ay +
-  Bu + b with A diagonal and no damping term, that is stable for any
-  non-negative A, reaches sequences of roughly fifty thousand steps by
-  parallel scan, and comes in two discretizations, a conservative one
-  and an implicit one whose numerical dissipation the authors read as a
-  forgetting mechanism; D-LinOSS \citep{d-linoss} adds an explicit
-  learnable damping term and proves that this enlarges the reachable
-  dynamics from a measure-zero set of eigenvalues, which the earlier
-  discretizations tie to frequency, to the full unit disk. The family
-  has universality theorems, and their construction is a fixed bank of
-  uncoupled forced harmonic oscillators followed by a nonlinear readout
+  matters for \hyperref[sec-2-3-2]{Section 2.3.2}: UnICORNN trains
+  nonlinear dynamics with full backpropagation through the 17,984-step
+  EigenWorms sequences and reaches 90.3\% there, a record set in 2021.
+  Their linear descendants trade the nonlinearity for scale: LinOSS
+  \citep{rusch2025} is a bank of uncoupled forced harmonic oscillators,
+  y'\,' = \ensuremath{-}Ay + Bu + b with A diagonal and no damping term,
+  that is stable for any non-negative A, reaches sequences of roughly
+  fifty thousand steps by parallel scan, and comes in two
+  discretizations, a conservative one and an implicit one whose
+  numerical dissipation the authors read as a forgetting mechanism;
+  D-LinOSS \citep{d-linoss} adds an explicit learnable damping term and
+  proves that this enlarges the reachable dynamics from a measure-zero
+  set of eigenvalues, which the earlier discretizations tie to
+  frequency, to the full unit disk. The family has universality
+  theorems, and their construction is a fixed bank of uncoupled forced
+  harmonic oscillators followed by a nonlinear readout
   \citep{lanthaler2023}; LinOSS proves its own for its continuous-time
   model. Two wording notes are worth recording, because they misled an
   earlier draft of this survey and may mislead a reader. The UnICORNN
@@ -657,7 +675,8 @@ publication date of the report cited for each. Systems whose dynamics is
 untrained or designed appear above the axis, systems trained through
 their dynamics below. A filled marker means the report is peer reviewed.
 The trained branch is entirely post-2020, and every system whose report
-is not peer reviewed falls in its last two years.}
+is not peer reviewed falls in its last two
+years.}\label{fig-fig6-system-timeline}
 \end{figure}
 
 Set against the physics, the pattern is stark and is one of this
@@ -692,20 +711,19 @@ Section 2 uses that coupling form; an open marker means we found none
 that does. Each system is placed at the year of the model it uses rather
 than the year it was published, so the lower track measures how far into
 the lineage the machine-learning literature has reached, not its own
-chronology.}
+chronology.}\label{fig-fig7-model-timeline}
 \end{figure}
 
-\subsection{Other neural network
-architectures}\label{other-neural-network-architectures}
+\subsection{Other neural network architectures}\label{sec-1-3}
 
 Oscillator networks are not the only option, and several of the systems
-in Section 2 embed one inside a conventional network rather than
-replacing it. Judging what the oscillator dynamics contributes therefore
-means knowing what the conventional architectures already do, both as
-the baselines an oscillator system is measured against and as the
-components it is often combined with. This section sets out the main
-families and how each one handles state, which is the property an
-oscillator field differs on most.
+in \hyperref[sec-2]{Section 2} embed one inside a conventional network
+rather than replacing it. Judging what the oscillator dynamics
+contributes therefore means knowing what the conventional architectures
+already do, both as the baselines an oscillator system is measured
+against and as the components it is often combined with. This section
+sets out the main families and how each one handles state, which is the
+property an oscillator field differs on most.
 
 \textbf{Recurrences carry a state vector forward.} The Elman network
 \citep{elman1990} updates a hidden vector once per input and reuses it,
@@ -788,7 +806,7 @@ survey's own evidence cautions against assuming it.} No published work
 compares a spiking network and an oscillator network on one task under
 matched conditions, and every nonlinear oscillator system in the record
 that lacks a proven gradient bound works at a short gradient horizon
-(Section 2.3).
+(\hyperref[sec-2-3]{Section 2.3}).
 
 \begin{figure}
 \centering
@@ -802,11 +820,12 @@ iteration Kuramoto Orientation Diffusion makes oscillatory. An
 oscillator field belongs to the upper track, but its state evolves under
 a fixed differential equation rather than under a transition learned
 from scratch, which is the substance of both the efficiency argument
-made for it and the training difficulty reported against it.}
+made for it and the training difficulty reported against
+it.}\label{fig-fig8-ann-timeline}
 \end{figure}
 
 \subsection{Motivation for this survey: independent convergence across
-fields}\label{motivation-for-this-survey-independent-convergence-across-fields}
+fields}\label{sec-1-4}
 
 The case for reviewing oscillator networks is not that any single result
 is decisive. It is that literatures with different methods and
@@ -832,8 +851,8 @@ Attention, preprint). What these results establish is that the dynamics
 can be trained at these scales at all; the long-sequence result has a
 2021 precedent in UnICORNN's 17,984-step classification, and the rest
 were not on the record five years ago. What they do not establish is how
-the systems stand against tuned conventional baselines, which Section
-2.3.4 takes up.
+the systems stand against tuned conventional baselines, which
+\hyperref[sec-2-3-4]{Section 2.3.4} takes up.
 
 The machine-learning literature has so far built on the simpler end of
 that physics, and it is already getting results there. The coupling laws
@@ -863,8 +882,9 @@ from evidence:
   efficiency argument since \citet{mead1990}; the concrete modern
   version is that a fixed-size dynamical state avoids the growing
   key-value cache that dominates Transformer serving. \textbf{No trained
-  oscillator network has published a measured energy win} (Section
-  2.3.4), so this is a reason to look, not a result.
+  oscillator network has published a measured energy win}
+  (\hyperref[sec-2-3-4]{Section 2.3.4}), so this is a reason to look,
+  not a result.
 \item
   \textbf{Alignment with the signals}. The signals biological sensing
   evolved to handle are physical waves, and the transducers that receive
@@ -881,8 +901,7 @@ from evidence:
   about what it has delivered.
 \end{enumerate}
 
-\subsection{Evidence standard and
-limitations}\label{evidence-standard-and-limitations}
+\subsection{Evidence standard and limitations}\label{sec-1-5}
 
 \textbf{Evidence standard.} This survey reports no new experiments and
 cites no unpublished results. Every claim is attributed to a published
@@ -930,23 +949,24 @@ Five limitations bound every claim that follows.
   reflect those interests. No unpublished work of ours is used or cited.
 \end{enumerate}
 
-\section{Oscillator neural networks}\label{oscillator-neural-networks}
+\section{Oscillator neural networks}\label{sec-2}
 
-\subsection{Scope and terms}\label{scope-and-terms}
+\subsection{Scope and terms}\label{sec-2-1}
 
 A ``coupled oscillator network'' here means a machine-learning system
 whose state evolves under oscillator dynamics: phase-only models of the
 Kuramoto and Winfree family, second-order oscillator ODEs, linear
 oscillatory state-space models, amplitude-phase models, and physical
 oscillator hardware. Eighteen load-bearing systems meet that definition
-and are tabulated in Appendix C as fifteen rows, since three pairs share
-an architecture and a control record: the echo-state network and the
-liquid state machine, LinOSS \citep{rusch2025} and D-LinOSS
-\citep{d-linoss}, and Kuramoto Attention \citep{kuramoto-attention} and
-FSN \citep{nunley2026}. The same words are used differently in physics,
-neuroscience and machine learning, and several of the comparisons below
-depend on which sense is meant; Appendix A is a glossary of the terms as
-this survey uses them.
+and are tabulated in \hyperref[sec-C]{Appendix C} as fifteen rows, since
+three pairs share an architecture and a control record: the echo-state
+network and the liquid state machine, LinOSS \citep{rusch2025} and
+D-LinOSS \citep{d-linoss}, and Kuramoto Attention
+\citep{kuramoto-attention} and FSN \citep{nunley2026}. The same words
+are used differently in physics, neuroscience and machine learning, and
+several of the comparisons below depend on which sense is meant;
+\hyperref[sec-A]{Appendix A} is a glossary of the terms as this survey
+uses them.
 
 One adjacent literature is deliberately outside that definition. A
 substantial body of work uses neural networks to \emph{model} oscillator
@@ -956,9 +976,9 @@ coupled system from data, most recently through Koopman operator methods
 survey asks what oscillator dynamics does for a machine-learning system,
 not what a machine-learning system can say about oscillator dynamics.
 
-\subsection{Taxonomy}\label{taxonomy}
+\subsection{Taxonomy}\label{sec-2-2}
 
-\subsubsection{Overview}\label{overview}
+\subsubsection{Overview}\label{sec-2-2-1}
 
 Two independent questions separate the surveyed systems, and crossing
 them gives four quadrants rather than a tree. The first is
@@ -979,11 +999,10 @@ independent questions: whether gradients reach the dynamics, and whether
 a trained conventional network wraps it. Coupling law, geometry and
 substrate cut across all four quadrants and are carried as columns in
 Section 2.3 rather than as further branches, because nesting them
-produces a tree no system occupies uniquely.}
+produces a tree no system occupies uniquely.}\label{fig-fig9-taxonomy}
 \end{figure}
 
-\subsubsection{Untrained designed
-dynamics}\label{untrained-designed-dynamics}
+\subsubsection{Untrained designed dynamics}\label{sec-2-2-2}
 
 Nothing is fitted anywhere. Every parameter is chosen, and the physics
 performs the computation directly. Oscillator Ising machines
@@ -1004,8 +1023,7 @@ oscillators whose frequencies are set by construction, not fitted, and
 it delivers sharp, compressive, actively amplified tuning that no
 learned filterbank has bettered.
 
-\subsubsection{Trained designed
-dynamics}\label{trained-designed-dynamics}
+\subsubsection{Trained designed dynamics}\label{sec-2-2-3}
 
 Gradients reach the dynamics, and the dynamics is essentially the whole
 model rather than a component of one; a thin conventional encoder or
@@ -1027,7 +1045,7 @@ decoder-only control that does worse than either (blog-published). WONN
 publishes neither.
 
 \subsubsection{Untrained dynamics with a trained encoder or
-decoder}\label{untrained-dynamics-with-a-trained-encoder-or-decoder}
+decoder}\label{sec-2-2-4}
 
 The dynamics is fixed, randomly or by design, and a readout is fitted to
 it. This is the oldest branch and the best evidenced, because a field
@@ -1051,22 +1069,22 @@ classification tasks; the trainable parameters are matched, which the
 paper enforces, and the random reservoir then carries about fifty times
 more units than the trained networks. That is a trained-versus-untrained
 comparison in the untrained direction, and the paper's trained twin is
-the frozen-twin control of Section 2.3.3 run in reverse. And designed
-dynamics can replace random dynamics at no cost: deterministic
-minimum-complexity reservoirs match classical random echo-state networks
-\citep{rodan2011}.
+the frozen-twin control of \hyperref[sec-2-3-3]{Section 2.3.3} run in
+reverse. And designed dynamics can replace random dynamics at no cost:
+deterministic minimum-complexity reservoirs match classical random
+echo-state networks \citep{rodan2011}.
 
 The distinguishing feature within this quadrant is \textbf{where the
-fixed dynamics comes from}, and it matters because Section 3.1 shows
-designed structure repeatedly failing to beat randomized twins
-elsewhere. Random initialization is the reservoir default, deterministic
-construction is a documented alternative at equal accuracy, and the
-tonotopic cochlea is the limiting case in which every parameter is
-chosen. This is the one branch where that comparison has been run and
-design holds up.
+fixed dynamics comes from}, and it matters because
+\hyperref[sec-3-1]{Section 3.1} shows designed structure repeatedly
+failing to beat randomized twins elsewhere. Random initialization is the
+reservoir default, deterministic construction is a documented
+alternative at equal accuracy, and the tonotopic cochlea is the limiting
+case in which every parameter is chosen. This is the one branch where
+that comparison has been run and design holds up.
 
 \subsubsection{Trained dynamics with a trained encoder or
-decoder}\label{trained-dynamics-with-a-trained-encoder-or-decoder}
+decoder}\label{sec-2-2-5}
 
 Gradients flow through the oscillator dynamics \emph{and} through
 conventional layers around it. This quadrant drives the current wave and
@@ -1113,20 +1131,19 @@ rather than settling it. If it carries, whatever synchronization
 contributes is inductive bias, and only a controlled ablation can
 measure it.
 
-\subsection{Comparison of the current
-landscape}\label{comparison-of-the-current-landscape}
+\subsection{Comparison of the current landscape}\label{sec-2-3}
 
-\subsubsection{What the systems are built
-from}\label{what-the-systems-are-built-from}
+\subsubsection{What the systems are built from}\label{sec-2-3-1}
 
-Appendix C records what each system \emph{is}: its oscillator family,
-the part of a model the dynamics constitutes, what gradients reach, and
-whether the work is peer reviewed. Appendix D records what each system
-\emph{reports}: task, data, headline result, parameter count and
-training horizon. Both are inventory. The three things worth reading
-across them are the coupling law, the geometry, and where the input
-enters, because those are the choices the physics says are consequential
-and the papers make in passing.
+\hyperref[sec-C]{Appendix C} records what each system \emph{is}: its
+oscillator family, the part of a model the dynamics constitutes, what
+gradients reach, and whether the work is peer reviewed.
+\hyperref[sec-D]{Appendix D} records what each system \emph{reports}:
+task, data, headline result, parameter count and training horizon. Both
+are inventory. The three things worth reading across them are the
+coupling law, the geometry, and where the input enters, because those
+are the choices the physics says are consequential and the papers make
+in passing.
 
 \begin{figure}
 \centering
@@ -1140,7 +1157,7 @@ inside the nonlinearity. The last two do not: UnICORNN's units are
 independent within a layer and LinOSS's state matrices are diagonal,
 which is why Section 2.3.3 records a coupling ablation for those rows as
 not applicable rather than as missing. Appendix B places all of them in
-the wider lineage.}
+the wider lineage.}\label{fig-fig10-model-lineage}
 \end{figure}
 
 \textbf{Where the input enters} looks like an implementation detail and
@@ -1166,7 +1183,8 @@ systems, each marked against the term it modifies. Classical theory
 makes this consequential rather than incidental: entrainment requires a
 phase-dependent term, so writing input into the natural frequency (1)
 and adding it as a drive (4) are not interchangeable. No paper in this
-survey contrasts two injection forms under controls.}
+survey contrasts two injection forms under
+controls.}\label{fig-fig11-input-injection}
 \end{figure}
 
 \textbf{Geometry and capacity} are separable design choices in
@@ -1215,8 +1233,7 @@ space by design, envelope-band initialization decides success on
 raw-waveform speech, and the cochlea literature designs the bank
 outright.
 
-\subsubsection{What the systems are evaluated
-on}\label{what-the-systems-are-evaluated-on}
+\subsubsection{What the systems are evaluated on}\label{sec-2-3-2}
 
 A survey of this shape would normally open its comparison with a shared
 benchmark. The field has not established one yet, and that absence is
@@ -1224,13 +1241,14 @@ itself one of the gaps this survey identifies. Some convergence has
 started: Sudoku is now reported by two independent groups, AKOrN and
 WONN, and CIFAR and ImageNet recur across several systems, though at
 different tasks. The spread is still the point, though. Read down the
-task column of Appendix D: class-conditional image generation scored by
-FID, ImageNet-1K top-1 classification, maze path finding and Sudoku,
-object discovery, multi-object binding robustness at small scale,
-character-level language modelling, generation on periodic domains,
-extreme-length sequence classification, general time-series benchmarks,
-spoken-digit recognition, and combinatorial optimization. Almost no two
-rows share a task, and where two rows do, they rarely share a protocol.
+task column of \hyperref[sec-D]{Appendix D}: class-conditional image
+generation scored by FID, ImageNet-1K top-1 classification, maze path
+finding and Sudoku, object discovery, multi-object binding robustness at
+small scale, character-level language modelling, generation on periodic
+domains, extreme-length sequence classification, general time-series
+benchmarks, spoken-digit recognition, and combinatorial optimization.
+Almost no two rows share a task, and where two rows do, they rarely
+share a protocol.
 
 Shared cross-disciplinary benchmarks largely do not exist here for three
 reasons. The field is genuinely multidisciplinary: results arrive from
@@ -1273,7 +1291,7 @@ Hamiltonian conservation in UnICORNN; the open marker is linear
 dynamics. Every nonlinear system without a stated bound trains at
 twenty-five steps or fewer; the two nonlinear systems that reach
 thousands of steps carry a proof, and the only system beyond twenty
-thousand is linear.}
+thousand is linear.}\label{fig-fig12-training-horizon}
 \end{figure}
 
 \textbf{What is comparable.} Two kinds of comparison survive those
@@ -1309,17 +1327,16 @@ through the dynamics entirely: equilibrium propagation for Kuramoto
 frequencies \citep{ahmadi2026} and local force-measurement rules for
 driven nonlinear oscillators \citep{bosch2025}.
 
-\subsubsection{What the systems report as
-controls}\label{what-the-systems-report-as-controls}
+\subsubsection{What the systems report as controls}\label{sec-2-3-3}
 
 The controls table is where this survey's argument is decided. The five
 controls below are not a standard anyone has adopted; they are assembled
-in Section 3.1 from cases where each control's \emph{absence} is
-documented to have misled. A mark means the surveyed work reports
-running that control. A dash means \textbf{we did not find it reported
-in the work we surveyed}, not that it was not run, and not that the
-result would change if it were. The pattern, rather than any single
-mark, is the observation.
+in \hyperref[sec-3-1]{Section 3.1} from cases where each control's
+\emph{absence} is documented to have misled. A mark means the surveyed
+work reports running that control. A dash means \textbf{we did not find
+it reported in the work we surveyed}, not that it was not run, and not
+that the result would change if it were. The pattern, rather than any
+single mark, is the observation.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
@@ -1333,7 +1350,8 @@ work reports running that control; \ensuremath{\approx} marks the
 nearest published instance rather than the control itself; a dash means
 we did not find it reported, which is not evidence it was not run.
 Damping is not one of the five, but the record holds two ablations of it
-that span a pair of papers (Section 2.3.3).}\tabularnewline
+that span a pair of papers (\hyperref[sec-2-3-3]{Section
+2.3.3}).}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 System
@@ -1370,7 +1388,8 @@ Single-term ablation of coupling
 \endlastfoot
 Un-0 & \ensuremath{\checkmark} & \ensuremath{\checkmark} &
 \ensuremath{\checkmark} (modular vs random masks) & --- (an external
-reimplementation exists but is not matched; Section 2.3.4) & --- \\
+reimplementation exists but is not matched; \hyperref[sec-2-3-4]{Section
+2.3.4}) & --- \\
 \cmidrule{1-6}AKOrN & --- & \ensuremath{\checkmark} (ItrConv and ItrSA:
 the same iterated layers without the Kuramoto update) & --- &
 \ensuremath{\approx} (those baselines at matched FLOPs and memory and
@@ -1447,22 +1466,22 @@ authors published both sides at all is to their credit, and the second
 pair is the cleaner instance, since only one term moves, though its
 LinOSS numbers are carried over from the earlier paper rather than
 re-run; we would still prefer the two sides in one paper under one
-protocol, which is what Section 3.2 asks for. Of the sixty-five
-applicable control comparisons these five give across the fourteen rows,
-sixteen have been run, ten of them by three systems, plus three
-near-instances; Appendix E itemizes them.
+protocol, which is what \hyperref[sec-3-2]{Section 3.2} asks for. Of the
+sixty-five applicable control comparisons these five give across the
+fourteen rows, sixteen have been run, ten of them by three systems, plus
+three near-instances; \hyperref[sec-E]{Appendix E} itemizes them.
 
 \subsubsection{How the systems compare with conventional
-architectures}\label{how-the-systems-compare-with-conventional-architectures}
+architectures}\label{sec-2-3-4}
 
 Each system's own reported numbers, set against the architectures of
-Section 2.3, read as follows. Un-0's ImageNet-64 FID of 6.74 is
-competitive with first-generation diffusion baselines and far from the
-modern frontier, where one-step models reach FID around 1.5 on harder
-benchmarks \citep{deng2026}, as its authors acknowledge; a community
-reimplementation on MNIST, 512 oscillators trained for 800 epochs
-against a class-conditional DCGAN that its own write-up puts at roughly
-ten times the parameters, judges the DCGAN the visibly stronger
+\hyperref[sec-2-3]{Section 2.3}, read as follows. Un-0's ImageNet-64 FID
+of 6.74 is competitive with first-generation diffusion baselines and far
+from the modern frontier, where one-step models reach FID around 1.5 on
+harder benchmarks \citep{deng2026}, as its authors acknowledge; a
+community reimplementation on MNIST, 512 oscillators trained for 800
+epochs against a class-conditional DCGAN that its own write-up puts at
+roughly ten times the parameters, judges the DCGAN the visibly stronger
 generator without reporting a metric (Kuramoto-MNIST
 \citep{kuramoto-mnist}, community repository); it is not a
 matched-budget comparison, and it agrees with rather than overturns the
@@ -1486,10 +1505,10 @@ care: 76.2\% on Maze-hard in one pass, 80.1\% with best-of-32 energy
 voting, at 0.396M parameters, against 85.3\% for the 7M-parameter
 TRM-Att and 74.5\% for the 27M-parameter HRM. That is a
 parameter-efficiency margin rather than an accuracy win, and not a
-matched-budget comparison in the sense of Section 2.3.3. AKOrN's
-reported advantages are adversarial and corruption robustness,
-calibration and Sudoku rather than clean-accuracy dominance, where it
-trails a ResNet-18 by three to five points.
+matched-budget comparison in the sense of \hyperref[sec-2-3-3]{Section
+2.3.3}. AKOrN's reported advantages are adversarial and corruption
+robustness, calibration and Sudoku rather than clean-accuracy dominance,
+where it trails a ResNet-18 by three to five points.
 
 The wins that exist are niche-shaped, and the niches are real. LinOSS
 beats state-space baselines on extreme-length sequences: 95.0\% on the
@@ -1504,10 +1523,10 @@ dissipative implicit variant, since the conservative variant scores
 budgets are not matched, with LinOSS at five to nine times the
 parameters of Mamba and S6 on that task; and the baseline numbers are
 carried over from prior work rather than re-run. The first of those is
-evidence for this survey's own reading in Section 3.1.4 that
-dissipation, rather than oscillation, is doing the work. Kuramoto
-Attention beats a parameter-matched Transformer at the 5M scale on
-byte-level code, by median only on enwik8, and trails it at 1M
+evidence for this survey's own reading in \hyperref[sec-3-1-4]{Section
+3.1.4} that dissipation, rather than oscillation, is doing the work.
+Kuramoto Attention beats a parameter-matched Transformer at the 5M scale
+on byte-level code, by median only on enwik8, and trails it at 1M
 (preprint). Untrained oscillator reservoirs beat trained RNNs on some
 time-series benchmarks. KomplexNet wins on multi-object binding
 robustness at small scale. A single physical oscillator does spoken
@@ -1535,23 +1554,24 @@ time-series work generally is thin, so absence of dominance there is
 absence of peer-reviewed attempts rather than a claim on capability thus
 far.
 
-\section{Discussion}\label{discussion}
+\section{Discussion}\label{sec-3}
 
-\subsection{Research challenges}\label{research-challenges}
+\subsection{Research challenges}\label{sec-3-1}
 
 Where the evidence stops. Each subsection states a bound the literature
 itself establishes, drawn from the same sources that make the positive
 case above. These are not objections from outside the field.
 
 \subsubsection{Attribution, and the controls that are
-missing}\label{attribution-and-the-controls-that-are-missing}
+missing}\label{sec-3-1-1}
 
-Each of the five controls in Section 2.3.3 exists because a published
-result shows what happens when it is absent. \emph{Frozen twins}:
-untrained oscillator dynamics can carry a task unaided (Section 2.2.4),
-so a trained gain must be measured against one, and Un-0 \citep{un-0}
-and KomplexNet \citep{muzellec2025}, whose fixed-Gaussian-kernel twin
-comes within a point of its trained kernel in distribution, are the two
+Each of the five controls in \hyperref[sec-2-3-3]{Section 2.3.3} exists
+because a published result shows what happens when it is absent.
+\emph{Frozen twins}: untrained oscillator dynamics can carry a task
+unaided (\hyperref[sec-2-2-4]{Section 2.2.4}), so a trained gain must be
+measured against one, and Un-0 \citep{un-0} and KomplexNet
+\citep{muzellec2025}, whose fixed-Gaussian-kernel twin comes within a
+point of its trained kernel in distribution, are the two
 trained-synchronization systems we found reporting it.
 \emph{Decoder-only controls}: wherever a conventional encoder or decoder
 wraps the dynamics, the compute may live there. \emph{Initialization
@@ -1635,10 +1655,11 @@ are not a procedural formality but the step that decides whether a
 reported gain is attributable to the dynamics. The binding results are
 also a reason not to assume the missing ablations would come back empty.
 If synchronization is the mechanism that groups distributed features, as
-the neuroscience in Section 1.2.2 reports, then removing it should cost
-accuracy on grouping tasks specifically, and be harmless on tasks that
-do not require grouping. An ablation that finds nothing on one task
-family is therefore not evidence that the coupling does nothing.
+the neuroscience in \hyperref[sec-1-2-2]{Section 1.2.2} reports, then
+removing it should cost accuracy on grouping tasks specifically, and be
+harmless on tasks that do not require grouping. An ablation that finds
+nothing on one task family is therefore not evidence that the coupling
+does nothing.
 
 \begin{figure}
 \centering
@@ -1650,11 +1671,11 @@ systems remove the coupling term as a single variable, the mechanism the
 Kuramoto family is named after; one reports no number, one reports a
 single dataset, and one, KomplexNet \citep{muzellec2025}, reports only a
 retrained model. Half-filled squares mark the nearest published instance
-rather than the control itself.}
+rather than the control itself.}\label{fig-fig13-controls-grid}
 \end{figure}
 
 \subsubsection{What training moves, and what it does
-not}\label{what-training-moves-and-what-it-does-not}
+not}\label{sec-3-1-2}
 
 Universality says nothing about trainability, and the adjacent
 literature is pointed about one parameter group. Learnable audio
@@ -1689,7 +1710,7 @@ family. The literature therefore cannot say whether an optimum is
 task-dependent, which is the natural expectation if some tasks want the
 dynamics for transduction and others want it for memory.
 
-\subsubsection{Structure and geometry}\label{structure-and-geometry}
+\subsubsection{Structure and geometry}\label{sec-3-1-3}
 
 Geometry is varied in four of the surveyed systems, and in none of them
 as a single variable. Neural Wave Machines \citep{keller2023} comes
@@ -1720,7 +1741,7 @@ a non-peer-reviewed study of one system whose authors themselves flag
 protocol drift between posts.
 
 \subsubsection{The dynamics as both resource and
-hazard}\label{the-dynamics-as-both-resource-and-hazard}
+hazard}\label{sec-3-1-4}
 
 Three lines of work, none of them aimed at the others, point the same
 way. \emph{Operating-regime theory} puts computation near the
@@ -1762,42 +1783,40 @@ publication bias could manufacture the pattern, and no published study
 we found isolates horizon length as the single variable on a fixed
 nonlinear oscillator substrate.
 
-\subsubsection{The physics the field has not
-used}\label{the-physics-the-field-has-not-used}
+\subsubsection{The physics the field has not used}\label{sec-3-1-5}
 
-Section 1.2.3 counted how many of the surveyed systems use each coupling
-form and found the count concentrated between 1967 and 1992. What
-follows is what that leaves unexplored. No surveyed system uses
-inertial, simplicial, hypergraph or Dirac coupling. Swarmalators, in
-which phase and spatial position couple to each other, were proposed as
-a substrate for bio-inspired computing in 2019 \citep{o-keeffe2019}, and
-we found no machine-learning system built on them, trained or untrained.
-The bounds of the physics parameters are unmapped: no published work
-sweeps coupling strength, frequency spread or delay to the point where
-the system leaves its useful regime, so the operating envelope is known
-only anecdotally. One paper compares coupling functions on a single task
-under controls, and its result is a null. FSN removes its static
-frustration angles and reports the no-phase model indistinguishable from
-the full one at a thirty-epoch budget, three seeds against five, with
-the angles buying early-training speed rather than final quality;
-because the delay term it keeps is itself a frustrated coupling with a
-data-determined angle, the comparison does not reach plain Kuramoto,
-which the same paper reports as a clearly worse model. That is one
-comparison, within one coupling family, on one task, and not yet at
-convergence. We found none that compares across families, so the choice
-of a Kuramoto-type coupling over a Winfree or Stuart-Landau one remains
-a convention rather than a finding.
+\hyperref[sec-1-2-3]{Section 1.2.3} counted how many of the surveyed
+systems use each coupling form and found the count concentrated between
+1967 and 1992. What follows is what that leaves unexplored. No surveyed
+system uses inertial, simplicial, hypergraph or Dirac coupling.
+Swarmalators, in which phase and spatial position couple to each other,
+were proposed as a substrate for bio-inspired computing in 2019
+\citep{o-keeffe2019}, and we found no machine-learning system built on
+them, trained or untrained. The bounds of the physics parameters are
+unmapped: no published work sweeps coupling strength, frequency spread
+or delay to the point where the system leaves its useful regime, so the
+operating envelope is known only anecdotally. One paper compares
+coupling functions on a single task under controls, and its result is a
+null. FSN removes its static frustration angles and reports the no-phase
+model indistinguishable from the full one at a thirty-epoch budget,
+three seeds against five, with the angles buying early-training speed
+rather than final quality; because the delay term it keeps is itself a
+frustrated coupling with a data-determined angle, the comparison does
+not reach plain Kuramoto, which the same paper reports as a clearly
+worse model. That is one comparison, within one coupling family, on one
+task, and not yet at convergence. We found none that compares across
+families, so the choice of a Kuramoto-type coupling over a Winfree or
+Stuart-Landau one remains a convention rather than a finding.
 
-\subsubsection{The missing shared
-protocol}\label{the-missing-shared-protocol}
+\subsubsection{The missing shared protocol}\label{sec-3-1-6}
 
 The field has no shared benchmark, no shared reporting convention, and
-no agreed set of controls, which is why Section 2.3 can compare within
-papers but not across them easily. This is more of a coordination and
-standards-setting concern than a scientific error, and it is one of the
-first things that could benefit the community.
+no agreed set of controls, which is why \hyperref[sec-2-3]{Section 2.3}
+can compare within papers but not across them easily. This is more of a
+coordination and standards-setting concern than a scientific error, and
+it is one of the first things that could benefit the community.
 
-\subsection{Future directions}\label{future-directions}
+\subsection{Future directions}\label{sec-3-2}
 
 These are directions for the field rather than protocols for a paper.
 Each follows from a specific gap above, and each would be worth doing
@@ -1826,35 +1845,36 @@ whichever way it came out.
   and vowel recognition has been run on coupled oscillators in hardware
   \citep{romera2018}. What is missing from each is not the dataset but
   the protocol around it: a tuned conventional baseline at a matched
-  parameter budget, seeds reported, and the five controls of Section
-  2.3.3 run alongside. Nothing in Section 2.3 can be turned into a
-  ranking until this exists, and its absence is currently mistaken for
-  parity in both directions.
+  parameter budget, seeds reported, and the five controls of
+  \hyperref[sec-2-3-3]{Section 2.3.3} run alongside. Nothing in
+  \hyperref[sec-2-3]{Section 2.3} can be turned into a ranking until
+  this exists, and its absence is currently mistaken for parity in both
+  directions.
 \item
   \textbf{A reporting standard for controls.} The five controls of
-  Section 2.3.3 should become a norm rather than an exception: frozen
-  twins, decoder-only controls, randomized-structure twins,
-  matched-budget baselines and single-term ablations, with multi-seed
-  variance reported alongside. Sixteen of sixty-five possible control
-  comparisons, ten of them from three systems, is what a field looks
-  like before its reporting habits have settled, and settling them costs
-  less now than it will once the literature is large. Concretely, a
-  paper introducing a trained oscillator system would say for each of
-  the five controls (frozen twin, decoder-only, randomized twin,
-  matched-budget baseline, single-term ablation of the coupling) whether
-  it was run, and give the resulting number rather than only the
-  headline result. Where a control does not apply it is worth saying so
-  and saying why: a frozen twin means nothing for a system whose
-  dynamics is never trained, and a coupling ablation means nothing for a
-  model that has no coupling term. An unreported control and an
-  inapplicable one look identical to a reader, and distinguishing them
-  took us a close reading of every paper in Table 1; an earlier draft of
-  this survey still got several of them wrong, which is the argument for
-  a standard rather than for close reading. Where two papers from one
-  group publish the two sides of an ablation, as coRNN and UnICORNN do
-  for damping and coupling and LinOSS and D-LinOSS do for damping, the
-  standard would ask for the comparison to be run once more, under one
-  protocol, in the later paper.
+  \hyperref[sec-2-3-3]{Section 2.3.3} should become a norm rather than
+  an exception: frozen twins, decoder-only controls,
+  randomized-structure twins, matched-budget baselines and single-term
+  ablations, with multi-seed variance reported alongside. Sixteen of
+  sixty-five possible control comparisons, ten of them from three
+  systems, is what a field looks like before its reporting habits have
+  settled, and settling them costs less now than it will once the
+  literature is large. Concretely, a paper introducing a trained
+  oscillator system would say for each of the five controls (frozen
+  twin, decoder-only, randomized twin, matched-budget baseline,
+  single-term ablation of the coupling) whether it was run, and give the
+  resulting number rather than only the headline result. Where a control
+  does not apply it is worth saying so and saying why: a frozen twin
+  means nothing for a system whose dynamics is never trained, and a
+  coupling ablation means nothing for a model that has no coupling term.
+  An unreported control and an inapplicable one look identical to a
+  reader, and distinguishing them took us a close reading of every paper
+  in Table 1; an earlier draft of this survey still got several of them
+  wrong, which is the argument for a standard rather than for close
+  reading. Where two papers from one group publish the two sides of an
+  ablation, as coRNN and UnICORNN do for damping and coupling and LinOSS
+  and D-LinOSS do for damping, the standard would ask for the comparison
+  to be run once more, under one protocol, in the later paper.
 \item
   \textbf{Treat the coupling law as a variable.} The field should
   establish what its namesake mechanism contributes, by comparing
@@ -1913,9 +1933,10 @@ whichever way it came out.
   one, no claim about where these systems are headed can be assessed.
 \end{enumerate}
 
-Appendix F collects the questions these directions leave open.
+\hyperref[sec-F]{Appendix F} collects the questions these directions
+leave open.
 
-\section{Conclusion}\label{conclusion}
+\section{Conclusion}\label{sec-4}
 
 The current wave of oscillator architectures has produced real systems.
 The oscillatory recurrences and their linear state-space descendants
@@ -1950,31 +1971,32 @@ The remaining six are a no-dynamics baseline and a coupling ablation
 from AKOrN \citep{akorn}, and matched-budget baselines from Kuramoto
 Attention \citep{kuramoto-attention} and FSN \citep{nunley2026}, from
 RON \citep{ceni2024}, and from coRNN \citep{rusch2021} and UnICORNN
-\citep{unicornn} on one supplementary task. Appendix E itemizes them.
-Where a control has been run it has changed what the paper could
-conclude, and in two cases it reversed a headline: at matched parameters
-on a chaotic system both oscillatory recurrences lose to an LSTM, and a
-fixed coupling kernel comes within a point of KomplexNet's learned one
-in distribution.
+\citep{unicornn} on one supplementary task. \hyperref[sec-E]{Appendix E}
+itemizes them. Where a control has been run it has changed what the
+paper could conclude, and in two cases it reversed a headline: at
+matched parameters on a chaotic system both oscillatory recurrences lose
+to an LSTM, and a fixed coupling kernel comes within a point of
+KomplexNet's learned one in distribution.
 
-Three further gaps sit alongside that one, and Section 3.1 sets out the
-evidence for each. We found no scaling study for trained oscillator
-networks, so how these systems behave as they grow is unknown. No
-surveyed system has published a measured energy win, which leaves the
-field's most-cited motivation resting on adjacent substrates. And the
-physics in use stops short of the forms that would test the properties
-these papers say they want: partial coherence on structured supports,
-the many coexisting stable states that higher-order and simplicial
-coupling produce, and the phase-position coupling of swarmalators. The
-neuroscience shows the same attribution problem from the other side, and
-the review that sets three theta-rhythmic segmentation models against
-each other \citep{dogonasheva2026} reaches it independently.
+Three further gaps sit alongside that one, and
+\hyperref[sec-3-1]{Section 3.1} sets out the evidence for each. We found
+no scaling study for trained oscillator networks, so how these systems
+behave as they grow is unknown. No surveyed system has published a
+measured energy win, which leaves the field's most-cited motivation
+resting on adjacent substrates. And the physics in use stops short of
+the forms that would test the properties these papers say they want:
+partial coherence on structured supports, the many coexisting stable
+states that higher-order and simplicial coupling produce, and the
+phase-position coupling of swarmalators. The neuroscience shows the same
+attribution problem from the other side, and the review that sets three
+theta-rhythmic segmentation models against each other
+\citep{dogonasheva2026} reaches it independently.
 
 None of that is a verdict on the approach, and none of it requires new
-theory to address. Section 3.2 sets out eight directions: a shared
-benchmark suite, a reporting standard for controls, treating the
-coupling law as a variable, treating geometry as a reported design
-decision, reporting where the input enters, measuring energy on
+theory to address. \hyperref[sec-3-2]{Section 3.2} sets out eight
+directions: a shared benchmark suite, a reporting standard for controls,
+treating the coupling law as a variable, treating geometry as a reported
+design decision, reporting where the input enters, measuring energy on
 hardware, replicating the blog-published results, and establishing
 whether scaling laws exist. The first three would do most of the work:
 consolidating on the benchmarks the field has already begun to share
@@ -1997,7 +2019,7 @@ measurable is, on the present record, still open.
 \section*{Appendix}\label{appendix}
 \addcontentsline{toc}{section}{Appendix}
 
-\section{Glossary}\label{glossary}
+\section{Glossary}\label{sec-A}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
@@ -2024,8 +2046,8 @@ As used in this survey
 \bottomrule\noalign{}
 \endlastfoot
 \textbf{ANN} & Artificial neural network. Used here for the conventional
-architectures of Section 1.3: convolutions, recurrences, attention and
-state-space models. \\
+architectures of \hyperref[sec-1-3]{Section 1.3}: convolutions,
+recurrences, attention and state-space models. \\
 \cmidrule{1-2}\textbf{ONN} & Oscillatory neural network. A
 machine-learning system whose state is a population of oscillators and
 whose computation is their evolution under a coupling law. \\
@@ -2082,7 +2104,7 @@ questions, and a report should say which it ran. \\
 unrolled and backpropagated through during training. \\
 \end{longtable}
 
-\section{Oscillator physics models}\label{oscillator-physics-models}
+\section{Oscillator physics models}\label{sec-B}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.5000}}
@@ -2095,8 +2117,9 @@ the self-sustained oscillator, dated as in \citet{rivera-sierra2026}.
 Almost every machine-learning system surveyed in this paper uses one of
 the entries from Landau and Stuart, Winfree, Kuramoto,
 Kuramoto--Sakaguchi, Schuster and Wagner, Daido, or Chandra, Girvan \&
-Ott; the model timeline in Section 1.2.3 marks which rows those are, and
-no surveyed system is built on any of the others.}\tabularnewline
+Ott; the model timeline in \hyperref[sec-1-2-3]{Section 1.2.3} marks
+which rows those are, and no surveyed system is built on any of the
+others.}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Model
@@ -2203,8 +2226,7 @@ simplicial representations give qualitatively different synchronization,
 so higher-order coupling is not one generalization but at least two. \\
 \end{longtable}
 
-\section{Oscillator systems: design and
-classification}\label{oscillator-systems-design-and-classification}
+\section{Oscillator systems: design and classification}\label{sec-C}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
@@ -2305,13 +2327,12 @@ dynamics; a learnable scaling of the adjacency & simulated & Nature
 Communications 2025 \\
 \end{longtable}
 
-\section{Oscillator systems: reported
-results}\label{oscillator-systems-reported-results}
+\section{Oscillator systems: reported results}\label{sec-D}
 
 Numbers are as published and are \textbf{not comparable across rows}:
-different tasks, different baselines, different tuning effort (Section
-2.3.2). They are recorded so that claims can be checked against their
-sources, not so that systems can be ranked.
+different tasks, different baselines, different tuning effort
+(\hyperref[sec-2-3-2]{Section 2.3.2}). They are recorded so that claims
+can be checked against their sources, not so that systems can be ranked.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
@@ -2320,9 +2341,9 @@ sources, not so that systems can be ranked.
   >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
   >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
 \caption{Reported results for the same systems, in the same order as
-Appendix C. These are as published and are \textbf{not comparable across
-rows}: different tasks, different baselines, different tuning effort
-(Section 2.3.2).}\tabularnewline
+\hyperref[sec-C]{Appendix C}. These are as published and are \textbf{not
+comparable across rows}: different tasks, different baselines, different
+tuning effort (\hyperref[sec-2-3-2]{Section 2.3.2}).}\tabularnewline
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 System
@@ -2428,20 +2449,20 @@ to 128 layers & not reported in the main text & unrolled
 forward-difference stack, to 128 layers \\
 \end{longtable}
 
-\section{How the control counts are
-derived}\label{how-the-control-counts-are-derived}
+\section{How the control counts are derived}\label{sec-E}
 
-The counts quoted in Sections 2.3.3 and 4 are derived from Table 1 as
-follows. Fourteen rows times five controls gives seventy possible
-control comparisons. Five are marked not applicable: the single-term
-coupling ablation for UnICORNN \citep{unicornn}, whose units do not
-couple within a layer, and for LinOSS \citep{rusch2025} / D-LinOSS
-\citep{d-linoss}, whose state matrices are diagonal, and the frozen twin
-for RON \citep{ceni2024}, the spintronic reservoir and oscillator Ising
-machines, none of which trains its dynamics in the first place. coRNN
-\citep{rusch2021} is coupled through its full weight matrices, so its
-coupling cell is applicable and empty. That leaves \textbf{sixty-five
-applicable comparisons}, of which \textbf{sixteen are reported}:
+The counts quoted in \hyperref[sec-2-3-3]{Sections 2.3.3} and
+\hyperref[sec-4]{4} are derived from Table 1 as follows. Fourteen rows
+times five controls gives seventy possible control comparisons. Five are
+marked not applicable: the single-term coupling ablation for UnICORNN
+\citep{unicornn}, whose units do not couple within a layer, and for
+LinOSS \citep{rusch2025} / D-LinOSS \citep{d-linoss}, whose state
+matrices are diagonal, and the frozen twin for RON \citep{ceni2024}, the
+spintronic reservoir and oscillator Ising machines, none of which trains
+its dynamics in the first place. coRNN \citep{rusch2021} is coupled
+through its full weight matrices, so its coupling cell is applicable and
+empty. That leaves \textbf{sixty-five applicable comparisons}, of which
+\textbf{sixteen are reported}:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -2503,31 +2524,32 @@ different training recipe; and the coupling cell of Kuramoto Attention /
 FSN, whose learned-value-projection ablation replaces the Kuramoto step
 rather than removing it.
 
-Two comparisons the five controls do not capture are recorded in Section
-2.3.3 because they come close to a sixth: UnICORNN is coRNN with the
-damping and the within-layer coupling removed and a layer stack added,
-and D-LinOSS with its damping set to zero recovers LinOSS's conservative
-discretization, so each pair of papers publishes both sides of a damping
-ablation that neither paper runs alone.
+Two comparisons the five controls do not capture are recorded in
+\hyperref[sec-2-3-3]{Section 2.3.3} because they come close to a sixth:
+UnICORNN is coRNN with the damping and the within-layer coupling removed
+and a layer stack added, and D-LinOSS with its damping set to zero
+recovers LinOSS's conservative discretization, so each pair of papers
+publishes both sides of a damping ablation that neither paper runs
+alone.
 
 An earlier draft of this survey counted seven of fifty-five. The
 difference is entirely controls that the papers report and that draft
 had missed, together with one cell it had marked not applicable in
 error. We record the correction here because it is itself evidence for
-the argument of Section 3.2 that reported controls need a reporting
-standard to be legible.
+the argument of \hyperref[sec-3-2]{Section 3.2} that reported controls
+need a reporting standard to be legible.
 
-Table 1 covers fourteen of the fifteen rows in Appendix C. ESN
-\citep{jaeger2001} and LSM \citep{maass2002} are omitted from it because
-they are the reservoir-computing precedent this survey measures
+Table 1 covers fourteen of the fifteen rows in \hyperref[sec-C]{Appendix
+C}. ESN \citep{jaeger2001} and LSM \citep{maass2002} are omitted from it
+because they are the reservoir-computing precedent this survey measures
 oscillator systems against rather than oscillator systems whose dynamics
 is itself under test.
 
-\section{Questions the record leaves
-open}\label{questions-the-record-leaves-open}
+\section{Questions the record leaves open}\label{sec-F}
 
 Ten questions no published work settles, each following from a gap in
-Section 3.1 and each with a note on what evidence would close it.
+\hyperref[sec-3-1]{Section 3.1} and each with a note on what evidence
+would close it.
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -2611,7 +2633,8 @@ in the public, commercial, or not-for-profit sectors.
 \section*{Data availability}
 No new data were generated. The manuscript source, its bibliography and
 the tooling that builds and checks it are available at
-https://github.com/ekryski/oscillator-research.
+https://github.com/ekryski/oscillator-research. A preprint of this
+article is available at https://doi.org/10.2139/ssrn.7445198.
 
 \bibliography{references}
 \end{document}

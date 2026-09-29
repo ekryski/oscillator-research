@@ -36,7 +36,7 @@ highlights:
 competing-interests: The author declares no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
 # acknowledgements: printed on the title-page file; omitted means "None."
 funding: This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
-data-availability: No new data were generated. The manuscript source, its bibliography and the tooling that builds and checks it are available at https://github.com/ekryski/oscillator-research.
+data-availability: No new data were generated. The manuscript source, its bibliography and the tooling that builds and checks it are available at https://github.com/ekryski/oscillator-research. A preprint of this article is available at https://doi.org/10.2139/ssrn.7445198.
 # date is filled in at build time from the manuscript's last commit
 # the preprint, posted 11 September 2026 and registered with Crossref on the
 # 12th; every generated citation points at it rather than at the repository
