@@ -1,9 +1,9 @@
 """The geometry interface every different oscillator model lattice geometry implements.
 
-A geometry is a "seating chart" of how the oscillator's lattice is arranged, 
-not a different model: all nine geometries reuse the same [C, G, G] kernel 
-and state storage, so the parameter budget is matched by construction and a 
-geometry comparison is a genuine single-factor experiment. What changes is 
+A geometry is a "seating chart" of how the oscillator's lattice is arranged,
+not a different model: all twelve geometries reuse the same [C, G, G] kernel
+and state storage, so the parameter budget is matched by construction and a
+geometry comparison is a genuine single-factor experiment. What changes is
 only how the lattice's edges are glued, which shows up in exactly four places:
 
     embed_kernel     open axes need the kernel at signed offsets in a padded
