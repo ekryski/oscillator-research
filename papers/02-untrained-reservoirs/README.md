@@ -90,7 +90,7 @@ Please cite the version you actually used: these manuscripts are drafts, and eve
 
 ### The interactive post's data
 
-`scripts/export_web_demo.py` writes everything the interactive post reads: the seed-0 physics, the demo clips, and each configuration's readout, refitted at the primary cell and checked against the record's seed-0 accuracy. Nothing it writes is part of the record. Its parts are the shared front end, physics and clips (`base`), the record's leak-check and controls cells (`record`), and the configs of the controls, design, cochlea and quadrature experiments; `--part` picks some, `--smoke` makes a fast low-fidelity pass.
+The paper's interactive post, [Does the physics do the work?](https://erickryski.com/articles/does-the-physics-do-the-work), runs every model it compares live in the browser. `scripts/export_web_demo.py` writes everything the post reads: the seed-0 physics, the demo clips, and each configuration's readout, refitted at the primary cell and checked against the record's seed-0 accuracy. Nothing it writes is part of the record. Its parts are the shared front end, physics and clips (`base`), the record's leak-check and controls cells (`record`), and the configs of the controls, design, cochlea and quadrature experiments; `--part` picks some, `--smoke` makes a fast low-fidelity pass.
 
 ```bash
 cd src
