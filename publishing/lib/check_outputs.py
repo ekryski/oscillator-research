@@ -45,6 +45,9 @@ from sanitize import INVISIBLE, LOOKALIKE_CHARS, WORD, _latin, strip_png, strip_
 PDF_KEYS = re.compile(rb"/ID\s*\[|/CreationDate|/ModDate|/PTEX\.|/(?:Producer|Creator)\s*\((?!\))")
 UNMAPPED = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f]")
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}T(\d{2}:\d{2}:\d{2})Z?")
+#: a Word bullet level: its glyph is a private-use code in the Symbol or Wingdings font
+#: (U+F0B7 for the round bullet), a font slot and not a character anyone reads
+BULLET_GLYPH = re.compile('(<w:lvlText w:val=")[\uf000-\uf0ff](")')
 
 
 def text_findings(text: str) -> list[str]:
@@ -83,6 +86,8 @@ def zip_findings(path: Path, name: str) -> list[str]:
             data = z.read(info)
             if info.filename.endswith((".xml", ".xhtml", ".opf", ".ncx", ".html", ".md", ".py", ".json", ".txt", ".toml")):
                 text = data.decode("utf-8", "ignore")
+                if info.filename == "word/numbering.xml":
+                    text = BULLET_GLYPH.sub(r"\1\2", text)
                 out += [f"{info.filename}: {f}" for f in text_findings(text)]
                 for m in DATE.finditer(text) if info.filename.endswith((".xml", ".opf")) else ():
                     if m.group(1) != "00:00:00":
