@@ -90,7 +90,7 @@ Please cite the version you actually used: these manuscripts are drafts, and eve
 
 ### The interactive post's data
 
-`scripts/export_web_demo.py` writes everything the interactive post reads: the seed-0 physics, the demo clips, and each configuration's readout, refitted at the primary cell and checked against the record's seed-0 accuracy. Nothing it writes is part of the record. It was written against the harness before its rename (`harness.confirm`, the tiers and the carrier pathway) and needs porting to `harness.experiment` before it runs again.
+`scripts/export_web_demo.py` writes everything the interactive post reads: the seed-0 physics, the demo clips, and each configuration's readout, refitted at the primary cell and checked against the record's seed-0 accuracy. Nothing it writes is part of the record. Its parts are the shared front end, physics and clips (`base`), the record's leak-check and controls cells (`record`), and the configs of the controls, design, cochlea and quadrature experiments; `--part` picks some, `--smoke` makes a fast low-fidelity pass.
 
 ```bash
 cd src

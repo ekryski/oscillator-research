@@ -1,9 +1,10 @@
 """Export the arms, readouts and clips behind the interactive post.
 
-    uv run python scripts/export_web_demo.py --out <website>/public/untrained            # everything
-    uv run python scripts/export_web_demo.py --out <dir> --part base --part envelope     # some of it
-    uv run python scripts/export_web_demo.py --out <dir> --smoke                         # a fast dry run
-    uv run python scripts/export_web_demo.py --out <dir> --record-only                   # refresh the record's numbers
+    cd src
+    uv run python ../scripts/export_web_demo.py --out <website>/public/untrained            # everything
+    uv run python ../scripts/export_web_demo.py --out <dir> --part base --part controls     # some of it
+    uv run python ../scripts/export_web_demo.py --out <dir> --smoke                         # a fast dry run
+    uv run python ../scripts/export_web_demo.py --out <dir> --record-only                   # refresh the record's numbers
 
 The post runs paper 02's arms in the browser, one clip at a time. Everything it
 needs comes from here, and all of it is computed by the harness's own code:
@@ -22,24 +23,25 @@ needs comes from here, and all of it is computed by the harness's own code:
     nets/<id>.bin        a trained baseline's weights (float32)
     audio/*.wav          the demo clips, as the bank stores them
     audio/noise.bin      the unit white noise the harness adds to each demo
-                         clip at 0 and +5 dB, exactly (float32): the quadrature
+                         clip at noise levels 0 and +5 dB (signal-to-noise
+                         ratios 0 and -5 dB), exactly (float32): the quadrature
                          pathway reads each band's phase from one frequency
                          bin, and where that bin is nearly empty a rounded copy
                          of the noise is enough to swing it
-    record.json          the recorded recognition cells of the gate and Tier 1,
-                         every read, size and width, per seed: the numbers the
-                         post quotes, copied, never recomputed
+    record.json          the recorded recognition cells of the leak check and the
+                         controls experiment, every read, size and width, per
+                         seed: the numbers the post quotes, copied, never recomputed
 
-A config is one arm on one pathway at one registered input gain and noise
-level, at seed 0. Its readout is the registered primary cell: the four-window
+A config is one arm on one pathway at one of the study's input gains and
+noise levels, at seed 0. Its readout is the primary cell: the four-window
 read, the first 2,048 clips of seed 0's training order, width 192. It is fitted
-exactly as `harness.confirm.readout.read_cells` fits it, and the export checks
+exactly as `harness.experiment.readout.read_cells` fits it, and the export checks
 the fit against the record: the fitted readout's accuracy on the 6,000 test
 clips must equal the recorded seed-0 accuracy wherever the record has that cell.
 It then scores the test set again the way the browser will (projection rounded
 to float16) and records how many predictions agree.
 
-Nothing here is registered and nothing here writes to the record.
+Nothing here writes to the record.
 """
 
 from __future__ import annotations
@@ -59,19 +61,18 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from harness.confirm import arms as am
-from harness.confirm import plan as pl
-from harness.confirm import protocol as pr
-from harness.confirm import readout as ro
-from harness.confirm import run as rn
-from harness.confirm import terms
+from harness.experiment import arms as am
+from harness.experiment import plan as pl
+from harness.experiment import protocol as pr
+from harness.experiment import readout as ro
+from harness.experiment import run as rn
+from harness.experiment import terms
 from harness.measurement.features import MIN_FRAMES_PER_WINDOW, projection_matrix
 from harness.models.field import physics_block
 from harness.models.geometries import build_geometry
 from harness.stimuli import frontend as fe
-from harness.sweep import ALPHA, BETA
 from harness.utils.constants import WARMUP_FRAMES
 
 SEED = 0
@@ -81,11 +82,13 @@ SIZE = rn.PRIMARY_SIZE
 DEMO_SPEAKERS = lambda d: (49 + d, 60 - d)  # noqa: E731
 DEMO_REP = 0
 GAINS = pl.GAINS
-PATHWAY_NOISES = {"envelope": (None, 0.0, 5.0), "quadrature": (0.0, 5.0)}
+PATHWAY_NOISES = {"spectrogram": pl.NOISES, "quadrature": pl.DESIGN_NOISES}
 DESIGN_NOISES = pl.DESIGN_NOISES
-SHAPES = pl.SHAPES
-FAMILIES = pl.PHASE_FAMILIES + pl.AMPLITUDE_FAMILIES
-PARTS = ("base", "record", "envelope", "design", "quadrature")
+#: the lattice geometries: the design experiment's six, then the cochlea experiment's three
+GEOMETRIES = pl.GEOMETRIES
+COCHLEAR = ("coil", "cochlea", "cochlea-matched")
+COUPLINGS = pl.PHASE_COUPLINGS + pl.AMPLITUDE_COUPLINGS
+PARTS = ("base", "record", "controls", "design", "cochlea", "quadrature")
 
 
 # ---------------------------------------------------------------------------
@@ -94,56 +97,63 @@ PARTS = ("base", "record", "envelope", "design", "quadrature")
 
 @dataclass(frozen=True)
 class Config:
-    """One arm on one pathway, at one registered gain and noise level."""
+    """One arm on one pathway, at one of the study's gains and noise levels."""
     part: str
-    drive: str
+    pathway: str
     arm: am.Arm
     gain: float | None
     noise_db: float | None
-    tier: str                       # the tier whose record holds this cell, or "" when none does
+    experiment: str                 # the experiment whose record holds this cell, or "" when none does
     reads: tuple = ("windowed",)
 
     def cid(self, read: str = "windowed") -> str:
         noise = "clean" if self.noise_db is None else f"{self.noise_db:g}db"
         gain = "" if self.gain is None else f"-g{self.gain:g}"
         suffix = "" if read == "windowed" else "-wholeclip"
-        return f"{self.drive}-{self.arm.label()}{gain}-{noise}{suffix}".replace(".", "p")
+        return f"{self.pathway}-{self.arm.label()}{gain}-{noise}{suffix}".replace(".", "p")
 
     def spec(self, span: str = "fixed") -> rn.Spec:
-        return rn.Spec(self.tier or "export", "recognition", self.drive, self.noise_db, self.gain, SEED,
+        return rn.Spec(self.experiment or "export", "recognition", self.pathway, self.noise_db, self.gain, SEED,
                        self.arm, sizes=(SIZE,), native_sizes=(), span=span)
 
 
-def field_arm(physics: str = "kuramoto", boundary: str = "torus", severed: bool = False) -> am.Arm:
-    return am.Arm("field", physics=physics, boundary=boundary, severed=severed)
+def network_arm(coupling: str = "kuramoto", geometry: str = "torus", coupled: bool = True) -> am.Arm:
+    return am.Arm("network", coupling=coupling, geometry=geometry, coupled=coupled)
 
 
 def configs(parts: tuple[str, ...]) -> list[Config]:
     out: list[Config] = []
-    if "envelope" in parts:
-        for noise in PATHWAY_NOISES["envelope"]:
-            out.append(Config("envelope", "envelope", pl.FLOOR, None, noise, "tier1",
+    if "controls" in parts:
+        for noise in PATHWAY_NOISES["spectrogram"]:
+            out.append(Config("controls", "spectrogram", pl.BASELINE, None, noise, "controls",
                               reads=("windowed@wholeclip", "windowed")))
             for gain in GAINS:
-                for arm in pl.FROZEN:
-                    out.append(Config("envelope", "envelope", arm, gain, noise, "tier1"))
-            for arch in pl.ANN_ARCHS:
-                out.append(Config("envelope", "envelope", am.Arm("ann", arch=arch), None, noise, "tier1"))
+                for arm in pl.UNTRAINED + ((pl.STUART_LANDAU,) if noise is None else ()):
+                    out.append(Config("controls", "spectrogram", arm, gain, noise, "controls"))
+            for arch in pl.TRAINED_ARCHS:
+                out.append(Config("controls", "spectrogram", am.Arm("trained", arch=arch), None, noise, "controls"))
     if "design" in parts:
-        for family in FAMILIES:
-            for shape in (("torus",) if family in pl.AMPLITUDE_FAMILIES else SHAPES):
-                arm = field_arm(family, shape)
-                if arm == pl.FIELD:
+        for coupling in COUPLINGS:
+            for geometry in (("torus",) if coupling in pl.AMPLITUDE_COUPLINGS else GEOMETRIES):
+                arm = network_arm(coupling, geometry)
+                if arm == pl.COUPLED:
                     continue
                 for noise in DESIGN_NOISES:
                     for gain in GAINS:
-                        out.append(Config("design", "envelope", arm, gain, noise, "tier2"))
+                        out.append(Config("design", "spectrogram", arm, gain, noise, "design"))
+    if "cochlea" in parts:
+        for coupling in pl.PHASE_COUPLINGS:
+            for geometry in COCHLEAR:
+                for noise in DESIGN_NOISES:
+                    for gain in GAINS:
+                        out.append(Config("cochlea", "spectrogram", network_arm(coupling, geometry), gain, noise,
+                                          "cochlea"))
     if "quadrature" in parts:
         for noise in PATHWAY_NOISES["quadrature"]:
             for gain in GAINS:
-                for family in pl.PHASE_FAMILIES:
-                    out.append(Config("quadrature", "quadrature", field_arm(family), gain, noise, "tier3"))
-                out.append(Config("quadrature", "quadrature", pl.SEVERED, gain, noise, ""))
+                for coupling in pl.PHASE_COUPLINGS:
+                    out.append(Config("quadrature", "quadrature", network_arm(coupling), gain, noise, "quadrature"))
+                out.append(Config("quadrature", "quadrature", pl.UNCOUPLED, gain, noise, ""))
     return out
 
 
@@ -163,20 +173,18 @@ def _group(name: str) -> dict:
 
 def record_cell(cfg: Config, read: str) -> dict | None:
     """The record's primary cell for this config, per seed: {seed: accuracy}, or None if unrun."""
-    if not cfg.tier:
+    if not cfg.experiment:
         return None
-    group = f"{cfg.tier}-recognition-{cfg.drive}"
-    if cfg.tier == "tier2":
-        group += f"-{cfg.arm.physics}"
     want = cfg.arm.as_dict()
     accs: dict[int, float] = {}
-    for run in _group(group).values():
+    for run in _group(cfg.spec().group()).values():
         s = run["spec"]
-        if (s["arm"] != want or s["noise_db"] != cfg.noise_db or s["gain"] != cfg.gain
-                or s["protocol"] != "A" or s["span"] != "fixed"):
+        if (s["arm"] != want or s["pathway"] != cfg.pathway or s["noise_db"] != cfg.noise_db
+                or s["gain"] != cfg.gain or s["protocol"] != "A" or s["span"] != "fixed"):
             continue
         for cell in run["cells"]:
-            if cell["read"] == read and cell["n_train"] == SIZE and cell["width"] == WIDTH:
+            if (cell["read"] == read and cell["n_train"] == SIZE and cell["width"] == WIDTH
+                    and cell.get("projection", "fixed") != "seeded"):
                 accs[s["seed"]] = cell["acc"]
     if not accs:
         return None
@@ -187,9 +195,10 @@ def record_cell(cfg: Config, read: str) -> dict | None:
 
 
 def export_record(out: Path) -> dict:
-    """The gate's and Tier 1's recognition cells, one row per cell with every seed's accuracy."""
+    """The leak check's and the controls experiment's recognition cells, one row per cell with every seed's
+    accuracy."""
     tables = {}
-    for tier, group in (("gate", "gate-recognition-envelope"), ("tier1", "tier1-recognition-envelope")):
+    for experiment, group in (("leak-check", "leak-check-recognition"), ("controls", "controls-recognition")):
         rows: dict[tuple, dict] = {}
         for run in _group(group).values():
             s = run["spec"]
@@ -197,10 +206,12 @@ def export_record(out: Path) -> dict:
                 continue
             arm = am.Arm(**s["arm"])
             for cell in run["cells"]:
+                if cell.get("projection", "fixed") == "seeded":
+                    continue
                 key = (arm.label(), s["noise_db"], s["gain"], s["span"], cell["read"], cell["n_train"],
                        cell["width"])
                 rows.setdefault(key, {})[s["seed"]] = round(cell["acc"], 6)
-        tables[tier] = [[*k, [v[i] for i in sorted(v)]] for k, v in sorted(rows.items(), key=str)]
+        tables[experiment] = [[*k, [v[i] for i in sorted(v)]] for k, v in sorted(rows.items(), key=str)]
     names = sorted({r[0] for t in tables.values() for r in t})
     record = {"columns": ["arm", "noise_db", "gain", "span", "read", "n_train", "width", "accs"],
               "names": {n: terms.arm(n) for n in names}, **tables,
@@ -210,7 +221,7 @@ def export_record(out: Path) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Features, exactly as a registered run computes them
+# Features, exactly as a recorded run computes them
 # ---------------------------------------------------------------------------
 
 def arm_features(cfg: Config, bank: dict, clips: rn.Clips, reads: tuple[str, ...], train_only: bool):
@@ -229,28 +240,28 @@ def arm_features(cfg: Config, bank: dict, clips: rn.Clips, reads: tuple[str, ...
                   slice(where.start, stop), total)
 
     net = None
-    if arm.kind == "ann":
+    if arm.kind == "trained":
         rows, tvalid = [], []
         for r, tv, _ in rn.batches(spec, clips):
             rows.append(r)
             tvalid.append(tv)
         rows, tvalid = torch.cat(rows), torch.cat(tvalid)
-        backbone, _, health = am.train_ann(arm, rows[:n_train], tvalid[:n_train], clips.labels[:n_train],
-                                           "recognition", SEED, clips.n_classes)
+        backbone, _, health = am.train_baseline(arm, rows[:n_train], tvalid[:n_train], clips.labels[:n_train],
+                                                "recognition", SEED, clips.n_classes)
         with torch.no_grad():
             step = rn.BATCH["recognition"]
             for a in range(0, total, step):
                 b = min(a + step, total)
-                keep(am.ann_blocks(backbone, rows[a:b], tvalid[a:b], "recognition"), slice(a, b))
+                keep(am.trained_blocks(backbone, rows[a:b], tvalid[a:b], "recognition"), slice(a, b))
         model, net = backbone, {"health": health}
     else:
-        model = am.build_frozen(arm, cfg.gain if cfg.gain is not None else 0.0, SEED)
+        model = am.build_untrained(arm, cfg.gain if cfg.gain is not None else 0.0, SEED)
         with torch.no_grad():
             for rows, tvalid, where in rn.batches(spec, clips):
                 if where.start >= total:
                     break
-                sig = am.frozen_signals(arm, model, rows)
-                keep(am.frozen_features(arm, sig, tvalid, "recognition"), where)
+                sig = am.untrained_signals(arm, model, rows)
+                keep(am.untrained_features(arm, sig, tvalid, "recognition"), where)
     blocks = {read: [buffers[k] for k in keys] for read, keys in am.reads(arm, "recognition").items()
               if read in reads}
     return blocks, model, net
@@ -269,7 +280,7 @@ def fit_readout(blocks: list[torch.Tensor], labels: torch.Tensor, layout: ro.Lay
     mean1, sd1 = ro._block_stats(blocks, rows_tr)
     projected = WIDTH < native
     if projected:
-        # read_cells projects once to the widest registered width below native and
+        # read_cells projects once to the widest recorded width below native and
         # slices; doing the same keeps the float32 sums in the same order
         top = max(w for w in rn.WIDTHS if w < native) if exact else WIDTH
         x_tr = ro._projected(blocks, rows_tr, mean1, sd1, top)[:, :WIDTH]
@@ -308,7 +319,7 @@ def fit_readout(blocks: list[torch.Tensor], labels: torch.Tensor, layout: ro.Lay
     out = {"native": native, "projected": projected, "mean1": mean1, "sd1": sd1,
            "mean2": mean2, "sd2": sd2, "w": w, "lam": best_lam, "val_acc": best_acc}
     if with_test:
-        # the registered path's own answer, to hold this refit to
+        # the recorded path's own answer, to hold this refit to
         ref = ro.ridge(x_tr, y_tr, x_te, y_te, am.N_CLASSES)
         pred = ro._predict(x_te, mean2, sd2, w)
         assert ref["lam"] == best_lam, (ref["lam"], best_lam)
@@ -418,13 +429,13 @@ def export_base(out: Path, bank: dict) -> dict:
         "min_frames_per_window": MIN_FRAMES_PER_WINDOW,
     }
 
-    # the seed-0 physics: every phase function and geometry draws the same kernel,
+    # the seed-0 physics: every coupling function and geometry draws the same kernel,
     # natural frequencies and initial phases from the seed; checked, not assumed
-    ref = am.build_frozen(pl.FIELD, 1.0, SEED)
+    ref = am.build_untrained(pl.COUPLED, 1.0, SEED)
     blk = physics_block(ref.core)
     kernel, omega, phase0 = blk.kernel.detach().clone(), blk.natural_freqs.detach().clone(), ref.core.phase0[0, 0]
     geometries = {}
-    for shape in SHAPES:
+    for shape in GEOMETRIES + COCHLEAR:
         geom = build_geometry(shape, am.GRID)
         embedded = geom.embed_kernel(kernel)
         kfft = geom.kernel_spectrum(embedded)
@@ -437,27 +448,27 @@ def export_base(out: Path, bank: dict) -> dict:
                              "check": {"sum": float(dense.double().sum()),
                                        "row0": [float(v) for v in dense[:, 0].double().sum(-1)],
                                        "abs": float(dense.double().abs().sum())}}
-    for family in FAMILIES:
-        for shape in (("torus",) if family in pl.AMPLITUDE_FAMILIES else SHAPES):
-            m = am.build_frozen(field_arm(family, shape), 1.0, SEED)
+    for family in COUPLINGS:
+        for shape in (("torus",) if family in pl.AMPLITUDE_COUPLINGS else GEOMETRIES + COCHLEAR):
+            m = am.build_untrained(network_arm(family, shape), 1.0, SEED)
             b = physics_block(m.core)
             assert torch.equal(b.kernel, kernel) and torch.equal(b.natural_freqs, omega), (family, shape)
             init = m.core.phase0[0, 0] if hasattr(m.core, "phase0") else torch.atan2(m.core.state0[0, 1],
                                                                                     m.core.state0[0, 0])
             assert torch.allclose(torch.remainder(init, 2 * math.pi), phase0, atol=1e-5), (family, shape)
-    sl = am.build_frozen(field_arm("sl"), 1.0, SEED).core
+    sl = am.build_untrained(network_arm("stuart-landau"), 1.0, SEED).core
     physics = {
-        "channels": 4, "grid": am.GRID, "dt": am.DT, "substeps": am.SUBSTEPS, "damping": pl.FIELD.damping,
-        "clamp": pl.FIELD.clamp, "omega": b64(omega), "phase0": b64(phase0), "geometries": geometries,
-        "sakaguchi_alpha": ALPHA, "harmonic2_beta": BETA,
+        "channels": 4, "grid": am.GRID, "dt": am.DT, "substeps": am.SUBSTEPS, "restoring": pl.COUPLED.restoring,
+        "ceiling": pl.COUPLED.ceiling, "omega": b64(omega), "phase0": b64(phase0), "geometries": geometries,
+        "sakaguchi_alpha": am.ALPHA, "harmonic2_beta": am.BETA,
         "winfree_s": [-1.0, 0.0], "winfree_i": [1.0, 0.0, 1.0],
         "sl": {"alpha": float(sl.alpha.flatten()[0]), "beta": float(F.softplus(sl.beta_hat).flatten()[0]),
                "state0": b64(sl.state0[0])},
     }
 
     banks = {}
-    for arm in (pl.BANK_A, pl.BANK_B):
-        b = am.build_frozen(arm, 1.0, SEED)
+    for arm in (pl.BANK_STATE, pl.BANK_WIDTH):
+        b = am.build_untrained(arm, 1.0, SEED)
         banks[arm.label()] = {"channels": arm.channels, "input_gain": b64(b.input_gain), "tau_s": b64(b.tau_s),
                               "rates_hz": {"hop": 62.5}}
 
@@ -512,13 +523,14 @@ def export_config(cfg: Config, out: Path, bank: dict, args, projections: dict) -
 
     # the demo clips, run the same way, for the page to check itself against
     waves, lens, _ = demo_waves(bank, cfg.noise_db)
-    demo_rows = pr.front_end(waves, cfg.drive)
-    tvalid = pr.valid_frames(lens, cfg.drive)
+    demo_rows = pr.front_end(waves, cfg.pathway)
+    tvalid = pr.valid_frames(lens, cfg.pathway)
     with torch.no_grad():
-        if cfg.arm.kind == "ann":
-            feats = am.ann_blocks(model, demo_rows, tvalid, "recognition")
+        if cfg.arm.kind == "trained":
+            feats = am.trained_blocks(model, demo_rows, tvalid, "recognition")
         else:
-            feats = am.frozen_features(cfg.arm, am.frozen_signals(cfg.arm, model, demo_rows), tvalid, "recognition")
+            feats = am.untrained_features(cfg.arm, am.untrained_signals(cfg.arm, model, demo_rows), tvalid,
+                                          "recognition")
     demo = {read: [feats[k] for k in keys] for read, keys in am.reads(cfg.arm, "recognition").items()
             if read in cfg.reads}
 
@@ -544,13 +556,13 @@ def export_config(cfg: Config, out: Path, bank: dict, args, projections: dict) -
         layout = write_bin(out / "readouts" / f"{cid}.bin", parts)
 
         entry = {
-            "id": cid, "part": cfg.part, "drive": cfg.drive, "arm": cfg.arm.as_dict(), "label": cfg.arm.label(),
+            "id": cid, "part": cfg.part, "pathway": cfg.pathway, "arm": cfg.arm.as_dict(), "label": cfg.arm.label(),
             "name": terms.arm(cfg.arm.label()), "gain": cfg.gain, "noise_db": cfg.noise_db, "read": read,
             "readout": {"file": f"readouts/{cid}.bin", "layout": layout, "native": r["native"],
                         "width": min(WIDTH, r["native"]), "projected": r["projected"],
                         "projection": projections[r["native"]]["file"] if r["projected"] else None,
                         "lam": r["lam"], "val_acc": r["val_acc"]},
-            "record": record_cell(cfg, read), "tier": cfg.tier or None,
+            "record": record_cell(cfg, read), "experiment": cfg.experiment or None,
             "n_train": clips.layout.n_train, "n_test": clips.layout.n_test if with_test else 0,
         }
         if with_test:
@@ -570,7 +582,7 @@ def export_config(cfg: Config, out: Path, bank: dict, args, projections: dict) -
                          "rows_sum": [float(v) for v in demo_rows.double().flatten(1).sum(1)]}
         entries.append(entry)
 
-    if cfg.arm.kind == "ann":
+    if cfg.arm.kind == "trained":
         nid = cfg.cid("windowed")
         layout = write_bin(out / "nets" / f"{nid}.bin", net_weights(model))
         for e in entries:
@@ -592,7 +604,9 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--part", action="append", choices=PARTS, help="repeatable; default: all")
     ap.add_argument("--only", action="append", default=[], help="export only config ids containing this")
-    ap.add_argument("--threads", type=int, default=2)
+    ap.add_argument("--threads", type=int, default=2,
+                    help="CPU threads; the trained baselines reproduce the record exactly only at its 2, since the thread "
+                         "count changes the order of the training's floating-point sums")
     ap.add_argument("--smoke", action="store_true", help="short training and test sets, for development")
     ap.add_argument("--smoke-train", type=int, default=384)
     ap.add_argument("--smoke-test", type=int, default=256)
@@ -616,7 +630,7 @@ def main(argv: list[str] | None = None) -> None:
     if args.record_only:
         for e in manifest["configs"].values():
             arm = am.Arm(**e["arm"])
-            cfg = Config(e["part"], e["drive"], arm, e["gain"], e["noise_db"], e["tier"] or "")
+            cfg = Config(e["part"], e["pathway"], arm, e["gain"], e["noise_db"], e["experiment"] or "")
             e["record"] = record_cell(cfg, e["read"])
         manifest["record"] = export_record(out)
         manifest["record_refreshed"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
@@ -644,11 +658,11 @@ def main(argv: list[str] | None = None) -> None:
                                    for k, v in projections.items()}
         manifest["meta"] = {
             "paper": "Spoken-Digit Recognition Without Training (paper 02)",
-            "source": "papers/02-untrained-reservoirs/src/scripts/export_web_demo.py",
+            "source": "papers/02-untrained-reservoirs/scripts/export_web_demo.py",
             "commit": git_commit(), "exported": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "seed": SEED,
             "primary_cell": {"read": "windowed", "n_train": SIZE, "width": WIDTH},
             "smoke": bool(args.smoke),
-            "note": "Untrained arms at seed 0; each readout is the registered primary cell, refitted here "
+            "note": "Untrained arms at seed 0; each readout is the primary cell, refitted here "
                     "and checked against the record. Trained baselines are retrained here at seed 0.",
         }
         save()   # after every config: resumable
