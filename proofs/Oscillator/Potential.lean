@@ -153,7 +153,7 @@ theorem hasFDerivAt_energyV (hK : K.IsHermitian) (V : ι → ℝ[X]) (w : ι →
       ((2 : ℝ) • ∑ i, pairing (Pi.single i (u i))) w :=
     (HasFDerivAt.fun_sum fun i _ => hasFDerivAt_input i (u i) w).const_mul (2 : ℝ)
   refine ((h1.fun_sub h2).fun_sub h3).congr_fderiv ?_
-  simp only [← pairingₗ_apply, ← map_smul, ← map_add, ← map_sum, ← map_sub]
+  simp only [← pairingₗ_apply, ← map_smul, ← map_sum, ← map_sub]
   exact congrArg pairingₗ (gradient_vector_identityV hK V w)
 
 theorem differentiable_energyV (hK : K.IsHermitian) (V : ι → ℝ[X]) :
@@ -277,7 +277,7 @@ theorem bistablePotential_leadingCoeff (μ g s : ℝ) (hs : s ≠ 0) :
     (bistablePotential μ g s).leadingCoeff = s / 3 := by
   rw [leadingCoeff, bistablePotential_natDegree μ g s hs]
   unfold bistablePotential
-  simp [coeff_X_pow, coeff_X, coeff_C]
+  simp [coeff_X_pow]
 
 theorem bistable_energy_bddBelow (μ g s : ι → ℝ) (hs : ∀ i, 0 < s i) :
     ∃ m : ℝ, ∀ w, m ≤ energyV (fun i => bistablePotential (μ i) (g i) (s i)) K u w :=
@@ -311,9 +311,8 @@ theorem hasFDerivAt_rotFieldV_zero (ω : ι → ℝ) (V : ι → ℝ[X]) :
   have h := ((hn.fun_add hKv).fun_add hu).fun_add hω
   refine h.congr_fderiv ?_
   ext v
-  simp only [ContinuousLinearMap.comp_apply, _root_.add_apply, _root_.sub_apply, _root_.smul_apply,
-    pairing_single]
-  simp [rotJacobian, mulVec, dotProduct, Complex.real_smul]
+  simp only [ContinuousLinearMap.comp_apply, _root_.add_apply, _root_.smul_apply]
+  simp [rotJacobian]
   ring
 
 /-- If `F_{V,ω}` is a gradient field for the real inner product, `K + i·diag(ω)` is Hermitian. -/
