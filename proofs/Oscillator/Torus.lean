@@ -34,6 +34,7 @@ section General
 
 variable {G : Type*} [AddCommGroup G] [Fintype G] {R : Type*} [CommRing R]
 
+omit [Fintype G] [CommRing R] in
 /-- A translation-invariant kernel on a finite abelian group is circulant, with symbol
 `d ↦ K d 0`. -/
 theorem circulant_of_translation_invariant (K : Matrix G G R)
