@@ -150,7 +150,7 @@ theorem hasFDerivAt_rotField (w : ι → ℂ) :
   ext v
   simp only [ContinuousLinearMap.comp_apply, _root_.add_apply, _root_.sub_apply, _root_.smul_apply,
     pairing_single]
-  simp [rotJacobian, mulVec, dotProduct, Complex.real_smul]
+  simp [rotJacobian, Complex.real_smul]
   ring
 
 theorem differentiable_rotField : Differentiable ℝ (rotField ω μ K u) :=

@@ -189,7 +189,7 @@ theorem circulant_mulVec_fourierMode2 (v : ZMod m × ZMod m → ℂ) (k : ZMod m
   rw [fourierMode2_eq, circulant_mulVec_addChar]
   congr 1
   refine Finset.sum_congr rfl fun l _ => ?_
-  simp only [prodChar_apply, AddChar.mulShift_apply, Prod.fst_neg, Prod.snd_neg, mul_neg, dft2]
+  simp only [prodChar_apply, AddChar.mulShift_apply, Prod.fst_neg, Prod.snd_neg, mul_neg]
   ring
 
 end TwoDim
