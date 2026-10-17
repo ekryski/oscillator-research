@@ -31,13 +31,11 @@ def OpNormBound (K : Matrix ι ι ℂ) (κ : ℝ) : Prop :=
 noncomputable def dissipationBound (N : ℕ) (μmax κ U S : ℝ) : ℝ :=
   2 * (μmax + κ) * S - (2 / N) * S ^ 2 + 2 * U * Real.sqrt N * Real.sqrt S
 
-/-- The derivative of the squared norm along a solution: `dS/dt = 2 ∑ i Re(conj(w_i) F_ω(w)_i)`. -/
-theorem hasDerivAt_sumNormSq_solution {w : ℝ → ι → ℂ} {t : ℝ}
-    (hw : HasDerivAt w (rotField ω μ K u (w t)) t) :
-    HasDerivAt (fun s => sumNormSq (w s))
-      (2 * ∑ i, (conj (w t i) * rotField ω μ K u (w t) i).re) t := by
-  have hi : ∀ i, HasDerivAt (fun s => normSq (w s i))
-      (2 * (conj (w t i) * rotField ω μ K u (w t) i).re) t := by
+/-- The derivative of the squared norm along any differentiable curve:
+`d/dt ∑ i |w_i|² = 2 ∑ i Re(conj(w_i) w'_i)`. -/
+theorem hasDerivAt_sumNormSq {w : ℝ → ι → ℂ} {w' : ι → ℂ} {t : ℝ} (hw : HasDerivAt w w' t) :
+    HasDerivAt (fun s => sumNormSq (w s)) (2 * ∑ i, (conj (w t i) * w' i).re) t := by
+  have hi : ∀ i, HasDerivAt (fun s => normSq (w s i)) (2 * (conj (w t i) * w' i).re) t := by
     intro i
     have h := (hasDerivAt_pi.1 hw i).norm_sq
     rw [Complex.inner] at h
@@ -48,6 +46,74 @@ theorem hasDerivAt_sumNormSq_solution {w : ℝ → ι → ℂ} {t : ℝ}
   have h := HasDerivAt.fun_sum (u := Finset.univ) fun i _ => hi i
   rw [← Finset.mul_sum] at h
   exact h
+
+/-- The derivative of the squared norm along a solution: `dS/dt = 2 ∑ i Re(conj(w_i) F_ω(w)_i)`. -/
+theorem hasDerivAt_sumNormSq_solution {w : ℝ → ι → ℂ} {t : ℝ}
+    (hw : HasDerivAt w (rotField ω μ K u (w t)) t) :
+    HasDerivAt (fun s => sumNormSq (w s))
+      (2 * ∑ i, (conj (w t i) * rotField ω μ K u (w t) i).re) t :=
+  hasDerivAt_sumNormSq hw
+
+/-- `∑ i |w_i|⁴ ≥ (∑ i |w_i|²)² / N`, in the form used below. -/
+theorem two_div_card_mul_sq_le (w : ι → ℂ) :
+    (2 / (Fintype.card ι : ℝ)) * sumNormSq w ^ 2 ≤ 2 * ∑ i, normSq (w i) ^ 2 := by
+  rcases Nat.eq_zero_or_pos (Fintype.card ι) with h0 | hpos
+  · rw [h0]
+    simp only [Nat.cast_zero, div_zero, zero_mul]
+    exact mul_nonneg (by norm_num) (Finset.sum_nonneg fun i _ => sq_nonneg _)
+  · have hcs := sq_sum_le_card_mul_sum_sq (s := Finset.univ) (f := fun i => normSq (w i))
+    rw [Finset.card_univ] at hcs
+    have hNpos : (0 : ℝ) < Fintype.card ι := by exact_mod_cast hpos
+    rw [sumNormSq, div_mul_eq_mul_div, div_le_iff₀ hNpos]
+    nlinarith [hcs]
+
+/-- The coupling term is bounded by the operator norm: `∑ i Re(conj(w_i) (K w)_i) ≤ κ ‖w‖²`. -/
+theorem sum_re_conj_mulVec_le {κ : ℝ} (hK : OpNormBound K κ) (w : ι → ℂ) :
+    ∑ i, (conj (w i) * (K *ᵥ w) i).re ≤ κ * sumNormSq w := by
+  have h1 : ∑ i, (conj (w i) * (K *ᵥ w) i).re ≤ ∑ i, ‖w i‖ * ‖(K *ᵥ w) i‖ := by
+    refine Finset.sum_le_sum fun i _ => ?_
+    calc (conj (w i) * (K *ᵥ w) i).re ≤ ‖conj (w i) * (K *ᵥ w) i‖ := Complex.re_le_norm _
+      _ = ‖w i‖ * ‖(K *ᵥ w) i‖ := by rw [norm_mul, Complex.norm_conj]
+  have h2 : (∑ i, ‖w i‖ * ‖(K *ᵥ w) i‖) ^ 2
+      ≤ (∑ i, ‖w i‖ ^ 2) * ∑ i, ‖(K *ᵥ w) i‖ ^ 2 :=
+    Finset.sum_mul_sq_le_sq_mul_sq _ _ _
+  have h3 : ∑ i, ‖w i‖ ^ 2 = sumNormSq w := by
+    simp [sumNormSq, Complex.normSq_eq_norm_sq]
+  have h4 : ∑ i, ‖(K *ᵥ w) i‖ ^ 2 = sumNormSq (K *ᵥ w) := by
+    simp [sumNormSq, Complex.normSq_eq_norm_sq]
+  rw [h3, h4] at h2
+  have h5 : (∑ i, ‖w i‖ * ‖(K *ᵥ w) i‖) ^ 2 ≤ (κ * sumNormSq w) ^ 2 := by
+    calc (∑ i, ‖w i‖ * ‖(K *ᵥ w) i‖) ^ 2 ≤ sumNormSq w * sumNormSq (K *ᵥ w) := h2
+      _ ≤ sumNormSq w * (κ ^ 2 * sumNormSq w) :=
+        mul_le_mul_of_nonneg_left (hK.2 w) (sumNormSq_nonneg w)
+      _ = (κ * sumNormSq w) ^ 2 := by ring
+  have h6 : ∑ i, ‖w i‖ * ‖(K *ᵥ w) i‖ ≤ κ * sumNormSq w :=
+    le_of_sq_le_sq h5 (mul_nonneg hK.1 (sumNormSq_nonneg w))
+  linarith
+
+/-- The input term is bounded by Cauchy–Schwarz: `∑ i Re(conj(w_i) u_i) ≤ U √N ‖w‖`. -/
+theorem sum_re_conj_input_le {U : ℝ} (hU : 0 ≤ U) (hu : ∀ i, ‖u i‖ ≤ U) (w : ι → ℂ) :
+    ∑ i, (conj (w i) * u i).re
+      ≤ U * Real.sqrt (Fintype.card ι) * Real.sqrt (sumNormSq w) := by
+  have h1 : ∑ i, (conj (w i) * u i).re ≤ U * ∑ i, ‖w i‖ := by
+    rw [Finset.mul_sum]
+    refine Finset.sum_le_sum fun i _ => ?_
+    calc (conj (w i) * u i).re ≤ ‖conj (w i) * u i‖ := Complex.re_le_norm _
+      _ = ‖w i‖ * ‖u i‖ := by rw [norm_mul, Complex.norm_conj]
+      _ ≤ ‖w i‖ * U := mul_le_mul_of_nonneg_left (hu i) (norm_nonneg _)
+      _ = U * ‖w i‖ := mul_comm _ _
+  have h2 : ∑ i, ‖w i‖ ≤ Real.sqrt (Fintype.card ι) * Real.sqrt (sumNormSq w) := by
+    rw [← Real.sqrt_mul (Nat.cast_nonneg _)]
+    rw [Real.le_sqrt (Finset.sum_nonneg fun i _ => norm_nonneg _)
+      (mul_nonneg (Nat.cast_nonneg _) (sumNormSq_nonneg w))]
+    have hcs := sq_sum_le_card_mul_sum_sq (s := Finset.univ) (f := fun i => ‖w i‖)
+    rw [Finset.card_univ] at hcs
+    calc (∑ i, ‖w i‖) ^ 2 ≤ (Fintype.card ι : ℝ) * ∑ i, ‖w i‖ ^ 2 := hcs
+      _ = Fintype.card ι * sumNormSq w := by simp [sumNormSq, Complex.normSq_eq_norm_sq]
+  calc ∑ i, (conj (w i) * u i).re ≤ U * ∑ i, ‖w i‖ := h1
+    _ ≤ U * (Real.sqrt (Fintype.card ι) * Real.sqrt (sumNormSq w)) :=
+      mul_le_mul_of_nonneg_left h2 hU
+    _ = U * Real.sqrt (Fintype.card ι) * Real.sqrt (sumNormSq w) := by ring
 
 /-- The frequency term drops out of `Re(conj(w_i) F_ω(w)_i)`, which splits into its four parts. -/
 theorem re_conj_mul_rotField (w : ι → ℂ) (i : ι) :
@@ -71,58 +137,9 @@ theorem dissipativity_bound {κ μmax U : ℝ} (hK : OpNormBound K κ) (hμ : �
   have hA : ∑ i, μ i * normSq (w i) ≤ μmax * sumNormSq w := by
     rw [sumNormSq, Finset.mul_sum]
     exact Finset.sum_le_sum fun i _ => mul_le_mul_of_nonneg_right (hμ i) (normSq_nonneg _)
-  have hB : (2 / (Fintype.card ι : ℝ)) * sumNormSq w ^ 2 ≤ 2 * ∑ i, normSq (w i) ^ 2 := by
-    rcases Nat.eq_zero_or_pos (Fintype.card ι) with h0 | hpos
-    · rw [h0]
-      simp only [Nat.cast_zero, div_zero, zero_mul]
-      exact mul_nonneg (by norm_num) (Finset.sum_nonneg fun i _ => sq_nonneg _)
-    · have hcs := sq_sum_le_card_mul_sum_sq (s := Finset.univ) (f := fun i => normSq (w i))
-      rw [Finset.card_univ] at hcs
-      have hNpos : (0 : ℝ) < Fintype.card ι := by exact_mod_cast hpos
-      rw [sumNormSq, div_mul_eq_mul_div, div_le_iff₀ hNpos]
-      nlinarith [hcs]
-  have hC : ∑ i, (conj (w i) * (K *ᵥ w) i).re ≤ κ * sumNormSq w := by
-    have h1 : ∑ i, (conj (w i) * (K *ᵥ w) i).re ≤ ∑ i, ‖w i‖ * ‖(K *ᵥ w) i‖ := by
-      refine Finset.sum_le_sum fun i _ => ?_
-      calc (conj (w i) * (K *ᵥ w) i).re ≤ ‖conj (w i) * (K *ᵥ w) i‖ := Complex.re_le_norm _
-        _ = ‖w i‖ * ‖(K *ᵥ w) i‖ := by rw [norm_mul, Complex.norm_conj]
-    have h2 : (∑ i, ‖w i‖ * ‖(K *ᵥ w) i‖) ^ 2
-        ≤ (∑ i, ‖w i‖ ^ 2) * ∑ i, ‖(K *ᵥ w) i‖ ^ 2 :=
-      Finset.sum_mul_sq_le_sq_mul_sq _ _ _
-    have h3 : ∑ i, ‖w i‖ ^ 2 = sumNormSq w := by
-      simp [sumNormSq, Complex.normSq_eq_norm_sq]
-    have h4 : ∑ i, ‖(K *ᵥ w) i‖ ^ 2 = sumNormSq (K *ᵥ w) := by
-      simp [sumNormSq, Complex.normSq_eq_norm_sq]
-    rw [h3, h4] at h2
-    have h5 : (∑ i, ‖w i‖ * ‖(K *ᵥ w) i‖) ^ 2 ≤ (κ * sumNormSq w) ^ 2 := by
-      calc (∑ i, ‖w i‖ * ‖(K *ᵥ w) i‖) ^ 2 ≤ sumNormSq w * sumNormSq (K *ᵥ w) := h2
-        _ ≤ sumNormSq w * (κ ^ 2 * sumNormSq w) :=
-          mul_le_mul_of_nonneg_left (hK.2 w) (sumNormSq_nonneg w)
-        _ = (κ * sumNormSq w) ^ 2 := by ring
-    have h6 : ∑ i, ‖w i‖ * ‖(K *ᵥ w) i‖ ≤ κ * sumNormSq w :=
-      le_of_sq_le_sq h5 (mul_nonneg hK.1 (sumNormSq_nonneg w))
-    linarith
-  have hD : ∑ i, (conj (w i) * u i).re
-      ≤ U * Real.sqrt (Fintype.card ι) * Real.sqrt (sumNormSq w) := by
-    have h1 : ∑ i, (conj (w i) * u i).re ≤ U * ∑ i, ‖w i‖ := by
-      rw [Finset.mul_sum]
-      refine Finset.sum_le_sum fun i _ => ?_
-      calc (conj (w i) * u i).re ≤ ‖conj (w i) * u i‖ := Complex.re_le_norm _
-        _ = ‖w i‖ * ‖u i‖ := by rw [norm_mul, Complex.norm_conj]
-        _ ≤ ‖w i‖ * U := mul_le_mul_of_nonneg_left (hu i) (norm_nonneg _)
-        _ = U * ‖w i‖ := mul_comm _ _
-    have h2 : ∑ i, ‖w i‖ ≤ Real.sqrt (Fintype.card ι) * Real.sqrt (sumNormSq w) := by
-      rw [← Real.sqrt_mul (Nat.cast_nonneg _)]
-      rw [Real.le_sqrt (Finset.sum_nonneg fun i _ => norm_nonneg _)
-        (mul_nonneg (Nat.cast_nonneg _) (sumNormSq_nonneg w))]
-      have hcs := sq_sum_le_card_mul_sum_sq (s := Finset.univ) (f := fun i => ‖w i‖)
-      rw [Finset.card_univ] at hcs
-      calc (∑ i, ‖w i‖) ^ 2 ≤ (Fintype.card ι : ℝ) * ∑ i, ‖w i‖ ^ 2 := hcs
-        _ = Fintype.card ι * sumNormSq w := by simp [sumNormSq, Complex.normSq_eq_norm_sq]
-    calc ∑ i, (conj (w i) * u i).re ≤ U * ∑ i, ‖w i‖ := h1
-      _ ≤ U * (Real.sqrt (Fintype.card ι) * Real.sqrt (sumNormSq w)) :=
-        mul_le_mul_of_nonneg_left h2 hU
-      _ = U * Real.sqrt (Fintype.card ι) * Real.sqrt (sumNormSq w) := by ring
+  have hB := two_div_card_mul_sq_le w
+  have hC := sum_re_conj_mulVec_le hK w
+  have hD := sum_re_conj_input_le hU hu w
   rw [hexp, dissipationBound]
   nlinarith [hA, hB, hC, hD]
 

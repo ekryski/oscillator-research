@@ -175,15 +175,17 @@ theorem pairing_apply_single [DecidableEq ι] (a : ι → ℂ) (k : ι) (b : ℂ
   simp
   ring
 
-/-- If the field with frequencies `ω` is a gradient field for the real inner product, then
-`K + i·diag(ω)` is Hermitian. -/
-theorem isHermitian_of_isGradientField [DecidableEq ι]
-    (h : ∃ φ, IsGradientFieldOf pairingCLM (rotField ω μ K u) φ) :
+/-- If a field whose Jacobian at the origin is `v ↦ (μ_i + i ω_i) v_i + (K v)_i` is a gradient field
+for the real inner product, then `K + i·diag(ω)` is Hermitian.  This is the form shared by the
+Stuart–Landau field and the fields with a general on-site potential (`Oscillator.Potential`). -/
+theorem isHermitian_of_isGradientField_of_jacobian [DecidableEq ι] {G : (ι → ℂ) → (ι → ℂ)}
+    (hG : HasFDerivAt G (rotJacobian ω μ K 0) 0)
+    (h : ∃ φ, IsGradientFieldOf pairingCLM G φ) :
     (K + diagonal (fun i => (ω i : ℂ) * I)).IsHermitian := by
   obtain ⟨φ, hφ⟩ := h
   have hsym : ∀ v w, pairing (rotJacobian ω μ K 0 v) w = pairing v (rotJacobian ω μ K 0 w) := by
     intro v w
-    have := hφ.jacobian_symm pairingCLM_comm (hasFDerivAt_rotField (u := u) 0) v w
+    have := hφ.jacobian_symm pairingCLM_comm hG v w
     simpa using this
   refine Matrix.IsHermitian.ext fun j k => ?_
   have h1 := hsym (Pi.single j 1) (Pi.single k 1)
@@ -196,6 +198,13 @@ theorem isHermitian_of_isGradientField [DecidableEq ι]
   · have hkj : k ≠ j := fun h => hjk h.symm
     simp [mulVec, dotProduct, Pi.single_apply, hjk, hkj, Complex.ext_iff] at h1 h2 ⊢
     constructor <;> linarith
+
+/-- If the field with frequencies `ω` is a gradient field for the real inner product, then
+`K + i·diag(ω)` is Hermitian. -/
+theorem isHermitian_of_isGradientField [DecidableEq ι]
+    (h : ∃ φ, IsGradientFieldOf pairingCLM (rotField ω μ K u) φ) :
+    (K + diagonal (fun i => (ω i : ℂ) * I)).IsHermitian :=
+  isHermitian_of_isGradientField_of_jacobian (hasFDerivAt_rotField (u := u) 0) h
 
 /-- **Corollary (asymmetric coupling).**  With a common frequency (`ω = 0`), a non-Hermitian
 coupling gives a field that is not a gradient field for the real inner product. -/

@@ -7,3 +7,4 @@ import Oscillator.Torus
 import Oscillator.Chain
 import Oscillator.Unit
 import Oscillator.EqProp
+import Oscillator.Potential
