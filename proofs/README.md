@@ -1,6 +1,6 @@
 # Formal proofs for the notes' Section 5
 
-Lean 4 proofs of the provable core of Section 5 of the unified-theory notes: the six propositions about Stuart–Landau networks, the obstruction behind P3's symmetry requirement, the local learning rule, and the chaining closure. Everything here is checked by Lean against Mathlib; there is no `sorry` anywhere in `Oscillator/`.
+Lean 4 proofs of the provable core of Section 5 of the unified-theory notes: the six propositions about Stuart–Landau networks, the obstruction behind P3's symmetry requirement, the local learning rule, the chaining closure, and the equilibrium-propagation identity that makes the local rule a gradient step. Everything here is checked by Lean against Mathlib; there is no `sorry` anywhere in `Oscillator/`.
 
 ```bash
 cd proofs
@@ -36,7 +36,7 @@ A solution of the dynamics is always a hypothesis, never a construction: a curve
 | P5 | Dissipativity: `d‖w‖²/dt ≤ 2(μ_max + κ)‖w‖² − (2/N)‖w‖⁴ + 2U√N‖w‖`, an absorbing ball, a global attractor | the differential inequality and the absorbing ball are proved; the attractor's existence is not | `Oscillator/Dissipativity.lean` |
 | P6 | Periodic boundaries make the kernel circulant on `Z_m × Z_m`, diagonalised by the two-dimensional DFT; the coupling ceiling is the kernel's operator norm | circulant structure and the diagonalisation are proved in one and two dimensions; the operator-norm consequence is not | `Oscillator/Torus.lean` |
 | — | Chaining: two modules with Hermitian coupling joined by any inter-module coupling form one network with Hermitian coupling, so P3 applies to the chain | proved | `Oscillator/Chain.lean` |
-| — | Equilibrium propagation: the loss gradient equals the `β → 0` limit of the contrast of `∂E/∂θ` between nudged and free equilibria | not formalised yet (see the end of this file) | — |
+| — | Equilibrium propagation: the loss gradient equals the `β → 0` limit of the contrast of `∂E/∂θ` between nudged and free equilibria | proved, for a `C¹` family of nudged equilibria and, via the implicit function theorem, at every nondegenerate equilibrium; instantiated as the network's threshold rule | `Oscillator/EqProp.lean` |
 
 ### Why P1 and P4 were not attempted
 
@@ -73,7 +73,7 @@ LaSalle's conclusion in the notes ("every trajectory converges to the set of equ
 * `hasFDerivAt_energy_K`, `fderiv_energy_K_apply` — in direction `δK`, `dE[δK] = −Σᵢⱼ Re(conj(wᵢ) δKᵢⱼ wⱼ)` (the coupling is taken as a function `ι → ι → ℂ`, i.e. `Matrix.of K`, to use the sup norm).
 * `fderiv_energy_K_single` — along the single entry `Kᵢⱼ ↦ Kᵢⱼ + c`: `dE = −Re(conj(wᵢ) wⱼ c)`. Read as a real gradient with respect to the complex entry, `∂E/∂Kᵢⱼ = −wᵢ conj(wⱼ) = −conj(conj(wᵢ) wⱼ)`.
 * `fderiv_energy_K_symm` — along the notes' real symmetric direction `Kᵢⱼ = Kⱼᵢ = κ`: `dE/dκ = −2 Re(conj(wᵢ) wⱼ)`, the notes' `∂E/∂Kᵢⱼ`.
-* `mu_contrast`, `K_contrast` — the equilibrium-propagation contrasts: `(∂E/∂μᵢ(w^β) − ∂E/∂μᵢ(w⁰))/β = −(|wᵢ^β|² − |wᵢ⁰|²)/β` and the coherence contrast for `K`, each local to the units involved. These follow by algebra from the derivatives above; the identity that makes the contrast the gradient of a loss is the equilibrium-propagation theorem, see the end of this file.
+* `mu_contrast`, `K_contrast` — the equilibrium-propagation contrasts: `(∂E/∂μᵢ(w^β) − ∂E/∂μᵢ(w⁰))/β = −(|wᵢ^β|² − |wᵢ⁰|²)/β` and the coherence contrast for `K`, each local to the units involved. These follow by algebra from the derivatives above; the identity that makes the contrast the gradient of a loss is `eqprop_identity` in `Oscillator/EqProp.lean`.
 
 ### `Oscillator/Dissipativity.lean` (P5)
 
@@ -118,6 +118,14 @@ For the isolated unit (`ι = Unit`, `K = 0`, constant input `F`):
 6. The operator norm in P5 is the ℓ² operator norm, stated as `‖Kv‖² ≤ κ²‖v‖²` for all `v`; `N` is `card ι`; `μ_max` and `U` are any upper bounds (`μᵢ ≤ μ_max`, `|uᵢ| ≤ U`, `U ≥ 0`).
 7. The DFT on `ZMod m` is Mathlib's `ZMod.dft`, `𝓕 v (k) = Σⱼ exp(−2πi jk/m) v(j)`, with the Fourier mode `k` being `j ↦ exp(2πi kj/m)`; the DFT matrix `W` has these modes as columns and satisfies `W·Wᴴ = m·1`.
 
-## Equilibrium propagation
+### `Oscillator/EqProp.lean` (equilibrium propagation)
 
-Not formalised in this version. What it would need: the equilibrium-propagation identity for a `C¹` family of nudged equilibria `w^β(θ)` of `E(θ, ·) + β C`, which follows from the symmetry of second derivatives of `Φ(θ, β) = E(θ, w^β) + β C(w^β)`, and the existence of that family near a nondegenerate equilibrium from the implicit function theorem (`ContDiffAt.implicitFunction` in this Mathlib). The contrasts that the identity turns into a gradient step are already proved (`mu_contrast`, `K_contrast`).
+The abstract setting is any pair of real normed spaces, parameters `Θ` and states `W`, an energy `E : Θ → W → ℝ`, a cost `C : W → ℝ`, and the nudged energy `nudged E C θ β = E θ + β C`.
+
+* `eqprop_identity` — **the identity.** Hypotheses: `E` and `C` are `C²`; `w : Θ × ℝ → W` is `C¹` at `(θ₀, 0)` and, near `(θ₀, 0)`, `w(θ, β)` is a critical point of `E(θ, ·) + β C`. Conclusion: for every parameter direction `h`, the contrast function `β ↦ ∂_θE(θ₀, w(θ₀, β))·h` is differentiable at `β = 0` with derivative `d/dθ[C(w(θ, 0))]·h`, the gradient of the loss `L(θ) = C(w(θ, 0))`. Equivalently `(∂_θE(θ₀, w^β) − ∂_θE(θ₀, w⁰))·h / β → ∇L(θ₀)·h`. The proof is the symmetry of second derivatives (Mathlib's `ContDiffAt.isSymmSndFDerivAt`) of `Φ(θ, β) = E(θ, w) + β C(w)` at `w = w(θ, β)`, whose first derivative is `(∂_θE, C(w))` because the `∂_w` term vanishes at a critical point (the envelope theorem); `Φ` is `C²` for that reason even though `w` is only `C¹`.
+* `exists_nudged_equilibria` — **the family exists.** Hypotheses: `Θ`, `W` complete; `E`, `C` `C²`; `w₀` a critical point of `E(θ₀, ·)` whose Hessian `fderiv (fderiv (E θ₀)) w₀` is invertible (a nondegenerate equilibrium). Conclusion: a `C¹` family `w(θ, β)` near `(θ₀, 0)` with `w(θ₀, 0) = w₀` of critical points of the nudged energies. This is Mathlib's `C¹` implicit function theorem (`ContDiffAt.implicitFunction`) applied to the nudged gradient `((θ, β), v) ↦ d_v(E(θ, ·) + β C)(v)`.
+* `eqprop_of_nondegenerate` — the two combined: at a nondegenerate equilibrium the identity holds for the implicit family.
+* `contDiff_energy` — the network's energy is `C²` (indeed polynomial) in `(μ, w)` jointly.
+* `eqprop_threshold_rule` — **the notes' local threshold rule is a gradient step.** Hypotheses: `K` Hermitian; a `C²` cost `C` on states; `w₀` an equilibrium of the free network (`F(w₀) = 0`) whose energy Hessian is invertible. Conclusion: there is a `C¹` family `w(μ, β)` of nudged equilibria through `w₀` (critical points of `energy μ K u + β C`, i.e. equilibria of the nudged dynamics by `fderiv_energy_eq_zero_iff`), and for every unit `i` the amplitude-contrast function `β ↦ −|w(μ₀, β)ᵢ|²` has derivative at `0` equal to `∂L/∂μᵢ` with `L(μ) = C(w(μ, 0))`. So `(|wᵢ^β|² − |wᵢ⁰|²)/β → −∂L/∂μᵢ`: the update `Δμᵢ ∝ (|wᵢ^β|² − |wᵢ⁰|²)/β` descends the loss, and it is computed from unit `i` alone. The same argument with `K` as the parameter and `fderiv_energy_K_symm` gives the coupling rule; it is not written out separately.
+
+What is not formalised here: that the nudged dynamics settle to `w(μ, β)` (that is the LaSalle step left open in P3), and the nondegeneracy of a given equilibrium, which is a hypothesis.
