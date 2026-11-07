@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[2]
 PAPERS = ROOT / "papers"
 #: preprocessed manuscripts and build logs; regenerated, never committed
 WORK = ROOT / "publishing" / ".work"
+#: every build of a face, kept so a later one can be marked up against it (history.py); never committed
+HISTORY = ROOT / "publishing" / ".history"
 #: the vendored TMLR style file and the pandoc templates that use it
 TEMPLATES = ROOT / "publishing" / "templates"
 

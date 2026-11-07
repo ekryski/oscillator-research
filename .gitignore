@@ -291,3 +291,10 @@ papers/*/results/*.tmp
 # a paper's anonymized supplementary zip, built by publishing/supplement.py
 papers/*/*-supplement.zip
 papers/*/supplement/
+
+# Every build of a face is kept under publishing/.history/, named for its day
+# and commit, so the next build can be marked up against it (lib/history.py);
+# the marked-up PDF of what changed lands beside the manuscript. Both are
+# working aids for a revision, never shipped and never committed.
+publishing/.history/
+papers/*/*-diff-*-to-*.pdf

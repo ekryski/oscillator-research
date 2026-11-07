@@ -5,6 +5,7 @@ check the one thing worth checking about the flags: which face each command
 resolves to, and therefore which file it would write.
 """
 
+import os
 import subprocess
 from pathlib import Path
 
@@ -112,3 +113,34 @@ def test_a_style_name_with_an_underscore_reaches_bibtex_as_written():
     assert bibstyle("metadata") != "\\bibliographystyle{iclr2027_conference}"
     script = (ROOT / "publishing/publish.sh").read_text()
     assert "--variable=biblio-style=" in script and "--metadata=biblio-style=" not in script
+
+
+def test_a_build_says_which_history_entry_and_diff_it_would_write():
+    # the stamp is the day and HEAD, so only its shape is checked here
+    out = plan("--iclr").stdout
+    assert "would keep publishing/.history/01-evidence-audit/iclr/" in out
+    assert "-iclr-diff-" in out and "-to-" in out
+    assert "would keep publishing/.history/01-evidence-audit/iclr/marks/v1.tex and .pdf" in plan("--iclr", "--mark", "v1").stdout
+    quiet = plan("--iclr", "--no-diff").stdout
+    assert "would keep" in quiet and "-diff-" not in quiet      # the build is still kept, only the diff is skipped
+
+
+def test_history_off_keeps_and_diffs_nothing():
+    result = subprocess.run(["bash", "publishing/publish.sh", PAPER, "--iclr", "--dry-run"],
+                            cwd=ROOT, capture_output=True, text=True, env={**os.environ, "HISTORY": "0"})
+    assert f"would write {PDF}-iclr.pdf" in result.stdout
+    assert "would keep" not in result.stdout and "-diff-" not in result.stdout
+
+
+def test_marking_another_commit_needs_a_name_and_builds_nothing_else():
+    result = plan("--iclr", "--at", "HEAD")
+    assert result.returncode != 0 and "--mark" in result.stderr
+    out = plan("--iclr", "--mark", "v1", "--at", "HEAD").stdout
+    assert "would build 01-evidence-audit (iclr, submission) at HEAD" in out
+    assert "marks/v1.tex and .pdf" in out
+    assert "would write" not in out
+
+
+def test_a_mark_is_a_file_name_not_a_path():
+    result = plan("--iclr", "--mark", "../x")
+    assert result.returncode != 0 and "letters, digits" in result.stderr

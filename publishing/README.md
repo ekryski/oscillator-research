@@ -248,6 +248,32 @@ equations drops out of the PDF **without an error**. Venue style files are
 generally written for pdflatex, so the build picks it for this one format and
 fails if any character goes missing.
 
+## Revisions: what changed since
+
+A revised manuscript is read against the version the reader already has. ICLR shows reviewers a pdfdiff of the revision against the submission, and a journal's revision letter points at marked changes. The build keeps every venue PDF it makes and marks up each new one against an earlier one, with `latexdiff`, in the face's own class, so the marked copy looks like the paper with additions underlined in blue and deletions struck through in red. None of this touches the shipped outputs: they keep their stable names, stay byte-identical across rebuilds, and never carry the stamp described here.
+
+```bash
+bash publishing/publish.sh 02 --iclr --mark iclr-2027-submitted --at dce9bc2   # keep the submitted version, built from its commit
+bash publishing/publish.sh 02 --iclr                                           # build, keep, and mark up against the previous build
+bash publishing/publish.sh 02 --iclr --diff-against iclr-2027-submitted        # mark up against the submission instead
+bash publishing/publish.sh 02 --iclr --no-diff                                 # keep the build, skip the markup
+HISTORY=0 bash publishing/publish.sh 02 --iclr                                 # neither keep nor mark up
+```
+
+**The history.** After each venue build, the `.tex` and the PDF of the face just built are copied to `publishing/.history/<paper>/<face>/<YYYY-MM-DD>-<hash>.tex` and `.pdf`, where `<paper>` is the paper's folder name, `<face>` the suffix the build writes (`iclr`, `preprint`, `iclr-preprint`, `tmlr-accepted`), the date today's and the hash HEAD's short one, with `-dirty` appended when the paper's sources or `publishing/` had uncommitted changes. Rewriting the built formats does not count as a change, since the build does that itself. A `.commit` file beside each entry records the full hash. The folder is gitignored: it is a working aid, not a record.
+
+**Marks.** `--mark <name>` also keeps the build as `.history/<paper>/<face>/marks/<name>.tex` and `.pdf`, so a version worth returning to has a name. `--mark <name> --at <git ref>` builds that commit's manuscript instead of the working tree, in a temporary worktree so the build finds the manuscript's last-changed date in git and reproduces the commit's PDF byte for byte, and keeps only the mark; nothing in the working tree is built or written. That is how a submitted version is captured after the fact: `--mark iclr-2027-submitted --at dce9bc2` is paper 02's ICLR 2027 submission, and the mark's PDF is identical to the one committed there.
+
+**The diff.** Each venue build then writes `<manuscript>-<face>-diff-<reference>-to-<stamp>.pdf` beside the manuscript, also gitignored. `<reference>` is the label of what it was compared with and `<stamp>` the entry the build itself became. The reference is chosen in this order:
+
+1. `--diff-against <X>`: a mark of that name; else a `.tex` file at that path; else a git ref, taking the committed `-<face>.tex` at that commit when there is one and building the commit in a temporary worktree otherwise. Anything that is none of these fails the build.
+2. the most recent earlier entry of the face, dated or marked, which is the previous build in the ordinary case and the mark straight after `--mark --at`.
+3. with nothing kept yet, the last commit on `main` that touched the paper, as for a git ref.
+
+The reference `.tex` is copied out of the history before the new build is kept, so keeping it cannot change the comparison, and the reference is found before the build is kept, so a build is never compared with itself. `latexdiff` runs on the two `.tex` files with figures left unmarked, and the result compiles in the staged venue folder with the face's class, style files, figures and bibliography by the same TeX cycle as the face. Because `latexdiff` can only see a figure's file name, the build then names the figure files under `resources/figures/` whose checksum differs between the reference's commit and the working tree. A `--diff-against` path has no commit, so nothing is compared for it.
+
+The diff PDF is a side output: never shipped, skipped by the fingerprint check (`latexdiff`'s preamble is not ours), and never a reason for the build to fail. Without `latexdiff` the build says so and goes on. BasicTeX's `tlmgr install latexdiff` needs an administrator, and the package is not relocatable, so `tlmgr --usermode` cannot take it; `brew install latexdiff` installs the same 1.4.0 script and is what this repository uses. `tests/test_history.py` checks the entry names, the reference order and the diff name on a tiny repository, and `test_publish_cli.py` the flags through `--dry-run`.
+
 ## Figures
 
 Manuscripts reference figures by real relative path, ending `.png`:
@@ -615,11 +641,13 @@ publishing/
 │   ├── check_citemap.py    can any citation land on the wrong work
 │   ├── check_hidden.py     invisible characters left in the source files
 │   ├── number_sections.py  write the section numbers into the headings
-│   └── check_links.py      does every citation still resolve
+│   ├── check_links.py      does every citation still resolve
+│   └── history.py          keep each build, mark up what changed since an earlier one
 ├── templates/
 │   ├── tmlr.latex          pandoc template targeting the TMLR style file
 │   └── tmlr/               the official TMLR style files, vendored unmodified
-└── .work/                  preprocessed copies and build logs (gitignored)
+├── .work/                  preprocessed copies and build logs (gitignored)
+└── .history/               every kept build, by paper and face, and the marks (gitignored)
 ```
 
 Each paper owns the rest:
@@ -631,6 +659,7 @@ papers/<paper>/
 ├── <title>-tmlr.pdf        the anonymous TMLR submission, and -tmlr.tex beside it
 ├── <title>.epub …          epub, html and docx for reading and sharing
 ├── <title>-arxiv.tar.gz    the posting bundle
+├── <title>-<face>-diff-<reference>-to-<stamp>.pdf   what changed since (gitignored)
 ├── metadata/
 │   ├── paper.yaml          title, authors, abstract, keywords
 │   └── citation.{bib,ris,txt,md}   how to cite this paper
