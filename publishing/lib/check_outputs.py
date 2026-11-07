@@ -39,6 +39,7 @@ import zlib
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from history import is_diff_output
 from paths import papers
 from sanitize import INVISIBLE, LOOKALIKE_CHARS, WORD, _latin, strip_png, strip_wav
 
@@ -133,7 +134,10 @@ def main() -> int:
         stem = paper.stem
         outputs = sorted(p for p in paper.dir.glob(f"{stem.removesuffix('-DRAFT')}*")
                          if p.suffix in {".pdf", ".html", ".tex", ".epub", ".docx", ".gz", ".zip"}
-                         and p.stat().st_mtime >= since)
+                         and p.stat().st_mtime >= since
+                         # the marked-up diff of a build against an earlier one is a working
+                         # aid that is never shipped, and latexdiff's preamble is not ours
+                         and not is_diff_output(p.name))
         found, notes = {}, {}
         for p in outputs:
             if p.suffix == ".pdf":

@@ -9,6 +9,11 @@
 #     bash publishing/publish.sh 01 --neunet        # any venue with templates/neunet.latex
 #     bash publishing/publish.sh 01 --tmlr --dry-run    # say what would be built, build nothing
 #     FORMATS="venue pdf" bash publishing/publish.sh 01
+#     bash publishing/publish.sh 02 --iclr --mark iclr-2027-submitted --at dce9bc2
+#                                                   # keep that commit's build under a name
+#     bash publishing/publish.sh 02 --iclr --diff-against iclr-2027-submitted
+#                                                   # mark up this build against it
+#     bash publishing/publish.sh 02 --iclr --no-diff
 #
 # The manuscripts stay plain readable Markdown. Everything a venue wants — a
 # title block, an abstract, real citations, a generated bibliography, a
@@ -30,6 +35,30 @@
 #           (camera-ready; TMLR needs tmlr-month / tmlr-year / tmlr-openreview
 #           in the paper's metadata). With no face flag and no venue flag the
 #           face is preprint: ordinary non-anonymous publishing.
+#
+# Every venue build is also kept, and marked up against an earlier one, so a
+# revision can be read against the version a reviewer already has
+# (publishing/lib/history.py; the shipped outputs are untouched by all of it):
+#
+#   history   each build's .tex and PDF go to publishing/.history/<paper>/<face>/
+#             <YYYY-MM-DD>-<hash>[-dirty], today's date and HEAD, -dirty when the
+#             paper's sources or publishing/ had uncommitted changes. HISTORY=0
+#             turns the keeping and the diff off, as it is for the builds below.
+#   --mark <name>          also keep this build as .history/<paper>/<face>/marks/<name>
+#   --mark <name> --at <git ref>   build that commit's manuscript instead, in a
+#             temporary worktree, and keep only the mark; the working tree's
+#             outputs are not touched. How a submitted version is captured.
+#   diff      each build then writes <manuscript>-<face>-diff-<reference>-to-<stamp>.pdf
+#             beside the manuscript, latexdiff's markup compiled with the face's own
+#             class: additions underlined in blue, deletions struck through in red.
+#             The reference is the most recent earlier entry of the face, dated or
+#             marked, or, with none kept yet, the last commit on main that touched
+#             the paper (its committed .tex, or a build of it). A note follows
+#             naming the figure files that differ from the reference's commit,
+#             which latexdiff cannot see. Needs latexdiff (brew install latexdiff);
+#             without it the build says so and goes on.
+#   --diff-against <mark | path to a .tex | git ref>   choose the reference
+#   --no-diff              skip the diff
 #
 # Pipeline per paper:
 #   1. refresh the .bib from the manuscript's own citations (new keys appended,
@@ -71,16 +100,39 @@ FACE=""
 FILTER=""
 DRY_RUN=0
 venue_named=0
-for arg in "$@"; do
-    case "$arg" in
+# the build history and the marked-up diff (see the header); HISTORY=0 is how a
+# build of another commit, made for a mark or a reference, stays out of both
+HISTORY="${HISTORY:-1}"
+DIFF=1
+DIFF_AGAINST=""
+MARK=""
+AT=""
+while [ $# -gt 0 ]; do
+    case "$1" in
         -h|--help) usage; exit 0 ;;
         --dry-run) DRY_RUN=1 ;;
-        --preprint|--accepted|--submission) FACE="${arg#--}" ;;
+        --no-diff) DIFF=0 ;;
+        --mark) MARK="${2:?--mark needs a name}"; shift ;;
+        --mark=*) MARK="${1#--mark=}" ;;
+        --at) AT="${2:?--at needs a git ref}"; shift ;;
+        --at=*) AT="${1#--at=}" ;;
+        --diff-against) DIFF_AGAINST="${2:?--diff-against needs a mark, a .tex file or a git ref}"; shift ;;
+        --diff-against=*) DIFF_AGAINST="${1#--diff-against=}" ;;
+        --preprint|--accepted|--submission) FACE="${1#--}" ;;
         --anonymous) FACE="submission" ;;
-        --*) VENUE="${arg#--}"; venue_named=1 ;;
-        *) FILTER="$arg" ;;
+        --*) VENUE="${1#--}"; venue_named=1 ;;
+        *) FILTER="$1" ;;
     esac
+    shift
 done
+if [ -n "$MARK" ] && ! [[ "$MARK" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+    echo "a mark is named with letters, digits, dots, dashes and underscores: not '$MARK'" >&2
+    exit 1
+fi
+if [ -n "$AT" ] && [ -z "$MARK" ]; then
+    echo "--at builds another commit only to keep it under a name: add --mark <name>" >&2
+    exit 1
+fi
 # naming a venue means formatting for it; naming none means publishing as yourself
 if [ -z "$FACE" ]; then
     [ "$venue_named" = 1 ] && FACE="submission" || FACE="preprint"
@@ -124,6 +176,18 @@ manuscript_in() {
     echo "$found"
 }
 
+# what history.py found to compare with, as the build's report words it
+reference_kind() {  # reference_kind <build|mark|path|ref|main>
+    case "$1" in
+        build) echo "the earlier build" ;;
+        mark) echo "the mark" ;;
+        path) echo "the file" ;;
+        ref) echo "the commit" ;;
+        main) echo "the last commit on main touching the paper," ;;
+        *) echo "$1" ;;
+    esac
+}
+
 if [ "$DRY_RUN" = 1 ]; then
     echo "venue: $VENUE"
     echo "face: $FACE"
@@ -134,9 +198,29 @@ if [ "$DRY_RUN" = 1 ]; then
         manuscript="$(manuscript_in "$dir")"
         [ -z "$manuscript" ] && continue
         name="$(basename "$manuscript" .md)"
+        if [ -n "$AT" ]; then
+            echo "would build $slug ($VENUE, $FACE) at $AT and keep it as publishing/.history/$slug/$SUFFIX/marks/$MARK.tex and .pdf"
+            continue
+        fi
         for fmt in $FORMATS; do
             case "$fmt" in
-                venue|tmlr) echo "would write $dir$name-$SUFFIX.pdf and .tex" ;;
+                venue|tmlr)
+                    echo "would write $dir$name-$SUFFIX.pdf and .tex"
+                    [ "$HISTORY" = 0 ] && continue
+                    stamp="$(python3 publishing/lib/history.py stamp "$slug")"
+                    echo "would keep publishing/.history/$slug/$SUFFIX/$stamp.tex and .pdf"
+                    [ -n "$MARK" ] && echo "would keep publishing/.history/$slug/$SUFFIX/marks/$MARK.tex and .pdf"
+                    if [ "$DIFF" != 0 ]; then
+                        ref="$(python3 publishing/lib/history.py reference "$slug" "$SUFFIX" --venue "$VENUE" --form "$FACE" \
+                                   --no-build ${DIFF_AGAINST:+--against "$DIFF_AGAINST"})" || exit 1
+                        if [ -n "$ref" ]; then
+                            IFS=$'\t' read -r label _ _ kind <<<"$ref"
+                            echo "would write $dir$name-$SUFFIX-diff-$label-to-$stamp.pdf (against $(reference_kind "$kind") $label)"
+                        else
+                            echo "would write no diff: nothing to compare with yet"
+                        fi
+                    fi
+                    ;;
                 arxiv) echo "would write $dir$name-arxiv.tar.gz (preprint face, $HOUSE_VENUE style)" ;;
                 supplement) [ -f "${dir}metadata/supplement-README.md" ] && echo "would write $dir${name%-DRAFT}-supplement.zip (anonymized src, results, audio)" ;;
                 pdf|epub|html|docx|tex) echo "would write $dir$name.$fmt" ;;
@@ -189,6 +273,24 @@ venue_metadata() {  # venue_metadata <venue> -> a --metadata-file flag, or nothi
     return 0
 }
 
+# The venue's TeX cycle. BibTeX needs the full latex/bibtex/latex/latex run to
+# resolve \citep keys and settle the cross-references. The first pass has no
+# .bbl yet, so its "undefined citation" warnings are expected; only the final
+# pass is diagnostic, and it gets its own log. A class with a long front matter
+# (Elsevier's prints the highlights on a page of their own) can leave the
+# labels one pass short; the log says when, and one more pass settles it.
+latex_cycle() {  # latex_cycle <dir> <job name> <log> <final-pass log>
+    local out="$1" job="$2" log="$3" final="$4"
+    (cd "$out" \
+        && "$VENUE_ENGINE" -interaction=nonstopmode "$job.tex" \
+        && bibtex "$job" \
+        && "$VENUE_ENGINE" -interaction=nonstopmode "$job.tex") >"$log" 2>&1
+    (cd "$out" && "$VENUE_ENGINE" -interaction=nonstopmode "$job.tex") >"$final" 2>&1
+    if grep -a -q "Rerun to get" "$final"; then
+        (cd "$out" && "$VENUE_ENGINE" -interaction=nonstopmode "$job.tex") >"$final" 2>&1
+    fi
+}
+
 stage_venue() {  # stage_venue <dir> <paper dir> <bib> <venue>
     local out="$1" dir="$2" bib="$3" venue="$4"
     rm -rf "$out"; mkdir -p "$out"
@@ -203,6 +305,79 @@ stage_venue() {  # stage_venue <dir> <paper dir> <bib> <venue>
         mkdir -p "$out/resources/figures"
         cp "$dir"/resources/figures/*.pdf "$out/resources/figures/" 2>/dev/null
     fi
+}
+
+# A mark of another commit is that commit's build, made in a temporary worktree
+# (history.py mark); nothing of the working tree is built or written.
+if [ -n "$AT" ]; then
+    for dir in papers/*/; do
+        slug="$(basename "$dir")"
+        [ -n "$FILTER" ] && [[ "$slug" != "$FILTER"* ]] && continue
+        [ -z "$(manuscript_in "$dir")" ] && continue
+        echo "=== $slug ($VENUE, $FACE) at $AT"
+        python3 publishing/lib/history.py mark "$slug" "$SUFFIX" "$MARK" --at "$AT" --venue "$VENUE" --form "$FACE" \
+            | sed 's/^/    kept /' || exit 1
+    done
+    exit 0
+fi
+
+# Keep the venue build just made and mark up what changed in it. The reference
+# is found before the build is kept, so the build is never its own past, and
+# its .tex is copied out of the history first, so keeping this build cannot
+# change it under the diff. The diff is latexdiff's markup compiled in the
+# staged venue folder, with the face's class, figures and bibliography, by the
+# same TeX cycle as the face; it is a side output that the fingerprint check
+# skips. A missing latexdiff, or a diff that will not compile, is said and
+# skipped: the shipped outputs are already written and are not at stake.
+track_build() {  # track_build <slug> <paper dir> <manuscript name> <staged venue dir>
+    local slug="$1" dir="$2" name="$3" out="$4"
+    local stamp ref label ref_tex ref_commit kind diff_tex diff_pdf diff_log diff_final
+    stamp="$(python3 publishing/lib/history.py stamp "$slug")" || return 1
+    ref=""
+    local found=0
+    if [ "$DIFF" != 0 ]; then
+        rm -rf "$WORK/reference-$VENUE-$slug"
+        ref="$(python3 publishing/lib/history.py reference "$slug" "$SUFFIX" --venue "$VENUE" --form "$FACE" \
+                   --into "$WORK/reference-$VENUE-$slug" ${DIFF_AGAINST:+--against "$DIFF_AGAINST"})" || found=1
+    fi
+    # kept whatever became of the reference: the build itself is sound
+    python3 publishing/lib/history.py record "$slug" "$SUFFIX" "$dir$name-$SUFFIX.tex" "$dir$name-$SUFFIX.pdf" \
+        ${MARK:+--mark "$MARK"} | sed 's/^/    kept /' || return 1
+    [ "$found" = 1 ] && return 1
+    [ "$DIFF" = 0 ] && return 0
+    if [ -z "$ref" ]; then
+        echo "    no diff: nothing to compare with yet (no earlier build kept, no commit on main touching $slug)"
+        return 0
+    fi
+    IFS=$'\t' read -r label ref_tex ref_commit kind <<<"$ref"
+    kind="$(reference_kind "$kind")"
+    diff_tex="$out/$name-diff.tex"
+    diff_pdf="$dir$name-$SUFFIX-diff-$label-to-$stamp.pdf"
+    python3 publishing/lib/history.py diff "$ref_tex" "$out/$name.tex" "$diff_tex"
+    local rc=$?
+    if [ "$rc" = 0 ]; then
+        diff_log="$WORK/$slug.$VENUE.diff.log"
+        diff_final="$WORK/$slug.$VENUE.diff.final.log"
+        latex_cycle "$out" "$name-diff" "$diff_log" "$diff_final"
+        if [ -f "$out/$name-diff.pdf" ]; then
+            cp "$out/$name-diff.pdf" "$diff_pdf"
+            echo "    $diff_pdf (changes against $kind $label)"
+            [ "$(grep -a -c '^!' "$diff_final")" != 0 ] \
+                && echo "    WARNING: the diff compiled with LaTeX errors; read it with care — see $diff_final" >&2
+        else
+            echo "    WARNING: the diff against $label did not compile — see $diff_log" >&2
+        fi
+    elif [ "$rc" = 2 ]; then
+        echo "    WARNING: no diff written; install latexdiff (brew install latexdiff) to mark up changes" >&2
+    else
+        echo "    WARNING: latexdiff failed on $ref_tex; no diff written" >&2
+    fi
+    if [ "$ref_commit" != "-" ]; then
+        python3 publishing/lib/history.py figures "$ref_commit" "$slug" | sed 's/^/    /'
+    else
+        echo "    (figures not compared: the reference is a file, not a commit)"
+    fi
+    return 0
 }
 
 built=0
@@ -351,22 +526,7 @@ print(int(datetime.datetime.fromisoformat(sys.argv[1]).replace(tzinfo=datetime.t
                     --output="$out/$name.tex" "$tex_body" || continue
                 log="$WORK/$slug.$VENUE.log"
                 final="$WORK/$slug.$VENUE.final.log"
-                # BibTeX needs the full latex/bibtex/latex/latex cycle to
-                # resolve \citep keys and settle the cross-references. The
-                # first pass has no .bbl yet, so its "undefined citation"
-                # warnings are expected — only the final pass is diagnostic,
-                # and it gets its own log.
-                (cd "$out" \
-                    && "$VENUE_ENGINE" -interaction=nonstopmode "$name.tex" \
-                    && bibtex "$name" \
-                    && "$VENUE_ENGINE" -interaction=nonstopmode "$name.tex") >"$log" 2>&1
-                (cd "$out" && "$VENUE_ENGINE" -interaction=nonstopmode "$name.tex") >"$final" 2>&1
-                # a class with a long front matter (Elsevier's prints the
-                # highlights on a page of their own) can leave the labels one
-                # pass short; the log says when, and one more pass settles it
-                if grep -a -q "Rerun to get" "$final"; then
-                    (cd "$out" && "$VENUE_ENGINE" -interaction=nonstopmode "$name.tex") >"$final" 2>&1
-                fi
+                latex_cycle "$out" "$name" "$log" "$final"
                 if [ -f "$out/$name.pdf" ]; then
                     cp "$out/$name.pdf" "$dir$name-$SUFFIX.pdf"
                     cp "$out/$name.tex" "$dir$name-$SUFFIX.tex"
@@ -392,6 +552,9 @@ print(int(datetime.datetime.fromisoformat(sys.argv[1]).replace(tzinfo=datetime.t
                         grep -a -m2 -A6 '^!' "$final" | grep -a -E '^!|^l\.[0-9]+' >&2
                         missing=1
                     }
+                    if [ "$HISTORY" != 0 ]; then
+                        track_build "$slug" "$dir" "$name" "$out" || missing=1
+                    fi
                 else
                     echo "    ERROR: the $VENUE build failed — see $log" >&2
                     grep -m3 "^!" "$log" >&2
