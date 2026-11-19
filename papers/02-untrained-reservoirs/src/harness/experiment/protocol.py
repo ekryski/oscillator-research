@@ -14,6 +14,13 @@ clips are prefixes of that permutation, so each contains the one before it.
 Protocol B, for comparison with published results only: the five speaker folds
 of Becker et al., copied verbatim from the corpus's own preprocess_data.py.
 
+Protocol V, for model selection: Protocol A with the last eight training speakers
+held out as a validation set. Speakers 1-40 train (20,000 clips), 41-48 validate
+(4,000), 49-60 test (6,000), the same test set as Protocol A. The ridge chooses
+its penalty on the validation speakers, and an experiment that selects a
+configuration (a network's gain, restoring strength and ceiling, or a reservoir
+baseline's hyperparameters) selects it on their accuracy, never on the test set's.
+
 The order task joins two recordings, digit a then digit b or b then a, behind a
 silent leader and across a 100 ms gap. Its labels alternate, so both classes are equally common in every set.
 """
@@ -47,6 +54,9 @@ INT16_SCALE = 32767.0
 
 TRAIN_SPEAKERS = tuple(range(1, 49))
 TEST_SPEAKERS = tuple(range(49, 61))
+#: Protocol V: the training speakers less the eight held out to validate on
+TRAIN_SPEAKERS_V = tuple(range(1, 41))
+VAL_SPEAKERS = tuple(range(41, 49))
 #: nested training-set sizes; the last is the whole training pool
 SIZES = (2048, 8192, 24000)
 
@@ -149,6 +159,11 @@ def training_order(pool: torch.Tensor, seed: int) -> torch.Tensor:
     """The seed's permutation of the training pool. Its prefixes are the nested sets."""
     gen = torch.Generator().manual_seed(TRAIN_ORDER_SEED + seed)
     return pool[torch.randperm(len(pool), generator=gen)]
+
+
+def protocol_v(bank: dict) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """(training pool, validation pool, test pool) as bank indices: speakers 1-40, 41-48, 49-60."""
+    return tuple(_of_speakers(bank, s) for s in (TRAIN_SPEAKERS_V, VAL_SPEAKERS, TEST_SPEAKERS))
 
 
 def protocol_b(bank: dict, fold: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:

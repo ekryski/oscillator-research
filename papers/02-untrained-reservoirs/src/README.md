@@ -34,6 +34,8 @@ uv run python -m harness.experiment.protocol --build-bank   # the 50-repetition 
 uv run python -m harness.experiment.plan prepare            # front-end rows, once per pathway and noise level
 uv run python -m harness.experiment.plan run leak-check controls --workers 3 --threads 2
 uv run python -m harness.experiment.plan run design becker-folds quadrature projection sweep cochlea --workers 6 --threads 1
+uv run python -m harness.experiment.plan run exact-drive clean selection calibration esn ron expansion projection-methods row-readout band-readout amplitude-view stiffness --workers 4 --threads 2 --device mps   # the revision's experiments
+uv run python -m harness.experiment.plan run baselines-selected --workers 4 --threads 2 --device mps   # once esn and ron are in: their selected configurations under Protocol A
 uv run python -m harness.experiment.summary                 # every accuracy and difference with its spread, and the leak check
 uv run python -m harness.experiment.figures                 # the paper's result figures
 ```
@@ -55,6 +57,8 @@ uv run python -m harness.experiment.figures                 # the paper's result
 | `models/field.py`, `phase.py`, `stuart_landau.py` | the oscillator network and its two cores |
 | `models/geometries/` | one module per lattice geometry, behind a four-method interface |
 | `models/leaky_bank.py` | the leaky-integrator bank |
+| `models/reservoirs.py` | the echo state network, the random oscillators network and the memoryless expansion (revision) |
+| `experiment/selection.py` | model selection on Protocol V's validation speakers (revision) |
 | `models/baselines/` | the five trained baselines |
 | `measurement/` | the read's statistics, the projection, the ridge, the phase instruments |
 
@@ -77,6 +81,12 @@ The paper's glossary (Appendix A) defines the terms. The code and the record use
 | coupling ceiling | `ceiling` | `spectral_clamp` |
 | input gain | `gain`, `g` in run ids | `gain` |
 | input pathway: spectrogram / quadrature | `pathway` | |
+| Stuart–Landau with the exact-rotation drive (revision) | `coupling`: `stuart-landau-exact`, `stuart-landau-fixed-exact` | `core` `sl-exact`, `sl-fixedamp-exact` (`SLCore(drive="rotation")`) |
+| echo state network (revision) | arm kind `esn`, labels `esn-n<units>-rho<ρ>-leak<a>`; the input scaling is the run's gain | `EchoStateNetwork` |
+| random oscillators network (revision) | arm kind `ron`, labels `ron-n<units>-tau<τ>-rho<ρ>-gamma<mid>r<radius>-eps<mid>r<radius>` | `RandomOscillators` |
+| random nonlinear expansion (revision) | arm kind `expansion`, labels `expansion-n<units>` | `EchoStateNetwork` with spectral radius 0 and leak 1 |
+| Protocol V, the validation speakers (revision) | `protocol`: `V`; run ids start with `V/` | `protocol.protocol_v` |
+| projection: random / PCA / pooled (revision) | cell field `projection`: `fixed`, `seeded`, `pca`, `pooled` | `readout.read_cells(method=...)` |
 
 ## Tests
 

@@ -44,6 +44,9 @@ class Cell:
     n_test: int
     fold: int = -1
     projection: str = "fixed"
+    val_acc: float | None = None   # the penalty-selection accuracy: Protocol V's validation speakers
+    protocol: str = "A"
+    view: str = "full"             # what the readout saw of a network's z (harness.experiment.views)
 
 
 def load(groups: list[str] | None = None) -> list[Cell]:
@@ -64,7 +67,8 @@ def load(groups: list[str] | None = None) -> list[Cell]:
                 out.append(Cell(s["experiment"], s["task"], s["pathway"], s["noise_db"], s["gain"], s["seed"],
                                 s["arm"], label, tuple(s["pair"]), c["read"], c["width"], c["n_train"],
                                 c["acc"], c.get("correct"), rec["n_test"], s.get("fold", -1),
-                                c.get("projection", "fixed")))
+                                c.get("projection", "fixed"), c.get("val_acc"), s.get("protocol", "A"),
+                                s.get("view", "full")))
     return out
 
 
