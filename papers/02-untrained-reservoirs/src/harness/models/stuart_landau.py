@@ -33,6 +33,18 @@ singularity, amplitude implicit for unconditional radial stability):
      (Cardano; p > 0 branch), applied as a radial rescale.
   3. exact phase rotation: z <- z · e^{i·dt·ω}.
 
+Drive step. The semi-implicit line above rotates the state by 2·arcsin(h/2) per
+substep rather than h = dt·drive (the map (x, y) -> (x − h·y, y + h·(x − h·y))
+has trace 2 − h², so its rotation angle is arccos(1 − h²/2)), and the rotation
+is not norm-preserving, so after the amplitude step the phase advance also
+depends on the current phase. At h ≤ 0.3 (gains 1 and 2 on this front end) the
+angle is within 0.4% of h; at gain 8 it is 7% too far, and at h = 2 the map
+stops rotating. `drive="rotation"` instead leaves the drive out of step 1 and
+folds it into step 3 as an exact rotation, z <- z · e^{i·dt·(ω + drive)}, so a
+drive of any size advances the phase by exactly h, as the phase core's Euler
+line does. The study's record was made with the default, `drive="semi-implicit"`;
+the exact-drive variant is the check of what that discretization did.
+
 Phase reduction: at |z| ≡ 1 the tangential projections of (1) are EXACTLY the
 kuramoto torque Σ K sin(θ_j − θ_i) and the pinning −λ sinθ (the s0 term is
 purely radial) — the phase core is this core's equal-amplitude slice, so arm B
@@ -84,8 +96,11 @@ class SLCore(nn.Module):
                  dt: float = 0.1, damping: float = 0.5, spectral_clamp: float = 0.5,
                  damping_learnable: bool = False,
                  alpha_init: float = 0.05, amplitude_frozen: bool = False,
-                 seed: int = 42):
+                 seed: int = 42, drive: str = "semi-implicit"):
         super().__init__()
+        if drive not in ("semi-implicit", "rotation"):
+            raise ValueError(f"unknown drive step '{drive}'")
+        self.drive_step = drive
         self.channels, self.grid, self.substeps, self.dt = channels, grid, substeps, dt
         self.damping, self.spectral_clamp = damping, spectral_clamp
         # harness slice: promote lambda to a per-channel physics parameter
@@ -134,15 +149,23 @@ class SLCore(nn.Module):
         dt = self.dt
         lam = self.damping_lam if hasattr(self, "damping_lam") else self.damping
         beta = torch.nn.functional.softplus(self.beta_hat)
-        co, si = torch.cos(dt * self.natural_freqs), torch.sin(dt * self.natural_freqs)
+        exact = self.drive_step == "rotation"
+        if exact:
+            # the drive joins the natural frequency in the exact rotation of step 3
+            angle = dt * (self.natural_freqs + drive)
+            co, si = torch.cos(angle), torch.sin(angle)
+            push = torch.zeros_like(drive)
+        else:
+            co, si = torch.cos(dt * self.natural_freqs), torch.sin(dt * self.natural_freqs)
+            push = drive
         for _ in range(self.substeps):
             field = torch.stack((x, y), dim=1)
             conv = torch.fft.irfft2(torch.fft.rfft2(field) * kfft, s=(self.grid, self.grid))
             # tangential drive: i·d·z = (−d·y, +d·x) — pure phase push, θ' += d.
             # y reads the updated x on purpose (semi-implicit ordering — see
-            # "Discretization ordering" in the module docstring).
-            x = x + dt * (conv[:, 0] - s0 * x + lam * (1 - x) - drive * y)
-            y = y + dt * (conv[:, 1] - s0 * y - lam * y + drive * x)
+            # "Discretization ordering" and "Drive step" in the module docstring).
+            x = x + dt * (conv[:, 0] - s0 * x + lam * (1 - x) - push * y)
+            y = y + dt * (conv[:, 1] - s0 * y - lam * y + push * x)
             r_old = torch.sqrt(x * x + y * y).clamp_min(1e-8)
             if self.amplitude_frozen:
                 scale = 1.0 / r_old
@@ -150,7 +173,7 @@ class SLCore(nn.Module):
                 r_new = implicit_amplitude_root(r_old, dt * beta, 1 - dt * self.alpha)
                 scale = r_new / r_old
             x, y = x * scale, y * scale
-            x, y = x * co - y * si, x * si + y * co  # z <- z * e^{i dt omega}
+            x, y = x * co - y * si, x * si + y * co  # z <- z * e^{i dt omega} (and the drive, when exact)
         new_state = torch.stack((x, y), dim=1)
         feat = torch.cat((y, x), dim=1).flatten(1)  # [Im z, Re z] = [sinθ, cosθ] order
         return new_state, feat

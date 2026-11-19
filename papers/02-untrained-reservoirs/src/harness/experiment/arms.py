@@ -10,6 +10,11 @@ that is shared: the same statistics over the same frames (harness.measurement
     bank         the untrained leaky-integrator bank, the non-oscillating control
     trained      a trained baseline, trained with a learned linear head on the
                  very statistics the ridge will read
+    esn          a leaky echo state network, the standard reservoir baseline
+    ron          the random oscillators network of Ceni et al. (2024)
+    expansion    a memoryless random nonlinear expansion of each frame (an echo
+                 state network with no recurrence and no leak), the control for
+                 dimensionality alone
 
 Every arm is read over one fixed window, the same frames for every clip: from
 the end of the integrator warm-up to the end of the padded clip. The baseline is
@@ -36,6 +41,7 @@ from harness.measurement.instruments import analytic_row_phase
 from harness.models.baselines import CNNBaseline, GRUBaseline, S4DBaseline, TCNBaseline, TransformerBaseline
 from harness.models.field import OscillatorField, physics_block, tonotopic_omega
 from harness.models.leaky_bank import LeakyBank
+from harness.models.reservoirs import EchoStateNetwork, RandomOscillators
 from harness.utils.constants import PLV_LOCK_THRESH, WARMUP_FRAMES
 
 GRID = 16
@@ -59,7 +65,10 @@ PROBE_SEED, TONOTOPIC_SEED = 5000, 8000
 #: the model layer's names for each coupling function: (core, phase coupling law)
 CORES = {"kuramoto": ("phase", "kuramoto"), "kuramoto-sakaguchi": ("phase", "sakaguchi"),
          "second-harmonic": ("phase", "harmonic2"), "winfree": ("phase", "winfree"),
-         "stuart-landau": ("sl", "kuramoto"), "stuart-landau-fixed": ("sl-fixedamp", "kuramoto")}
+         "stuart-landau": ("sl", "kuramoto"), "stuart-landau-fixed": ("sl-fixedamp", "kuramoto"),
+         # the same two with the input applied as an exact rotation rather than inside the semi-implicit
+         # step (harness.models.stuart_landau, "Drive step"): the check of what that discretization did
+         "stuart-landau-exact": ("sl-exact", "kuramoto"), "stuart-landau-fixed-exact": ("sl-fixedamp-exact", "kuramoto")}
 #: the bank's label by channel count: the state-matched and the width-matched bank
 BANKS = {4: "bank-state", 8: "bank-width"}
 
@@ -67,7 +76,7 @@ BANKS = {4: "bank-state", 8: "bank-width"}
 @dataclass(frozen=True)
 class Arm:
     """One arm, fully specified. The label is its identity in the record."""
-    kind: str                       # baseline | network | bank | trained
+    kind: str                       # baseline | network | bank | trained | esn | ron | expansion
     coupling: str = "kuramoto"      # a key of CORES
     geometry: str = "torus"         # torus | cylinder | sheet | helix | cube | sphere | coil | cochlea | cochlea-matched
     frequencies: str = "random"     # random | tonotopic | identical
@@ -76,6 +85,14 @@ class Arm:
     channels: int = 4
     coupled: bool = True            # False: the uncoupled network, its coupling kernels zeroed
     arch: str = ""                  # a trained baseline's architecture
+    # the reservoir baselines' hyperparameters (harness.models.reservoirs); the input scaling is the run's gain
+    units: int = 0                  # echo state units, random oscillators, or expansion units
+    rho: float = 0.0                # spectral radius of the recurrent matrix
+    leak: float = 1.0               # the echo state network's leaking rate
+    tau: float = 0.0                # the random oscillators' time step
+    gamma: tuple = ()               # (midpoint, radius) of the random oscillators' stiffness
+    eps: tuple = ()                 # (midpoint, radius) of their damping
+    stiffness: float = 1.0          # a Stuart–Landau network's amplitude relaxation rate, as a multiple of 0.05
 
     def label(self) -> str:
         if self.kind == "baseline":
@@ -84,15 +101,23 @@ class Arm:
             return BANKS.get(self.channels, f"bank-ch{self.channels}")
         if self.kind == "trained":
             return f"trained-{self.arch}"
+        if self.kind == "esn":
+            return f"esn-n{self.units}-rho{self.rho:g}-leak{self.leak:g}"
+        if self.kind == "ron":
+            return (f"ron-n{self.units}-tau{self.tau:g}-rho{self.rho:g}"
+                    f"-gamma{self.gamma[0]:g}r{self.gamma[1]:g}-eps{self.eps[0]:g}r{self.eps[1]:g}")
+        if self.kind == "expansion":
+            return f"expansion-n{self.units}"
         name = "coupled" if self.coupled else "uncoupled"
         size = "" if self.channels == 4 else f"-ch{self.channels}"
+        stiff = "" if self.stiffness == 1.0 else f"-stiffness{self.stiffness:g}"
         return (f"{name}-{self.coupling}-{self.geometry}-{self.frequencies}"
-                f"-restoring{self.restoring:g}-ceiling{self.ceiling:g}{size}")
+                f"-restoring{self.restoring:g}-ceiling{self.ceiling:g}{size}{stiff}")
 
     @property
     def uses_gain(self) -> bool:
         """Gain scales the input into a reservoir; the baseline and the trained baselines read rows as they are."""
-        return self.kind in ("network", "bank")
+        return self.kind in ("network", "bank", "esn", "ron", "expansion")
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -131,6 +156,15 @@ def build_untrained(arm: Arm, gain: float, seed: int, device: str = "cpu") -> nn
         return None
     if arm.kind == "bank":
         return LeakyBank(channels=arm.channels, grid=GRID, gain=gain, seed=seed).to(device)
+    if arm.kind == "esn":
+        return EchoStateNetwork(units=arm.units, inputs=GRID, spectral_radius=arm.rho, leak=arm.leak,
+                                gain=gain, seed=seed).to(device)
+    if arm.kind == "expansion":
+        return EchoStateNetwork(units=arm.units, inputs=GRID, spectral_radius=0.0, leak=1.0,
+                                gain=gain, seed=seed).to(device)
+    if arm.kind == "ron":
+        return RandomOscillators(units=arm.units, inputs=GRID, tau=arm.tau, spectral_radius=arm.rho,
+                                 gamma=arm.gamma, eps=arm.eps, gain=gain, seed=seed).to(device)
     if arm.kind != "network":
         raise ValueError(f"{arm.kind} is not an untrained arm")
     core, coupling = CORES[arm.coupling]
@@ -139,6 +173,7 @@ def build_untrained(arm: Arm, gain: float, seed: int, device: str = "cpu") -> nn
         channels=arm.channels, grid=GRID, coupling=coupling, damping=arm.restoring,
         spectral_clamp=arm.ceiling, substeps=SUBSTEPS, dt=DT, n_classes=N_CLASSES,
         probe_seed=PROBE_SEED + seed, gain=gain, seed=seed, core=core, boundary=arm.geometry,
+        amplitude_stiffness=arm.stiffness,
         sakaguchi_alpha=ALPHA if coupling == "sakaguchi" else 0.0,
         harmonic2_beta=BETA if coupling == "harmonic2" else 0.0)
     block = physics_block(network.core)
@@ -172,15 +207,18 @@ def _end(tvalid: torch.Tensor, span: str) -> torch.Tensor | None:
 
 
 def untrained_features(arm: Arm, signals: torch.Tensor, tvalid: torch.Tensor, task: str,
-                       span: str = "fixed") -> dict[str, torch.Tensor]:
-    """One batch's feature blocks for an untrained arm, keyed as `reads` names them."""
+                       span: str = "fixed", rate: bool = True) -> dict[str, torch.Tensor]:
+    """One batch's feature blocks for an untrained arm, keyed as `reads` names them.
+
+    `rate` False leaves a network's rotation rates out, for a view of its signals that has no phase.
+    """
     hi = _end(tvalid, span)
     out: dict[str, torch.Tensor] = {}
     for name, windows in _statistics(task):
         out[name] = ft.windowed(signals, windows, lo=WARMUP_FRAMES, hi=hi)
         if arm.kind == "baseline":
             out[f"{name}@wholeclip"] = ft.windowed(signals, windows, lo=0, hi=hi)
-        if arm.kind == "network":
+        if arm.kind == "network" and rate:
             out[f"{name}:rate"] = ft.rotation_rate(signals, windows, lo=WARMUP_FRAMES, hi=hi)
     return out
 
@@ -204,7 +242,8 @@ def network_instruments(signals: torch.Tensor, rows: torch.Tensor, pathway: str,
     channels and frames. plv is each oscillator's phase-locking value to its own
     row's drive, |<e^{i(theta - phi)}>| over frames, averaged over oscillators, and
     entrained the share of oscillators whose value exceeds PLV_LOCK_THRESH.
-    amplitude is the mean |z|: 1 for a phase core, free for a Stuart-Landau one.
+    amplitude is the mean |z|: 1 for a phase core, free for a Stuart-Landau one;
+    amplitude_spread is the standard deviation of |z| over oscillators and frames.
     Diagnostics only: nothing here reaches the readout.
     """
     b, t, _ = signals.shape
@@ -217,7 +256,22 @@ def network_instruments(signals: torch.Tensor, rows: torch.Tensor, pathway: str,
     diff = theta - drive_phase(rows, pathway)[:, lo:t, None, :, None]
     plv = torch.sqrt(torch.cos(diff).mean(1) ** 2 + torch.sin(diff).mean(1) ** 2).flatten(1)
     return {"R": r, "plv": plv.mean(1), "entrained": (plv > PLV_LOCK_THRESH).float().mean(1),
-            "amplitude": amp.mean((1, 2, 3, 4))}
+            "amplitude": amp.mean((1, 2, 3, 4)), "amplitude_spread": amp.flatten(1).std(1)}
+
+
+def signal_rows(arm: Arm, grid: int = GRID) -> torch.Tensor | None:
+    """The lattice row each of an arm's signals belongs to, in signal order; None where signals have no row.
+
+    A network exposes sin θ of every oscillator (channel, row, column) and then cos θ; a bank exposes each
+    unit's state in (channel, row, column) order; the spectrogram-only baseline's signals are the bands
+    themselves, one per row. The within-row pooling (harness.experiment.readout) uses it.
+    """
+    if arm.kind == "baseline":
+        return torch.arange(grid)
+    if arm.kind not in ("network", "bank"):
+        return None
+    rows = torch.arange(grid).view(1, grid, 1).expand(arm.channels, grid, grid).flatten()
+    return rows.repeat(2) if arm.kind == "network" else rows
 
 
 def meta(arm: Arm, model: nn.Module | None) -> dict:
@@ -227,6 +281,8 @@ def meta(arm: Arm, model: nn.Module | None) -> dict:
     stored = sum(p.numel() for p in model.parameters())
     trained = sum(p.numel() for p in model.parameters() if p.requires_grad)
     states = arm.channels * GRID * GRID if arm.kind in ("network", "bank") else None
+    if arm.kind in ("esn", "ron", "expansion"):
+        states = model.n_states
     out = {"states": states, "stored_params": stored, "trained_params": trained}
     if arm.kind == "network" and not arm.coupled:
         # the zeroed kernel is still stored, but it no longer does anything

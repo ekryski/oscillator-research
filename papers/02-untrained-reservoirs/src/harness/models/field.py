@@ -55,7 +55,7 @@ class OscillatorField(nn.Module):
                  kernel_support: int = 0, core: str = "phase", boundary: str = "torus",
                  damping_learnable: bool = False, omega_encoder: bool = False,
                  sakaguchi_alpha: float = 0.0, harmonic2_beta: float = 0.0,
-                 graph_k: int = 1):
+                 graph_k: int = 1, amplitude_stiffness: float = 1.0):
         super().__init__()
         self.channels, self.grid, self.gain = channels, grid, gain
         if core == "phase":
@@ -65,13 +65,16 @@ class OscillatorField(nn.Module):
                                   compile_step=False, seed=seed, kernel_support=kernel_support,
                                   boundary=boundary, damping_learnable=damping_learnable,
                                   sakaguchi_alpha=sakaguchi_alpha, harmonic2_beta=harmonic2_beta)
-        else:  # "sl" (arm C) | "sl-fixedamp" (arm B) — Stuart-Landau
+        else:  # "sl" (arm C) | "sl-fixedamp" (arm B) — Stuart-Landau; "-exact" applies the drive as an exact rotation
+            assert core in ("sl", "sl-fixedamp", "sl-exact", "sl-fixedamp-exact"), f"unknown core '{core}'"
             assert blocks == 1 and kernel_support == 0, "SL core: blocks/support unsupported"
             assert boundary == "torus", "cylinder boundary: phase core only (scope)"
             self.core = SLCore(channels=channels, grid=grid, substeps=substeps, dt=dt,
                                damping=damping, spectral_clamp=spectral_clamp,
-                               amplitude_frozen=(core == "sl-fixedamp"), seed=seed,
-                               damping_learnable=damping_learnable)
+                               amplitude_frozen=core.startswith("sl-fixedamp"), seed=seed,
+                               damping_learnable=damping_learnable,
+                               alpha_init=0.05 * amplitude_stiffness,
+                               drive="rotation" if core.endswith("-exact") else "semi-implicit")
         if blocks > 1:
             # Physics-only invariant: the 1x1 inter-block mixers are bookend-class
             # capacity — frozen at their random init (fixed routing), so stage-E
