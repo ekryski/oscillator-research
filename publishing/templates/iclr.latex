@@ -63,13 +63,18 @@ $after-header-includes.latex()$
 \renewcommand{\topfraction}{0.92}
 \renewcommand{\bottomfraction}{0.85}
 \renewcommand{\textfraction}{0.06}
-\renewcommand{\floatpagefraction}{0.72}
+% a page of floats alone is only made when they nearly fill it; a smaller figure
+% goes to the top of a page with text under it, not onto a half-empty page
+\renewcommand{\floatpagefraction}{0.85}
 \setcounter{topnumber}{3}
 \setcounter{bottomnumber}{2}
 \setcounter{totalnumber}{4}
 \makeatletter
 \renewcommand{\fps@figure}{!htbp}
 \renewcommand{\fps@table}{!htbp}
+% on a page of floats the figures start at the top, so what space is left is in
+% one piece at the foot and not split above and below
+\setlength{\@fptop}{0pt}
 % A float still waiting when a numbered section begins is flushed first, so a
 % figure stays inside the section that cites it. placeins would do this, but
 % it is not in a BasicTeX installation. \@deferlist holds exactly the pending

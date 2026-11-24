@@ -7,7 +7,7 @@ and the test block are batched separately, so a test clip's features are
 computed in the same batch in every experiment that uses it.
 
 The record lives under results/, one file per experiment and task (and per
-coupling function in the design and sweep experiments). A run's identity is
+coupling function in the design, sweep, exact-drive and selection experiments). A run's identity is
 derived from its specification alone, so a sweep can be stopped and restarted
 and each run lands in the same place exactly once.
 """
@@ -31,6 +31,7 @@ import torch
 from harness.experiment import arms as am
 from harness.experiment import protocol as pr
 from harness.experiment import readout as ro
+from harness.experiment import views as vw
 from harness.utils.paths import CACHE_DIR, RESULTS_DIR
 
 #: the common widths; an arm is never read wider than its native width
@@ -52,7 +53,7 @@ class Spec:
     gain: float | None             # None for arms that read the rows as they are
     seed: int
     arm: am.Arm
-    protocol: str = "A"            # A | B
+    protocol: str = "A"            # A | B | V (A with speakers 41-48 held out as a validation set)
     fold: int = -1                 # Becker fold, protocol B only
     pair: tuple = ()               # order task only
     sizes: tuple = (PRIMARY_SIZE,)
@@ -61,15 +62,22 @@ class Spec:
     bits: str = "all"              # all | primary
     span: str = "fixed"            # fixed | clip (a per-clip span, a diagnostic)
     reads: tuple = ()              # the reads to record; empty records every read the arm has
+    view: str = "full"             # full | phase | amplitude | slaved: what the readout sees of a network's z
+                                   # (harness.experiment.views)
     projection: str = "fixed"      # fixed | both: also read through the seeded projection (cells tagged
-                                   # fixed, seeded, or none where the read is not projected)
+                                   # fixed, seeded, or none where the read is not projected) | methods: also
+                                   # through a training-set PCA and the within-row pooling (tagged pca, pooled)
+                                   # | rows: also through the lower and the upper half of the rows alone
+                                   # (tagged pooled-lower, pooled-upper; at the half-lattice width)
+                                   # | bands: also through each row alone (tagged pooled-row00 to -row15)
 
     def group(self) -> str:
         name = f"{self.experiment}-{self.task}"
-        return f"{name}-{self.arm.coupling}" if self.experiment in ("design", "sweep") else name
+        split = ("design", "sweep", "exact-drive", "clean", "selection")
+        return f"{name}-{self.arm.coupling}" if self.experiment in split else name
 
     def run_id(self) -> str:
-        parts = [f"B{self.fold}" if self.protocol == "B" else "A"]
+        parts = [f"B{self.fold}" if self.protocol == "B" else self.protocol]
         if self.task == "order":
             parts.append(f"pair{self.pair[0]}{self.pair[1]}")
         parts.append("clean" if self.noise_db is None else f"{self.noise_db:g}db")
@@ -80,6 +88,8 @@ class Spec:
             parts.append(f"n{self.sizes[0]}")
         if self.span != "fixed":
             parts.append(f"{self.span}span")
+        if self.view != "full":
+            parts.append(f"{self.view}-view")
         return "/".join(parts)
 
     def as_dict(self) -> dict:
@@ -194,6 +204,11 @@ def assemble(spec: Spec, bank: dict) -> Clips:
     if spec.protocol == "B":
         parts = pr.protocol_b(bank, spec.fold)
         layout = ro.Layout(len(parts[0]), len(parts[1]), len(parts[2]))
+    elif spec.protocol == "V":
+        train_pool, val_pool, test_pool = pr.protocol_v(bank)
+        order = pr.training_order(train_pool, spec.seed)[:max(spec.sizes)]
+        parts = (order, val_pool, test_pool)
+        layout = ro.Layout(len(order), len(val_pool), len(test_pool))
     else:
         train_pool, test_pool = pr.protocol_a(bank)
         order = pr.training_order(train_pool, spec.seed)[:max(spec.sizes)]
@@ -288,7 +303,9 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
                 if arm.kind == "network":
                     for name, value in am.network_instruments(sig, rows.to(device), spec.pathway, arm.channels).items():
                         per_clip.setdefault(name, torch.zeros(total))[where] = value.cpu()
-                _store(buffers, am.untrained_features(arm, sig, tvalid.to(device), spec.task, spec.span),
+                    sig = vw.apply_view(arm, model, sig, spec.view)
+                _store(buffers, am.untrained_features(arm, sig, tvalid.to(device), spec.task, spec.span,
+                                                      rate=spec.view != "amplitude"),
                        where, total)
         timing["simulate_s"] = time.perf_counter() - t1
         if per_clip:
@@ -299,13 +316,24 @@ def execute(spec: Spec, device: str = "cpu", bank: dict | None = None) -> dict:
                    if not spec.reads or read in spec.reads}
     cells = ro.read_cells(read_blocks, clips.labels, clips.layout, spec.sizes, spec.widths,
                           spec.native_sizes, clips.n_classes, keep_bits(spec))
+    native = {read: sum(b.shape[1] for b in blocks) for read, blocks in read_blocks.items()}
     if spec.projection == "both":
         # the seeded projection's cells; an unprojected cell is the same under either, so it is kept once
-        native = {read: sum(b.shape[1] for b in blocks) for read, blocks in read_blocks.items()}
         seeded = ro.read_cells(read_blocks, clips.labels, clips.layout, spec.sizes, spec.widths, (),
                                clips.n_classes, keep_bits(spec), projection_seed=spec.seed)
         cells = ([{**c, "projection": "none" if c["effective_width"] == native[c["read"]] else "fixed"} for c in cells]
                  + [{**c, "projection": "seeded"} for c in seeded if c["effective_width"] != native[c["read"]]])
+    elif spec.projection in ("methods", "rows", "bands"):
+        # the same read through a training-set PCA and the within-row pooling, through each half of the rows
+        # alone, or through each row alone, at the asked widths
+        cells = [{**c, "projection": "none" if c["effective_width"] == native[c["read"]] else "fixed"} for c in cells]
+        methods = {"methods": ("pca", "pooled"), "rows": ("pooled-lower", "pooled-upper"),
+                   "bands": tuple(f"pooled-row{r:02d}" for r in range(am.GRID))}[spec.projection]
+        for method in methods:
+            more = ro.read_cells(read_blocks, clips.labels, clips.layout, spec.sizes, spec.widths, (),
+                                 clips.n_classes, keep_bits(spec), method=method,
+                                 signal_rows=am.signal_rows(arm), windows=am.WINDOWS[spec.task])
+            cells += [{**c, "projection": method} for c in more if c["effective_width"] != native[c["read"]]]
     timing["readout_s"] = time.perf_counter() - t2
     timing["total_s"] = time.perf_counter() - t0
     return {"spec": spec.as_dict(), "arm_meta": am.meta(arm, model),

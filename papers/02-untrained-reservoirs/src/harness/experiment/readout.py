@@ -16,6 +16,24 @@ against the original for identical choices and accuracies.
 A read may be a list of feature blocks (a network's statistics, then its
 rotation rates). Blocks are projected piecewise, so a composite read never has
 to be copied into one matrix.
+
+Three ways to bring a wide read to a common width, all linear maps applied to
+the standardized features:
+
+    random   the fixed (or seeded) Gaussian projection, the study's primary one
+    pca      the leading principal directions of the training rows, fitted on
+             them alone and applied unchanged to the validation and test rows
+    pooled   a structured average: each statistic of each window, averaged over
+             every signal of a lattice row (channels, columns, and sin and cos),
+             so a network's 24,576 features become 16 rows x 3 statistics x 4
+             windows = 192, the spectrogram-only baseline's own layout
+    pooled-lower, pooled-upper
+             the same average kept for the lower or the upper half of the rows
+             only (8 rows x 3 statistics x 4 windows = 96), which reads an arm
+             through one half of its lattice
+    pooled-row<k>
+             the same average kept for row k alone (3 statistics x 4 windows =
+             12), which reads an arm through one band's row
 """
 
 from __future__ import annotations
@@ -28,8 +46,10 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from harness.measurement.features import projection_matrix
+from harness.measurement.features import STATS_PER_SIGNAL, projection_matrix
 
+#: the projection methods a read can go through
+METHODS = ("random", "pca", "pooled", "pooled-lower", "pooled-upper")
 #: ridge penalties, scaled by the number of fitted clips
 LAMBDAS = (1e-3, 1e-2, 1e-1, 1.0)
 #: the share of a training set held out to choose the penalty
@@ -194,19 +214,91 @@ def _block_stats(blocks: list[torch.Tensor], rows: slice) -> tuple[torch.Tensor,
     return torch.cat([m for m, _ in parts]), torch.cat([s for _, s in parts])
 
 
+def _inverse_sd(sd: torch.Tensor) -> torch.Tensor:
+    """1/sd, or zero where a feature is constant over the training set and carries nothing."""
+    return torch.where(sd > MIN_SD, 1.0 / sd, torch.zeros_like(sd)).float()
+
+
+def _standardized(blocks: list[torch.Tensor], rows: slice, mean: torch.Tensor, sd: torch.Tensor) -> torch.Tensor:
+    """The standardized rows as one float32 matrix (for fitting a projection; small row ranges only)."""
+    m, inv = mean.float(), _inverse_sd(sd)
+    parts, at = [], 0
+    for b in blocks:
+        k = b.shape[1]
+        parts.append((b[rows] - m[at:at + k]) * inv[at:at + k])
+        at += k
+    return torch.cat(parts, dim=1)
+
+
+def pca_matrix(blocks: list[torch.Tensor], rows: slice, mean: torch.Tensor, sd: torch.Tensor,
+               width: int) -> torch.Tensor:
+    """[D, width]: the leading principal directions of the standardized training rows.
+
+    Exact, through the n x n Gram matrix of the n training rows (n is far below
+    D here): Z Z^T = U diag(l) U^T gives the directions V = Z^T U / sqrt(l). Fitted
+    on the training rows alone; the test rows never enter.
+    """
+    z = _standardized(blocks, rows, mean, sd).double()
+    n = z.shape[0]
+    if width > n:
+        raise ValueError(f"{n} training rows cannot give {width} principal directions")
+    evals, evecs = torch.linalg.eigh(z @ z.T)
+    order = torch.argsort(evals, descending=True)[:width]
+    l, u = evals[order].clamp_min(1e-12), evecs[:, order]
+    return ((z.T @ u) / l.sqrt()).float()
+
+
+def pooling_matrix(signal_rows: torch.Tensor, stats: int, windows: int,
+                   keep_rows: tuple[int, ...] | None = None) -> torch.Tensor:
+    """[D, windows * stats * rows]: averages each window's statistic over the signals of each lattice row.
+
+    `signal_rows[d]` is the row that signal d belongs to; a block of `windowed`
+    features is laid out window by window, statistic by statistic, signal by
+    signal, and the pooled features come out in the same order with the row in
+    the signal's place: the spectrogram-only baseline's own layout. With
+    `keep_rows`, only those rows' pooled features are kept (in the same order),
+    so the read sees that part of the lattice and nothing else.
+    """
+    n_rows = int(signal_rows.max()) + 1
+    d = signal_rows.numel()
+    p = torch.zeros(windows * stats * d, windows * stats * n_rows)
+    for w in range(windows):
+        for s in range(stats):
+            f0, c0 = (w * stats + s) * d, (w * stats + s) * n_rows
+            p[f0 + torch.arange(d), c0 + signal_rows] = 1.0
+    p = p / p.sum(0, keepdim=True).clamp_min(1.0)
+    if keep_rows is not None:
+        keep = torch.tensor([r in keep_rows for r in range(n_rows)]).repeat(windows * stats)
+        p = p[:, keep]
+    return p
+
+
+def _kept_rows(method: str, signal_rows: torch.Tensor) -> tuple[int, ...] | None:
+    """The rows a pooled method keeps: all of them, or the lower or upper half."""
+    n_rows = int(signal_rows.max()) + 1
+    if method == "pooled-lower":
+        return tuple(range(n_rows // 2))
+    if method == "pooled-upper":
+        return tuple(range(n_rows // 2, n_rows))
+    if method.startswith("pooled-row"):
+        return (int(method[len("pooled-row"):]),)
+    return None
+
+
 def _projected(blocks: list[torch.Tensor], rows: slice, mean: torch.Tensor, sd: torch.Tensor,
-               width: int, seed: int | None = None) -> torch.Tensor:
+               width: int, seed: int | None = None, matrix: torch.Tensor | None = None) -> torch.Tensor:
     """Standardize, then project to `width`, a chunk of rows at a time.
 
     Rows are centred before they are scaled and projected, which keeps float32
     accurate where folding the mean into the projection would subtract two
     large numbers. A feature that is constant over the training set carries
     nothing, and is given weight zero rather than being divided by nothing.
-    Blocks take consecutive row ranges of the one projection matrix.
+    Blocks take consecutive row ranges of the one projection matrix: the fixed
+    or seeded Gaussian draw, or `matrix` when another linear map is asked for.
     """
-    p = projection_matrix(int(mean.numel()), width, seed)
+    p = projection_matrix(int(mean.numel()), width, seed) if matrix is None else matrix[:, :width]
     m = mean.float()
-    inv = torch.where(sd > MIN_SD, 1.0 / sd, torch.zeros_like(sd)).float()
+    inv = _inverse_sd(sd)
     out = []
     start, stop = rows.start or 0, rows.stop
     for i in range(start, stop, CHUNK):
@@ -228,14 +320,22 @@ def _native(blocks: list[torch.Tensor], rows: slice) -> torch.Tensor:
 def read_cells(reads: dict[str, list[torch.Tensor]], labels: torch.Tensor, layout: Layout,
                sizes: tuple[int, ...], widths: tuple[int, ...], native_sizes: tuple[int, ...],
                n_classes: int, keep_bits: Callable[[str, int, int], bool],
-               projection_seed: int | None = None) -> list[dict]:
+               projection_seed: int | None = None, method: str = "random",
+               signal_rows: torch.Tensor | None = None, windows: int = 1) -> list[dict]:
     """Every (read, size, width) cell a run asks for.
 
     `reads` maps a read's name to its feature blocks, rows laid out by `layout`.
     `keep_bits(read, width, size)` says which cells store per-clip correctness.
     A width at or above the native width is the native read, fitted once.
     `projection_seed` reads through the seeded projection instead of the fixed one.
+    `method` is "random" (the Gaussian projection), "pca" (fitted on each
+    training set), "pooled" (the within-row average, which needs each signal's
+    lattice row in `signal_rows` and the read's `windows`, and reads at the one
+    width that layout gives) or "pooled-lower" / "pooled-upper" (the same
+    average over the lower or the upper half of the rows only).
     """
+    if method not in METHODS and not method.startswith("pooled-row"):
+        raise ValueError(f"unknown projection method '{method}'")
     y_te = labels[layout.test]
     y_val = labels[layout.val] if layout.n_val else None
     cells = []
@@ -253,9 +353,19 @@ def read_cells(reads: dict[str, list[torch.Tensor]], labels: torch.Tensor, layou
             below = [e for _, e in wanted if e < native]
             if below:
                 top = max(below)
-                p_tr = _projected(blocks, rows_tr, mean, sd, top, projection_seed)
-                p_te = _projected(blocks, layout.test, mean, sd, top, projection_seed)
-                p_val = _projected(blocks, layout.val, mean, sd, top, projection_seed) if layout.n_val else None
+                matrix = None
+                if method == "pca":
+                    matrix = pca_matrix(blocks, rows_tr, mean, sd, top)
+                elif method.startswith("pooled"):
+                    if signal_rows is None or len(blocks) != 1:
+                        raise ValueError("the pooled projection needs one block of windowed statistics and its signals' rows")
+                    matrix = pooling_matrix(signal_rows, STATS_PER_SIGNAL, windows, _kept_rows(method, signal_rows))
+                    if matrix.shape[1] != top:
+                        raise ValueError(f"pooling gives {matrix.shape[1]} features, not the {top} asked for")
+                p_tr = _projected(blocks, rows_tr, mean, sd, top, projection_seed, matrix)
+                p_te = _projected(blocks, layout.test, mean, sd, top, projection_seed, matrix)
+                p_val = (_projected(blocks, layout.val, mean, sd, top, projection_seed, matrix)
+                         if layout.n_val else None)
             done: dict[int, dict] = {}
             for requested, effective in wanted:
                 if effective not in done:

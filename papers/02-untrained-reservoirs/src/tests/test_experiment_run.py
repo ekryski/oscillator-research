@@ -210,11 +210,14 @@ def test_an_untrained_arm_reads_the_same_on_the_apple_silicon_gpu(bank, arm):
 def test_a_network_records_how_synchronized_and_how_locked_it_is_and_nothing_else_does(bank):
     for arm in (COUPLED, am.Arm("network", coupled=False), am.Arm("network", coupling="stuart-landau")):
         inst = rn.execute(spec(arm, reads=("windowed",)), bank=bank)["instruments"]
-        assert set(inst) == {"R", "plv", "entrained", "amplitude"}
+        assert set(inst) == {"R", "plv", "entrained", "amplitude", "amplitude_spread"}
         for name in ("R", "plv", "entrained"):
             assert 0.0 <= inst[name]["mean"] <= 1.0 and len(inst[name]["by_class"]) == 10
         if arm.coupling != "stuart-landau":
             assert inst["amplitude"]["mean"] == pytest.approx(1.0, abs=1e-4)   # a phase core stays on the circle
+            assert inst["amplitude_spread"]["mean"] == pytest.approx(0.0, abs=1e-4)
+        else:
+            assert inst["amplitude_spread"]["mean"] > 1e-4                     # a free amplitude moves
     assert "instruments" not in rn.execute(spec(am.Arm("bank"), reads=("windowed",)), bank=bank)
 
 
@@ -233,3 +236,68 @@ def test_the_order_parameter_reads_one_for_a_locked_channel_and_near_zero_for_a_
     spread = torch.linspace(0, 2 * math.pi, g * g + 1)[:-1].view(1, 1, 1, g, g).expand(1, t, 1, g, g)
     sig = torch.cat((spread.sin().flatten(2), spread.cos().flatten(2)), dim=2)
     assert am.network_instruments(sig, rows, "spectrogram", 1, g, lo=0)["R"].item() < 1e-5
+
+
+def test_protocol_v_holds_out_eight_training_speakers():
+    from harness.experiment import protocol as pr
+    bank = {"speakers": torch.arange(1, 61).repeat_interleave(3), "labels": torch.zeros(180, dtype=torch.long)}
+    train, val, test = pr.protocol_v(bank)
+    spk = lambda idx: set(bank["speakers"][idx].tolist())  # noqa: E731
+    assert spk(train) == set(range(1, 41)) and spk(val) == set(range(41, 49)) and spk(test) == set(range(49, 61))
+    a_train, a_test = pr.protocol_a(bank)
+    assert torch.equal(test, a_test)                       # the same test set as Protocol A
+    assert spk(train) | spk(val) == spk(a_train)           # the validation speakers come out of A's training pool
+    spec = rn.Spec("selection", "recognition", "spectrogram", 0.0, 0.5, 1,
+                   am.Arm("network", restoring=0.1, ceiling=1.5), protocol="V")
+    assert spec.run_id().startswith("V/0db/g0.5/s1/coupled-kuramoto-torus-random-restoring0.1-ceiling1.5")
+    assert spec.group() == "selection-recognition-kuramoto"
+
+
+def test_the_row_projection_reads_each_half_of_the_lattice_beside_the_random_projection(bank):
+    width = 4 * 3 * (am.GRID // 2)                                 # half the rows x statistics x windows
+    for arm in (COUPLED, am.Arm("baseline")):
+        reads = ("windowed",) if arm.kind == "network" else ("windowed@wholeclip",)
+        rec = rn.execute(spec(arm, gain=1.0 if arm.kind == "network" else None, reads=reads, widths=(width,),
+                              sizes=(256,), native_sizes=(), projection="rows"), bank=bank)
+        by = {c["projection"]: c for c in rec["cells"]}
+        assert set(by) == {"fixed", "pooled-lower", "pooled-upper"}
+        for c in by.values():
+            assert c["width"] == width and c["effective_width"] == width and 0 <= c["acc"] <= 1
+
+
+def test_the_bands_projection_reads_each_row_alone(bank):
+    width = 4 * 3                                                  # one row x statistics x windows
+    rec = rn.execute(spec(COUPLED, gain=1.0, reads=("windowed",), widths=(width,), sizes=(256,), native_sizes=(),
+                          projection="bands"), bank=bank)
+    tags = {c["projection"] for c in rec["cells"]}
+    assert tags == {"fixed", *(f"pooled-row{r:02d}" for r in range(am.GRID))}
+    assert all(c["width"] == width and c["effective_width"] == width and 0 <= c["acc"] <= 1 for c in rec["cells"])
+
+
+def test_a_view_names_the_run_and_changes_what_the_readout_sees(bank):
+    assert spec(COUPLED, view="phase").run_id().endswith("/phase-view")
+    assert "view" not in spec(COUPLED).run_id()
+    sl = am.Arm("network", coupling="stuart-landau")
+    full = rn.execute(spec(sl, gain=1.0, reads=("windowed",), sizes=(256,), native_sizes=()), bank=bank)
+    amp = rn.execute(spec(sl, gain=1.0, reads=("windowed",), sizes=(256,), native_sizes=(), view="amplitude"), bank=bank)
+    phase = rn.execute(spec(sl, gain=1.0, reads=("windowed",), sizes=(256,), native_sizes=(), view="phase"), bank=bank)
+    assert amp["native_widths"]["windowed"] == full["native_widths"]["windowed"] // 2
+    assert phase["native_widths"]["windowed"] == full["native_widths"]["windowed"]
+    assert all(0 <= c["acc"] <= 1 for r in (full, amp, phase) for c in r["cells"])
+    slaved = rn.execute(spec(COUPLED, gain=1.0, reads=("windowed",), sizes=(256,), native_sizes=(), view="slaved"), bank=bank)
+    assert slaved["native_widths"]["windowed"] == full["native_widths"]["windowed"]
+    assert slaved["spec"]["view"] == "slaved" and all(0 <= c["acc"] <= 1 for c in slaved["cells"])
+
+
+def test_the_projection_methods_add_pca_and_pooled_cells_beside_the_fixed_ones(bank):
+    width = 4 * 3 * am.GRID                                        # the pooled layout: windows x statistics x rows
+    for arm in (COUPLED, am.Arm("bank")):
+        rec = rn.execute(spec(arm, reads=("windowed",), widths=(width,), sizes=(256,), native_sizes=(),
+                              projection="methods"), bank=bank)                 # 256 clips can give 192 directions
+        by = {(c["projection"], c["n_train"]): c for c in rec["cells"]}
+        assert {p for p, _ in by} == {"fixed", "pca", "pooled"}
+        for (p, n), c in by.items():
+            assert c["width"] == width and c["effective_width"] == width and 0 <= c["acc"] <= 1
+        fixed = rn.execute(spec(arm, reads=("windowed",), widths=(width,), sizes=(256,), native_sizes=()),
+                           bank=bank)["cells"]
+        assert [c["acc"] for c in fixed] == [by[("fixed", c["n_train"])]["acc"] for c in fixed]

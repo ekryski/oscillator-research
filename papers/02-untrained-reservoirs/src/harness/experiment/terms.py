@@ -31,6 +31,8 @@ FACTORS = {"coupling": "coupling function", "geometry": "lattice geometry", "fre
 LEVELS = {
     "kuramoto": "Kuramoto", "kuramoto-sakaguchi": "Kuramoto–Sakaguchi", "second-harmonic": "second harmonic",
     "winfree": "Winfree", "stuart-landau": "Stuart–Landau", "stuart-landau-fixed": "Stuart–Landau, fixed amplitude",
+    "stuart-landau-exact": "Stuart–Landau, exact-rotation drive",
+    "stuart-landau-fixed-exact": "Stuart–Landau, fixed amplitude, exact-rotation drive",
     "random": "random", "tonotopic": "tonotopic", "identical": "identical",
 }
 
@@ -41,9 +43,27 @@ PATHWAYS = {"spectrogram": "spectrogram", "quadrature": "quadrature"}
 REFERENCE = {"coupling": "kuramoto", "geometry": "torus", "frequencies": "random", "restoring": 0.3, "ceiling": 1.0}
 
 _NETWORK = re.compile(r"^(coupled|uncoupled)-"
-                      r"(?P<coupling>kuramoto-sakaguchi|second-harmonic|stuart-landau-fixed|stuart-landau|[a-z]+)-"
+                      r"(?P<coupling>kuramoto-sakaguchi|second-harmonic|stuart-landau-fixed-exact|stuart-landau-exact"
+                      r"|stuart-landau-fixed|stuart-landau|[a-z]+)-"
                       r"(?P<geometry>[a-z-]+?)-(?P<frequencies>random|tonotopic|identical)-restoring(?P<restoring>[0-9.]+)"
-                      r"-ceiling(?P<ceiling>[0-9.]+)(?:-ch(?P<channels>\d+))?$")
+                      r"-ceiling(?P<ceiling>[0-9.]+)(?:-ch(?P<channels>\d+))?(?:-stiffness(?P<stiffness>[0-9.]+))?$")
+
+
+_ESN = re.compile(r"^esn-n(?P<units>\d+)-rho(?P<rho>[0-9.]+)-leak(?P<leak>[0-9.]+)$")
+_RON = re.compile(r"^ron-n(?P<units>\d+)-tau(?P<tau>[0-9.]+)-rho(?P<rho>[0-9.]+)"
+                  r"-gamma(?P<g>[0-9.]+)r(?P<gr>[0-9.]+)-eps(?P<e>[0-9.]+)r(?P<er>[0-9.]+)$")
+_EXPANSION = re.compile(r"^expansion-n(?P<units>\d+)$")
+
+
+def _reservoir(label: str) -> str | None:
+    if m := _ESN.match(label):
+        return f"echo state network ({int(m['units']):,} units, ρ {m['rho']}, leak {m['leak']})"
+    if m := _RON.match(label):
+        return (f"random oscillators network ({int(m['units']):,} oscillators, τ {m['tau']}, ρ {m['rho']}, "
+                f"γ {m['g']} ± {m['gr']}, ε {m['e']} ± {m['er']})")
+    if m := _EXPANSION.match(label):
+        return f"random nonlinear expansion ({int(m['units']):,} units)"
+    return None
 
 
 def level(value) -> str:
@@ -59,6 +79,8 @@ def arm(label: str) -> str:
     """
     if label in ARMS:
         return ARMS[label]
+    if (named := _reservoir(label)) is not None:
+        return named
     m = _NETWORK.match(label)
     if not m:
         return label
@@ -68,7 +90,8 @@ def arm(label: str) -> str:
              f"{level(m['frequencies'])} ω" if m["frequencies"] != REFERENCE["frequencies"] else "",
              f"λ {m['restoring']}" if float(m["restoring"]) != REFERENCE["restoring"] else "",
              f"ceiling {m['ceiling']}" if float(m["ceiling"]) != REFERENCE["ceiling"] else "",
-             f"{m['channels']} channels" if m["channels"] else ""]
+             f"{m['channels']} channels" if m["channels"] else "",
+             f"amplitude relaxation ×{m['stiffness']}" if m["stiffness"] else ""]
     parts = [p for p in parts if p]
     return name + (f" ({', '.join(parts)})" if parts else "")
 

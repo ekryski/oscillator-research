@@ -32,11 +32,34 @@ SEEDS = (0, 1, 2)
 TRAINED_ARCHS = ("gru", "tcn", "cnn", "transformer", "s4d")
 PHASE_COUPLINGS = ("kuramoto", "kuramoto-sakaguchi", "second-harmonic", "winfree")
 AMPLITUDE_COUPLINGS = ("stuart-landau", "stuart-landau-fixed")
+#: the amplitude coupling functions with the input applied as an exact rotation (the record's own Stuart–Landau
+#: runs apply it inside a semi-implicit step, which rotates too far at high gain; see harness.models.stuart_landau)
+EXACT_DRIVE_COUPLINGS = ("stuart-landau-exact", "stuart-landau-fixed-exact")
 GEOMETRIES = ("torus", "cylinder", "sheet", "helix", "cube", "sphere")
 FREQUENCIES = ("random", "tonotopic", "identical")
 RESTORINGS = (0.3, 0.1)
 CEILINGS = (1.0, 0.5)
 BECKER_TRAIN = 18000
+#: the selection grid (Protocol V): gain, restoring strength and coupling ceiling around the reference, selected on
+#: the validation speakers; the Stuart–Landau network at the gains where it reads best
+SELECTION_GAINS = {"kuramoto": (0.25, 0.5, 1.0, 2.0), "stuart-landau": (0.5, 1.0, 2.0)}
+SELECTION_RESTORINGS = (0.1, 0.3, 0.5, 0.8, 1.0)   # every restoring strength the design and sweep experiments ran
+SELECTION_CEILINGS = (0.5, 1.0, 1.5, 2.0)           # and every coupling ceiling
+#: the calibration experiment's noise levels, the harness's level of the noise relative to the speech (-10 is noise
+#: 10 dB quieter than the speech, an SNR of +10 dB), and the networks it runs at the reference configuration
+CALIBRATION_NOISES = (None, -10.0, -5.0, 0.0, 5.0, 10.0)
+CALIBRATION_COUPLINGS = ("kuramoto", "stuart-landau")
+#: the reservoir baselines' grids (Protocol V); the input scaling is the run's gain
+RESERVOIR_GAINS = (0.5, 1.0, 2.0)
+ESN_UNITS = 1024                                   # the network's 1,024 states
+ESN_RHOS = (0.5, 0.9, 1.1, 1.3)
+ESN_LEAKS = (0.1, 0.3, 1.0)
+RON_UNITS = 512                                    # 512 oscillators, 1,024 states (position and velocity)
+RON_TAUS = (0.1, 0.3)
+RON_RHOS = (1.0, 3.0, 9.0)
+RON_GAMMAS = ((1.0, 0.5), (5.0, 4.0))              # (midpoint, radius) of the stiffness
+RON_EPSS = ((0.5, 0.4), (2.0, 1.5))                # (midpoint, radius) of the damping
+EXPANSION_UNITS = (1024, 2048)
 #: the sweep beyond the design experiment's levels: restoring strengths up to the natural frequency, where an
 #: oscillator stops rotating; coupling ceilings above 1; and gains up to 12, below the integrator's
 #: bound, where drive, natural frequency and coupling together would pass pi radians a step
@@ -54,6 +77,11 @@ UNTRAINED = (COUPLED, UNCOUPLED, BANK_STATE, BANK_WIDTH)
 #: the design experiment runs this network with noise only; the controls experiment adds it on clean
 #: audio, so it stands beside every other arm in all three conditions
 STUART_LANDAU = Arm("network", coupling="stuart-landau")
+ROW_READOUT_WIDTH = 8 * 3 * 4                       # half the rows x statistics x windows, the pooled half-lattice read
+BAND_READOUT_WIDTH = 1 * 3 * 4                      # one row x statistics x windows, the pooled single-band read
+AMPLITUDE_VIEWS = ("full", "phase", "amplitude")    # what the readout sees of the Stuart–Landau network's z
+STIFFNESSES = (4.0, 16.0)                           # the amplitude relaxation rate as a multiple of the core's 0.05
+STIFFNESS_GAINS = (1.0, 4.0, 8.0)
 
 
 def _trained(arch: str) -> Arm:
@@ -151,6 +179,145 @@ def sweep() -> Iterator[rn.Spec]:
                                   Arm("network", coupling=coupling), **common)
 
 
+def exact_drive() -> Iterator[rn.Spec]:
+    """Both Stuart–Landau networks at the reference configuration with the input applied as an exact rotation,
+    across every gain of the design and sweep experiments. Paired with the record's Stuart–Landau cells (the
+    design files at gains 1 and 2, the sweep files beyond): same clips, seeds and reads. It asks whether the
+    fixed-amplitude network's divergence from Kuramoto at high gain, and the free amplitude's robustness to gain,
+    come from the physics or from the drive step's discretization."""
+    common = dict(bits="primary", reads=("windowed", "windowed+rate"))
+    for noise in DESIGN_NOISES:
+        for seed in SEEDS:
+            for coupling in EXACT_DRIVE_COUPLINGS:
+                for gain in sorted(GAINS + SWEEP_GAINS):
+                    yield rn.Spec("exact-drive", "recognition", "spectrogram", noise, gain, seed,
+                                  Arm("network", coupling=coupling), **common)
+
+
+def clean() -> Iterator[rn.Spec]:
+    """Both Stuart–Landau networks at the reference configuration on clean audio, gains 1 and 2, under Protocol A,
+    which the design experiment left out (its noise levels are 0 and −5 dB); the controls experiment ran the free
+    amplitude clean on the CPU, and this reruns it on the GPU beside the fixed amplitude, which no experiment had run
+    clean. Paired with the controls experiment's clean Kuramoto and baseline cells: same clips, seeds and reads. It asks whether the free amplitude's lead over
+    Kuramoto is a property of noisy drive or of the dynamics."""
+    common = dict(bits="primary", reads=("windowed", "windowed+rate"))
+    for seed in SEEDS:
+        for coupling in AMPLITUDE_COUPLINGS:
+            for gain in GAINS:
+                yield rn.Spec("clean", "recognition", "spectrogram", None, gain, seed,
+                              Arm("network", coupling=coupling), **common)
+
+
+def selection() -> Iterator[rn.Spec]:
+    """Model selection for the coupled network under Protocol V: the gain, restoring strength and coupling ceiling
+    grid for the Kuramoto and Stuart–Landau networks at the reference geometry and frequencies, every cell read on
+    the validation speakers (41-48) and the test speakers (49-60). The summary picks each network's configuration by
+    validation accuracy and reports that configuration's test accuracy beside the reference's."""
+    common = dict(protocol="V", bits="primary", reads=("windowed",))
+    for noise in DESIGN_NOISES:
+        for seed in SEEDS:
+            for coupling, gains in SELECTION_GAINS.items():
+                for gain in gains:
+                    for restoring in SELECTION_RESTORINGS:
+                        for ceiling in SELECTION_CEILINGS:
+                            yield rn.Spec("selection", "recognition", "spectrogram", noise, gain, seed,
+                                          Arm("network", coupling=coupling, restoring=restoring, ceiling=ceiling),
+                                          **common)
+
+
+def calibration() -> Iterator[rn.Spec]:
+    """The noise-level calibration redone in this repository under Protocol V: the spectrogram-only baseline and the
+    Kuramoto and Stuart–Landau networks at the reference configuration, gains 1 and 2, from noise 10 dB below the
+    speech to 10 dB above it and on clean audio, every cell read on the validation speakers. With the selection
+    experiment's grid it stands in for the pilot's calibration: the paper's noise levels are those at which the
+    strongest untrained network lands between 70 and 90% on the validation speakers, and the grid asks whether the
+    reference's gain, restoring strength and coupling ceiling are what those speakers would pick."""
+    common = dict(protocol="V", bits="primary")
+    for noise in CALIBRATION_NOISES:
+        for seed in SEEDS:
+            yield rn.Spec("calibration", "recognition", "spectrogram", noise, None, seed, BASELINE, **common)
+            for coupling in CALIBRATION_COUPLINGS:
+                for gain in GAINS:
+                    yield rn.Spec("calibration", "recognition", "spectrogram", noise, gain, seed,
+                                  Arm("network", coupling=coupling), reads=("windowed",), **common)
+
+
+def esn() -> Iterator[rn.Spec]:
+    """The leaky echo state network's selection grid under Protocol V: spectral radius, leaking rate and input
+    scaling (the gain), at the network's state count. The summary selects by validation accuracy per noise level."""
+    common = dict(protocol="V", bits="primary", reads=("windowed",))
+    for noise in DESIGN_NOISES:
+        for seed in SEEDS:
+            for gain in RESERVOIR_GAINS:
+                for rho in ESN_RHOS:
+                    for leak in ESN_LEAKS:
+                        yield rn.Spec("esn", "recognition", "spectrogram", noise, gain, seed,
+                                      Arm("esn", units=ESN_UNITS, rho=rho, leak=leak), **common)
+
+
+def ron() -> Iterator[rn.Spec]:
+    """The random oscillators network's selection grid under Protocol V: time step, spectral radius, stiffness and
+    damping ranges and input scaling (the gain), at the network's state count."""
+    common = dict(protocol="V", bits="primary", reads=("windowed",))
+    for noise in DESIGN_NOISES:
+        for seed in SEEDS:
+            for gain in RESERVOIR_GAINS:
+                for tau in RON_TAUS:
+                    for rho in RON_RHOS:
+                        for gamma in RON_GAMMAS:
+                            for eps in RON_EPSS:
+                                yield rn.Spec("ron", "recognition", "spectrogram", noise, gain, seed,
+                                              Arm("ron", units=RON_UNITS, tau=tau, rho=rho, gamma=gamma, eps=eps),
+                                              **common)
+
+
+def expansion() -> Iterator[rn.Spec]:
+    """The memoryless random nonlinear expansion of the input, at the network's state count and at its signal
+    count, on recognition (every noise level, Protocol A) and on the order task, where it must read chance."""
+    arms = [Arm("expansion", units=n) for n in EXPANSION_UNITS]
+    for noise in NOISES:
+        for seed in SEEDS:
+            for gain in GAINS:
+                for arm in arms:
+                    yield rn.Spec("expansion", "recognition", "spectrogram", noise, gain, seed, arm, bits="primary")
+    for pair in pr.PAIRS:
+        for noise in NOISES:
+            for seed in SEEDS:
+                for gain in GAINS:
+                    yield rn.Spec("expansion", "order", "spectrogram", noise, gain, seed, arms[0], pair=pair)
+
+
+def _selected_arms() -> list[tuple[Arm, float, float]]:
+    """(arm, gain, noise) for each reservoir baseline's validation-selected configuration, from the record."""
+    from harness.experiment import record as rec
+    from harness.experiment import selection
+    try:
+        cells = rec.load(["esn-recognition", "ron-recognition"])
+    except FileNotFoundError:
+        return []
+    out = []
+    for experiment in ("esn", "ron"):
+        for noise, chosen in selection.select(cells, experiment).items():
+            spec = next(iter(chosen["cells"].values())).arm
+            out.append((Arm(**spec), chosen["gain"], noise))
+    return out
+
+
+def baselines_selected() -> Iterator[rn.Spec]:
+    """The echo state network and the random oscillators network at the hyperparameters selected on the validation
+    speakers (the esn and ron experiments), rerun under Protocol A beside the controls experiment's arms: recognition at
+    every noise level (the 0 dB selection serves clean audio, which the grids leave out) and the order task. Defined
+    by the record, so it is empty until the grids are in."""
+    picks = _selected_arms()
+    for arm, gain, noise in picks:
+        noises = (None, noise) if noise == 0.0 else (noise,)
+        for n in noises:
+            for seed in SEEDS:
+                yield rn.Spec("baselines-selected", "recognition", "spectrogram", n, gain, seed, arm, bits="primary")
+                for pair in pr.PAIRS:
+                    yield rn.Spec("baselines-selected", "order", "spectrogram", n, gain, seed, arm, pair=pair)
+
+
 def cochlea() -> Iterator[rn.Spec]:
     """The coil and the cochlea (harness.models.geometries.coil), for every phase coupling function and
     kind of natural frequencies, at the reference restoring strength and ceiling. Paired with the design
@@ -189,6 +356,79 @@ def projection() -> Iterator[rn.Spec]:
                                       native_sizes=(), reads=("pooled",), projection="both")
 
 
+def projection_methods() -> Iterator[rn.Spec]:
+    """The controls experiment's reservoirs and the Stuart–Landau network at the primary cell, read at width 192
+    through the fixed random projection, a PCA fitted on the training clips, and the within-row pooling. Their
+    fixed cells repeat the controls and design experiments' (on the GPU)."""
+    for noise in NOISES:
+        for seed in SEEDS:
+            for gain in GAINS:
+                for arm in UNTRAINED + (STUART_LANDAU,):
+                    yield rn.Spec("projection-methods", "recognition", "spectrogram", noise, gain, seed, arm,
+                                  widths=(192,), native_sizes=(), bits="primary", reads=("windowed",),
+                                  projection="methods")
+
+
+def row_readout() -> Iterator[rn.Spec]:
+    """The Kuramoto, uncoupled and Stuart–Landau networks and the whole-clip spectrogram baseline at the primary cell, each read
+    through only the lower or only the upper eight rows of its lattice (the within-row pooling kept for one half:
+    8 rows × 3 statistics × 4 windows = 96 features), beside the fixed random projection at the same width. Asks
+    whether the upper bands, where the Stuart–Landau network's signals carry more class information than
+    Kuramoto's, are where its accuracy comes from."""
+    common = dict(widths=(ROW_READOUT_WIDTH,), native_sizes=(), bits="primary", projection="rows")
+    for noise in DESIGN_NOISES:
+        for seed in SEEDS:
+            yield rn.Spec("row-readout", "recognition", "spectrogram", noise, None, seed, BASELINE,
+                          reads=("windowed@wholeclip",), **common)
+            for gain in GAINS:
+                for arm in (COUPLED, UNCOUPLED, STUART_LANDAU):
+                    yield rn.Spec("row-readout", "recognition", "spectrogram", noise, gain, seed, arm,
+                                  reads=("windowed",), **common)
+
+
+def band_readout() -> Iterator[rn.Spec]:
+    """Per-band readout accuracy: the networks, the state-matched bank and the whole-clip baseline at the primary
+    cell, each read through one row of its lattice alone (the within-row pooling kept for one row: 3 statistics × 4
+    windows = 12 features), for every row, beside the fixed random projection at width 12. Clean, 0 and −5 dB,
+    gain 1. The map of what the readout gets from each band, in place of the per-feature F maps, which the noise
+    floor inflates (Appendix D.2)."""
+    common = dict(widths=(BAND_READOUT_WIDTH,), native_sizes=(), bits="primary", projection="bands")
+    for noise in NOISES:
+        for seed in SEEDS:
+            yield rn.Spec("band-readout", "recognition", "spectrogram", noise, None, seed, BASELINE,
+                          reads=("windowed@wholeclip",), **common)
+            for arm in (COUPLED, UNCOUPLED, STUART_LANDAU, BANK_STATE):
+                yield rn.Spec("band-readout", "recognition", "spectrogram", noise, 1.0, seed, arm,
+                              reads=("windowed",), **common)
+
+
+def amplitude_view() -> Iterator[rn.Spec]:
+    """What the amplitude gives the readout (harness.experiment.views): the Stuart–Landau network read through its
+    full signals, its phase alone and its amplitude alone, and the Kuramoto network read with an amplitude slaved to
+    its phases, at the primary cell, 0 and −5 dB, gains 1 and 2."""
+    common = dict(bits="primary", reads=("windowed",))
+    for noise in DESIGN_NOISES:
+        for seed in SEEDS:
+            for gain in GAINS:
+                for view in AMPLITUDE_VIEWS:
+                    yield rn.Spec("amplitude-view", "recognition", "spectrogram", noise, gain, seed, STUART_LANDAU,
+                                  view=view, **common)
+                yield rn.Spec("amplitude-view", "recognition", "spectrogram", noise, gain, seed, COUPLED,
+                              view="slaved", **common)
+
+
+def stiffness() -> Iterator[rn.Spec]:
+    """The amplitude relaxation rate: the exact-drive Stuart–Landau network with alpha and beta at 4 and 16 times
+    the core's 0.05 (time constants of about 5 and 1.25 frames against 20), at gains 1, 4 and 8, 0 dB, beside the
+    exact-drive experiment's rate-1 runs. Whether the amplitude's gain to the readout needs its slow memory."""
+    common = dict(bits="primary", reads=("windowed",))
+    for seed in SEEDS:
+        for s in STIFFNESSES:
+            for gain in STIFFNESS_GAINS:
+                yield rn.Spec("stiffness", "recognition", "spectrogram", 0.0, gain, seed,
+                              Arm("network", coupling="stuart-landau-exact", stiffness=s), **common)
+
+
 def becker_folds() -> Iterator[rn.Spec]:
     """Protocol B: Becker et al.'s folds, clean audio, for comparison with published results."""
     for fold in range(len(pr.BECKER_FOLDS)):
@@ -202,7 +442,11 @@ def becker_folds() -> Iterator[rn.Spec]:
 
 
 EXPERIMENTS = {"leak-check": leak_check, "controls": controls, "design": design, "quadrature": quadrature,
-               "becker-folds": becker_folds, "projection": projection, "sweep": sweep, "cochlea": cochlea}
+               "becker-folds": becker_folds, "projection": projection, "sweep": sweep, "cochlea": cochlea,
+               "exact-drive": exact_drive, "clean": clean, "selection": selection, "calibration": calibration, "esn": esn, "ron": ron, "expansion": expansion,
+               "projection-methods": projection_methods, "baselines-selected": baselines_selected,
+               "row-readout": row_readout, "band-readout": band_readout, "amplitude-view": amplitude_view,
+               "stiffness": stiffness}
 
 
 # ---------------------------------------------------------------------------
@@ -212,8 +456,10 @@ EXPERIMENTS = {"leak-check": leak_check, "controls": controls, "design": design,
 def cost(spec: rn.Spec) -> float:
     """A rough relative cost, so the pool starts the longest runs first."""
     clips = (pr.ORDER_TRAIN + pr.ORDER_TEST) if spec.task == "order" else max(spec.sizes) + 6000
-    per_clip = {"baseline": 0.1, "bank": 0.4, "network": 1.0, "trained": 3.0}[spec.arm.kind]
-    return clips * per_clip * (spec.arm.channels / 4 if spec.arm.kind != "trained" else 1)
+    per_clip = {"baseline": 0.1, "bank": 0.4, "network": 1.0, "trained": 3.0,
+                "esn": 0.5, "ron": 0.5, "expansion": 0.2}[spec.arm.kind]
+    size = spec.arm.channels / 4 if spec.arm.kind in ("network", "bank") else 1
+    return clips * per_clip * size
 
 
 # ---------------------------------------------------------------------------
@@ -226,6 +472,8 @@ def prepare(workers: int) -> None:
     n = len(bank["labels"])
     jobs = [("rows", p, noise, None, None) for p in pr.CACHED_PATHWAYS for noise in NOISES
             if pr.load_rows(pr.rows_path(p, noise), n) is None]
+    jobs += [("rows", "spectrogram", noise, None, None) for noise in CALIBRATION_NOISES
+             if noise not in NOISES and pr.load_rows(pr.rows_path("spectrogram", noise), n) is None]
     for pair in pr.PAIRS:
         for noise in NOISES:
             for code in (0, *(s + 1 for s in SEEDS)):

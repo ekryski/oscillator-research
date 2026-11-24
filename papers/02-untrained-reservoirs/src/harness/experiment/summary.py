@@ -22,7 +22,7 @@ from collections import defaultdict
 
 import numpy as np
 
-from harness.experiment import plan, terms
+from harness.experiment import plan, selection, terms
 from harness.experiment import record as rec
 from harness.experiment import run as rn
 from harness.experiment.arms import Arm
@@ -85,11 +85,26 @@ def accuracies(cells: list[Cell]) -> list[dict]:
     """One record per arm, read, condition, width and size, over its replicates."""
     groups = defaultdict(dict)
     for c in cells:
-        key = (c.experiment, c.task, c.pathway, c.label, c.read, c.noise, c.gain, c.pair, c.width, c.n_train, c.projection)
+        key = (c.experiment, c.task, c.pathway, c.label, c.read, c.noise, c.gain, c.pair, c.width, c.n_train, c.projection,
+               c.view)
         groups[key][replicate(c)] = c.acc
-    fields = ("experiment", "task", "pathway", "arm", "read", "noise", "gain", "pair", "width", "n_train", "projection")
+    fields = ("experiment", "task", "pathway", "arm", "read", "noise", "gain", "pair", "width", "n_train", "projection",
+              "view")
     return [{**dict(zip(fields, k, strict=True)), "name": terms.arm(k[3]),
              "pair": list(k[7]) or None, **spread(v)} for k, v in sorted(groups.items(), key=str)]
+
+
+def validation_accuracies(cells: list[Cell]) -> list[dict]:
+    """Protocol V cells: the validation speakers' accuracy beside the test accuracy, per configuration."""
+    groups = defaultdict(lambda: ({}, {}))
+    for c in cells:
+        if c.protocol == "V" and c.val_acc is not None:
+            key = (c.experiment, c.task, c.label, c.read, c.noise, c.gain, c.width, c.n_train)
+            groups[key][0][replicate(c)] = c.val_acc
+            groups[key][1][replicate(c)] = c.acc
+    fields = ("experiment", "task", "arm", "read", "noise", "gain", "width", "n_train")
+    return [{**dict(zip(fields, k, strict=True)), "name": terms.arm(k[2]), "protocol": "V",
+             "validation": spread(v), "test": spread(t)} for k, (v, t) in sorted(groups.items(), key=str)]
 
 
 # ---------------------------------------------------------------------------
@@ -333,6 +348,338 @@ def reproduction(cells: list[Cell]) -> dict:
             "largest_clips": max(clips)}
 
 
+EXACT_DRIVE = {"stuart-landau-exact": "stuart-landau", "stuart-landau-fixed-exact": "stuart-landau-fixed"}
+SL_LABEL = Arm("network", coupling="stuart-landau").label()
+
+
+def _by_condition_and_seed(c: Cell) -> tuple:
+    return (c.noise, c.gain, c.width, c.n_train, replicate(c))
+
+
+def _against_gainless(a_cells: list[Cell], b_cells: list[Cell], name: str, experiment: str) -> list[dict]:
+    """a minus a gainless b (the spectrogram-only baseline), matched at every gain of a."""
+    return [{"comparison": name, "experiment": experiment, "task": "recognition", "pathway": "spectrogram",
+             "noise": k[0], "gain": k[1], "width": k[2], "b_width": k[2], "n_train": k[3], **paired(v)}
+            for k, v in sorted(matched(a_cells, b_cells).items(), key=str)]
+
+
+def exact_drive(cells: list[Cell]) -> list[dict]:
+    """The exact-drive experiment against the record: each exact-rotation Stuart–Landau network minus the same
+    network with the semi-implicit drive (the design files at gains 1 and 2, the sweep files beyond), minus
+    Kuramoto at the same gain, and gain g minus gain 1 within itself; the free-amplitude one minus the whole-clip
+    baseline."""
+    exact = [c for c in cells if c.experiment == "exact-drive" and c.read == "windowed"]
+    record = [c for c in cells if c.experiment in ("design", "sweep") and c.read == "windowed"]
+    kuramoto = [c for c in record if c.label == COUPLED]
+    base = [c for c in cells if c.experiment == "controls" and c.task == "recognition" and c.label == "baseline"
+            and c.read == "windowed@wholeclip"]
+    out = []
+    for coupling, semi in EXACT_DRIVE.items():
+        a = [c for c in exact if c.label == Arm("network", coupling=coupling).label()]
+        name = terms.level(coupling)
+        b = [c for c in record if c.label == Arm("network", coupling=semi).label()]
+        out += _rows(f"{name} minus {terms.level(semi)}", "exact-drive", _pair_by(a, b, _by_condition_and_seed))
+        out += _rows(f"{name} minus Kuramoto", "exact-drive", _pair_by(a, kuramoto, _by_condition_and_seed))
+        at_one = [c for c in a if c.gain == 1.0]
+        by_seed = lambda c: (c.noise, c.width, c.n_train, replicate(c))  # noqa: E731
+        for gain in sorted(plan.GAINS + plan.SWEEP_GAINS):
+            if gain != 1.0:
+                out += _rows(f"{name}: gain {gain:g} minus gain 1", "exact-drive",
+                             _pair_by([c for c in a if c.gain == gain], at_one, by_seed))
+        out += _against_gainless(a, base, f"{name} minus {BASELINE_WHOLE}", "exact-drive")
+    return out
+
+
+def clean(cells: list[Cell]) -> list[dict]:
+    """The clean experiment against the controls experiment on clean audio: each Stuart–Landau network minus Kuramoto
+    at the same gain, the free amplitude minus the fixed one, and each minus the whole-clip baseline."""
+    mine = [c for c in cells if c.experiment == "clean" and c.read == "windowed"]
+    if not mine:
+        return []
+    ctrl = [c for c in cells if c.experiment == "controls" and c.task == "recognition" and c.noise is None]
+    kuramoto = [c for c in ctrl if c.label == COUPLED and c.read == "windowed"]
+    base = [c for c in ctrl if c.label == "baseline" and c.read == "windowed@wholeclip"]
+    free = [c for c in mine if c.label == Arm("network", coupling="stuart-landau").label()]
+    fixed = [c for c in mine if c.label == Arm("network", coupling="stuart-landau-fixed").label()]
+    out = []
+    for coupling, a in (("stuart-landau", free), ("stuart-landau-fixed", fixed)):
+        name = terms.level(coupling)
+        out += _rows(f"{name} minus Kuramoto", "clean", _pair_by(a, kuramoto, _by_condition_and_seed))
+        out += _against_gainless(a, base, f"{name} minus {BASELINE_WHOLE}", "clean")
+    out += _rows(f"{terms.level('stuart-landau')} minus {terms.level('stuart-landau-fixed')}", "clean",
+                 _pair_by(free, fixed, _by_condition_and_seed))
+    return out
+
+
+def _by_condition_seed_any_width(c: Cell) -> tuple:
+    return (c.noise, c.gain, c.n_train, replicate(c))
+
+
+ROW_HALVES = {"pooled-lower": "lower eight rows", "pooled-upper": "upper eight rows"}
+
+
+def row_readout(cells: list[Cell]) -> list[dict]:
+    """The row-readout experiment: each arm read through only the lower or only the upper eight rows of its lattice
+    (the within-row pooling kept for one half, 96 features). The upper half minus the lower, each half minus the
+    fixed random projection at the same width and minus the full pooled read at 192 (the projection-methods
+    experiment; the whole-clip baseline's own 192 features for the baseline), and the Stuart–Landau network minus
+    Kuramoto and each network minus the baseline through each half."""
+    mine = [c for c in cells if c.experiment == "row-readout"]
+    if not mine:
+        return []
+    full = [c for c in cells if c.experiment == "projection-methods" and c.read == "windowed" and c.projection == "pooled"]
+    full += [c for c in cells if c.experiment == "controls" and c.task == "recognition" and c.label == "baseline"
+             and c.read == "windowed@wholeclip" and c.width == rec.PRIMARY_WIDTH]
+    out = []
+    names = {COUPLED: NETWORK, UNCOUPLED: terms.arm(UNCOUPLED), SL_LABEL: terms.arm(SL_LABEL), "baseline": BASELINE_WHOLE}
+    for label, name in names.items():
+        arm = [c for c in mine if c.label == label]
+        lower = [c for c in arm if c.projection == "pooled-lower"]
+        upper = [c for c in arm if c.projection == "pooled-upper"]
+        out += _rows(f"{name}: upper eight rows minus lower eight rows", "row-readout",
+                     _pair_by(upper, lower, _by_condition_and_seed))
+        for method, half in ROW_HALVES.items():
+            a = [c for c in arm if c.projection == method]
+            out += [{**r, "projection": method} for r in
+                    _rows(f"{name}: {half} minus the random projection at width 96", "row-readout",
+                          _pair_by(a, [c for c in arm if c.projection == "fixed"], _by_condition_and_seed))]
+            out += [{**r, "projection": method} for r in
+                    _rows(f"{name}: {half} minus every row (width 192)", "row-readout",
+                          _pair_by(a, [c for c in full if c.label == label], _by_condition_seed_any_width))]
+    for method, half in ROW_HALVES.items():
+        m = [c for c in mine if c.projection == method]
+        network = [c for c in m if c.label == COUPLED]
+        sl = [c for c in m if c.label == SL_LABEL]
+        base = [c for c in m if c.label == "baseline"]
+        out += [{**r, "projection": method} for r in
+                _rows(f"{terms.arm(SL_LABEL)} minus {NETWORK}, {half}", "row-readout",
+                      _pair_by(sl, network, _by_condition_and_seed))]
+        out += [{**r, "projection": method} for r in
+                _rows(f"{NETWORK} minus the {terms.arm(UNCOUPLED)}, {half}", "row-readout",
+                      _pair_by(network, [c for c in m if c.label == UNCOUPLED], _by_condition_and_seed))]
+        for a, name in ((network, NETWORK), (sl, terms.arm(SL_LABEL))):
+            out += [{**r, "projection": method} for r in
+                    _against_gainless(a, base, f"{name} minus {BASELINE_WHOLE}, {half}", "row-readout")]
+    return out
+
+
+VIEW_NAMES = {"phase": "phase alone", "amplitude": "amplitude alone", "slaved": "slaved amplitude"}
+
+
+def _by_condition_seed_projection(c: Cell) -> tuple:
+    return (c.noise, c.gain, c.width, c.n_train, replicate(c), c.projection)
+
+
+def band_readout(cells: list[Cell]) -> list[dict]:
+    """The band-readout experiment: through each row alone, the Stuart–Landau network minus Kuramoto, the coupled
+    network minus the uncoupled one, and each network minus the whole-clip baseline's own band."""
+    mine = [c for c in cells if c.experiment == "band-readout" and c.projection.startswith("pooled-row")]
+    if not mine:
+        return []
+    out = []
+    network = [c for c in mine if c.label == COUPLED]
+    sl = [c for c in mine if c.label == SL_LABEL]
+    unc = [c for c in mine if c.label == UNCOUPLED]
+    bank = [c for c in mine if c.label == "bank-state"]
+    base = [c for c in mine if c.label == "baseline"]
+    def tagged(rows, tag):
+        return [{**r, "projection": tag, "band": int(tag[len("pooled-row"):])} for r in rows]
+    for tag in sorted({c.projection for c in mine}):
+        pick = lambda cs: [c for c in cs if c.projection == tag]  # noqa: E731
+        out += tagged(_rows(f"{terms.arm(SL_LABEL)} minus {NETWORK}, one band", "band-readout",
+                            _pair_by(pick(sl), pick(network), _by_condition_and_seed)), tag)
+        out += tagged(_rows(f"{NETWORK} minus the {terms.arm(UNCOUPLED)}, one band", "band-readout",
+                            _pair_by(pick(network), pick(unc), _by_condition_and_seed)), tag)
+        out += tagged(_rows(f"{NETWORK} minus the {terms.arm('bank-state')}, one band", "band-readout",
+                            _pair_by(pick(network), pick(bank), _by_condition_and_seed)), tag)
+        for a, name in ((network, NETWORK), (sl, terms.arm(SL_LABEL)), (unc, terms.arm(UNCOUPLED)),
+                        (bank, terms.arm("bank-state"))):
+            out += tagged(_against_gainless(pick(a), pick(base), f"{name} minus {BASELINE_WHOLE}, one band",
+                                            "band-readout"), tag)
+    return out
+
+
+def amplitude_views(cells: list[Cell]) -> list[dict]:
+    """The amplitude-view experiment: the Stuart–Landau network through its phase alone and its amplitude alone
+    against the Kuramoto network and against its full signals, and the Kuramoto network with a slaved amplitude
+    against itself and against the Stuart–Landau network."""
+    mine = [c for c in cells if c.experiment == "amplitude-view" and c.read == "windowed"]
+    if not mine:
+        return []
+    kuramoto = [c for c in cells if c.experiment == "controls" and c.task == "recognition" and c.label == COUPLED
+                and c.read == "windowed" and c.view == "full"]
+    sl = {v: [c for c in mine if c.label == SL_LABEL and c.view == v] for v in ("full", "phase", "amplitude")}
+    slaved = [c for c in mine if c.label == COUPLED and c.view == "slaved"]
+    name = terms.arm(SL_LABEL)
+    out = []
+    for v in ("phase", "amplitude"):
+        out += _rows(f"{name}, {VIEW_NAMES[v]} minus {NETWORK}", "amplitude-view",
+                     _pair_by(sl[v], kuramoto, _by_condition_and_seed))
+        out += _rows(f"{name} minus {name}, {VIEW_NAMES[v]}", "amplitude-view",
+                     _pair_by(sl["full"], sl[v], _by_condition_and_seed))
+    out += _rows(f"{name} minus {NETWORK} (this experiment's runs)", "amplitude-view",
+                 _pair_by(sl["full"], kuramoto, _by_condition_and_seed))
+    out += _rows(f"{NETWORK}, {VIEW_NAMES['slaved']} minus {NETWORK}", "amplitude-view",
+                 _pair_by(slaved, kuramoto, _by_condition_and_seed))
+    out += _rows(f"{NETWORK}, {VIEW_NAMES['slaved']} minus {name}", "amplitude-view",
+                 _pair_by(slaved, sl["full"], _by_condition_and_seed))
+    return out
+
+
+def stiffness(cells: list[Cell]) -> list[dict]:
+    """The stiffness experiment: the exact-drive Stuart–Landau network with a faster amplitude relaxation minus the
+    exact-drive experiment's rate-1 network at the same gain, and each rate's gain 4 and 8 minus its gain 1."""
+    mine = [c for c in cells if c.experiment == "stiffness" and c.read == "windowed"]
+    if not mine:
+        return []
+    ref_label = Arm("network", coupling="stuart-landau-exact").label()
+    ref = [c for c in cells if c.experiment == "exact-drive" and c.label == ref_label and c.read == "windowed"]
+    out = []
+    for label in sorted({c.label for c in mine}):
+        a = [c for c in mine if c.label == label]
+        out += _rows(f"{terms.arm(label)} minus {terms.arm(ref_label)}", "stiffness", _pair_by(a, ref, _by_condition_and_seed))
+        at_one = {(c.noise, c.width, c.n_train, replicate(c)): c for c in a if c.gain == 1.0}
+        groups = defaultdict(list)
+        for c in a:
+            if c.gain != 1.0 and (other := at_one.get((c.noise, c.width, c.n_train, replicate(c)))) is not None:
+                groups[(c.noise, c.gain, c.width, c.n_train)].append((c, other))
+        out += _rows(f"{terms.arm(label)}: gain minus gain 1", "stiffness", groups)
+    at_one = {(c.noise, c.width, c.n_train, replicate(c)): c for c in ref if c.gain == 1.0}
+    groups = defaultdict(list)
+    for c in ref:
+        if c.gain in (4.0, 8.0) and (other := at_one.get((c.noise, c.width, c.n_train, replicate(c)))) is not None:
+            groups[(c.noise, c.gain, c.width, c.n_train)].append((c, other))
+    out += _rows(f"{terms.arm(ref_label)}: gain minus gain 1", "stiffness", groups)
+    return out
+
+
+def selections(cells: list[Cell]) -> list[dict]:
+    """Model selection on Protocol V's validation speakers: per network or reservoir baseline and noise level, the
+    configuration with the highest mean validation accuracy, its test accuracy, and (for the networks) the
+    reference configuration's test accuracy under the same protocol with the paired difference."""
+    out = []
+    for experiment, family in (("selection", "kuramoto"), ("selection", "stuart-landau"), ("esn", None), ("ron", None)):
+        for noise, chosen in selection.select(cells, experiment, family).items():
+            reps = chosen["cells"]
+            entry = {"experiment": experiment, "family": family or experiment, "noise": noise,
+                     "grid": chosen["grid"], "n_replicates": len(reps),
+                     "selected": {"arm": chosen["label"], "name": terms.arm(chosen["label"]), "gain": chosen["gain"],
+                                  "validation": spread({r: c.val_acc for r, c in reps.items()}),
+                                  "test": spread({r: c.acc for r, c in reps.items()})}}
+            if family is not None:
+                reference = chosen["configs"].get((Arm("network", coupling=family).label(), 1.0))
+                if reference:
+                    entry["reference"] = {"arm": Arm("network", coupling=family).label(), "gain": 1.0,
+                                          "validation": spread({r: c.val_acc for r, c in reference.items()}),
+                                          "test": spread({r: c.acc for r, c in reference.items()})}
+                    pairs = [(reps[r], reference[r]) for r in reps if r in reference]
+                    entry["selected_minus_reference"] = paired(pairs)
+            out.append(entry)
+    return out
+
+
+def calibration(cells: list[Cell]) -> list[dict]:
+    """The calibration experiment's noise gate: per arm, gain and noise level, the validation and test accuracy on
+    Protocol V, and whether the validation accuracy lands in the 70 to 90% window that fixed the study's noise levels.
+    The baseline is read over the whole clip, as the paper reports it."""
+    out = []
+    for r in validation_accuracies(cells):
+        if r["experiment"] != "calibration" or r["width"] != rec.PRIMARY_WIDTH or r["n_train"] != rec.PRIMARY_SIZE:
+            continue
+        if r["read"] != ("windowed@wholeclip" if r["arm"] == "baseline" else "windowed"):
+            continue
+        out.append({**r, "in_window": 70.0 <= r["validation"]["mean"] <= 90.0})
+    return out
+
+
+#: the selection grid's axes, each with the reference value the other two are held at in a profile
+SELECTION_AXES = (("gain", 1.0), ("restoring", 0.3), ("ceiling", 1.0))
+AXIS_NAMES = {"gain": "input gain", "restoring": "restoring strength", "ceiling": "coupling ceiling"}
+
+
+def selection_profiles(cells: list[Cell]) -> list[dict]:
+    """The selection grid read one axis at a time: per network and noise level, the validation and test accuracy
+    along the gain, the restoring strength and the coupling ceiling with the other two factors at their reference
+    values. It is the calibration the pilot ran, redone on the validation speakers."""
+    out = []
+    for family in ("kuramoto", "stuart-landau"):
+        mine = selection.candidates(cells, "selection", family)
+        for noise in sorted({c.noise for c in mine}, key=lambda x: -1 if x is None else x):
+            configs = selection.by_configuration([c for c in mine if c.noise == noise])
+            for axis, _ in SELECTION_AXES:
+                fixed = {a: v for a, v in SELECTION_AXES if a != axis}
+                points = []
+                for (label, gain), reps in configs.items():
+                    arm = next(iter(reps.values())).arm
+                    values = {"gain": gain, "restoring": arm["restoring"], "ceiling": arm["ceiling"]}
+                    if all(values[a] == v for a, v in fixed.items()):
+                        points.append({"value": values[axis], "arm": label, "gain": gain, "n_replicates": len(reps),
+                                       "validation": spread({r: c.val_acc for r, c in reps.items()}),
+                                       "test": spread({r: c.acc for r, c in reps.items()})})
+                if points:
+                    out.append({"experiment": "selection", "family": family, "noise": noise, "axis": axis,
+                                "fixed": fixed, "points": sorted(points, key=lambda p: p["value"])})
+    return out
+
+
+def reservoir_baselines(cells: list[Cell]) -> list[dict]:
+    """The random nonlinear expansion against the coupled network (the controls experiment), the whole-clip
+    baseline and the state-matched bank, on recognition and the order task; and the selected echo state network
+    and random oscillators network (the baselines-selected experiment, Protocol A) against the same."""
+    out = []
+    for experiment in ("expansion", "baselines-selected"):
+        for task in ("recognition", "order"):
+            r = READ[task]
+            mine = [c for c in cells if c.experiment == experiment and c.task == task and c.read == r]
+            ctrl = [c for c in cells if c.experiment == "controls" and c.task == task]
+            network = [c for c in ctrl if c.label == COUPLED and c.read == r]
+            bank = [c for c in ctrl if c.label == "bank-state" and c.read == r]
+            base = [c for c in ctrl if c.label == "baseline" and c.read == r + "@wholeclip"]
+            key = lambda c: (c.noise, c.gain, c.pair, c.width, c.n_train, replicate(c))  # noqa: E731
+            for label in sorted({c.label for c in mine}):
+                a = [c for c in mine if c.label == label]
+                name = terms.arm(label)
+                for other, b in ((NETWORK, network), (terms.arm("bank-state"), bank)):
+                    groups = _pair_by(b, a, key) if other == NETWORK else _pair_by(a, b, key)
+                    comp = f"{NETWORK} minus the {name}" if other == NETWORK else f"{name} minus the {other}"
+                    out += [{"comparison": comp, "experiment": experiment, "task": task, "pathway": "spectrogram",
+                             "noise": k[0], "gain": k[1], "width": k[2], "b_width": k[2], "n_train": k[3], **paired(v)}
+                            for k, v in sorted(groups.items(), key=str)]
+                out += [{**row, "task": task} for row in _against_gainless(a, base, f"{name} minus {BASELINE_WHOLE}", experiment)]
+    return out
+
+
+def projection_methods(cells: list[Cell]) -> list[dict]:
+    """The projection-methods experiment: each reservoir through a training-set PCA and through the within-row
+    pooling minus the fixed random projection, and under each method the coupled network against its controls and
+    the Stuart–Landau network against Kuramoto and against the whole-clip baseline."""
+    mine = [c for c in cells if c.experiment == "projection-methods" and c.read == "windowed"]
+    base = [c for c in cells if c.experiment == "controls" and c.task == "recognition" and c.label == "baseline"
+            and c.read == "windowed@wholeclip"]
+    fixed = [c for c in mine if c.projection == "fixed"]
+    out = []
+    for method in ("pca", "pooled"):
+        m = [c for c in mine if c.projection == method]
+        for label in sorted({c.label for c in m}):
+            rows = _rows(f"{terms.arm(label)}: {method} minus fixed projection", "projection-methods",
+                         _pair_by([c for c in m if c.label == label], [c for c in fixed if c.label == label],
+                                  _by_condition_and_seed))
+            out += [{**r, "projection": method} for r in rows]
+        network = [c for c in m if c.label == COUPLED]
+        sl = [c for c in m if c.label == SL_LABEL]
+        for other in (UNCOUPLED, "bank-state", "bank-width"):
+            rows = _rows(f"{NETWORK} minus the {terms.arm(other)}, {method} projection", "projection-methods",
+                         _pair_by(network, [c for c in m if c.label == other], _by_condition_and_seed))
+            out += [{**r, "projection": method} for r in rows]
+        rows = _rows(f"{terms.arm(SL_LABEL)} minus {NETWORK}, {method} projection", "projection-methods",
+                     _pair_by(sl, network, _by_condition_and_seed))
+        out += [{**r, "projection": method} for r in rows]
+        for a, name in ((network, NETWORK), (sl, terms.arm(SL_LABEL))):
+            rows = _against_gainless(a, base, f"{name} minus {BASELINE_WHOLE}, {method} projection", "projection-methods")
+            out += [{**r, "projection": method} for r in rows]
+    return out
+
+
 CHANCE = 0.1
 
 
@@ -348,7 +695,13 @@ def summary(cells: list[Cell] | None = None) -> dict:
     cells = rec.load() if cells is None else cells
     return {"accuracy": accuracies(cells),
             "comparisons": (controls(cells) + _against_network(cells, "becker-folds", "recognition") + design(cells)
-                            + pathways(cells) + projections(cells) + sweep(cells) + cochlea(cells)),
+                            + pathways(cells) + projections(cells) + sweep(cells) + cochlea(cells)
+                            + exact_drive(cells) + clean(cells) + reservoir_baselines(cells) + projection_methods(cells)
+                            + row_readout(cells) + band_readout(cells) + amplitude_views(cells) + stiffness(cells)),
+            "validation": validation_accuracies(cells),
+            "selection": selections(cells),
+            "calibration": calibration(cells),
+            "selection_profiles": selection_profiles(cells),
             "order_baseline_at_chance": rec.baseline_at_chance(cells),
             "projection_reproduces_controls": reproduction(cells),
             "leak_check": leak_check(cells)}
@@ -432,6 +785,8 @@ def _arm(r: dict) -> str:
     name = terms.arm(r["arm"])
     if r["arm"] == "baseline":
         name += ", whole clip" if r["read"].endswith("@wholeclip") else ", from frame 16"
+    if r.get("view", "full") != "full":
+        name += f", {VIEW_NAMES[r['view']]}"
     return name + (f" (gain = {r['gain']:g})" if r.get("gain") is not None else "")
 
 
@@ -567,6 +922,156 @@ def report(s: dict, done: dict[str, tuple[int, int]]) -> str:
               f"{rec_cell}. Each coupling function at the reference configuration, {diff}.", ""]
     lines += _grid([r for r in cmp if r["experiment"] == "sweep" and r["width"] == w and r["n_train"] == n],
                    lambda r: r["comparison"], _by_condition, _diff)
+    lines += ["", "## Exact-rotation drive: the Stuart–Landau networks with the input applied as an exact rotation (Section 4.5, Appendix E)", "",
+              f"{rec_cell}. The record's Stuart–Landau runs apply the input inside a semi-implicit step that rotates the "
+              "state by 2·arcsin(h/2) per frame rather than h (h = dt × gain × input), within 0.3% at gains 1 and 2 but "
+              "7% too far by gain 8; these runs apply it as an exact rotation. Each exact-drive network minus the same "
+              "network with the semi-implicit drive, minus Kuramoto at the same gain, minus itself at gain 1, and the "
+              f"free-amplitude one minus the whole-clip baseline; {diff}.", ""]
+    lines += _grid([r for r in cmp if r["experiment"] == "exact-drive" and r["width"] == w and r["n_train"] == n],
+                   lambda r: r["comparison"], _by_condition, _diff)
+    exact_acc = [r for r in acc if r["experiment"] == "exact-drive" and r["width"] == w and r["n_train"] == n
+                 and r["read"] == "windowed"]
+    lines += ["", "Accuracy of each exact-drive network by gain:", ""]
+    lines += _grid(exact_acc, lambda r: f"{r['name']}, {snr(r['noise'])}", lambda r: (r["gain"], f"gain {r['gain']:g}"), _acc)
+    clean_cmp = [r for r in cmp if r["experiment"] == "clean" and r["width"] == w and r["n_train"] == n]
+    if clean_cmp:
+        lines += ["", "## Clean audio: the Stuart–Landau networks beside Kuramoto and the input (Section 4.3, Appendix D.2)", "",
+                  f"{rec_cell}, on clean audio, which the design experiment left out (the controls experiment ran the free amplitude clean; the fixed amplitude is new). Each Stuart–Landau network minus the "
+                  f"controls experiment's Kuramoto network at the same gain, the free amplitude minus the fixed one, and each "
+                  f"minus the whole-clip baseline; {diff}.", ""]
+        lines += _grid(clean_cmp, lambda r: r["comparison"], _by_condition, _diff)
+        clean_acc = [r for r in acc if r["experiment"] == "clean" and r["width"] == w and r["n_train"] == n
+                     and r["read"] == "windowed"]
+        lines += ["", "Accuracy of each Stuart–Landau network on clean audio by gain:", ""]
+        lines += _grid(clean_acc, lambda r: r["name"], lambda r: (r["gain"], f"gain {r['gain']:g}"), _acc)
+    row_cmp = [r for r in cmp if r["experiment"] == "row-readout" and r["n_train"] == n]
+    if row_cmp:
+        rw = plan.ROW_READOUT_WIDTH
+        lines += ["", "## Row-restricted readouts: each arm through only the lower or only the upper eight rows of its lattice (Section 5, Appendix D.2)", "",
+                  f"{n:,} training clips, the four-window read (frames 16 to 61); tested on the 6,000 clips of speakers 49 "
+                  "to 60. The Kuramoto, uncoupled and Stuart–Landau networks and the whole-clip spectrogram baseline, each read through "
+                  "the within-row pooling kept for one half of the rows only (8 rows × 3 statistics × 4 windows = "
+                  f"{rw} features), beside the fixed random projection of every feature at width {rw}. The lower eight rows "
+                  "are the eight lowest mel bands and the upper eight the highest; the baseline's rows are its bands. "
+                  f"{seeds}, in percent.", ""]
+        row_acc = [r for r in acc if r["experiment"] == "row-readout" and r["n_train"] == n]
+        proj_name = {"fixed": f"random projection, width {rw}", **ROW_HALVES}
+        lines += _grid(sorted(row_acc, key=_rank), lambda r: f"{_arm(r)}, {proj_name.get(r['projection'], r['projection'])}",
+                       _by_noise, _acc)
+        lines += ["", f"The upper half minus the lower, each half minus the random projection at width {rw} and minus the "
+                  "full pooled read of every row (width 192; the projection-methods experiment, and the controls "
+                  f"experiment's whole-clip baseline), and the study's comparisons through each half; {diff}.", ""]
+        lines += _grid(row_cmp, lambda r: r["comparison"] + (f" (gain = {r['gain']:g})" if r["gain"] is not None else ""),
+                       _by_noise, _diff)
+    band_cmp = [r for r in cmp if r["experiment"] == "band-readout" and r["n_train"] == n]
+    if band_cmp:
+        bw = plan.BAND_READOUT_WIDTH
+        lines += ["", "## Per-band readout accuracy: each arm through one row of its lattice alone (Appendix D.2)", "",
+                  f"{n:,} training clips, the four-window read (frames 16 to 61); tested on the 6,000 clips of speakers 49 "
+                  "to 60. The Kuramoto, uncoupled and Stuart–Landau networks, the state-matched bank and the whole-clip "
+                  "spectrogram baseline, each read through the within-row pooling kept for one row (3 statistics × 4 "
+                  f"windows = {bw} features), for every row; the baseline's rows are its bands. Reservoirs at gain 1. "
+                  f"{seeds}, in percent; chance is 10%.", ""]
+        band_acc = [r for r in acc if r["experiment"] == "band-readout" and r["n_train"] == n
+                    and r["projection"].startswith("pooled-row")]
+        band_of = lambda r: int(r["projection"][len("pooled-row"):])  # noqa: E731
+        for noise in sorted({r["noise"] for r in band_acc}, key=lambda x: (x is not None, x)):
+            lines += ["", f"{snr(noise)}:", ""]
+            lines += _grid([r for r in band_acc if r["noise"] == noise], lambda r: _arm(r).replace(" (gain = 1)", ""),
+                           lambda r: (band_of(r), f"band {band_of(r)}"), lambda r: f"{r['mean']:.1f}")
+        lines += ["", f"The study's comparisons through one band at a time; {diff}; the interval is left out for room.", ""]
+        for noise in sorted({r["noise"] for r in band_cmp}, key=lambda x: (x is not None, x)):
+            lines += ["", f"{snr(noise)}:", ""]
+            lines += _grid([r for r in band_cmp if r["noise"] == noise], lambda r: r["comparison"],
+                           lambda r: (r["band"], f"band {r['band']}"), lambda r: f"{r['mean']:+.1f} ± {r['sd']:.1f}")
+    view_cmp = [r for r in cmp if r["experiment"] == "amplitude-view" and r["width"] == w and r["n_train"] == n]
+    if view_cmp:
+        lines += ["", "## Amplitude views: what the readout sees of the Stuart–Landau network's z (Section 5, Appendix D.2)", "",
+                  f"{rec_cell}. The Stuart–Landau network read through its full signals (r·sin θ, r·cos θ), through its "
+                  "phase alone (every oscillator at unit radius) and through its amplitude alone (|z|, one signal per "
+                  "oscillator), and the Kuramoto network read with an amplitude slaved to its phases (the Stuart–Landau "
+                  "radial equation driven by the Kuramoto phases, with no feedback on them). Accuracy, "
+                  f"{seeds}, in percent.", ""]
+        view_acc = [r for r in acc if r["experiment"] == "amplitude-view" and r["width"] == w and r["n_train"] == n
+                    and r["read"] == "windowed"]
+        lines += _grid(view_acc, _arm, _by_condition, _acc)
+        lines += ["", f"Each view against the controls experiment's Kuramoto network and the full read; {diff}.", ""]
+        lines += _grid(view_cmp, lambda r: r["comparison"], _by_condition, _diff)
+    stiff_cmp = [r for r in cmp if r["experiment"] == "stiffness" and r["width"] == w and r["n_train"] == n]
+    if stiff_cmp:
+        lines += ["", "## Amplitude relaxation rate: the exact-drive Stuart–Landau network with a faster amplitude (Section 5, Appendix D.2)", "",
+                  f"{rec_cell}, 0 dB. The amplitude's relaxation rate alpha (and beta, so the attracting radius stays 1) "
+                  "at 4 and 16 times the core's 0.05, a time constant of about 5 and 1.25 frames against 20, at gains "
+                  f"1, 4 and 8; the exact-drive experiment's rate-1 network beside them. {seeds}, in percent.", ""]
+        ref_label = Arm("network", coupling="stuart-landau-exact").label()
+        stiff_acc = [r for r in acc if r["n_train"] == n and r["width"] == w and r["read"] == "windowed" and r["noise"] == 0.0
+                     and (r["experiment"] == "stiffness" or (r["experiment"] == "exact-drive" and r["arm"] == ref_label
+                                                             and r["gain"] in plan.STIFFNESS_GAINS))]
+        lines += _grid(stiff_acc, lambda r: terms.arm(r["arm"]), lambda r: (r["gain"], f"gain {r['gain']:g}"), _acc)
+        lines += ["", f"Each faster rate minus rate 1 at the same gain, and each rate's gain 4 and 8 minus its gain 1; {diff}.", ""]
+        lines += _grid(stiff_cmp, lambda r: r["comparison"], lambda r: (r["gain"], f"gain {r['gain']:g}"), _diff)
+    family = lambda f: terms.level(f) if f in terms.LEVELS else f  # noqa: E731
+    lines += ["", "## Calibration on the validation speakers (Protocol V; Appendix F)", "",
+              "The pilot's calibration redone in this repository under the study's own readout, on the validation speakers "
+              "(41 to 48) and never the test speakers. The noise gate: the spectrogram-only baseline (whole clip) and the "
+              "Kuramoto and Stuart–Landau networks at the reference configuration, from noise 10 dB below the speech to "
+              f"10 dB above it; validation accuracy, {seeds}, in percent. The study's noise levels are those at which the "
+              "strongest untrained network lands between 70 and 90%; a cell outside that window says so.", ""]
+    lines += _grid(s["calibration"], lambda r: r["name"] + (f", gain = {r['gain']:g}" if r["gain"] is not None else ""),
+                   _by_noise, lambda r: _acc(r["validation"]) + ("" if r["in_window"] else " (outside)"))
+    lines += ["", "The selection grid one axis at a time, the other two factors at their reference values (gain 1, restoring "
+              "strength 0.3, coupling ceiling 1): validation accuracy, with the test accuracy in brackets.", ""]
+    for axis, name in AXIS_NAMES.items():
+        flat = [{"row": f"{family(p['family'])}, {snr(p['noise'])}", **pt}
+                for p in s["selection_profiles"] if p["axis"] == axis for pt in p["points"]]
+        lines += ["", f"{name}:", ""] + _grid(flat, lambda r: r["row"], lambda r: (r["value"], f"{r['value']:g}"),
+                                              lambda r: f"{_acc(r['validation'])} [{_acc(r['test'])}]")
+    sel = s["selection"]
+    lines += ["", "## Model selection on the validation speakers (Protocol V; Section 4.8, Appendix F)", "",
+              "Protocol V trains on speakers 1 to 40, chooses the ridge penalty and selects the configuration on "
+              "speakers 41 to 48 (4,000 clips), and tests on speakers 49 to 60 as every other experiment does. For each "
+              "network and reservoir baseline, the configuration with the highest validation accuracy (mean over seeds) "
+              f"is selected, and its test accuracy read off afterwards; {seeds}, in percent. For the networks the "
+              "reference configuration (gain 1, restoring strength 0.3, coupling ceiling 1) under the same protocol "
+              "stands beside it, with the paired difference.", ""]
+    if sel:
+        lines += ["| network or baseline | SNR | grid | selected configuration | validation | test | reference, test | selected minus reference |",
+                  "|---|---|---|---|---|---|---|---|"]
+        for e in sel:
+            cfg = e["selected"]["name"] + (f" (gain = {e['selected']['gain']:g})" if e["selected"]["gain"] is not None else "")
+            ref = _acc(e["reference"]["test"]) if "reference" in e else ""
+            d = _diff(e["selected_minus_reference"]) if "selected_minus_reference" in e else ""
+            lines += [f"| {terms.level(e['family']) if e['family'] in terms.LEVELS else e['family']} | {snr(e['noise'])} | "
+                      f"{e['grid']} | {cfg} | {_acc(e['selected']['validation'])} | {_acc(e['selected']['test'])} | {ref} | {d} |"]
+    else:
+        lines += ["(not run yet)"]
+    lines += ["", "## Reservoir baselines: the random nonlinear expansion and the selected echo state and random oscillators networks (Section 4.8)", "",
+              f"{rec_cell}; the order task as in Section 4.2. The expansion is tanh(V·(gain × input) + b), a memoryless "
+              "random feature map of each frame, at the network's 1,024 states and at its 2,048 signals; the echo state "
+              "network and the random oscillators network run at their validation-selected hyperparameters (the table "
+              f"above) under Protocol A. {seeds}, in percent.", ""]
+    for task in ("recognition", "order"):
+        rows = [r for r in acc if r["experiment"] in ("expansion", "baselines-selected") and r["task"] == task
+                and r["width"] == w and r["n_train"] == n and r["read"] == READ[task]]
+        rows = _pooled(rows) if task == "order" else rows
+        lines += [f"### {task}", ""] + _grid(rows, _arm, _by_noise, _acc) + [""]
+    lines += [f"Each against the coupled network, the whole-clip baseline and the state-matched bank, {diff}.", ""]
+    lines += _grid([r for r in cmp if r["experiment"] in ("expansion", "baselines-selected") and r["width"] == w and r["n_train"] == n],
+                   lambda r: f"{r['task']}: {r['comparison']}" + (f" (gain = {r['gain']:g})" if r["gain"] is not None else ""),
+                   _by_noise, _diff)
+    lines += ["", "## Projection methods: a training-set PCA and a within-row pooling beside the random projection (Section 3.3, Appendix D)", "",
+              f"{rec_cell}. The same reservoir runs read three ways at width {w}: through the fixed random projection, "
+              "through the leading 192 principal directions of the training clips' standardized features (fitted on "
+              "the training clips alone), and through a structured pooling that averages each window's statistic over "
+              "the signals of each lattice row (channels, columns, sin and cos), which gives 16 rows × 3 statistics × 4 "
+              f"windows = 192, the spectrogram-only baseline's own layout. {seeds}, in percent.", ""]
+    pm = [r for r in acc if r["experiment"] == "projection-methods" and r["width"] == w and r["n_train"] == n]
+    lines += _grid(sorted(pm, key=_rank), lambda r: f"{_arm(r)}, {r['projection']}", _by_noise, _acc)
+    lines += ["", f"Each method minus the fixed projection per arm, and the study's comparisons under each method, {diff}.", ""]
+    lines += _grid([r for r in cmp if r["experiment"] == "projection-methods" and r["width"] == w and r["n_train"] == n],
+                   lambda r: r["comparison"] + (f" (gain = {r['gain']:g})" if r["gain"] is not None else ""),
+                   _by_noise, _diff)
     lines += ["", "## Cochlea: the coil and the cochlea, each minus another geometry, over matched configurations (Section 4.4)", "",
               f"{rec_cell}. Matched on coupling function and natural frequencies, {diff}.", ""]
     lines += _grid([r for r in cmp if r["experiment"] == "cochlea" and r["width"] == w and r["n_train"] == n],

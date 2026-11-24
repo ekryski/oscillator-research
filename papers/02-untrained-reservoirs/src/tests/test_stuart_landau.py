@@ -137,3 +137,69 @@ def test_sl_phase_trajectory_and_features_shapes():
     assert th.shape == (3, 40, 2, 8, 8) and torch.isfinite(th).all()
     f = m.features(rows)
     assert f.shape == (3, 4 * 2 * 8 * 8) and torch.isfinite(f).all()
+
+
+def test_exact_drive_matches_phase_core_at_high_drive():
+    # The semi-implicit drive line rotates by 2·arcsin(h/2) per frame, not h, so at a
+    # strong drive the fixed-amplitude core drifts from the phase core; with the drive
+    # applied as an exact rotation (drive="rotation") the two agree at every drive up to
+    # the operator split's O(dt) error, which the drive's size does not enlarge.
+    def gap(core, scale):
+        rows = torch.randn(2, 40, 16, generator=torch.Generator().manual_seed(11)).abs() * scale
+        torch.manual_seed(7)
+        phase = OscillatorField(channels=2, grid=16, n_classes=4, probe_seed=0, gain=1.0)
+        torch.manual_seed(7)
+        sl = OscillatorField(channels=2, grid=16, n_classes=4, probe_seed=0, gain=1.0, core=core)
+        drv = rows.view(2, 40, 1, 16, 1).expand(2, 40, 2, 16, 16)
+        f_phase, _ = phase.core.forward_scan(drv)
+        f_sl, _ = sl.core.forward_scan(drv)
+        return (f_phase - f_sl).abs().mean().item()
+
+    weak_semi, weak_exact = gap("sl-fixedamp", 0.3), gap("sl-fixedamp-exact", 0.3)
+    strong_semi, strong_exact = gap("sl-fixedamp", 12.0), gap("sl-fixedamp-exact", 12.0)
+    assert weak_exact < 0.05 and strong_exact < 0.05, (weak_exact, strong_exact)
+    assert strong_semi > 3 * strong_exact, (strong_semi, strong_exact)
+
+
+def test_exact_drive_rotates_by_exactly_h():
+    # Coupling, restoring pull and natural frequency zeroed, a constant drive d: under the
+    # exact-rotation drive every frame turns the phase by exactly dt·d. Under the semi-implicit
+    # drive one frame's turn depends on the starting phase (the map is conjugate to a rotation,
+    # not a rotation), and over many frames the phase advances by 2·arcsin(dt·d/2) per frame
+    # on average, the rotation number of the map (x, y) -> (x − h·y, y + h·(x − h·y)).
+    dt, d, frames = 0.1, 15.0, 400  # h = 1.5
+    h = dt * d
+    turns = {}
+    for drive in ("rotation", "semi-implicit"):
+        core = SLCore(channels=1, grid=4, dt=dt, damping=0.0, amplitude_frozen=True, drive=drive)
+        with torch.no_grad():
+            core.kernel.zero_()
+            core.natural_freqs.zero_()
+        state = core.init_state(1)
+        coup = core.prepare_coupling()
+        steps = []
+        for _ in range(frames):
+            new_state, _ = core.step_frame(state, torch.full((1, 1, 4, 4), d), coup)
+            before = torch.atan2(state[:, 1], state[:, 0])
+            after = torch.atan2(new_state[:, 1], new_state[:, 0])
+            steps.append(torch.remainder(after - before, TWO_PI))
+            state = new_state
+        turns[drive] = torch.stack(steps)  # [frames, 1, 1, 4, 4]
+    assert (turns["rotation"] - h).abs().max() < 1e-4, turns["rotation"].flatten()[:4]
+    semi = turns["semi-implicit"]
+    assert semi.std(0).mean() > 0.1, semi.std(0).mean()                  # a single frame's turn varies with the phase
+    assert abs(semi.mean().item() - 2 * math.asin(h / 2)) < 0.02, (semi.mean().item(), 2 * math.asin(h / 2))
+
+
+def test_free_amplitude_exact_drive_runs_and_is_recorded_distinctly():
+    from harness.experiment import arms as am
+    from harness.experiment import terms
+    for coupling in ("stuart-landau-exact", "stuart-landau-fixed-exact"):
+        arm = am.Arm("network", coupling=coupling)
+        model = am.build_untrained(arm, 2.0, 0)
+        assert model.core.drive_step == "rotation"
+        assert model.core.amplitude_frozen == coupling.endswith("fixed-exact")
+        label = arm.label()
+        assert "exact" in label and "exact-rotation drive" in terms.arm(label), terms.arm(label)
+    assert terms.arm("coupled-stuart-landau-fixed-exact-torus-random-restoring0.3-ceiling1") == (
+        "coupled oscillator network (Stuart–Landau, fixed amplitude, exact-rotation drive)")
